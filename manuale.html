@@ -26,7 +26,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 <header><div class="wrap">
 <h1>Manuale Operativo — Next Point Padel</h1>
 <div class="lead">Guida pratica per amministrazione, tornei, Bove, King, comunicazioni, sito pubblico, Supabase e GitHub.</div>
-<div class="meta">Edizione operativa · stato documentato al 22 settembre 2026 · repository: torneirobertobove/torneirobertobove.github.io</div>
+<div class="meta">Edizione operativa · stato documentato al 25 settembre 2026 · repository: torneipadel/torneipadelnew.github.io</div>
 </div></header>
 <nav><div class="inner">
 <a href="#mappa">Mappa</a><a href="#admin">Admin</a><a href="#tornei">Tornei</a><a href="#bove">Bove</a><a href="#regole">Regole</a><a href="#calendario">Calendario</a><a href="#finali">Fase finale</a><a href="#king">King</a><a href="#news">News</a><a href="#sponsor">Sponsor</a><a href="#pubblico">Sito pubblico</a><a href="#privacy">Privacy iscritti</a><a href="#supabase">Supabase</a><a href="#monitor">Monitor risorse</a><a href="#github">GitHub</a><a href="#diagnosi">Diagnosi</a><a href="#checklist">Checklist</a>
@@ -44,7 +44,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 </section>
 
 <section id="ruoli-admin"><h2>2.1 Ruoli Admin e Superadmin — protezioni definitive</h2>
-<p>Dal 22 settembre 2026 il sistema distingue due livelli amministrativi.</p>
+<p>Dal 25 settembre 2026 il sistema distingue due livelli amministrativi.</p>
 <table><tr><th>Ruolo</th><th>Account autorizzati</th><th>Operazioni</th></tr>
 <tr><td><b>Superadmin</b></td><td><code>giose.rizzi@gmail.com</code></td><td>Tutte le funzioni Admin + eliminazione definitiva dei tornei e delle iscrizioni, archiviazione/riapertura dei tornei archiviati, ripristino dai backup e consultazione del registro audit.</td></tr>
 <tr><td><b>Admin</b></td><td><code>boverob@libero.it</code><br><code>cfalba@libero.it</code></td><td>Gestione ordinaria di tornei, iscrizioni, risultati, comunicazioni e configurazioni. Le operazioni distruttive e il ripristino sono riservati al Superadmin.</td></tr>
@@ -52,7 +52,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 <div class="note danger"><b>Protezione DB:</b> il controllo non è soltanto grafico. RLS, policy e trigger Supabase impediscono a un Admin di eliminare tornei/iscrizioni, archiviare o riaprire un torneo archiviato, oppure modificare il proprio ruolo in <code>superadmin</code>. I backup automatici e il registro delle modifiche sono gestiti dal database.</div>
 <p>Nel pannello Admin il ruolo viene mostrato nel footer. La voce <code>👑 Superadmin</code> è visibile esclusivamente all'account Superadmin.</p>
 <h3>Backup e ripristino completo dei dati amministrativi</h3>
-<p>Dal 22 settembre 2026 il sistema non limita più il backup al solo torneo. Sono presenti snapshot automatici anche per <code>iscrizioni</code>, <code>profili</code>, <code>news</code>, <code>sponsor</code> e <code>mercatino</code>.</p>
+<p>Dal 25 settembre 2026 il sistema non limita più il backup al solo torneo. Sono presenti snapshot automatici anche per <code>iscrizioni</code>, <code>profili</code>, <code>news</code>, <code>sponsor</code> e <code>mercatino</code>.</p>
 <table><tr><th>Area</th><th>Backup automatico</th><th>Ripristino Superadmin</th></tr>
 <tr><td>Torneo + configurazione/regole</td><td>✓</td><td>✓</td></tr>
 <tr><td>Iscrizioni</td><td>✓</td><td>✓</td></tr>
@@ -163,7 +163,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 </section>
 
 <section id="privacy"><h2>12. Privacy e gestione degli iscritti</h2>
-<p>Dal 22 settembre 2026 la gestione delle iscrizioni applica il principio di minimizzazione: l'area pubblica può utilizzare soltanto i dati essenziali necessari per il torneo, mentre i dati completi degli iscritti restano disponibili all'area amministrativa autorizzata o all'interessato per la propria iscrizione.</p>
+<p>Dal 25 settembre 2026 la gestione delle iscrizioni applica il principio di minimizzazione: l'area pubblica può utilizzare soltanto i dati essenziali necessari per il torneo, mentre i dati completi degli iscritti restano disponibili all'area amministrativa autorizzata o all'interessato per la propria iscrizione.</p>
 <table><tr><th>Dato</th><th>Area pubblica</th><th>Admin</th><th>Regola</th></tr>
 <tr><td>Nome/cognome o nome visualizzato</td><td>Solo quando necessario per torneo, tabellone, risultato o classifica</td><td>✓</td><td>Minimizzazione</td></tr>
 <tr><td>E-mail</td><td>✕</td><td>✓</td><td>Non pubblicare</td></tr>
@@ -210,7 +210,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 </section>
 
 <section id="github"><h2>15. GitHub, versioni e backup</h2>
-<p>Repository operativo: <code>torneirobertobove/torneirobertobove.github.io</code>. Branch operativo: <code>main</code>.</p>
+<p>Repository operativo: <code>torneipadel/torneipadelnew.github.io</code>. Branch operativo: <code>main</code>.</p>
 <div class="card"><b>Snapshot di sicurezza</b><br>Branch <code>backup-2026-09-20-completo</code> creato sul commit <code>0dfdc190a70be28fce047bddda850d1abc49e360</code>. Il branch è uno snapshot GitHub del progetto a quel momento.</div>
 <h3>Regola di modifica</h3><ol><li>Identificare il file.</li><li>Leggere la versione corrente.</li><li>Modificare solo ciò che serve.</li><li>Commit descrittivo.</li><li>Verificare il diff.</li><li>Testare il flusso interessato.</li></ol>
 </section>
@@ -233,7 +233,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 </section>
 
 <section id="stato"><h2>18. Stato documentale e prossime verifiche</h2>
-<p>Questo manuale descrive il funzionamento e le regole operative del progetto sulla base dello stato del repository e delle verifiche disponibili al 22/09/2026. Non sostituisce i test reali del browser.</p>
+<p>Questo manuale descrive il funzionamento e le regole operative del progetto sulla base dello stato del repository e delle verifiche disponibili al 25/09/2026. Non sostituisce i test reali del browser.</p>
 <table><tr><th>Area</th><th>Stato documentato</th></tr>
 <tr><td>Macchina Bove</td><td class="warn">Corretta sui problemi rilevati dall’audit del 22/09/2026; test browser finale da eseguire</td></tr>
 <tr><td>Admin → Bove</td><td class="ok">Operativa</td></tr>
@@ -272,7 +272,7 @@ Correzione 22/09/2026 — input risultati Bove</h3>
 <section><h2>18. Principi di manutenzione</h2>
 <ul><li>Una correzione deve risolvere il problema senza rompere funzioni già operative.</li><li>Prima di sostituire una logica, confrontarla con la versione precedente funzionante quando disponibile.</li><li>Non eliminare grandi porzioni di codice per risolvere un difetto locale.</li><li>Non introdurre nuove autenticazioni, menu o flussi se non richiesti.</li><li>Separare sempre diagnosi, correzione e verifica.</li><li>Ogni correzione importante deve avere un commit identificabile.</li><li>Il manuale deve essere aggiornato quando cambia un flusso operativo stabile.</li></ul>
 </section>
-</main>
+<section id="architettura-aziendale"><h2>Architettura aziendale — ambiente autonomo</h2><p>Il repository MASTER rappresenta un <strong>ambiente aziendale autonomo</strong> di Next Point Padel: sito, repository GitHub, progetto Supabase, Auth, amministratori, dati, News, Sponsor, Mercatino, privacy e backup appartengono a questo ambiente e non condividono i dati operativi con altre società.</p><ul><li><strong>Sito:</strong> <code>https://torneipadelnew.github.io</code></li><li><strong>Repository:</strong> <code>torneipadel/torneipadelnew.github.io</code></li><li><strong>Supabase MASTER:</strong> <code>dkeqicstprvvfebiaooc</code></li><li><strong>Superadmin:</strong> <code>giose.rizzi@gmail.com</code></li><li><strong>Admin:</strong> <code>boverob@libero.it</code> e <code>cfalba@libero.it</code></li></ul><p>Il laboratorio storico rimane separato. Per una nuova società si replica questo modello creando un nuovo repository, un nuovo progetto Supabase/Auth e una nuova configurazione del sito; non si inseriscono i dati di società diverse nello stesso ambiente operativo.</p></section></main>
 <footer>Manuale operativo Next Point Padel · documento integrato nel repository · aggiornare la data e la sezione “Stato documentale” dopo modifiche strutturali.</footer>
 <div class="note"><b>Aggiornamento monitor GitHub:</b> GitHub viene letto con cache di 10 minuti per evitare il limite delle richieste anonime API. L’aggiornamento automatico Supabase resta ogni 30 secondi. Se GitHub restituisce temporaneamente HTTP 403, il monitor usa l’ultimo dato GitHub valido in cache invece di interrompere il monitor.</div>
 <!-- FIX 22/09/2026 - risultati semifinali e finale -->
@@ -280,7 +280,7 @@ Correzione 22/09/2026 — input risultati Bove</h3>
 <h2>Correzione risultati Semifinali e Finale — 22/09/2026</h2>
 <p>Ripristinata l'editabilità delle celle risultato nelle fasi di Semifinale e Finale di tabellone.html. È stata rimossa dalla generazione delle celle la condizione che impostava <code>disabled</code> quando le squadre erano ancora rappresentate da qualificati/vincitori provvisori. Commit: <code>7bbed4e3f67563c9b10dd6254389f7ab4ee63168</code>.</p>
 </section>
-<section id="backup-codice-superadmin"><h2>Backup differenziale e ripristino del codice</h2><p>Il codice del repository <strong>torneirobertobove/torneirobertobove.github.io</strong> è versionato direttamente con GitHub. Ogni commit conserva la differenza rispetto alla versione precedente, ma Git può ricostruire il file completo di qualunque commit.</p><ul><li>Nel pannello <strong>👑 Superadmin → 🧩 Backup e ripristino codice</strong> sono visibili le versioni recenti dei file principali.</li><li>Ogni versione può essere marcata <strong>🟢 STABILE</strong>, <strong>🟡 TEST</strong> oppure <strong>🔴 PROBLEMATICA</strong>.</li><li><strong>Confronta</strong> apre il confronto della versione selezionata con <strong>main</strong>.</li><li><strong>Ripristina</strong> richiede il ripristino del file completo alla versione scelta. GitHub Actions esegue la richiesta e crea un nuovo commit: la cronologia precedente non viene cancellata.</li><li>Il ripristino è limitato ai file autorizzati e viene eseguito automaticamente entro il ciclo di controllo della workflow.</li></ul><p><strong>Principio di sicurezza:</strong> non si sovrascrive la cronologia Git e non si conserva un secondo archivio duplicato di ogni file. Il backup differenziale è Git; il pannello Superadmin gestisce la selezione, lo stato e la richiesta di ripristino.</p></section><section id="fix-campione-tabellone-20260922"><h2>Ripristino campione nel tabellone</h2><p>Il tabellone finale conserva e ricarica finalisti, semifinali, quarti e campione già salvati nel torneo. Un refresh o una nuova renderizzazione non sostituisce più un campione persistito con segnaposto.</p></section>
+<section id="backup-codice-superadmin"><h2>Backup differenziale e ripristino del codice</h2><p>Il codice del repository <strong>torneipadel/torneipadelnew.github.io</strong> è versionato direttamente con GitHub. Ogni commit conserva la differenza rispetto alla versione precedente, ma Git può ricostruire il file completo di qualunque commit.</p><ul><li>Nel pannello <strong>👑 Superadmin → 🧩 Backup e ripristino codice</strong> sono visibili le versioni recenti dei file principali.</li><li>Ogni versione può essere marcata <strong>🟢 STABILE</strong>, <strong>🟡 TEST</strong> oppure <strong>🔴 PROBLEMATICA</strong>.</li><li><strong>Confronta</strong> apre il confronto della versione selezionata con <strong>main</strong>.</li><li><strong>Ripristina</strong> richiede il ripristino del file completo alla versione scelta. GitHub Actions esegue la richiesta e crea un nuovo commit: la cronologia precedente non viene cancellata.</li><li>Il ripristino è limitato ai file autorizzati e viene eseguito automaticamente entro il ciclo di controllo della workflow.</li></ul><p><strong>Principio di sicurezza:</strong> non si sovrascrive la cronologia Git e non si conserva un secondo archivio duplicato di ogni file. Il backup differenziale è Git; il pannello Superadmin gestisce la selezione, lo stato e la richiesta di ripristino.</p></section><section id="fix-campione-tabellone-20260922"><h2>Ripristino campione nel tabellone</h2><p>Il tabellone finale conserva e ricarica finalisti, semifinali, quarti e campione già salvati nel torneo. Un refresh o una nuova renderizzazione non sostituisce più un campione persistito con segnaposto.</p></section>
 </body>
 </html>
 <!-- RIPRISTINO BOVE 22/09/2026 -->
