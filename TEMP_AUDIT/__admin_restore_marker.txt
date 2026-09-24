@@ -1,0 +1,1 @@
+Restoring admin.html to the immediately previous working version after refactor regression.

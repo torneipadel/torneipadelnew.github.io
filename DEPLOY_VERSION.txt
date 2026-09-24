@@ -1,0 +1,5 @@
+ADMIN APPROVAL FIX DEPLOY MARKER
+Commit: 0942082fc98356d8a4b94c3f26343a69d2e7eaea
+Forced deployment: 2026-08-22T16:59:01Z
+
+The current main/admin.html already contains the corrected direct Supabase player selection and approval flow.

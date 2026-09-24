@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manuale Operativo — Next Point Padel</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--ink:#20252b;--muted:#68717c;--line:#dfe4e9;--accent:#1261a0;--ok:#176b3a;--warn:#9a6700}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Arial,sans-serif}
+header{background:#17212b;color:#fff;padding:38px 24px}header .wrap,main{max-width:1180px;margin:auto}
+h1{margin:0 0 8px;font-size:32px}h2{margin-top:42px;border-bottom:1px solid var(--line);padding-bottom:8px}h3{margin-top:28px}
+.lead{color:#dce7ef}.meta{font-size:13px;color:#b8c6d1}
+nav{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);z-index:5}
+nav .inner{max-width:1180px;margin:auto;padding:10px 18px;display:flex;gap:8px;flex-wrap:wrap}
+nav a{color:var(--accent);text-decoration:none;font-size:13px;padding:5px 7px}
+main{padding:22px 18px 70px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:0 2px 8px #00000008}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}.tag{display:inline-block;border-radius:20px;padding:3px 9px;font-size:12px;font-weight:700;background:#edf3f8}.ok{color:var(--ok)}.warn{color:var(--warn)}
+code{background:#eef1f4;padding:2px 5px;border-radius:4px}pre{background:#101820;color:#e9eef2;padding:14px;overflow:auto;border-radius:8px}
+table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;border-bottom:1px solid var(--line);padding:9px;vertical-align:top}th{background:#f0f3f6}
+.note{border-left:4px solid var(--accent);padding:10px 14px;background:#eef6fc}.danger{border-left-color:#b42318;background:#fff3f1}
+footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);font-size:13px}
+@media print{nav{display:none}header{color:#000;background:#fff;border-bottom:2px solid #000}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Manuale Operativo — Next Point Padel</h1>
+<div class="lead">Guida pratica per amministrazione, tornei, Bove, King, comunicazioni, sito pubblico, Supabase e GitHub.</div>
+<div class="meta">Edizione operativa · stato documentato al 22 settembre 2026 · repository: torneirobertobove/torneirobertobove.github.io</div>
+</div></header>
+<nav><div class="inner">
+<a href="#mappa">Mappa</a><a href="#admin">Admin</a><a href="#tornei">Tornei</a><a href="#bove">Bove</a><a href="#regole">Regole</a><a href="#calendario">Calendario</a><a href="#finali">Fase finale</a><a href="#king">King</a><a href="#news">News</a><a href="#sponsor">Sponsor</a><a href="#pubblico">Sito pubblico</a><a href="#privacy">Privacy iscritti</a><a href="#supabase">Supabase</a><a href="#monitor">Monitor risorse</a><a href="#github">GitHub</a><a href="#diagnosi">Diagnosi</a><a href="#checklist">Checklist</a>
+</div></nav>
+<main>
+<section id="mappa"><h2>1. Mappa generale del progetto</h2>
+<div class="grid">
+<div class="card"><b>Area amministrativa</b><br><code>admin.html</code> + moduli JavaScript. Gestisce tornei, iscrizioni, comunicazioni, King e funzioni amministrative.</div>
+<div class="card"><b>Macchina torneo</b><br><code>tabellone.html</code>. È il motore di stato del torneo: caricamento, regole, gironi, calendario, risultati, classifiche e fase finale.</div>
+<div class="card"><b>Area pubblica</b><br><code>visitatore.html</code> e relativi script. Mostra tornei, news, eventi, mercatino, sponsor e classifiche pubbliche.</div>
+<div class="card"><b>Dati</b><br>Supabase: tornei, iscrizioni, profili, news, sponsor, mercatino e dati collegati.</div>
+<div class="card"><b>Versionamento</b><br>GitHub è la fonte del codice. Le modifiche devono essere tracciabili tramite commit.</div>
+</div>
+<div class="note"><b>Regola fondamentale:</b> Bove è la macchina a stati del torneo. L'area Admin deve alimentarla senza sostituirne la logica centrale.</div>
+</section>
+
+<section id="ruoli-admin"><h2>2.1 Ruoli Admin e Superadmin — protezioni definitive</h2>
+<p>Dal 22 settembre 2026 il sistema distingue due livelli amministrativi.</p>
+<table><tr><th>Ruolo</th><th>Account autorizzati</th><th>Operazioni</th></tr>
+<tr><td><b>Superadmin</b></td><td><code>giose.rizzi@gmail.com</code></td><td>Tutte le funzioni Admin + eliminazione definitiva dei tornei e delle iscrizioni, archiviazione/riapertura dei tornei archiviati, ripristino dai backup e consultazione del registro audit.</td></tr>
+<tr><td><b>Admin</b></td><td><code>boverob@libero.it</code><br><code>cfalba@libero.it</code></td><td>Gestione ordinaria di tornei, iscrizioni, risultati, comunicazioni e configurazioni. Le operazioni distruttive e il ripristino sono riservati al Superadmin.</td></tr>
+</table>
+<div class="note danger"><b>Protezione DB:</b> il controllo non è soltanto grafico. RLS, policy e trigger Supabase impediscono a un Admin di eliminare tornei/iscrizioni, archiviare o riaprire un torneo archiviato, oppure modificare il proprio ruolo in <code>superadmin</code>. I backup automatici e il registro delle modifiche sono gestiti dal database.</div>
+<p>Nel pannello Admin il ruolo viene mostrato nel footer. La voce <code>👑 Superadmin</code> è visibile esclusivamente all'account Superadmin.</p>
+<h3>Backup e ripristino completo dei dati amministrativi</h3>
+<p>Dal 22 settembre 2026 il sistema non limita più il backup al solo torneo. Sono presenti snapshot automatici anche per <code>iscrizioni</code>, <code>profili</code>, <code>news</code>, <code>sponsor</code> e <code>mercatino</code>.</p>
+<table><tr><th>Area</th><th>Backup automatico</th><th>Ripristino Superadmin</th></tr>
+<tr><td>Torneo + configurazione/regole</td><td>✓</td><td>✓</td></tr>
+<tr><td>Iscrizioni</td><td>✓</td><td>✓</td></tr>
+<tr><td>Profili/ruoli</td><td>✓</td><td>✓</td></tr>
+<tr><td>News</td><td>✓</td><td>✓</td></tr>
+<tr><td>Sponsor</td><td>✓</td><td>✓</td></tr>
+<tr><td>Mercatino</td><td>✓</td><td>✓</td></tr>
+</table>
+<p>Per i dati amministrativi il backup è <b>per singola riga</b>: quando una riga viene inserita, modificata o cancellata, viene conservato lo snapshot. Il Superadmin può selezionare il backup dalla sezione <code>👑 Superadmin</code> e ripristinare quella riga. Il ripristino sostituisce la riga corrente con lo snapshot salvato, oppure elimina una riga se il backup rappresenta un inserimento successivamente da annullare.</p>
+<div class="note"><b>Importante:</b> questa è una protezione completa delle entità amministrative gestite dal pannello, ma non equivale a un'immagine unica dell'intero database. Il ripristino dipende dalla presenza del relativo snapshot.</div>
+</section>
+
+<section id="admin"><h2>2. Area amministrativa</h2>
+<h3>Accesso</h3><p>L'area amministrativa è il punto di ingresso per la gestione operativa. Le funzioni devono essere utilizzate rispettando il flusso previsto dal progetto e senza creare dati duplicati.</p>
+<h3>Sezioni principali</h3>
+<ul><li>Gestione tornei</li><li>Iscrizioni e partecipanti</li><li>News</li><li>Sponsor</li><li>WhatsApp/comunicazioni</li><li>King Torneo Individuale a Coppie Variabili</li></ul>
+<div class="note"><b>Principio di manutenzione:</b> non modificare autenticazione, menu o UI quando la richiesta riguarda esclusivamente la logica di torneo.</div>
+</section>
+
+<section id="tornei"><h2>3. Gestione tornei</h2>
+<h3>Flusso operativo</h3>
+<ol><li>Creare/selezionare il torneo.</li><li>Inserire dati torneo.</li><li>Definire numero squadre/partecipanti.</li><li>Calcolare i giocatori/coppie.</li><li>Scegliere la formula.</li><li>Configurare la formula.</li><li>Creare il torneo.</li><li>Aprire Bove con l'identificativo corretto.</li></ol>
+<h3>Formati squadre</h3><p>Sono previsti i formati 8, 12, 16, 20 e 24 squadre. La gestione dei gironi utilizza gruppi da quattro quando il formato lo consente, con lettere A-F.</p>
+<h3>Salvataggio</h3><p>Il salvataggio deve mantenere un unico torneo per identificativo. Non creare copie dello stesso torneo per risolvere un problema di ricaricamento.</p>
+<h3>Salva risultato — area Admin</h3><p>Nel tabellone, in modalità amministratore, il pulsante <code>💾 Salva risultato</code> è visibile direttamente fuori dal menu hamburger. Al salvataggio riuscito mostra temporaneamente <code>✅ Risultato salvato!</code> e torna automaticamente a <code>💾 Salva risultato</code> dopo circa 2 secondi. In modalità visitatore/TV il pulsante amministrativo non deve essere utilizzabile.</p>
+</section>
+
+<section id="bove"><h2>4. Bove — macchina a stati del torneo</h2>
+<p>Il flusso concettuale è:</p>
+<pre>apri → identifica torneo → carica stato → inizializza regole → determina formula/gironi
+→ carica o inserisce squadre → genera partite/campi/orari → render
+→ inserisce risultati → aggiorna classifica → qualifica → fase finale → campione → salva</pre>
+<h3>Stato principale</h3>
+<p>Tra le informazioni fondamentali rientrano <code>idTorneo</code>, <code>nomeTorneo</code>, <code>dataTorneo</code>, <code>formato</code>, regole, squadre, risultati, campi, orari e dati della fase finale.</p>
+<h3>Regola di inizializzazione</h3><p>Le funzioni di default devono aggiungere soltanto dati mancanti. Non devono sovrascrivere configurazioni già salvate. Lo stesso principio vale per la gestione delle regole.</p>
+<h3>Gironi</h3><p>Per quattro squadre l'ordine storico delle sei partite è: 1-2, 3-4, 1-4, 2-3, 1-3, 2-4. Le schermate devono mantenere i partecipanti e le coppie già presenti.</p>
+</section>
+
+<section id="regole"><h2>5. Regole e classifiche</h2>
+<p>La configurazione comprende i punti per vittoria, pareggio e sconfitta e i criteri di spareggio. È presente anche la gestione dei punti della sconfitta.</p>
+<table><tr><th>Elemento</th><th>Uso</th></tr>
+<tr><td>Vittoria / pareggio / sconfitta</td><td>Determina i punti assegnati al termine del risultato.</td></tr>
+<tr><td>Criteri 1-3</td><td>Ordine degli spareggi configurabile.</td></tr>
+<tr><td>Qualificate</td><td>Numero di squadre che accedono alla fase successiva.</td></tr>
+<tr><td>KO</td><td>Attivazione e configurazione della fase a eliminazione diretta.</td></tr></table>
+<div class="note"><b>Controllo obbligatorio:</b> dopo ogni modifica delle regole, salvare, ricaricare il torneo e verificare che i valori siano rimasti identici.</div>
+</section>
+
+<section id="calendario"><h2>6. Campi, orari e calendario</h2>
+<p>Campi e orari sono parte dello stato del torneo. Per la fase finale devono essere salvati e ricaricati insieme ai relativi incontri.</p>
+<ul><li>Verificare campo.</li><li>Verificare ora.</li><li>Salvare.</li><li>Ricaricare Bove.</li><li>Controllare che campo e ora coincidano con quelli salvati.</li></ul>
+<p>La stessa verifica va eseguita per quarti, semifinali e finale quando la formula li prevede.</p>
+</section>
+
+<section id="finali"><h2>7. Fase finale</h2>
+<p>La fase finale può comprendere Quarti → Semifinali → Finale. I dati delle partite devono rimanere coerenti con le squadre qualificate.</p>
+<h3>Verifica funzionale</h3>
+<ol><li>Completare la fase a gironi.</li><li>Controllare le qualificate.</li><li>Verificare l'attivazione della fase KO prevista dalla formula.</li><li>Controllare i quarti.</li><li>Controllare le semifinali.</li><li>Controllare la finale.</li><li>Impostare campo e ora.</li><li>Salvare.</li><li>Ricaricare.</li><li>Verificare campi, orari e partecipanti.</li></ol>
+<h3>Stampa</h3><p>La stampa deve essere separata dalla normale UI: menu e controlli non devono comparire nel foglio. Il layout previsto per il tabellone è A4 orizzontale, con box allineati, collegamenti discreti e testi leggibili.</p>
+</section>
+
+<section id="king"><h2>8. 🏆 King Torneo Individuale a Coppie Variabili</h2>
+<p>È una modalità distinta dal normale torneo a squadre. La classifica è individuale mentre le coppie cambiano nel corso delle giornate.</p>
+<ul><li>Vittoria = 3 punti.</li><li>Pareggio = 1 punto.</li><li>Sconfitta = 0 punti.</li><li>Classifica individuale con PF, PS e differenza.</li><li>Inserimento manuale sempre disponibile.</li><li>Automatizzazione per squadre/coppie disponibile.</li><li>Giornate programmabili con numero di slot e giorni/orari.</li></ul>
+<h3>Regola delle giornate</h3><p>Nel test operativo da 8 giocatori, una giornata è stata modellata con 4 coppie e 6 partite: ogni giocatore disputa 3 partite nella giornata. Dodici giornate corrispondono quindi a 12 giornate di partecipazione per giocatore.</p>
+<h3>Archivio</h3><p>Le giornate devono rimanere consultabili e correggibili. L'inserimento manuale non deve essere rimosso quando è presente l'automazione.</p>
+</section>
+
+<section id="news"><h2>9. News</h2>
+<p>La gestione News mantiene i contenuti dei tornei nella configurazione del torneo e supporta anche la tabella globale <code>public.news</code>. Il modulo pubblico aggrega le News del torneo, le News globali, i tornei pubblicati e i contenuti del Mercatino.</p>
+<h3>News automatica dei tornei — attiva</h3>
+<div class="note"><b>Automazione introdotta il 21 settembre 2026:</b> quando un torneo risulta <b>pubblicato/attivo</b>, Admin controlla automaticamente ogni 15 secondi se esiste già la News automatica. Se manca, viene creata una sola volta.</div>
+<ul>
+<li><b>Testo:</b> prova a usare l'endpoint AI <code>news-ai</code>; se l'AI non è disponibile, usa un template locale senza bloccare la pubblicazione.</li>
+<li><b>Locandina:</b> viene generata automaticamente con un <b>template fisso deterministico</b> e dati reali del torneo: nome, data, ora, luogo, coppie, livello, quota e scadenza quando presenti.</li>
+<li><b>Duplicati:</b> la chiave <code>auto-news-torneo-&lt;id&gt;</code> impedisce la creazione ripetuta della stessa News.</li>
+<li><b>Costo:</b> il fallback locale non richiede API AI. Se è disponibile l'endpoint AI già presente nel progetto, il testo può usare il servizio AI; la generazione automatica di immagini AI non è necessaria per questo primo livello, perché la locandina è prodotta dal template fisso.</li>
+<li><b>WhatsApp:</b> resta manuale come stabilito. Questa automazione non invia messaggi WhatsApp.</li>
+</ul>
+<h3>Flusso News completo — riparazione verificata il 21 settembre 2026</h3>
+<div class="note"><b>Ripristino:</b> il pulsante normale <b>📰 News</b> apre nuovamente il flusso completo di creazione comunicazioni. Il torneo è <b>facoltativo</b>: con un torneo selezionato vengono utilizzati i dati del torneo; senza torneo si possono creare News generali, offerte, eventi e altre comunicazioni.</div>
+<ul>
+<li><b>News di torneo:</b> il layout completo consente di inserire/modificare titolo, data, ora, luogo, coppie, livello, quota, scadenza, offerta/prodotto/argomento e CTA. I dati possono essere usati per generare la locandina automatica.</li>
+<li><b>Locandina automatica:</b> la sezione di generazione automatica costruisce l'anteprima sulla base dei dati inseriti e la locandina può essere pubblicata insieme alla News.</li>
+<li><b>Locandina manuale:</b> è possibile caricare una propria foto, aggiungere più testi, posizionarli, modificarne dimensione, colore, allineamento e peso, generare la locandina e pubblicarla.</li>
+<li><b>News generale:</b> senza torneo la stessa interfaccia resta utilizzabile per comunicazioni, offerte, eventi, prodotti, ricordi e articoli; la pubblicazione viene salvata nelle News globali con <code>torneo_id = null</code>.</li>
+<li><b>WhatsApp:</b> per una News/locandina collegata a un torneo, il flusso WhatsApp del medesimo torneo recupera la locandina pubblicata e prepara il messaggio/link per l'invio ai destinatari.</li>
+<li><b>Routing:</b> <code>admin-comunicazioni-v1.js</code> indirizza il pulsante normale verso il flusso News completo; <code>admin-news-ai-v1.js</code> fornisce l'editor completo e mantiene anche il percorso esplicito <code>news-ai</code>.</li>
+<li><b>Cache:</b> le versioni degli script News in <code>admin.html</code> sono state incrementate dopo la riparazione per impedire il caricamento di vecchi JavaScript.</li>
+</ul>
+<h3>Procedura manuale</h3><ol><li>Aprire News.</li><li>Creare o modificare il contenuto.</li><li>Se necessario, scegliere la locandina manuale.</li><li>Salvare/pubblicare.</li><li>Verificare l'elenco.</li><li>Controllare la visualizzazione pubblica.</li></ol>
+</section>
+
+<section id="backup-news-auto"><h2>9.1 Backup operativo — automazione News</h2>
+<div class="note"><b>Backup aggiornato al 21 settembre 2026:</b> prima delle attività successive è disponibile il branch <code>backup-news-automation-updated-2026-09-21</code>, creato dall'ultimo commit stabile della branch <code>main</code>.</div>
+<ul><li>Il backup comprende l'automazione News torneo, il caricamento del modulo in <code>admin.html</code> e la documentazione aggiornata.</li><li>Il backup non sostituisce <code>main</code> e può essere usato per ripristinare lo stato precedente alle modifiche successive.</li><li>Prima di nuove modifiche strutturali al flusso News o al backend, creare un nuovo backup.</li></ul>
+</section>
+
+<section id="sponsor"><h2>10. Sponsor</h2>
+<p>La tabella <code>public.sponsor</code> contiene nome, immagine, video, link e data di creazione. La gestione deve essere accessibile dalla sezione Comunicazioni/Sponsor.</p>
+<div class="note"><b>Diagnosi route:</b> se il pulsante Sponsor non apre la sezione, controllare prima il caricamento di <code>admin-comunicazioni-v1.js</code> e il routing <code>openAdminSponsor</code>; non modificare il database per un problema di apertura della pagina.</div>
+</section>
+
+<section id="pubblico"><h2>11. Sito pubblico / Visitatore</h2>
+<p>Il sito pubblico presenta Home, Tornei, News, Mercatino, Eventi, Info e Contatti. La grafica segue un'impostazione leggera tipo Wansport, con sfondo <code>sfondo2.jpg</code> e layout a vetro.</p>
+<h3>Contenuti pubblici</h3><ul><li>Tornei</li><li>Classifiche e vetrina King</li><li>News</li><li>Mercatino</li><li>Eventi/calendario</li><li>Sponsor</li><li>Informazioni e contatti</li></ul>
+<p>Il pubblico non deve mostrare controlli amministrativi o pulsanti di profilo/dashboard non previsti.</p>
+</section>
+
+<section id="privacy"><h2>12. Privacy e gestione degli iscritti</h2>
+<p>Dal 22 settembre 2026 la gestione delle iscrizioni applica il principio di minimizzazione: l'area pubblica può utilizzare soltanto i dati essenziali necessari per il torneo, mentre i dati completi degli iscritti restano disponibili all'area amministrativa autorizzata o all'interessato per la propria iscrizione.</p>
+<table><tr><th>Dato</th><th>Area pubblica</th><th>Admin</th><th>Regola</th></tr>
+<tr><td>Nome/cognome o nome visualizzato</td><td>Solo quando necessario per torneo, tabellone, risultato o classifica</td><td>✓</td><td>Minimizzazione</td></tr>
+<tr><td>E-mail</td><td>✕</td><td>✓</td><td>Non pubblicare</td></tr>
+<tr><td>Telefono</td><td>✕</td><td>✓ se necessario</td><td>Non pubblicare</td></tr>
+<tr><td>Note personali</td><td>✕</td><td>✓ se necessarie</td><td>Non pubblicare</td></tr>
+<tr><td>Stato iscrizione</td><td>Solo nella misura necessaria</td><td>✓</td><td>Usato per gestione</td></tr>
+</table>
+<h3>Iscrizione</h3><p>La pagina di iscrizione mostra un richiamo all'informativa Privacy prima della conferma. La registrazione richiede autenticazione e l'inserimento viene vincolato all'utente autenticato.</p>
+<h3>Eliminazione</h3><p>Prima della chiusura delle iscrizioni, l'Admin può eliminare una singola iscrizione dal torneo tramite <code>🗑️ Elimina</code>. L'operazione richiede conferma ed è limitata al torneo selezionato. Dopo la chiusura/archiviazione il comando viene disabilitato.</p>
+<h3>Pubblicazione</h3><p>Il codice pubblico non carica più campi come e-mail, telefono o note per il tabellone/classifica. Bove e la vetrina King richiedono solo i campi essenziali per la visualizzazione sportiva.</p>
+<h3>Regola privacy</h3><div class="note"><b>Importante:</b> la Privacy Policy del sito deve essere coerente con il titolare reale, le basi giuridiche, i tempi di conservazione e i fornitori effettivamente utilizzati. Al primo utilizzo l'Admin deve compilare i campi obbligatori nel pannello <code>🔐 Dati Privacy</code>; la pagina pubblica Privacy li legge automaticamente dal database. I dati devono essere quelli reali e verificati del Titolare.</div>
+</section>
+
+<section id="supabase"><h2>13. Supabase — struttura operativa</h2>
+<p>Il progetto utilizza Supabase come backend. Le principali tabelle applicative documentate sono:</p>
+<table><tr><th>Tabella</th><th>Funzione</th></tr>
+<tr><td><code>tornei</code></td><td>Anagrafica e configurazione dei tornei.</td></tr>
+<tr><td><code>iscrizioni</code></td><td>Partecipanti/iscrizioni e stato di approvazione.</td></tr>
+<tr><td><code>profili</code></td><td>Dati dei profili utenti.</td></tr>
+<tr><td><code>news</code></td><td>Comunicazioni globali e collegate ai tornei.</td></tr>
+<tr><td><code>sponsor</code></td><td>Contenuti sponsor.</td></tr>
+<tr><td><code>mercatino</code></td><td>Annunci del mercatino.</td></tr></table>
+<h3>Backup Superadmin</h3><p>La tabella <code>public.admin_data_backup</code> conserva gli snapshot delle righe di <code>iscrizioni</code>, <code>profili</code>, <code>news</code>, <code>sponsor</code> e <code>mercatino</code>. La funzione <code>superadmin_restore_data_backup</code> è riservata al Superadmin e registra il ripristino nell'<code>admin_audit_log</code>.</p>
+<h3>Regola</h3><p>Una modifica alla struttura dati va fatta tramite migrazione tracciata. Non usare SQL manuale non documentato come soluzione definitiva a un problema applicativo.</p>
+<h3>Sicurezza</h3><p>RLS è attivo sulle tabelle applicative. Gli avvisi del Security Advisor sulle funzioni con search_path modificabile e sulla protezione password devono essere trattati come attività di sicurezza separate dalla normale manutenzione funzionale.</p>
+</section>
+
+<section id="monitor"><h2>14. Monitor risorse GitHub + Supabase</h2>
+<p>In <code>admin.html</code>, nella sezione <b>Sistema</b>, è disponibile il pulsante <code>📊 Stato risorse</code>. Il monitor legge la situazione reale senza modificare il flusso dei tornei.</p>
+<ul><li><b>Supabase Database:</b> dimensione reale confrontata con la quota Free di 500 MB per progetto.</li><li><b>Supabase Storage:</b> spazio occupato confrontato con la quota Free di 1 GB.</li><li><b>Supabase Auth:</b> numero attuale di utenti presenti; il dato non va confuso con i MAU mensili.</li><li><b>Dati applicativi:</b> conteggio dei record nelle tabelle principali monitorate.</li><li><b>GitHub:</b> dimensione del repository, branch predefinito e data dell’ultimo push.</li></ul>
+<div class="note"><b>Grafico “Limiti e massimi”:</b> mostra visivamente l'utilizzo reale rispetto al massimo monitorato per Database, Storage e soglia prudenziale GitHub. La barra raggiunge il 100% quando viene raggiunto il limite.</div>
+<div class="note"><b>Soglie:</b> database e Storage usano le quote Free reali; per GitHub il monitor usa 1 GB come soglia prudenziale interna, non come limite contrattuale del piano. Egress Supabase e MAU mensili richiedono la sezione Usage/Billing della piattaforma e non vengono stimati artificialmente.</div>
+<p>Il monitor si aggiorna automaticamente ogni <b>30 secondi</b> mentre la schermata è aperta. Il pulsante <code>↻ Aggiorna</code> rimane comunque sempre attivo per forzare immediatamente una nuova lettura. Per GitHub viene usata una cache di 10 minuti per evitare il limite delle chiamate anonime API.</p>
+<h3>Automazione 100%: costi da considerare</h3>
+<table><tr><th>Funzione</th><th>Situazione attuale</th><th>Per automatizzarla al 100%</th><th>Quando acquistare</th></tr>
+<tr><td>📰 News</td><td>Free / manuale assistita</td><td>API AI per testo + API immagini + generazione automatica della locandina + pubblicazione automatica. Le immagini API sono a consumo; ad esempio OpenAI GPT Image 2 indica circa $0,006 per immagine 1024×1024 in qualità bassa, con costi maggiori per qualità superiori.</td><td><b>Non serve</b> finché l'amministratore approva/genera manualmente. <b>Serve</b> quando si vuole creare e pubblicare senza intervento.</td></tr>
+<tr><td>💬 WhatsApp</td><td>Free / preparazione e invio manuale</td><td>WhatsApp Business Platform/API ufficiale, con costi variabili in base a categoria, mercato e volume dei messaggi.</td><td><b>Non serve</b> finché l'amministratore preme/invia. <b>Serve</b> quando si vuole invio automatico senza azione umana.</td></tr>
+<tr><td>⚙️ Supabase</td><td>Free</td><td>Il piano Pro o servizi aggiuntivi diventano necessari solo se le quote Free o il carico delle automazioni lo richiedono.</td><td><b>Monitorare.</b> Passare di piano quando una quota Free si avvicina al limite o l'automazione richiede capacità non disponibili.</td></tr>
+<tr><td>⚫ GitHub</td><td>Free</td><td>Il normale repository pubblico non richiede un piano a pagamento per la dimensione del codice. Actions, Packages e LFS hanno quote separate.</td><td><b>Non acquistare</b> solo perché cresce il codice. Valutare un piano/uso a pagamento solo se si superano le quote del servizio effettivamente utilizzato.</td></tr>
+</table>
+<div class="note"><b>Semaforo operativo:</b> 🟢 <b>NON ACQUISTARE</b> = il lavoro manuale è accettabile; 🟠 <b>PREPARARSI</b> = si vuole eliminare attività ripetitive e va definita l'architettura; 🔴 <b>ACQUISTARE/ATTIVARE</b> = è richiesta l'esecuzione automatica senza intervento umano.</div>
+<div class="note"><b>Architettura consigliata per News:</b> AI per testo/immagine + template deterministico per inserire dati esatti di torneo/offerta + Supabase per salvataggio/pubblicazione. In questo modo data, ora, prezzo e nome torneo non dipendono dalla precisione del testo generato dentro l'immagine.</div>
+<div class="note"><b>Nota prezzi:</b> i prezzi API sono variabili e vanno ricontrollati prima dell'attivazione. Il monitor mostra costi e soglie come guida operativa, non come fattura.</div>
+</section>
+
+<section id="github"><h2>15. GitHub, versioni e backup</h2>
+<p>Repository operativo: <code>torneirobertobove/torneirobertobove.github.io</code>. Branch operativo: <code>main</code>.</p>
+<div class="card"><b>Snapshot di sicurezza</b><br>Branch <code>backup-2026-09-20-completo</code> creato sul commit <code>0dfdc190a70be28fce047bddda850d1abc49e360</code>. Il branch è uno snapshot GitHub del progetto a quel momento.</div>
+<h3>Regola di modifica</h3><ol><li>Identificare il file.</li><li>Leggere la versione corrente.</li><li>Modificare solo ciò che serve.</li><li>Commit descrittivo.</li><li>Verificare il diff.</li><li>Testare il flusso interessato.</li></ol>
+</section>
+
+<section id="diagnosi"><h2>16. Diagnosi rapida</h2>
+<table><tr><th>Sintomo</th><th>Prima verifica</th><th>Non fare</th></tr>
+<tr><td>Bove perde regole</td><td>Caricamento stato → ensure regole → render; controllare che i default siano solo missing-only.</td><td>Riscrivere l'intero salvataggio.</td></tr>
+<tr><td>Campo/ora non restano</td><td>Controllare stato salvato e ricaricamento DB.</td><td>Modificare la UI senza verificare il dato.</td></tr>
+<tr><td>KO non appare</td><td>Controllare flag fase finale, qualificate e formula.</td><td>Creare un secondo motore KO.</td></tr>
+<tr><td>Sponsor non apre</td><td>Controllare script/routing e console JavaScript.</td><td>Modificare Supabase.</td></tr>
+<tr><td>News chiede un torneo</td><td>Controllare gestione News globale e <code>torneo_id</code> nullo.</td><td>Associare artificialmente una news globale a un torneo.</td></tr>
+<tr><td>King ha scrollbar</td><td>Controllare larghezza del wrapper e tabella ranking.</td><td>Ridurre arbitrariamente i dati della classifica.</td></tr></table>
+<h3>Audit browser</h3><p>Per problemi di runtime, usare la console per raccogliere errori, script caricati, stato Supabase e funzioni globali. L'audit deve essere usato per diagnosticare, non come sostituto della correzione permanente nel repository.</p>
+</section>
+
+<section id="checklist"><h2>17. Checklist operativa</h2>
+<h3>Nuovo torneo</h3><ul><li>☐ Dati torneo</li><li>☐ Numero squadre</li><li>☐ Partecipanti/coppie</li><li>☐ Formula</li><li>☐ Regole</li><li>☐ Gironi</li><li>☐ Campi/orari</li><li>☐ Creazione</li><li>☐ Apertura Bove</li><li>☐ Salvataggio e ricaricamento</li><li>☐ Se si modifica un risultato da Admin, verificare il messaggio “✅ Risultato salvato!”</li></ul>
+<h3>Prima di dichiarare concluso un torneo</h3><ul><li>☐ Tutti i risultati presenti</li><li>☐ Classifica corretta</li><li>☐ Qualificate corrette</li><li>☐ Fase finale corretta</li><li>☐ Campi/orari finali salvati</li><li>☐ Ricaricamento verificato</li><li>☐ Stampa verificata</li><li>☐ Dati pubblici verificati</li></ul>
+<h3>Modifica tecnica</h3><ul><li>☐ Problema riprodotto</li><li>☐ File/funzione individuati</li><li>☐ Nessuna modifica non richiesta</li><li>☐ Commit eseguito</li><li>☐ Test di regressione eseguito</li><li>☐ Risultato documentato</li><li>☐ Manuale operativo aggiornato con la modifica</li></ul>
+</section>
+
+<section id="stato"><h2>18. Stato documentale e prossime verifiche</h2>
+<p>Questo manuale descrive il funzionamento e le regole operative del progetto sulla base dello stato del repository e delle verifiche disponibili al 22/09/2026. Non sostituisce i test reali del browser.</p>
+<table><tr><th>Area</th><th>Stato documentato</th></tr>
+<tr><td>Macchina Bove</td><td class="warn">Corretta sui problemi rilevati dall’audit del 22/09/2026; test browser finale da eseguire</td></tr>
+<tr><td>Admin → Bove</td><td class="ok">Operativa</td></tr>
+<tr><td>Salvataggio torneo</td><td class="ok">Operativo</td></tr>
+<tr><td>Pulsante Admin “Salva risultato”</td><td class="ok">Operativo: feedback “Risultato salvato!” temporaneo</td></tr>
+<tr><td>Regole e configurazione</td><td class="warn">Corretta sui problemi rilevati; test browser finale da eseguire</td></tr>
+<tr><td>Formati 8/12/16/20/24</td><td class="warn">Logica fase finale corretta; test browser finale da eseguire</td></tr>
+<tr><td>King</td><td class="warn">Operativo con verifiche UI da mantenere</td></tr>
+<tr><td>News globale</td><td class="ok">Implementata</td></tr>
+<tr><td>Sponsor</td><td class="warn">Route riparata; test browser finale da confermare</td></tr>
+<tr><td>Stampa fase finale</td><td class="warn">Menu escluso dalla stampa; rifinitura grafica ancora da completare</td></tr>
+</table>
+<div class="danger note"><b>Nota:</b> le righe “in verifica” non sono dichiarazioni di errore: indicano che il comportamento deve essere ricontrollato dopo modifiche al codice prima di considerarlo definitivamente congelato.</div>
+</section>
+
+<section id="audit-22092026"><h2>
+
+<h3><p><b>Seconda verifica 22/09/2026:</b> il problema è stato ricondotto alla gestione congiunta degli input KO e del controllo accessi asincrono. Ripristinati input numerici con mantenimento del focus, corretto il riconoscimento del risultato completo e resa esplicita la modalità amministratore; dopo la conferma del profilo admin il tabellone viene ridisegnato senza lasciare i controlli risultati disabilitati.</p>
+Correzione 22/09/2026 — input risultati Bove</h3>
+<p>Corretto il blocco degli input del tabellone che poteva rimanere attivo dopo un controllo accessi temporaneamente negativo durante il caricamento della sessione admin. Gli elementi bloccati dal controllo accessi vengono ora marcati e riabilitati quando l'utente viene riconosciuto come amministratore. I campi della fase finale disabilitati intenzionalmente per segnaposto restano gestiti dalla logica del tabellone.</p>
+18. Audit e correzioni del 22/09/2026</h2>
+<p>Audit statico completo del repository eseguito prima delle correzioni. Sono stati individuati e corretti i principali problemi di regressione del motore Bove e dell'Admin.</p>
+<ul>
+<li><b>Bove risultati KO:</b> l'inserimento del punteggio non ricostruisce più il DOM ad ogni cifra, evitando la perdita del focus.</li>
+<li><b>Fase finale:</b> al completamento di un risultato viene sincronizzata la catena Quarti → Semifinali → Finale → Campione.</li>
+<li><b>Qualificazioni:</b> la selezione non dipende più dall'ordine dei gironi e non tronca arbitrariamente i primi gironi.</li>
+<li><b>Formati gironi + fase finale:</b> 8/12 squadre usano 4 qualificate e semifinali; 16/20/24 usano 8 qualificate e quarti, semifinali e finale.</li>
+<li><b>Stampa Bove:</b> hamburger/menu e pulsante di salvataggio admin vengono nascosti in stampa.</li>
+<li><b>Admin:</b> il torneo speciale “King Torneo Individuale a Coppie Variabili” resta nella sezione dedicata e non viene proposto nel wizard normale.</li>
+<li><b>Admin mobile:</b> rimosso il duplicato “Inserisci contenuto”.</li>
+<li><b>Link pubblici:</b> i collegamenti “Tornei” di 2Page.html e informazioni.html puntano ora alla sezione Tornei di visitatore.html.</li>
+</ul>
+<p><b>Backup preventivo:</b> prima delle correzioni è stata creata la branch <code>backup-before-audit-repairs-2026-09-22</code>.</p>
+</section>
+
+<section><h2>18. Principi di manutenzione</h2>
+<ul><li>Una correzione deve risolvere il problema senza rompere funzioni già operative.</li><li>Prima di sostituire una logica, confrontarla con la versione precedente funzionante quando disponibile.</li><li>Non eliminare grandi porzioni di codice per risolvere un difetto locale.</li><li>Non introdurre nuove autenticazioni, menu o flussi se non richiesti.</li><li>Separare sempre diagnosi, correzione e verifica.</li><li>Ogni correzione importante deve avere un commit identificabile.</li><li>Il manuale deve essere aggiornato quando cambia un flusso operativo stabile.</li></ul>
+</section>
+</main>
+<footer>Manuale operativo Next Point Padel · documento integrato nel repository · aggiornare la data e la sezione “Stato documentale” dopo modifiche strutturali.</footer>
+<div class="note"><b>Aggiornamento monitor GitHub:</b> GitHub viene letto con cache di 10 minuti per evitare il limite delle richieste anonime API. L’aggiornamento automatico Supabase resta ogni 30 secondi. Se GitHub restituisce temporaneamente HTTP 403, il monitor usa l’ultimo dato GitHub valido in cache invece di interrompere il monitor.</div>
+<!-- FIX 22/09/2026 - risultati semifinali e finale -->
+<section>
+<h2>Correzione risultati Semifinali e Finale — 22/09/2026</h2>
+<p>Ripristinata l'editabilità delle celle risultato nelle fasi di Semifinale e Finale di tabellone.html. È stata rimossa dalla generazione delle celle la condizione che impostava <code>disabled</code> quando le squadre erano ancora rappresentate da qualificati/vincitori provvisori. Commit: <code>7bbed4e3f67563c9b10dd6254389f7ab4ee63168</code>.</p>
+</section>
+<section id="backup-codice-superadmin"><h2>Backup differenziale e ripristino del codice</h2><p>Il codice del repository <strong>torneirobertobove/torneirobertobove.github.io</strong> è versionato direttamente con GitHub. Ogni commit conserva la differenza rispetto alla versione precedente, ma Git può ricostruire il file completo di qualunque commit.</p><ul><li>Nel pannello <strong>👑 Superadmin → 🧩 Backup e ripristino codice</strong> sono visibili le versioni recenti dei file principali.</li><li>Ogni versione può essere marcata <strong>🟢 STABILE</strong>, <strong>🟡 TEST</strong> oppure <strong>🔴 PROBLEMATICA</strong>.</li><li><strong>Confronta</strong> apre il confronto della versione selezionata con <strong>main</strong>.</li><li><strong>Ripristina</strong> richiede il ripristino del file completo alla versione scelta. GitHub Actions esegue la richiesta e crea un nuovo commit: la cronologia precedente non viene cancellata.</li><li>Il ripristino è limitato ai file autorizzati e viene eseguito automaticamente entro il ciclo di controllo della workflow.</li></ul><p><strong>Principio di sicurezza:</strong> non si sovrascrive la cronologia Git e non si conserva un secondo archivio duplicato di ogni file. Il backup differenziale è Git; il pannello Superadmin gestisce la selezione, lo stato e la richiesta di ripristino.</p></section><section id="fix-campione-tabellone-20260922"><h2>Ripristino campione nel tabellone</h2><p>Il tabellone finale conserva e ricarica finalisti, semifinali, quarti e campione già salvati nel torneo. Un refresh o una nuova renderizzazione non sostituisce più un campione persistito con segnaposto.</p></section>
+</body>
+</html>
+<!-- RIPRISTINO BOVE 22/09/2026 -->
+<section class="card">
+<h2>Ripristino BOVE — 22/09/2026</h2>
+<p>Ripristinata la versione stabile della macchina della fase finale dal riferimento <code>08e3baece67cf4feb54f23009d919990435a7dc8</code>, mantenendo la logica di passaggio qualificati Gironi → Quarti → Semifinali → Finale. Nei risultati KO sono state rimosse le frecce dei campi numerici e i campi risultato non vengono più bloccati in base ai segnaposto.</p>
+<p>Backup della versione precedente: <code>backup-before-bove-full-restore-2026-09-22</code>.</p>
+</section>

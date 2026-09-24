@@ -1,0 +1,1 @@
+Forza il redeploy GitHub Pages dopo la correzione della gestione approvazione iscritti in admin.html.

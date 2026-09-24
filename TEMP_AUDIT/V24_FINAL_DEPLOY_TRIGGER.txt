@@ -1,0 +1,2 @@
+REAL ADMIN WIZARD V24.2 DEPLOY TRIGGER
+Authoritative deployment: .github/workflows/admin-wizard-fix-deploy.yml

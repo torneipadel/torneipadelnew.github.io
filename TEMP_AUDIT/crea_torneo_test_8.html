@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crea torneo test 8 squadre</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:system-ui;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.box{max-width:650px;padding:30px;border-radius:16px;background:#111827;border:1px solid #334155;text-align:center}
+#status{margin-top:18px;line-height:1.6;white-space:pre-wrap}
+a{color:#60a5fa}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>🎾 Creazione torneo test</h2>
+<div id="status">Creazione in corso...</div>
+</div>
+<script>
+const sb=window.supabase.createClient(
+  'https://iybjvtmfaupgthqqsngd.supabase.co',
+  'sb_publishable_oLLML3_ne0I1dWKIinSRNA_K1Ao5SOl',
+  {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+);
+
+const NOME='Torneo all\'italiana completo – 8 squadre';
+const SQUADRE=['A1','A2','A3','A4','B1','B2','B3','B4'];
+
+function cfg(){
+  return {
+    A:SQUADRE.slice(0,4),
+    B:SQUADRE.slice(4,8),
+    C:[],D:[],E:[],F:[],G:[],
+    Ares:[],Bres:[],Cres:[],Dres:[],Eres:[],Fres:[],Gres:[],
+    Atime:[],Btime:[],Ctime:[],Dtime:[],Etime:[],Ftime:[],Gtime:[],
+    Acamp:[],Bcamp:[],Ccamp:[],Dcamp:[],Ecamp:[],Fcamp:[],Gcamp:[],
+    rankA:[],rankB:[],rankC:[],rankD:[],rankE:[],rankF:[],rankG:[],
+    qRes:[],sTopRes:[],fTopRes:[],finalTop:[],
+    partecipanti:[],
+    coppie:SQUADRE,
+    gironi:{A:SQUADRE.slice(0,4),B:SQUADRE.slice(4,8),C:[],D:[],E:[],F:[],G:[]},
+    rules:{
+      locked:false,
+      tipoTorneo:'gironiFinale',
+      formatoTorneo:'gironiFinale',
+      numeroSquadre:8,
+      numeroGironi:2,
+      squadrePerGirone:4,
+      formulaGironi:'italiana',
+      formulaFinale:'eliminazione_diretta',
+      w:3,d:1,l:0,
+      qualificatePerGirone:2,
+      numeroQualificateFinali:4,
+      usaQuarti:false,
+      usaSemifinali:true,
+      usaFinale:true,
+      killerPoint:false,
+      rigori:true,
+      tempoSupplementare:true,
+      garaAndataRitorno:false,
+      start:'20:00',
+      duration:30,
+      crit1:'df',crit2:'gf',crit3:'gs',
+      mostraQuarti:false
+    }
+  };
+}
+
+async function crea(){
+  const status=document.getElementById('status');
+  try{
+    const {data:esistente,error:errSel}=await sb.from('tornei').select('id,nome,data,posti').eq('nome',NOME).order('id',{ascending:false}).limit(1);
+    if(errSel) throw errSel;
+    if(Array.isArray(esistente)&&esistente.length){
+      const id=esistente[0].id;
+      status.innerHTML='Torneo già presente.\n\nID: '+id+'\n\nApertura del torneo...';
+      setTimeout(()=>location.href='Bove.html?idTorneo='+encodeURIComponent(id),500);
+      return;
+    }
+
+    const id=Date.now();
+    const configurazione=cfg();
+    const record={
+      id,
+      nome:NOME,
+      data:new Date().toISOString().slice(0,10),
+      data_torneo:new Date().toISOString().slice(0,10),
+      ora_inizio:'20:00',
+      posti:8,
+      descrizione:'Torneo di prova completo: 8 squadre, 2 gironi da 4, formula all\'italiana, 2 qualificate per girone, semifinali e finale.',
+      formula:'gironiFinale',
+      stato:'bozza',
+      pubblicato:false,
+      iscrizioni_chiuse:false,
+      configurazione
+    };
+
+    const {error}=await sb.from('tornei').insert(record);
+    if(error) throw error;
+
+    status.innerHTML='TORNEO CREATO CORRETTAMENTE.\n\n'+NOME+'\nID: '+id+'\n\nApertura del torneo...';
+    setTimeout(()=>location.href='Bove.html?idTorneo='+encodeURIComponent(id),700);
+  }catch(e){
+    console.error(e);
+    status.textContent='ERRORE CREAZIONE TORNEO:\n\n'+(e?.message||JSON.stringify(e));
+  }
+}
+
+crea();
+</script>
+</body>
+</html>
