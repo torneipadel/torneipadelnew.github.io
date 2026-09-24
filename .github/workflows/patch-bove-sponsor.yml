@@ -1,0 +1,62 @@
+name: Patch sponsor globali
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-bove-sponsor.yml'
+      - 'sponsor-public-v2.js'
+      - '2Page.html'
+      - 'Bove.html'
+      - 'visitatore.html'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installa il gestore sponsor globale senza modificare la logica del tabellone
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          PAGES = [
+              '2Page.html',
+              'Bove.html',
+              'visitatore.html'
+          ]
+
+          def patch_page(filename):
+              p = Path(filename)
+              if not p.exists():
+                  return False
+              s = p.read_text(encoding='utf-8')
+              original = s
+              s = re.sub(r'\s*<script[^>]+(?:tabellone-fix\.js|sponsor-global-fix\.js|sponsor-public-v2\.js)[^>]*></script>', '', s, flags=re.I)
+              s = s.replace('const sb = supabase.createClient(', 'const sb = window.sb = supabase.createClient(', 1)
+              s = s.replace('const sb=supabase.createClient(', 'const sb=window.sb=supabase.createClient(', 1)
+              marker = '<script src="sponsor-public-v2.js?v=8"></script>'
+              if '</body>' in s:
+                  s = s.replace('</body>', '  ' + marker + '\n</body>', 1)
+              p.write_text(s, encoding='utf-8')
+              return s != original
+
+          changed = []
+          for page in PAGES:
+              if patch_page(page):
+                  changed.append(page)
+          print('Pagine sponsor aggiornate:', changed)
+          PY
+
+      - name: Commit sponsor
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 2Page.html Bove.html visitatore.html
+          git diff --cached --quiet || git commit -m 'Mostra sponsor globali nelle pagine pubbliche'
+          git push
