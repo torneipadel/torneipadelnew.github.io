@@ -1,17 +1,17 @@
 {
   "name": "NEXT POINT PADEL",
   "short_name": "NEXT POINT PADEL",
-  "id": "/",
+  "id": "./",
   "description": "NEXT POINT PADEL - Tornei, eventi e competizioni di padel.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./login.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#071219",
   "theme_color": "#071219",
   "icons": [
     {
-      "src": "/loghi/icona_app1.jpg",
+      "src": "loghi/icona_app1.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any"
