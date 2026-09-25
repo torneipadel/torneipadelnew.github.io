@@ -21,9 +21,7 @@ jobs:
           from pathlib import Path
 
           login = Path("login.html").read_text(encoding="utf-8")
-          m = re.search(r'https://dkeqicstprvvfebiaooc\\.supabase\\.co",\"([^\"]+)\"', login)
-          if not m:
-              m = re.search(r'https://dkeqicstprvvfebiaooc\\.supabase\\.co",\\s*"([^"]+)"', login)
+          m = re.search(r'createClient\("https://dkeqicstprvvfebiaooc\.supabase\.co","([^"]+)"', login)
           if not m:
               raise SystemExit("MASTER client key not found in login.html")
           valid_key = m.group(1)
@@ -41,7 +39,7 @@ jobs:
               p = Path(name)
               s = p.read_text(encoding="utf-8")
               new = re.sub(
-                  r'((?:const)\\s+(?:KEY|SUPABASE_KEY)\\s*=\\s*[\'"])[^\'"]+([\'"])',
+                  r'(const\s+(?:KEY|SUPABASE_KEY)\s*=\s*['"])[^'"]+(['"])',
                   lambda m: m.group(1) + valid_key + m.group(2),
                   s
               )
@@ -52,7 +50,6 @@ jobs:
           print("Changed:", changed)
           if len(changed) != len(files):
               raise SystemExit("Not all five target files were changed")
-
           PY
 
       - name: Commit repaired clients
