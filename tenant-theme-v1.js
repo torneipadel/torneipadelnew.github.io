@@ -11,10 +11,10 @@ function apply(a){
  document.documentElement.style.setProperty('--tenant-accent',accent);document.documentElement.style.setProperty('--gold',accent);document.documentElement.style.setProperty('--yellow',accent);
  document.documentElement.dataset.tenantTheme='1';
  if(a.sfondo_url) document.body.style.setProperty('background-image',`linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.68)),url("${a.sfondo_url}")`,'important');
- document.querySelectorAll('[data-tenant-logo]').forEach(el=>{if(a.logo_url)el.src=a.logo_url;});
- document.querySelectorAll('[data-tenant-name]').forEach(el=>{el.textContent=a.nome_app||a.ragione_sociale||el.textContent;});
+ document.querySelectorAll('img.logo,img.brand-logo,[data-tenant-logo]').forEach(el=>{if(a.logo_url)el.src=a.logo_url;});
+ document.querySelectorAll('[data-tenant-name],.brand-name').forEach(el=>{el.textContent=a.nome_app||a.ragione_sociale||el.textContent;});
  document.querySelectorAll('[data-tenant-primary]').forEach(el=>{el.style.backgroundColor=primary;});
- document.querySelectorAll('[data-tenant-accent]').forEach(el=>{el.style.color=accent;});
+ document.querySelectorAll('[data-tenant-accent]').forEach(el=>{el.style.color=accent;});const style=document.createElement('style');style.textContent='.tenant-themed{--tenant-primary:'+primary+';--tenant-accent:'+accent+'}.btn.primary,.main-action,.cta{background:var(--tenant-primary)!important}.eyebrow,.badge,.type{color:var(--tenant-accent)!important}';document.head.appendChild(style);
 }
 async function load(){
  try{
