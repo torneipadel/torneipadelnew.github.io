@@ -119,12 +119,15 @@ async function startRegistration(){
  const d=savePending();
  let user=await getSessionUser();
  if(user){
-   if(String(user.email||"").trim().toLowerCase()!==d.email){
-     submit.disabled=false;
-     status.textContent="L'account già autenticato non corrisponde all'email amministratore indicata.";
-     return;
+   const currentEmail=String(user.email||"").trim().toLowerCase();
+   if(currentEmail!==d.email){
+     status.textContent="È presente una sessione con un altro account. Chiusura della sessione e prosecuzione con l'email amministratore indicata…";
+     const {error:signOutError}=await sb.auth.signOut();
+     if(signOutError)throw signOutError;
+     user=null;
+   }else{
+     await createCompany(user);return;
    }
-   await createCompany(user);return;
  }
  const password=$("password").value,password2=$("password2").value;
  if(!password||password.length<8){submit.disabled=false;status.textContent="La password deve contenere almeno 8 caratteri.";return}
