@@ -9,66 +9,80 @@
     }
 
     async function verificaAccessoAdmin(session){
-      if(!session)return true;
+      if(!session){
+        window.location.href="index.html";
+        return false;
+      }
+
       try{
         const email=String(session.user?.email||"").trim().toLowerCase();
         const superadminEmail=email==="giose.rizzi@gmail.com";
-        const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it";
-        const ruoloAutorizzato=superadminEmail?"superadmin":adminEmail?"admin":"";
+        const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";
 
-        if(!ruoloAutorizzato){
-          window.location.href="2Page.html";
-          return false;
-        }
-
-        if(superadminEmail){
-          window.adminRuolo="superadmin";
-          window.isSuperadmin=true;
+        if(superadminEmail||adminEmail){
+          const ruolo=superadminEmail?"superadmin":"admin";
+          window.adminRuolo=ruolo;
+          window.isSuperadmin=superadminEmail;
           window.isAdmin=true;
-          document.documentElement.dataset.adminRole="superadmin";
+          document.documentElement.dataset.adminRole=ruolo;
 
           const mini=document.getElementById("adminEmailMini");
           if(mini && session.user?.email) mini.textContent=session.user.email;
 
           const badge=document.getElementById("adminRoleBadge");
           if(badge){
-            badge.textContent="👑 SUPERADMIN";
-            badge.dataset.role="superadmin";
+            badge.textContent=superadminEmail?"👑 SUPERADMIN":"👤 ADMIN";
+            badge.dataset.role=ruolo;
           }
 
           window.dispatchEvent(new CustomEvent("admin:role-ready",{
-            detail:{ruolo:"superadmin",isSuperadmin:true,isAdmin:true}
+            detail:{ruolo,isSuperadmin:superadminEmail,isAdmin:true}
           }));
           return true;
         }
 
-        const ruolo=ruoloAutorizzato;
+        const {data:access,error}=await client.rpc("get_my_azienda_access");
+        if(error){
+          console.error("Errore verifica accesso azienda:",error);
+          window.location.href="dashboard.html";
+          return false;
+        }
 
-        window.adminRuolo=ruolo;
-        window.isSuperadmin=ruolo==="superadmin";
-        window.isAdmin=ruolo==="admin"||ruolo==="superadmin";
+        const row=Array.isArray(access)?access[0]:access;
+        if(!row?.azienda_id){
+          window.location.href="dashboard.html";
+          return false;
+        }
 
-        document.documentElement.dataset.adminRole=ruolo;
+        if(row.accesso_consentito!==true){
+          window.location.href="dashboard.html?demo=scaduta";
+          return false;
+        }
+
+        window.adminRuolo="owner";
+        window.isSuperadmin=false;
+        window.isAdmin=true;
+        window.isTenantOwner=true;
+        window.aziendaId=row.azienda_id;
+        window.nomeAppAzienda=row.nome_app||"";
+        document.documentElement.dataset.adminRole="owner";
 
         const mini=document.getElementById("adminEmailMini");
-        if(mini && session.user?.email){
-          mini.textContent=session.user.email;
-        }
+        if(mini && session.user?.email) mini.textContent=session.user.email;
 
         const badge=document.getElementById("adminRoleBadge");
         if(badge){
-          badge.textContent=ruolo==="superadmin"?"👑 SUPERADMIN":"👤 ADMIN";
-          badge.dataset.role=ruolo;
+          badge.textContent="🏢 OWNER";
+          badge.dataset.role="owner";
         }
 
         window.dispatchEvent(new CustomEvent("admin:role-ready",{
-          detail:{ruolo,isSuperadmin:ruolo==="superadmin",isAdmin:true}
+          detail:{ruolo:"owner",isSuperadmin:false,isAdmin:true,isTenantOwner:true,aziendaId:row.azienda_id}
         }));
-
         return true;
       }catch(e){
         console.error("Errore verifica accesso amministratore:",e);
-        window.location.href="2Page.html";
+        window.location.href="dashboard.html";
         return false;
       }
     }
