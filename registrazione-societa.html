@@ -141,7 +141,7 @@ async function startRegistration(){
    account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
    titolare:d.titolare,telefono:d.telefono,pec:d.pec,sede:d.sede,cf_piva:d.cf,email_aziendale:d.email,
    privacy_accettata:"true",termini_accettati:"true",richiesta_at:new Date().toISOString()
- }});
+ }}});
  if(signUp.error){
    submit.disabled=false;
    status.textContent="Registrazione non completata: "+signUp.error.message+" Se l'account esiste già, accedi dal Login e torna qui per completare la registrazione.";
