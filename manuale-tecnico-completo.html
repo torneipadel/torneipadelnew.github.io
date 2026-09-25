@@ -20,13 +20,13 @@ table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th,td{bor
 <h1>NEXT POINT PADEL</h1>
 <p><strong>Manuale tecnico e funzionale completo</strong></p>
 <p>Fotografia del progetto, delle aree applicative, dei menu, dei moduli e delle funzioni rilevate nel repository ufficiale.</p>
-<p class="small" style="color:rgba(255,255,255,.72)">Repository: torneirobertobove/torneirobertobove.github.io · Branch: main · Data fotografia: 20 settembre 2026</p>
+<p class="small" style="color:rgba(255,255,255,.72)">Repository: torneipadel/torneipadelnew.github.io · Branch: main · Aggiornamento SaaS: 25 settembre 2026</p>
 </div>
 </header>
 <div class="wrap layout">
 <nav class="toc">
 <strong>Indice</strong>
-<a href="#1">1. Scopo e metodo</a><a href="#2">2. Architettura</a><a href="#3">3. Mappa menu</a><a href="#4">4. Admin</a><a href="#5">5. Bove</a><a href="#6">6. Formule</a><a href="#7">7. Fase finale</a><a href="#8">8. King</a><a href="#9">9. Calendario</a><a href="#10">10. News</a><a href="#11">11. Sponsor</a><a href="#12">12. WhatsApp</a><a href="#13">13. Mercatino</a><a href="#14">14. Visitatore</a><a href="#15">15. Iscrizioni</a><a href="#16">16. Supabase e stato</a><a href="#17">17. Funzioni di supporto</a><a href="#18">18. Legacy e backup</a><a href="#19">19. Verifiche e criticità</a><a href="#20">20. Indice funzionale</a>
+<a href="#1">1. Scopo e metodo</a><a href="#2">2. Architettura</a><a href="#3">3. Mappa menu</a><a href="#4">4. Admin</a><a href="#5">5. Bove</a><a href="#6">6. Formule</a><a href="#7">7. Fase finale</a><a href="#8">8. King</a><a href="#9">9. Calendario</a><a href="#10">10. News</a><a href="#11">11. Sponsor</a><a href="#12">12. WhatsApp</a><a href="#13">13. Mercatino</a><a href="#14">14. Visitatore</a><a href="#15">15. Iscrizioni</a><a href="#16">16. Supabase e stato</a><a href="#17">17. Funzioni di supporto</a><a href="#18">18. Legacy e backup</a><a href="#19">19. Verifiche e criticità</a><a href="#20">20. Indice funzionale</a><a href="#21">21. SaaS MASTER e sicurezza</a>
 </nav>
 <main>
 <section class="card" id="1">
@@ -426,10 +426,40 @@ table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th,td{bor
 </table>
 </section>
 
+
+<section class="card" id="21">
+<h2>21. Architettura SaaS MASTER — aggiornamento 25 settembre 2026</h2>
+<div class="ok"><strong>Stato corrente:</strong> il progetto MASTER utilizza un'unica codebase GitHub e un unico progetto Supabase condiviso con isolamento tenant tramite <code>azienda_id</code> e RLS. Non viene creato un repository GitHub separato per ogni società.</div>
+<h3>21.1 Infrastruttura MASTER</h3>
+<table><tr><th>Componente</th><th>Valore corrente</th></tr>
+<tr><td>GitHub</td><td><code>torneipadel/torneipadelnew.github.io</code> — branch <code>main</code></td></tr>
+<tr><td>GitHub Pages</td><td><code>https://torneipadel.github.io/torneipadelnew.github.io/</code></td></tr>
+<tr><td>Supabase</td><td>Progetto <code>PadelApp</code>, ref <code>dkeqicstprvvfebiaooc</code>, regione <code>eu-north-1</code></td></tr>
+<tr><td>Modello dati</td><td>Tenant condivisi tramite <code>aziende</code>, <code>azienda_utenti</code> e colonne <code>azienda_id</code>.</td></tr>
+</table>
+<h3>21.2 Registrazione e provisioning automatico</h3>
+<div class="flow"><span>Landing</span><b class="arrow">→</b><span>Demo / Società</span><b class="arrow">→</b><span>Supabase Auth</span><b class="arrow">→</b><span>trigger automatico</span><b class="arrow">→</b><span>azienda + owner + provisioning</span><b class="arrow">→</b><span>dashboard</span></div>
+<p>La registrazione salva i metadati dell'account. Il trigger <code>crea_azienda_e_provisioning_nuovo_utente()</code> crea automaticamente l'azienda, il membro owner e la richiesta di provisioning. Per la demo vengono registrate <code>demo_inizio</code> e <code>demo_scadenza</code> a 14 giorni.</p>
+<h3>21.3 Controllo accesso demo</h3>
+<p><code>get_my_azienda_access()</code> restituisce stato, tipo account, scadenza e accesso consentito. Le demo scadute vengono bloccate anche dall'<code>admin-access-guard-v1.js</code>. L'accesso del proprietario tenant è distinto dagli account platform admin.</p>
+<h3>21.4 Ruoli platform</h3>
+<table><tr><th>Ruolo</th><th>Account</th></tr>
+<tr><td>Superadmin</td><td><code>giose.rizzi@gmail.com</code></td></tr>
+<tr><td>Admin</td><td><code>boverob@libero.it</code>, <code>cfalba@libero.it</code>, <code>admin@test.it</code></td></tr>
+</table>
+<h3>21.5 Isolamento tenant</h3>
+<p>Le tabelle applicative principali <code>tornei</code>, <code>iscrizioni</code>, <code>news</code>, <code>sponsor</code> e <code>mercatino</code> possiedono <code>azienda_id</code>. Trigger di assegnazione valorizzano automaticamente il tenant; le policy RLS limitano lettura e scrittura al tenant dell'utente secondo il ruolo.</p>
+<h3>21.6 Sicurezza verificata</h3>
+<p>Il 25 settembre 2026 è stato eseguito un audit dei privilegi. È stato revocato l'accesso <code>anon</code> alle tabelle amministrative e di configurazione sensibili, mantenendo l'accesso autenticato necessario alle funzioni amministrative. Dopo la correzione, l'advisor Supabase non segnala più l'esposizione anonima di tali tabelle; rimangono le tabelle pubbliche intenzionalmente leggibili, oltre agli avvisi relativi a funzioni SECURITY DEFINER usate dal runtime e alla protezione password compromesse.</p>
+<div class="warn"><strong>Nota:</strong> la protezione Supabase contro password compromesse risulta ancora disabilitata e richiede l'impostazione Auth del progetto. Non viene dichiarata come risolta dal codice applicativo.</div>
+<h3>21.7 Stato dati di produzione</h3>
+<p>L'audit di provisioning è stato mantenuto senza creare aziende di test: nessuna azienda, membership o richiesta di provisioning fittizia è stata lasciata nel database MASTER.</p>
+</section>
+
 <section class="card">
 <h2>Conclusione</h2>
 <p>Questo documento costituisce la fotografia tecnica e funzionale di riferimento del progetto alla data indicata. La sua funzione è permettere a un amministratore, sviluppatore o manutentore di comprendere l'organizzazione dell'applicazione, individuare le funzioni responsabili di ciascun comportamento e distinguere codice operativo, fix, test e storico.</p>
-<p><strong>Documento:</strong> NPPADEL-TECH-DOC-02<br><strong>Repository:</strong> torneirobertobove/torneirobertobove.github.io<br><strong>Branch:</strong> main<br><strong>Data:</strong> 20 settembre 2026</p>
+<p><strong>Documento:</strong> NPPADEL-TECH-DOC-02<br><strong>Repository:</strong> torneipadel/torneipadelnew.github.io<br><strong>Branch:</strong> main<br><strong>Aggiornamento:</strong> 25 settembre 2026</p>
 <p><a href="#top">↑ Torna all'inizio</a></p>
 </section>
 </main>
