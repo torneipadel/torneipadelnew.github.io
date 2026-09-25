@@ -1,6 +1,6 @@
 (function(){'use strict';
 const URL_SUPABASE='https://dkeqicstprvvfebiaooc.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg';
+const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 const client=window.supabase.createClient(URL_SUPABASE,KEY);
 const BUCKET='mercatino-images';
 const list=document.getElementById('list'),detail=document.getElementById('detail'),detailContent=document.getElementById('detailContent');
