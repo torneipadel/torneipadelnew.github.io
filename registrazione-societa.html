@@ -137,7 +137,7 @@ async function startRegistration(){
  }
 
  status.textContent="Account non ancora presente: creazione dell'account…";
- const signUp=await sb.auth.signUp({email:d.email,password,options:{data:{
+ const signUp=await sb.auth.signUp({email:d.email,password,options:{emailRedirectTo:location.origin+location.pathname,data:{
    account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
    titolare:d.titolare,telefono:d.telefono,pec:d.pec,sede:d.sede,cf_piva:d.cf,email_aziendale:d.email,
    privacy_accettata:"true",termini_accettati:"true",richiesta_at:new Date().toISOString()
@@ -154,11 +154,8 @@ async function startRegistration(){
  // Il trigger MASTER crea automaticamente azienda, owner e provisioning
  // nello stesso INSERT di auth.users, anche quando la conferma email impedisce
  // a signUp() di restituire una sessione immediata.
- status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Società e ambiente MASTER creati.";
- form.style.display="none";
- $("success").style.display="block";
- sessionStorage.removeItem(PENDING_KEY);
- submit.disabled=true;
+ status.textContent="Account creato. Conferma l'email: al ritorno qui la società verrà attivata automaticamente.";
+ submit.disabled=false;
 }
 form.addEventListener("submit",async e=>{
  e.preventDefault();
