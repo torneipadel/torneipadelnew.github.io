@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurazione App · Next Point Padel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-supabase-singleton-v1.js?v=1"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:#fff;background:linear-gradient(rgba(3,12,24,.42),rgba(3,12,24,.82)),url('sfondo2.jpg') center/cover fixed no-repeat;padding:18px}
+.page{width:min(900px,100%);margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.top a{color:#fff;text-decoration:none;font-weight:700}.card{background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.055));border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(16px);border-radius:22px;padding:25px;box-shadow:0 16px 45px rgba(0,0,0,.25)}h1{margin:0 0 7px;font-size:28px}p{color:rgba(255,255,255,.72);line-height:1.55}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.field label{display:block;font-size:11px;font-weight:800;margin-bottom:6px}.field input,.field textarea{width:100%;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;padding:11px;font:14px Arial}.field textarea{min-height:120px;resize:vertical}.field input[type=file]{padding:9px}.hint{font-size:10px;color:rgba(255,255,255,.55);margin-top:5px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}.primary{background:#fff;color:#073b72}.secondary{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)}#status{min-height:20px;margin-top:13px;font-size:12px;color:#ffe76b}.preview{display:flex;gap:12px;align-items:center;margin-top:8px}.preview img{max-width:130px;max-height:90px;border-radius:10px;object-fit:contain;background:#fff1}.section-title{grid-column:1/-1;margin-top:8px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);font-size:14px;font-weight:800}@media(max-width:680px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.card{padding:18px}}
+</style>
+</head>
+<body>
+<main class="page">
+<div class="top"><a href="admin.html">← Gestione Tornei</a><a href="dashboard.html">Home</a></div>
+<section class="card">
+<h1>⚙️ Configurazione della tua app</h1>
+<p>Questa è la prima area di configurazione della società. Logo, sfondo, colori e testi legali appartengono esclusivamente alla tua azienda.</p>
+<form id="form">
+<div class="grid">
+<div class="field"><label>RAGIONE SOCIALE *</label><input id="ragione" required></div>
+<div class="field"><label>NOME APP *</label><input id="nomeApp" required></div>
+<div class="field"><label>TITOLARE</label><input id="titolare"></div>
+<div class="field"><label>SEDE</label><input id="sede"></div>
+<div class="field"><label>CODICE FISCALE / P.IVA</label><input id="cf"></div>
+<div class="field"><label>EMAIL AZIENDALE</label><input id="email" type="email"></div>
+<div class="field"><label>TELEFONO</label><input id="telefono"></div>
+<div class="field"><label>PEC</label><input id="pec"></div>
+<div class="section-title">🎨 Identità grafica</div>
+<div class="field"><label>LOGO</label><input id="logo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><div class="hint">PNG/JPG/WebP/SVG · massimo 6 MB</div><div class="preview" id="logoPreview"></div></div>
+<div class="field"><label>SFONDO APP</label><input id="sfondo" type="file" accept="image/png,image/jpeg,image/webp"><div class="hint">JPG/PNG/WebP · massimo 8 MB</div><div class="preview" id="sfondoPreview"></div></div>
+<div class="field"><label>COLORE PRINCIPALE</label><input id="primary" type="color" value="#073b72" style="height:44px;padding:4px"></div>
+<div class="field"><label>COLORE ACCENTO</label><input id="accent" type="color" value="#ffe76b" style="height:44px;padding:4px"></div>
+<div class="section-title">🔐 Privacy, Cookie e Termini</div>
+<div class="field full"><label>INFORMATIVA PRIVACY</label><textarea id="privacy"></textarea></div>
+<div class="field full"><label>COOKIE</label><textarea id="cookie"></textarea></div>
+<div class="field full"><label>TERMINI DEL SERVIZIO</label><textarea id="termini"></textarea></div>
+</div>
+<div class="actions"><button class="btn primary" type="submit">💾 SALVA CONFIGURAZIONE</button><button class="btn secondary" type="button" onclick="location.href='admin.html'">ANNULLA</button></div>
+<div id="status"></div>
+</form>
+</section>
+</main>
+<script>
+const sb=window.sb||supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu");
+const privacyDefault=`INFORMATIVA PRIVACY — MODELLO
+Titolare: [INSERIRE RAGIONE SOCIALE]
+Sede: [INSERIRE SEDE]
+Codice fiscale/P.IVA: [INSERIRE]
+E-mail: [INSERIRE E-MAIL PRIVACY]
+PEC: [INSERIRE, SE DISPONIBILE]
+
+La presente informativa descrive il trattamento dei dati personali effettuato attraverso l'app della società, per la gestione degli account, dei tornei, delle iscrizioni, dei risultati, delle comunicazioni e dei servizi richiesti. I dati sono trattati secondo le basi giuridiche applicabili e per il tempo necessario alle finalità indicate. L'interessato può esercitare i diritti previsti dagli articoli 15-22 del GDPR contattando il Titolare ai recapiti indicati sopra.`;
+const cookieDefault=`COOKIE — MODELLO
+Questa applicazione utilizza i cookie e tecnologie strettamente necessari al funzionamento, alla sicurezza, alla gestione della sessione e alle preferenze. Eventuali servizi di terze parti devono essere verificati e indicati dalla società prima della pubblicazione definitiva.`;
+const terminiDefault=`TERMINI DEL SERVIZIO — MODELLO
+L'utilizzo dell'app è consentito agli utenti autorizzati dalla società. Le funzionalità sono fornite per la gestione delle attività del club e dei tornei. La società deve completare e verificare i propri dati legali prima della pubblicazione dei testi definitivi.`;
+let azienda=null;
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function preview(id,url,label){const el=document.getElementById(id);el.innerHTML=url?'<img src="'+esc(url)+'" alt="'+label+'"><span>'+label+' attuale</span>':''}
+async function upload(path,file,max){if(!file)return null;if(file.size>max)throw new Error('Il file supera il limite consentito.');const ext=(file.name.split('.').pop()||'bin').toLowerCase();const p=path+'/'+crypto.randomUUID()+'.'+ext;const r=await sb.storage.from('azienda-assets').upload(p,file,{contentType:file.type||'application/octet-stream',upsert:false});if(r.error)throw r.error;return sb.storage.from('azienda-assets').getPublicUrl(p).data.publicUrl}
+async function init(){const {data:{session}}=await sb.auth.getSession();if(!session){location.href='index.html';return}const {data,error}=await sb.from('aziende').select('*').eq('owner_user_id',session.user.id).maybeSingle();if(error||!data){document.getElementById('status').textContent='Nessuna società associata a questo account.';return}azienda=data;ragione.value=data.ragione_sociale||'';nomeApp.value=data.nome_app||'';titolare.value=data.titolare||'';sede.value=data.sede||'';cf.value=data.cf_piva||'';email.value=data.email||'';telefono.value=data.telefono||'';pec.value=data.pec||'';privacy.value=data.privacy_text||privacyDefault;cookie.value=data.cookie_text||cookieDefault;termini.value=data.termini_text||terminiDefault;primary.value=data.colori?.primary||'#073b72';accent.value=data.colori?.accent||'#ffe76b';preview('logoPreview',data.logo_url,'Logo');preview('sfondoPreview',data.sfondo_url,'Sfondo')}
+form.addEventListener('submit',async e=>{e.preventDefault();const st=document.getElementById('status');st.textContent='Salvataggio…';try{const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Sessione scaduta.');let logoUrl=azienda.logo_url||null;let sfondoUrl=azienda.sfondo_url||null;const lf=logo.files[0],bf=sfondo.files[0];if(lf)logoUrl=await upload(session.user.id,lf,6291456);if(bf)sfondoUrl=await upload(session.user.id,bf,8388608);const payload={ragione_sociale:ragione.value.trim(),nome_app:nomeApp.value.trim(),titolare:titolare.value.trim(),sede:sede.value.trim(),cf_piva:cf.value.trim(),email:email.value.trim(),telefono:telefono.value.trim(),pec:pec.value.trim(),logo_url:logoUrl,sfondo_url:sfondoUrl,colori:{primary:primary.value,accent:accent.value},privacy_text:privacy.value.trim(),cookie_text:cookie.value.trim(),termini_text:termini.value.trim(),stato:'attiva',updated_at:new Date().toISOString()};const r=await sb.from('aziende').update(payload).eq('id',azienda.id).eq('owner_user_id',session.user.id);if(r.error)throw r.error;st.textContent='✅ Configurazione salvata correttamente.';azienda={...azienda,...payload};preview('logoPreview',logoUrl,'Logo');preview('sfondoPreview',sfondoUrl,'Sfondo')}catch(err){console.error(err);st.textContent='Errore: '+err.message}});
+init();
+</script>
+</body></html>
