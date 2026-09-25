@@ -456,6 +456,22 @@ table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th,td{bor
 <p>L'audit di provisioning è stato mantenuto senza creare aziende di test: nessuna azienda, membership o richiesta di provisioning fittizia è stata lasciata nel database MASTER.</p>
 </section>
 
+<section class="card" id="22">
+<h2>22. SaaS — Fase 1: Configurazione App società</h2>
+<p>Implementata il 25 settembre 2026 la prima fase del percorso onboarding tenant. È disponibile <code>configurazione-app.html</code>, accessibile dall'area amministrativa tramite il menu <strong>🎨 Configurazione App</strong>.</p>
+<table><tr><th>Funzione</th><th>Stato</th></tr>
+<tr><td>Dati società</td><td>Implementato</td></tr>
+<tr><td>Logo</td><td>Implementato con Storage tenant</td></tr>
+<tr><td>Sfondo</td><td>Implementato con Storage tenant</td></tr>
+<tr><td>Colori principale/accento</td><td>Implementato nel profilo azienda</td></tr>
+<tr><td>Modello Privacy</td><td>Predisposto e modificabile</td></tr>
+<tr><td>Modello Cookie</td><td>Predisposto e modificabile</td></tr>
+<tr><td>Modello Termini</td><td>Predisposto e modificabile</td></tr>
+</table>
+<p>La configurazione salva i dati nella riga della società autenticata. Il bucket Storage <code>azienda-assets</code> è già pubblico in lettura e protetto in scrittura per cartella utente.</p>
+<p><strong>Prossima fase:</strong> gestione utenti della società e ruoli Owner/Admin/User. Non viene dichiarata completata finché non sarà implementata e verificata separatamente.</p>
+</section>
+
 <section class="card">
 <h2>Conclusione</h2>
 <p>Questo documento costituisce la fotografia tecnica e funzionale di riferimento del progetto alla data indicata. La sua funzione è permettere a un amministratore, sviluppatore o manutentore di comprendere l'organizzazione dell'applicazione, individuare le funzioni responsabili di ciascun comportamento e distinguere codice operativo, fix, test e storico.</p>
