@@ -47,22 +47,27 @@ async function wireDashboard(){
       if(session)break;
       await new Promise(r=>setTimeout(r,200));
     }
-    const email=String(session?.user?.email||"").trim().toLowerCase();
-    const superadmin=email==="giose.rizzi@gmail.com";
-    const admin=email==="boverob@libero.it"||email==="cfalba@libero.it";
-    if(!session||(!superadmin&&!admin)){
-      adminState.adminLoggato=false;
-      adminState.adminEmail="";
-      window.adminRuolo="";
-      window.isSuperadmin=false;
-      window.isAdmin=false;
+    if(!session){
+      adminState.adminLoggato=false;adminState.adminEmail="";
+      window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
       document.documentElement.dataset.adminRole="";
-      salvaAdminState();
-      document.getElementById("areaAdmin")?.classList.add("hidden");
-      window.location.replace("index.html");
-      return false
+      salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
+      window.location.replace("index.html");return false;
     }
-    window.adminRuolo=superadmin?"superadmin":"admin";
+    const email=String(session.user?.email||"").trim().toLowerCase();
+    const guardRole=String(window.adminRuolo||"").toLowerCase();
+    const owner=guardRole==="owner"||window.isTenantOwner===true;
+    const superadmin=guardRole==="superadmin"||email==="giose.rizzi@gmail.com";
+    const admin=guardRole==="admin"||email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";
+    if(!owner&&!superadmin&&!admin){
+      adminState.adminLoggato=false;adminState.adminEmail="";
+      window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
+      document.documentElement.dataset.adminRole="";
+      salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
+      window.location.replace("dashboard.html");return false;
+    }
+    window.adminRuolo=owner?"owner":(superadmin?"superadmin":"admin");
+    window.isTenantOwner=owner;
     window.isSuperadmin=superadmin;
     window.isAdmin=true;
     document.documentElement.dataset.adminRole=window.adminRuolo;
@@ -72,16 +77,14 @@ async function wireDashboard(){
     salvaAdminState();
     document.getElementById("boxLoginAdmin")?.classList.add("hidden");
     document.getElementById("areaAdmin")?.classList.remove("hidden");
-    const mini=document.getElementById("adminEmailMini");
-    if(mini)mini.textContent=session.user?.email||email;
+    const mini=document.getElementById("adminEmailMini");if(mini)mini.textContent=session.user?.email||email;
     await caricaTorneiSupabase();
-    window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:window.adminRuolo,isSuperadmin:superadmin,isAdmin:true}}));
+    window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:window.adminRuolo,isSuperadmin:superadmin,isAdmin:true,isTenantOwner:owner}}));
     return true
   }catch(e){
     console.error("Errore verifica sessione Admin:",e);
     document.getElementById("areaAdmin")?.classList.add("hidden");
-    window.location.replace("index.html");
-    return false
+    window.location.replace("index.html");return false
   }
 }
 document.addEventListener("DOMContentLoaded",wireDashboard);
