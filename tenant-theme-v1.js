@@ -7,10 +7,10 @@ function apply(a){
  const colors=a.colori||a.colori||{};
  const primary=colors.primary||colors.primaryColor||colors.principale||'#073b72';
  const accent=colors.accent||colors.accentColor||colors.accento||'#ffe76b';
- document.documentElement.style.setProperty('--tenant-primary',primary);
- document.documentElement.style.setProperty('--tenant-accent',accent);
+ document.documentElement.style.setProperty('--tenant-primary',primary);document.documentElement.style.setProperty('--blue',primary);document.documentElement.style.setProperty('--blue2',primary);
+ document.documentElement.style.setProperty('--tenant-accent',accent);document.documentElement.style.setProperty('--gold',accent);document.documentElement.style.setProperty('--yellow',accent);
  document.documentElement.dataset.tenantTheme='1';
- if(a.sfondo_url) document.body.style.setProperty('background-image',`linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.68)),url("${a.sfondo_url}")`);
+ if(a.sfondo_url) document.body.style.setProperty('background-image',`linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.68)),url("${a.sfondo_url}")`,'important');
  document.querySelectorAll('[data-tenant-logo]').forEach(el=>{if(a.logo_url)el.src=a.logo_url;});
  document.querySelectorAll('[data-tenant-name]').forEach(el=>{el.textContent=a.nome_app||a.ragione_sociale||el.textContent;});
  document.querySelectorAll('[data-tenant-primary]').forEach(el=>{el.style.backgroundColor=primary;});
