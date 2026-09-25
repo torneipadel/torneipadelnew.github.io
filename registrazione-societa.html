@@ -52,7 +52,7 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 <div class="actions"><button type="button" class="back" id="back">INDIETRO</button><button type="submit" class="submit" id="submit">CREA LA MIA APP</button></div>
 <div id="status" class="status"></div>
 </form>
-<div id="success" class="success"><strong>Registrazione completata</strong><span>La configurazione della società è stata registrata. Stiamo predisponendo l'ambiente dell'app.</span></div>
+<div id="success" class="success"><strong>Registrazione avvenuta con successo!</strong><span>La società è stata registrata correttamente nel MASTER. Se richiesto, conferma l'email e poi accedi dal Login.</span></div>
 </section>
 <div class="footer"><a href="privacy.html">Privacy</a><a href="cookie.html">Cookie</a><a href="termini.html">Termini</a><a href="contatti.html">Contatti</a></div>
 </main>
@@ -151,9 +151,10 @@ async function startRegistration(){
    await createCompany(signUp.data.session.user);return;
  }
 
- status.textContent="Account creato. Conferma l'email, poi accedi dal Login: la registrazione della società riprenderà automaticamente.";
- submit.disabled=false;
- setTimeout(()=>location.href="login.html?next=registrazione-societa.html&email="+encodeURIComponent(d.email),900);
+ form.style.display="none";
+ $("success").style.display="block";
+ status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Società creata e ambiente MASTER attivo.";
+ submit.disabled=true;
 }
 form.addEventListener("submit",async e=>{
  e.preventDefault();
