@@ -151,8 +151,14 @@ async function startRegistration(){
    await createCompany(signUp.data.session.user);return;
  }
 
- status.textContent="✓ ACCOUNT REGISTRATO. Per completare l'attivazione della società, accedi con questa email e password.";
- submit.disabled=false;
+ // Il trigger MASTER crea automaticamente azienda, owner e provisioning
+ // nello stesso INSERT di auth.users, anche quando la conferma email impedisce
+ // a signUp() di restituire una sessione immediata.
+ status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Società e ambiente MASTER creati.";
+ form.style.display="none";
+ $("success").style.display="block";
+ sessionStorage.removeItem(PENDING_KEY);
+ submit.disabled=true;
 }
 form.addEventListener("submit",async e=>{
  e.preventDefault();
