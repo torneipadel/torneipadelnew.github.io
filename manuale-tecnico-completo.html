@@ -456,6 +456,8 @@ table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}th,td{bor
 <p>L'audit di provisioning è stato mantenuto senza creare aziende di test: nessuna azienda, membership o richiesta di provisioning fittizia è stata lasciata nel database MASTER.</p>
 </section>
 
+<section class="card" id="23"><h2>23. SaaS — Fase 2: Utenti e ruoli società</h2><p>Implementata la gestione tenant degli utenti tramite <code>azienda_utenti</code> e Edge Function <code>tenant-user-management</code>. Il proprietario può invitare utenti con ruolo <strong>admin</strong> o <strong>user</strong>, modificare il ruolo e attivare/disattivare l'accesso. Gli Admin possono consultare gli utenti ma non modificare ruoli o stato.</p><p>La pagina operativa è <code>utenti-societa.html</code> ed è raggiungibile dal menu amministrativo. L'invito viene inviato tramite Supabase Auth; l'appartenenza alla società viene registrata sul tenant corrente. È stato aggiunto il campo <code>azienda_utenti.attivo</code>.</p><p><strong>Verifica:</strong> implementazione, schema e funzione server sono presenti nel MASTER. Il test reale di invio email richiede una sessione autenticata di un owner e un indirizzo destinatario; non viene creato un account fittizio nel database.</p></section>
+
 <section class="card" id="22">
 <h2>22. SaaS — Fase 1: Configurazione App società</h2>
 <p>Implementata il 25 settembre 2026 la prima fase del percorso onboarding tenant. È disponibile <code>configurazione-app.html</code>, accessibile dall'area amministrativa tramite il menu <strong>🎨 Configurazione App</strong>.</p>
