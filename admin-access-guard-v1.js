@@ -17,7 +17,7 @@
       try{
         const email=String(session.user?.email||"").trim().toLowerCase();
         const superadminEmail=email==="giose.rizzi@gmail.com";
-        const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";
+        const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it";
 
         if(superadminEmail||adminEmail){
           const ruolo=superadminEmail?"superadmin":"admin";
