@@ -1,0 +1,13 @@
+name: Audit Supabase references
+on:
+  push:
+    branches: [main]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan
+        run: |
+          echo "=== SUPABASE URLS / KEYS / PROJECT REFS ==="
+          grep -RInE --exclude-dir=.git --exclude-dir=TEMP_AUDIT 'supabase\.co|sb_publishable_|iybjvtmfaupgthqqsngd|dkeqicstprvvfebiaooc' . || true
