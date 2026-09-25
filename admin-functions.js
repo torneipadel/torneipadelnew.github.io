@@ -58,7 +58,7 @@ async function wireDashboard(){
     const guardRole=String(window.adminRuolo||"").toLowerCase();
     const owner=guardRole==="owner"||window.isTenantOwner===true;
     const superadmin=guardRole==="superadmin"||email==="giose.rizzi@gmail.com";
-    const admin=guardRole==="admin"||email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";
+    const admin=guardRole==="admin"||email==="boverob@libero.it"||email==="cfalba@libero.it";
     if(!owner&&!superadmin&&!admin){
       adminState.adminLoggato=false;adminState.adminEmail="";
       window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
