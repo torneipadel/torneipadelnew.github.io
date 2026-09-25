@@ -3,7 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Next Point Padel — La piattaforma per società e club</title>
+<style>
+:root{--blue:#073b72;--blue2:#0b568f;--yellow:#ffe76b;--ink:#10233a;--muted:#607085;--glass:rgba(255,255,255,.92);--line:rgba(7,59,114,.12)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,"Open Sans",Arial,sans-serif;color:var(--ink);background:#f5f8fb}
+a{text-decoration:none}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:42px 20px;background:linear-gradient(135deg,rgba(7,59,114,.96),rgba(11,86,143,.88)),url("sfondo2.jpg") center/cover no-repeat}
+.card{width:min(1080px,100%);padding:54px 58px;border:1px solid rgba(255,255,255,.22);border-radius:28px;background:rgba(255,255,255,.11);box-shadow:0 30px 80px rgba(0,0,0,.24);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);text-align:center;color:#fff}
+.logo img{display:block;width:auto;max-width:210px;max-height:125px;margin:0 auto 14px;border-radius:18px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,.2))}
+.logo h1{margin:0;font-size:clamp(30px,5vw,52px);letter-spacing:2px;font-weight:800}
+.logo p{margin:10px 0 0;font-size:clamp(15px,2vw,19px);opacity:.9}
+.hero-copy{max-width:800px;margin:42px auto 0}
+.hero-copy h2{margin:0;font-size:clamp(25px,4vw,40px);line-height:1.15}
+.hero-copy p{margin:18px auto 0;max-width:760px;font-size:17px;line-height:1.7;opacity:.9}
+.actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:34px auto 18px}
+.actions a{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:12px;background:#fff;color:var(--blue);font-weight:800;font-size:13px;letter-spacing:.5px;box-shadow:0 10px 24px rgba(0,0,0,.15)}
+.actions a:nth-child(2){background:var(--yellow);color:var(--blue)}
+.login{display:inline-block;color:#fff;font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:4px}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:42px}
+.features div{padding:20px 14px;border:1px solid rgba(255,255,255,.18);border-radius:16px;background:rgba(255,255,255,.09);text-align:left}
+.features b{display:block;margin:5px 0 5px;font-size:15px}
+.features span{display:block;font-size:12px;line-height:1.5;opacity:.8}
+section{max-width:1080px;margin:0 auto;padding:74px 20px 10px;text-align:center}
+section h2{margin:0 0 28px;color:var(--blue);font-size:30px}
+.columns{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+article{padding:28px 22px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 12px 32px rgba(7,59,114,.07)}
+article h3{margin:0 0 10px;color:var(--blue);font-size:18px}
+article p{margin:0;color:var(--muted);line-height:1.6;font-size:14px}
+footer{margin-top:70px;padding:32px 20px;text-align:center;background:#092f57;color:rgba(255,255,255,.78);font-size:13px;line-height:1.8}
+footer a{color:#fff}
+@media(max-width:800px){.card{padding:40px 24px}.features{grid-template-columns:repeat(2,1fr)}.columns{grid-template-columns:1fr}}
+@media(max-width:520px){.hero{padding:18px 12px}.card{padding:32px 18px;border-radius:22px}.logo img{max-width:175px;max-height:105px}.actions{flex-direction:column}.actions a{width:100%}.features{grid-template-columns:1fr}.hero-copy{margin-top:32px}.hero-copy p{font-size:15px}section{padding-top:54px}}
+</style>
 </head>
-<body><header class="hero"><div class="card"><div class="logo"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><h1>NEXT POINT PADEL</h1><p>La piattaforma digitale per società e club di padel</p></div><div class="hero-copy"><h2>Gestisci il tuo club. Organizza. Comunica. Cresci.</h2><p>Next Point Padel riunisce in un unico ambiente tornei, iscrizioni, giocatori, classifiche, calendario, news, eventi, sponsor e comunicazioni del club.</p></div><div class="actions"><a href="registrazione-demo.html">PROVA GRATIS</a><a href="registrazione-societa.html">REGISTRA LA TUA SOCIETÀ</a></div><a class="login" href="login.html">Hai già un account? Accedi</a><div class="features"><div>🏆 <b>Tornei</b><span>Formule, gironi, tabelloni, risultati e classifiche.</span></div><div>👥 <b>Giocatori</b><span>Profili, iscrizioni e partecipanti.</span></div><div>📅 <b>Calendario</b><span>Campi, date e attività.</span></div><div>📰 <b>Comunicazione</b><span>News, eventi, sponsor e comunicazioni.</span></div></div></div></header><section><h2>A chi è pensata</h2><div class="columns"><article><h3>🎾 Club e circoli</h3><p>Centralizza le attività e offre ai giocatori un ambiente digitale ordinato.</p></article><article><h3>🏢 Società sportive</h3><p>Per ASD, SSD e società che organizzano tornei ed eventi.</p></article><article><h3>📣 Organizzatori</h3><p>Semplifica iscrizioni, tabelloni, risultati e comunicazioni.</p></article></div></section><section><h2>Come funziona</h2><div class="columns"><article><h3>1. Registrati</h3><p>Crea account e società.</p></article><article><h3>2. Prova</h3><p>Utilizza la demo e verifica le funzioni.</p></article><article><h3>3. Attiva</h3><p>Continua con l'attivazione della società.</p></article></div></section><footer><a href="informazioni.html">Informazioni</a> · <a href="contatti.html">Contatti</a> · <a href="privacy.html">Privacy</a> · <a href="cookie.html">Cookie</a> · <a href="termini.html">Termini</a><br><br>© Next Point Padel</footer></body>
+<body>
+<header class="hero">
+<div class="card">
+<div class="logo"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><h1>NEXT POINT PADEL</h1><p>La piattaforma digitale per società e club di padel</p></div>
+<div class="hero-copy"><h2>Gestisci il tuo club. Organizza. Comunica. Cresci.</h2><p>Next Point Padel riunisce in un unico ambiente tornei, iscrizioni, giocatori, classifiche, calendario, news, eventi, sponsor e comunicazioni del club.</p></div>
+<div class="actions"><a href="registrazione-demo.html">PROVA GRATIS</a><a href="registrazione-societa.html">REGISTRA LA TUA SOCIETÀ</a></div>
+<a class="login" href="login.html">Hai già un account? Accedi</a>
+<div class="features"><div>🏆 <b>Tornei</b><span>Formule, gironi, tabelloni, risultati e classifiche.</span></div><div>👥 <b>Giocatori</b><span>Profili, iscrizioni e partecipanti.</span></div><div>📅 <b>Calendario</b><span>Campi, date e attività.</span></div><div>📰 <b>Comunicazione</b><span>News, eventi, sponsor e comunicazioni.</span></div></div>
+</div>
+</header>
+<section><h2>A chi è pensata</h2><div class="columns"><article><h3>🎾 Club e circoli</h3><p>Centralizza le attività e offre ai giocatori un ambiente digitale ordinato.</p></article><article><h3>🏢 Società sportive</h3><p>Per ASD, SSD e società che organizzano tornei ed eventi.</p></article><article><h3>📣 Organizzatori</h3><p>Semplifica iscrizioni, tabelloni, risultati e comunicazioni.</p></article></div></section>
+<section><h2>Come funziona</h2><div class="columns"><article><h3>1. Registrati</h3><p>Crea account e società.</p></article><article><h3>2. Prova</h3><p>Utilizza la demo e verifica le funzioni.</p></article><article><h3>3. Attiva</h3><p>Continua con l'attivazione della società.</p></article></div></section>
+<footer><a href="informazioni.html">Informazioni</a> · <a href="contatti.html">Contatti</a> · <a href="privacy.html">Privacy</a> · <a href="cookie.html">Cookie</a> · <a href="termini.html">Termini</a><br><br>© Next Point Padel</footer>
+</body>
 </html>
