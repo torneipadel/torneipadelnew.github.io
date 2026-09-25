@@ -59,21 +59,29 @@
           return false;
         }
 
-        window.adminRuolo="owner";
-        window.isSuperadmin=false;
+        const tenantRole=String(row.ruolo||"owner").toLowerCase();
+        const tenantIsSuperadmin=tenantRole==="superadmin";
+        const tenantIsAdmin=tenantRole==="admin"||tenantIsSuperadmin||tenantRole==="owner";
+        if(!tenantIsAdmin){
+          window.location.href="dashboard.html";
+          return false;
+        }
+        window.adminRuolo=tenantRole;
+        window.isSuperadmin=tenantIsSuperadmin;
         window.isAdmin=true;
-        window.isTenantOwner=true;
+        window.isTenantOwner=tenantRole==="owner";
+        window.isTenantSuperadmin=tenantIsSuperadmin;
         window.aziendaId=row.azienda_id;
         window.nomeAppAzienda=row.nome_app||"";
-        document.documentElement.dataset.adminRole="owner";
+        document.documentElement.dataset.adminRole=tenantRole;
 
         const mini=document.getElementById("adminEmailMini");
         if(mini && session.user?.email) mini.textContent=session.user.email;
 
         const badge=document.getElementById("adminRoleBadge");
         if(badge){
-          badge.textContent="🏢 OWNER";
-          badge.dataset.role="owner";
+          badge.textContent=tenantRole==="owner"?"🏢 OWNER":(tenantRole==="superadmin"?"👑 SUPERADMIN SOCIETÀ":"👤 ADMIN SOCIETÀ");
+          badge.dataset.role=tenantRole;
         }
 
         window.dispatchEvent(new CustomEvent("admin:role-ready",{
