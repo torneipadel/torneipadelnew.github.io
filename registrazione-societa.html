@@ -59,7 +59,7 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 <script>
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id),status=$("status"),submit=$("submit");
-$("back").onclick=()=>location.href="login.html";
+$("back").onclick=()=>location.href="index.html";
 $("companyRegistration").addEventListener("submit",async e=>{
  e.preventDefault();
  const email=$("email").value.trim().toLowerCase(),password=$("password").value,password2=$("password2").value;
