@@ -58,26 +58,116 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 </main>
 <script>
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const $=id=>document.getElementById(id),status=$("status"),submit=$("submit");
-$("back").onclick=()=>location.href="index.html";
-$("companyRegistration").addEventListener("submit",async e=>{
- e.preventDefault();
- const email=$("email").value.trim().toLowerCase(),password=$("password").value,password2=$("password2").value;
- if(password!==password2){status.textContent="Le password non coincidono.";return}
- if(password.length<8){status.textContent="La password deve contenere almeno 8 caratteri.";return}
- submit.disabled=true;status.textContent="Creazione account e configurazione della società…";
- const {data,error}=await sb.auth.signUp({email,password,options:{data:{
-   account_type:"societa",nome:$("nome").value.trim(),cognome:$("cognome").value.trim(),
-   ragione_sociale:$("ragione").value.trim(),nome_app:$("nomeApp").value.trim(),
-   titolare:$("titolare").value.trim(),telefono:$("telefono").value.trim(),pec:$("pec").value.trim(),
-   sede:$("sede").value.trim(),cf_piva:$("cf").value.trim(),email_aziendale:email,
+const $=id=>document.getElementById(id),status=$("status"),submit=$("submit"),form=$("companyRegistration");
+const PENDING_KEY="nextpoint_company_registration_pending";
+$("back").onclick=()=>location.href="login.html";
+
+function fields(){
+ return {
+   ragione:$("ragione").value.trim(),nomeApp:$("nomeApp").value.trim(),titolare:$("titolare").value.trim(),
+   email:$("email").value.trim().toLowerCase(),telefono:$("telefono").value.trim(),pec:$("pec").value.trim(),
+   sede:$("sede").value.trim(),cf:$("cf").value.trim(),nome:$("nome").value.trim(),cognome:$("cognome").value.trim()
+ };
+}
+function savePending(){
+ const data=fields();
+ sessionStorage.setItem(PENDING_KEY,JSON.stringify(data));
+ return data;
+}
+function restorePending(){
+ try{
+   const raw=sessionStorage.getItem(PENDING_KEY);if(!raw)return;
+   const d=JSON.parse(raw);
+   Object.keys(d).forEach(k=>{if($(k)&&d[k]!=null)$(k).value=d[k]});
+ }catch(e){console.warn("Ripristino registrazione:",e)}
+}
+function setAuthenticatedMode(user){
+ const current=String(user?.email||"").trim().toLowerCase(), email=String($("email").value||"").trim().toLowerCase();
+ const ok=!!current&&!!email&&current===email;
+ $("password").required=!ok;
+ $("password2").required=!ok;
+ if(ok){
+   $("password").value="";$("password2").value="";
+   status.textContent="Account già autenticato: puoi completare la configurazione della società.";
+ }
+ return ok;
+}
+async function getSessionUser(){
+ try{
+   const {data}=await sb.auth.getSession();
+   return data?.session?.user||null;
+ }catch(e){return null}
+}
+async function createCompany(user){
+ const d=fields();
+ const {data,error}=await sb.rpc("create_company_for_current_user",{
+   p_ragione_sociale:d.ragione,p_nome_app:d.nomeApp,p_titolare:d.titolare,p_sede:d.sede,
+   p_cf_piva:d.cf,p_telefono:d.telefono,p_pec:d.pec,p_email_aziendale:d.email,p_tipo_account:"societa"
+ });
+ if(error)throw error;
+ if(!data?.ok)throw new Error(data?.message||"La società non è stata creata.");
+ sessionStorage.removeItem(PENDING_KEY);
+ form.style.display="none";
+ $("success").style.display="block";
+ status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Società creata e ambiente MASTER attivo.";
+ submit.disabled=true;
+ return data;
+}
+async function startRegistration(){
+ submit.disabled=true;
+ status.textContent="Verifica dell'account e configurazione della società…";
+ const d=savePending();
+ let user=await getSessionUser();
+ if(user){
+   if(String(user.email||"").trim().toLowerCase()!==d.email){
+     submit.disabled=false;
+     status.textContent="L'account già autenticato non corrisponde all'email amministratore indicata.";
+     return;
+   }
+   await createCompany(user);return;
+ }
+ const password=$("password").value,password2=$("password2").value;
+ if(!password||password.length<8){submit.disabled=false;status.textContent="La password deve contenere almeno 8 caratteri.";return}
+ if(password!==password2){submit.disabled=false;status.textContent="Le password non coincidono.";return}
+
+ status.textContent="Accesso all'account amministratore…";
+ const signIn=await sb.auth.signInWithPassword({email:d.email,password});
+ if(!signIn.error&&signIn.data?.user){
+   await createCompany(signIn.data.user);return;
+ }
+
+ status.textContent="Account non ancora presente: creazione dell'account…";
+ const signUp=await sb.auth.signUp({email:d.email,password,options:{data:{
+   account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
+   titolare:d.titolare,telefono:d.telefono,pec:d.pec,sede:d.sede,cf_piva:d.cf,email_aziendale:d.email,
    privacy_accettata:"true",termini_accettati:"true",richiesta_at:new Date().toISOString()
  }}}});
- if(error){submit.disabled=false;status.textContent="Registrazione non completata: "+error.message;return}
- $("formSection").querySelector("form").style.display="none";$("success").style.display="block";
- if(data.session){status.textContent="Accesso effettuato. Apertura della dashboard…";setTimeout(()=>location.href="dashboard.html",700)}
- else {status.textContent="Controlla la casella email per confermare l'account. Dopo la conferma potrai accedere alla dashboard."}
+ if(signUp.error){
+   submit.disabled=false;
+   status.textContent="Registrazione non completata: "+signUp.error.message+" Se l'account esiste già, accedi dal Login e torna qui per completare la registrazione.";
+   return;
+ }
+ if(signUp.data?.session?.user){
+   await createCompany(signUp.data.session.user);return;
+ }
+
+ status.textContent="Account creato. Conferma l'email, poi accedi dal Login: la registrazione della società riprenderà automaticamente.";
+ submit.disabled=false;
+ setTimeout(()=>location.href="login.html?next=registrazione-societa.html&email="+encodeURIComponent(d.email),900);
+}
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+ try{await startRegistration()}catch(error){
+   console.error("Registrazione società:",error);
+   submit.disabled=false;
+   status.textContent="Registrazione non completata: "+(error?.message||error);
+ }
 });
+restorePending();
+(async()=>{
+ const user=await getSessionUser();
+ if(user&&$("email").value.trim().toLowerCase()===String(user.email||"").trim().toLowerCase())setAuthenticatedMode(user);
+})();
 </script>
 </body>
 </html>
