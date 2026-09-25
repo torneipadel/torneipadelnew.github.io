@@ -67,7 +67,7 @@
           return false;
         }
         window.adminRuolo=tenantRole;
-        window.isSuperadmin=tenantIsSuperadmin;
+        window.isSuperadmin=false;
         window.isAdmin=true;
         window.isTenantOwner=tenantRole==="owner";
         window.isTenantSuperadmin=tenantIsSuperadmin;
