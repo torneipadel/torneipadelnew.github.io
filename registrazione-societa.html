@@ -151,10 +151,8 @@ async function startRegistration(){
    await createCompany(signUp.data.session.user);return;
  }
 
- form.style.display="none";
- $("success").style.display="block";
- status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Società creata e ambiente MASTER attivo.";
- submit.disabled=true;
+ status.textContent="✓ ACCOUNT REGISTRATO. Per completare l'attivazione della società, accedi con questa email e password.";
+ submit.disabled=false;
 }
 form.addEventListener("submit",async e=>{
  e.preventDefault();
@@ -167,7 +165,20 @@ form.addEventListener("submit",async e=>{
 restorePending();
 (async()=>{
  const user=await getSessionUser();
- if(user&&$("email").value.trim().toLowerCase()===String(user.email||"").trim().toLowerCase())setAuthenticatedMode(user);
+ if(user&&$("email").value.trim().toLowerCase()===String(user.email||"").trim().toLowerCase()){
+   setAuthenticatedMode(user);
+   try{
+     const raw=sessionStorage.getItem(PENDING_KEY);
+     if(raw){
+       status.textContent="Sessione autenticata: completamento automatico della registrazione della società…";
+       await createCompany(user);
+     }
+   }catch(error){
+     console.error("Completamento automatico registrazione società:",error);
+     status.textContent="Registrazione non completata: "+(error?.message||error);
+     submit.disabled=false;
+   }
+ }
 })();
 </script>
 </body>
