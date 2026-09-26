@@ -40,12 +40,12 @@ async function wireDashboard(){
   caricaAdminState();
   try{
     let session=null;
-    for(let i=0;i<15;i++){
+    for(let i=0;i<20;i++){
       const{data,error}=await sb.auth.getSession();
       if(error)throw error;
       session=data?.session||null;
       if(session)break;
-      await new Promise(r=>setTimeout(r,200));
+      await new Promise(r=>setTimeout(r,250));
     }
     if(!session){
       adminState.adminLoggato=false;adminState.adminEmail="";
@@ -54,46 +54,83 @@ async function wireDashboard(){
       salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
       window.location.replace("index.html");return false;
     }
-    const email=String(session.user?.email||"").trim().toLowerCase();
 
-    // admin-access-guard-v1.js verifica in modo asincrono il ruolo tenant tramite RPC.
-    // Aspettiamo il suo evento prima di decidere se l'utente può entrare:
-    // evita il race condition che rimandava subito l'owner alla dashboard.
-    if(!window.adminRuolo && !window.isTenantOwner && !window.isAdmin){
-      await new Promise(resolve=>{
-        let done=false;
-        const finish=()=>{if(done)return;done=true;window.removeEventListener("admin:role-ready",finish);resolve()};
-        window.addEventListener("admin:role-ready",finish,{once:true});
-        setTimeout(finish,6000);
-      });
+    const email=String(session.user?.email||"").trim().toLowerCase();
+    const isGlobalSuperadmin=email==="giose.rizzi@gmail.com";
+    const isGlobalAdmin=email==="boverob@libero.it"||email==="cfalba@libero.it";
+
+    // Per gli account globali il ruolo è determinato dall'email amministrativa.
+    let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
+    let aziendaAccess=null;
+
+    // Per gli account delle società verifichiamo direttamente l'appartenenza
+    // tenant tramite RPC. Non dipendiamo dall'evento asincrono del guard.
+    if(!role){
+      let lastError=null;
+      for(let i=0;i<3;i++){
+        const{data,error}=await sb.rpc("get_my_azienda_access");
+        lastError=error||null;
+        if(!error){
+          const row=Array.isArray(data)?data[0]:data;
+          if(row?.azienda_id){
+            aziendaAccess=row;
+            if(row.accesso_consentito===true){
+              role=String(row.ruolo||"owner").toLowerCase();
+              if(!["owner","admin","superadmin"].includes(role))role="";
+            }
+            break;
+          }
+          break;
+        }
+        await new Promise(r=>setTimeout(r,500));
+      }
+      if(lastError && !aziendaAccess){
+        console.error("Errore verifica accesso azienda:",lastError);
+      }
     }
 
-    const guardRole=String(window.adminRuolo||"").toLowerCase();
-    const owner=guardRole==="owner"||window.isTenantOwner===true;
-    const superadmin=guardRole==="superadmin"||email==="giose.rizzi@gmail.com";
-    const admin=guardRole==="admin"||email==="boverob@libero.it"||email==="cfalba@libero.it";
-    if(!owner&&!superadmin&&!admin){
+    if(!role){
       adminState.adminLoggato=false;adminState.adminEmail="";
       window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
       document.documentElement.dataset.adminRole="";
       salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
       window.location.replace("dashboard.html");return false;
     }
-    window.adminRuolo=owner?"owner":(superadmin?"superadmin":"admin");
+
+    const owner=role==="owner";
+    const superadmin=role==="superadmin";
+    window.adminRuolo=role;
     window.isTenantOwner=owner;
     window.isSuperadmin=superadmin;
     window.isAdmin=true;
-    document.documentElement.dataset.adminRole=window.adminRuolo;
+    window.isTenantSuperadmin=!isGlobalSuperadmin&&superadmin;
+    if(aziendaAccess?.azienda_id){
+      window.aziendaId=aziendaAccess.azienda_id;
+      window.nomeAppAzienda=aziendaAccess.nome_app||"";
+    }
+    document.documentElement.dataset.adminRole=role;
+
     adminState.adminLoggato=true;
     adminState.adminEmail=session.user?.email||email;
     window.adminState=adminState;
     salvaAdminState();
     document.getElementById("boxLoginAdmin")?.classList.add("hidden");
     document.getElementById("areaAdmin")?.classList.remove("hidden");
-    const mini=document.getElementById("adminEmailMini");if(mini)mini.textContent=session.user?.email||email;
+
+    const mini=document.getElementById("adminEmailMini");
+    if(mini)mini.textContent=session.user?.email||email;
+
     await caricaTorneiSupabase();
-    window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:window.adminRuolo,isSuperadmin:superadmin,isAdmin:true,isTenantOwner:owner}}));
-    return true
+    window.dispatchEvent(new CustomEvent("admin:role-ready",{
+      detail:{
+        ruolo:role,
+        isSuperadmin:superadmin,
+        isAdmin:true,
+        isTenantOwner:owner,
+        aziendaId:aziendaAccess?.azienda_id||null
+      }
+    }));
+    return true;
   }catch(e){
     console.error("Errore verifica sessione Admin:",e);
     document.getElementById("areaAdmin")?.classList.add("hidden");
