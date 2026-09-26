@@ -15,6 +15,7 @@ function setAdminStorageScope(userId,aziendaId){
   const uid=String(userId||"").trim();
   const aid=String(aziendaId||"").trim();
   adminStorageKey=(aid&&uid)?ADMIN_STORAGE_BASE+"__"+aid+"__"+uid:(uid?ADMIN_STORAGE_BASE+"__global__"+uid:ADMIN_STORAGE_BASE);
+  window.__adminStorageKey=adminStorageKey;
   try{localStorage.removeItem(ADMIN_STORAGE_BASE)}catch(e){}
 }
 function salvaAdminState(){try{localStorage.setItem(adminStorageKey,JSON.stringify(adminState));window.adminState=adminState}catch(e){console.error("Errore salvataggio stato admin:",e)}}
