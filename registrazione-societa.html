@@ -157,7 +157,9 @@ async function startRegistration(){
  // Il trigger MASTER crea automaticamente azienda, owner e provisioning
  // nello stesso INSERT di auth.users, anche quando la conferma email impedisce
  // a signUp() di restituire una sessione immediata.
- form.style.display="none";\n $("success").style.display="block";\n status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Account e richiesta della società creati correttamente. Conferma l'email per completare l'accesso.";
+ form.style.display="none";
+ $("success").style.display="block";
+ status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Account e richiesta della società creati correttamente. Conferma l'email per completare l'accesso.";
  submit.disabled=false;
 }
 form.addEventListener("submit",async e=>{
