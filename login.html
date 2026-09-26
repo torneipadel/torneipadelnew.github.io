@@ -139,18 +139,10 @@ async function loginUser(){
  sessionStorage.setItem("nextpoint_login_role",role);
  setTimeout(()=>window.location.replace("dashboard.html?v=tenant"),200);
 }
-async function resetPassword(){setStatus("Per recuperare la password usa il normale recupero dell'account personale.")}
-adminAccessToggle.addEventListener("click",()=>{
- adminAccessMode=!adminAccessMode; company=null; companyStep.style.display="none"; pivaInput.readOnly=false; pivaInput.style.opacity=""; pivaInput.value=""; passwordInput.value="";
- document.getElementById("identifierLabel").textContent=adminAccessMode?"Email amministratore piattaforma":"Partita IVA o Codice Fiscale della società";
- pivaInput.placeholder=adminAccessMode?"Inserisci l'email dell'amministratore":"Inserisci Partita IVA o Codice Fiscale";
- adminAccessToggle.textContent=adminAccessMode?"Torna all'accesso società":"Accesso amministratore piattaforma"; loginBtn.textContent=adminAccessMode?"ACCEDI":"CONTINUA"; setStatus("");
-});
-loginBtn.addEventListener("click",loginUser);
-registerBtn.addEventListener("click",()=>{window.location.href=returnPath||"registrazione-societa.html"});
-registerLink.addEventListener("click",()=>{window.location.href=returnPath||"registrazione-societa.html"});
-forgotPassword.addEventListener("click",resetPassword);
-pivaInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loginUser()}});
-passwordInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loginUser()}});
-emailInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();loginUser()}});
+async function resetPassword(){const email=emailInput.value.trim();if(!email){status.innerHTML=tr("enterEmail");return}status.innerHTML=tr("resetSending");const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/reset-password.html"});if(error){status.innerHTML="Errore: "+error.message;return}status.innerHTML=tr("resetSent")}
+loginBtn.addEventListener("click",loginUser);registerBtn.addEventListener("click",registerUser);registerLink.addEventListener("click",registerUser);forgotPassword.addEventListener("click",resetPassword);document.getElementById("loginForm").addEventListener("submit",function(){loginUser()});
+sb.auth.onAuthStateChange(function(event,session){});
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js",{scope:"/"}).catch(function(error){console.error("Service Worker PWA:",error)})})}
 </script>
+</body>
+</html>
