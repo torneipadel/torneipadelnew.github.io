@@ -5,7 +5,17 @@
 'use strict';
 const URL_SUPABASE='https://dkeqicstprvvfebiaooc.supabase.co';
 const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
-let client=null, tournaments=[], counts={};
+let client=null, tournaments=[], counts={}, publicCompany=null;
+const publicSlug=new URLSearchParams(location.search).get('azienda')||'';
+async function resolvePublicCompany(){
+  if(!publicSlug) return null;
+  try{
+    const response=await fetch(URL_SUPABASE+'/functions/v1/login-piva',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:publicSlug})});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result?.ok||!result?.azienda) return null;
+    return result.azienda;
+  }catch(e){console.error('[SOCIETA PUBBLICA]',e);return null}
+}
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const id=v=>Number(v)||0;
 function dateLabel(v){if(!v)return '-';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'long',year:'numeric'}).format(d)}
@@ -27,7 +37,10 @@ function styles(){if(document.getElementById('np-v2-style'))return;const s=docum
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 `;document.head.appendChild(s)}
 
-async function loadData(){const {data,error}=await client.from('tornei').select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,posti,configurazione').order('data',{ascending:true});if(error){console.error(error);return}tournaments=data||[];const ids=tournaments.map(t=>t.id).filter(Boolean);if(ids.length){const risultati=await Promise.all(ids.map(async id=>{const r=await client.rpc('get_torneo_iscrizioni_count',{p_torneo_id:Number(id)});return{id,data:r.data,error:r.error}}));if(risultati.some(x=>x.error)){console.error('[CONTEGGIO ISCRIZIONI] RPC',risultati.filter(x=>x.error));counts={};return}counts={};risultati.forEach(x=>{counts[String(x.id)]=Number(x.data)||0})}}
+async function loadData(){
+  let q=client.from('tornei').select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,posti,configurazione').order('data',{ascending:true});
+  if(publicCompany?.id) q=q.eq('azienda_id',publicCompany.id);
+  const {data,error}=await q;if(error){console.error(error);return}tournaments=data||[];const ids=tournaments.map(t=>t.id).filter(Boolean);if(ids.length){const risultati=await Promise.all(ids.map(async id=>{const r=await client.rpc('get_torneo_iscrizioni_count',{p_torneo_id:Number(id)});return{id,data:r.data,error:r.error}}));if(risultati.some(x=>x.error)){console.error('[CONTEGGIO ISCRIZIONI] RPC',risultati.filter(x=>x.error));counts={};return}counts={};risultati.forEach(x=>{counts[String(x.id)]=Number(x.data)||0})}}
 
 async function userBlock(){const box=document.getElementById('npUser');const {data}=await client.auth.getSession();const u=data?.session?.user;if(!u){box.innerHTML='<div><h3>Benvenuto su Next Point Padel</h3><p>Accedi per vedere iscrizioni e torneo personale.</p></div><a class="np-btn np-primary" href="index.html">ACCEDI</a>';return}box.innerHTML=`<div><h3>👋 Bentornato</h3><p>${esc(u.email||'Utente collegato')}</p></div><a class="np-btn np-primary" href="#mioTorneo">IL MIO TORNEO</a>`}
 
@@ -41,7 +54,9 @@ async function myTournament(){const box=document.getElementById('npMyTournament'
 async function news(){
   const box=document.getElementById('npNews');
   if(!box)return;
-  const {data,error}=await client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id').eq('pubblicata',true).order('in_evidenza',{ascending:false}).order('ordine',{ascending:true}).order('created_at',{ascending:false}).limit(30);
+  let q=client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id').eq('pubblicata',true).order('in_evidenza',{ascending:false}).order('ordine',{ascending:true}).order('created_at',{ascending:false}).limit(30);
+  if(publicCompany?.id) q=q.eq('azienda_id',publicCompany.id);
+  const {data,error}=await q;
   if(error){console.error('[NEWS GLOBALI]',error);box.innerHTML='<div class="np-empty">News non disponibili al momento.</div>';return}
   const all=(data||[]).map(n=>{const t=tournaments.find(x=>String(x.id)===String(n.torneo_id));return {...n,__torneo:t?.nome||''}}).sort((a,b)=>{if(Boolean(b.in_evidenza)!==Boolean(a.in_evidenza))return b.in_evidenza?1:-1;return new Date(b.created_at||0)-new Date(a.created_at||0)});
   if(!all.length){box.innerHTML='<div class="np-empty">Nessuna comunicazione pubblicata al momento.</div>';return}
@@ -58,6 +73,18 @@ function renderHero(){const box=document.getElementById('npHeroPoster');if(!box)
 
 async function start(){
   styles();
+  publicCompany=await resolvePublicCompany();
+  if(publicSlug&&!publicCompany){
+    document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:#fff;font-family:Arial;background:#06111f"><div style="max-width:520px;text-align:center"><h1>Società non trovata</h1><p>Il collegamento della società non è valido o la società non è disponibile.</p><a href="index.html" style="display:inline-block;margin-top:12px;padding:12px 18px;border-radius:10px;background:#fff;color:#073b72;text-decoration:none;font-weight:800">TORNA ALLA PAGINA INIZIALE</a></div></div>';
+    return;
+  }
+  if(publicCompany){
+    document.title=(publicCompany.nome_app||publicCompany.ragione_sociale||'Società')+' — Next Point Padel';
+    document.querySelector('.np-brandline-name')?.replaceChildren(document.createTextNode(publicCompany.nome_app||publicCompany.ragione_sociale||''));
+    document.querySelector('.np-brandline-logo')?.setAttribute('src',publicCompany.logo_url||'/loghi/icona_app1.jpg');
+    const homeLink=document.querySelector('#npMenu a[href="dashboard.html"]');
+    if(homeLink) homeLink.href='visitatore.html?azienda='+encodeURIComponent(publicCompany.slug);
+  }
   client=window.sb=window.__NP_SUPABASE_CLIENT__||supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   window.__NP_SUPABASE_CLIENT__=client;
   await loadData();
