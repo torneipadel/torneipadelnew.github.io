@@ -61,7 +61,19 @@ const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_pu
 const $=id=>document.getElementById(id),status=$("status"),submit=$("submit"),form=$("companyRegistration");
 const PENDING_KEY="nextpoint_company_registration_pending";
 $("back").onclick=()=>location.href="login.html";
-$('configure').onclick=()=>location.href='configurazione-app.html';
+$('configure').onclick=async()=>{
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){
+      status.textContent="Sessione non disponibile. Accedi con l'account appena registrato per continuare la configurazione.";
+      return;
+    }
+    location.href='configurazione-app.html';
+  }catch(e){
+    console.error("Apertura configurazione:",e);
+    status.textContent="Impossibile aprire la configurazione: "+(e?.message||e);
+  }
+};
 $("exit").onclick=async()=>{try{await sb.auth.signOut()}catch(e){console.warn("Uscita:",e)}sessionStorage.removeItem(PENDING_KEY);location.href="index.html";};
 
 function fields(){
