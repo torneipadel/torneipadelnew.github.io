@@ -1,7 +1,162 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registrati | Next Point Padel</title><style>body{margin:0;font-family:Arial;background:#f4f6fa}.box{max-width:500px;margin:5vh auto;padding:30px;background:#fff;border-radius:22px;box-shadow:0 12px 30px #0001}h1{color:#073b72}input,button{width:100%;padding:13px;margin:7px 0;border-radius:10px;border:1px solid #d5dbe5;box-sizing:border-box}button{background:#ffe76b;border:0;font-weight:800;cursor:pointer}.msg{margin-top:12px;font-weight:700}a{color:#073b72;font-weight:700}</style></head><body><div class="box"><a id="back">← Torna alla società</a><h1>Registrati</h1><p id="company">Creazione account utente</p><input id="nome" placeholder="Nome"><input id="cognome" placeholder="Cognome"><input id="telefono" placeholder="Telefono"><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password (minimo 6 caratteri)"><button id="go">CREA ACCOUNT</button><div class="msg" id="msg"></div><p>Hai già un account? <a id="login">ACCEDI</a></p></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu"),p=new URLSearchParams(location.search),azienda=p.get("azienda")||"",q=encodeURIComponent(azienda),msg=document.getElementById("msg");
-back.href="societa.html?slug="+q;login.href="login-utente.html?azienda="+q;
-async function init(){const r=await sb.rpc("get_public_company",{p_slug:azienda}),c=Array.isArray(r.data)?r.data[0]:r.data;if(c)company.textContent="Stai creando un account per "+(c.nome_app||c.ragione_sociale)+".";}
-async function go(){msg.textContent="Creazione account in corso…";const em=email.value.trim(),pw=password.value,n=nome.value.trim(),co=cognome.value.trim(),t=telefono.value.trim();if(!azienda||!n||!co||!em||pw.length<6){msg.textContent="Compila i campi obbligatori e usa almeno 6 caratteri.";return}const r=await sb.auth.signUp({email:em,password:pw,options:{data:{nome:n,cognome:co,telefono:t},emailRedirectTo:location.origin+"/registrazione-utente.html?azienda="+q}});if(r.error){msg.textContent=r.error.message;return}if(r.data.session){const m=await sb.rpc("complete_visitor_membership",{p_azienda_slug:azienda,p_nome:n,p_cognome:co,p_telefono:t});if(m.error){msg.textContent=m.error.message;return}msg.textContent="Registrazione avvenuta con successo.";setTimeout(function(){location.href="societa.html?slug="+q},700);return}msg.textContent="Registrazione completata. Controlla la tua email per confermare l'account, poi accedi da questa società."}
-document.getElementById("go").onclick=go;init();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrazione visitatore | Next Point Padel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--line:rgba(255,255,255,.22);--blue:#073b72}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+body{background:#06111f url('/sfondo2.jpg') center/cover fixed no-repeat;font-family:'Open Sans',Arial,sans-serif;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px 16px;overflow-x:hidden}
+body:before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,12,24,.30),rgba(3,12,24,.68));pointer-events:none;z-index:-1}
+.box{width:min(620px,100%);margin:0 auto;padding:24px 22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 35px rgba(0,0,0,.28);text-align:center}
+.logo{width:112px;height:auto;display:block;margin:0 auto 12px}
+h2{margin:0 0 12px;font-size:22px;line-height:1.2;font-weight:800;letter-spacing:-.02em}
+.info{font-size:13px;line-height:1.45;color:rgba(255,255,255,.68);margin:0 0 12px}
+input,textarea{display:block;width:100%;padding:0 13px;margin:7px 0;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:rgba(255,255,255,.94);color:#333;font:600 14px 'Open Sans',Arial,sans-serif;height:46px;outline:none}
+textarea{height:88px;padding:11px 13px;resize:vertical;min-height:88px}
+input::placeholder,textarea::placeholder{color:#777;font-weight:400}
+input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2px rgba(255,255,255,.10)}
+.btn,.btn-back{display:block;width:100%;min-height:46px;margin:10px 0 0;padding:11px 14px;border:1px solid rgba(255,255,255,.20);border-radius:10px;cursor:pointer;font:800 13px 'Open Sans',Arial,sans-serif;line-height:1.2}
+.btn{background:#fff;color:var(--blue)}
+.btn-back{background:rgba(0,0,0,.32);color:#fff}
+#status{margin-top:12px;min-height:20px;color:#ffeb3b;font-size:13px;line-height:1.4}
+a{color:#fff;font-weight:700}
+.privacy-note{font-size:11px;line-height:1.55;color:rgba(255,255,255,.68);margin:12px 0 4px}
+@media(max-width:767px){body{align-items:flex-start;padding:18px 12px 28px;background-attachment:scroll}.box{width:min(620px,100%);padding:20px 16px;border-radius:16px}.logo{width:100px;margin-bottom:10px}h2{font-size:20px}.info{font-size:13px}input,textarea{font-size:14px}.btn,.btn-back{font-size:13px}}
+@media(max-width:380px){.box{padding:18px 13px}.logo{width:92px}h2{font-size:19px}input,textarea{height:44px}.btn,.btn-back{min-height:44px}}
+</style>
+</head>
+<body>
+<div class="box">
+<img src="/loghi/icona_app1.jpg" class="logo" alt="NEXT POINT PADEL">
+<h2>Registrazione visitatore</h2>
+<div class="info" id="company">Caricamento società...</div>
+
+<input id="nome" placeholder="Nome">
+<input id="cognome" placeholder="Cognome">
+<input id="telefono" placeholder="Telefono">
+<input id="livello" placeholder="Livello">
+<input id="alias" placeholder="Alias torneo">
+<textarea id="note" placeholder="Note"></textarea>
+
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password (minimo 6 caratteri)">
+
+<p class="privacy-note">I dati inseriti servono per creare il tuo account e gestire la tua partecipazione alle attività della società. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Leggi l’informativa privacy</a>.</p>
+
+<button class="btn" id="go">CREA ACCOUNT</button>
+<button class="btn-back" id="back">⬅ Torna alla società</button>
+<div id="status"></div>
+<p class="privacy-note">Hai già un account? <a id="login">ACCEDI</a></p>
+</div>
+
+<script>
+const sb=supabase.createClient(
+"https://dkeqicstprvvfebiaooc.supabase.co",
+"sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",
+{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+);
+const params=new URLSearchParams(location.search);
+const azienda=params.get("azienda")||"";
+const q=encodeURIComponent(azienda);
+const statusBox=document.getElementById("status");
+
+document.getElementById("back").onclick=()=>{location.href="societa.html?slug="+q};
+document.getElementById("login").href="login-utente.html?azienda="+q;
+
+function generaAlias(nome,cognome){
+ if(!nome||!cognome)return "";
+ return nome.trim().charAt(0)+"."+cognome.trim();
+}
+
+async function init(){
+ const r=await sb.rpc("get_public_company",{p_slug:azienda});
+ const c=Array.isArray(r.data)?r.data[0]:r.data;
+ if(!c){
+   statusBox.textContent="Società non trovata o non disponibile.";
+   document.getElementById("go").disabled=true;
+   return;
+ }
+ document.getElementById("company").textContent="Stai creando un account per "+(c.nome_app||c.ragione_sociale)+".";
+}
+
+async function go(){
+ statusBox.textContent="Creazione account in corso…";
+
+ const nome=document.getElementById("nome").value.trim();
+ const cognome=document.getElementById("cognome").value.trim();
+ const telefono=document.getElementById("telefono").value.trim();
+ const livello=document.getElementById("livello").value.trim();
+ let alias=document.getElementById("alias").value.trim();
+ const note=document.getElementById("note").value.trim();
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+
+ if(!azienda||!nome||!cognome||!email||password.length<6){
+   statusBox.textContent="Compila Nome, Cognome, Email e Password (minimo 6 caratteri).";
+   return;
+ }
+ if(!alias){
+   alias=generaAlias(nome,cognome);
+   document.getElementById("alias").value=alias;
+ }
+
+ const r=await sb.auth.signUp({
+   email,
+   password,
+   options:{
+     data:{nome,cognome,telefono,livello,alias,note},
+     emailRedirectTo:location.origin+"/registrazione-utente.html?azienda="+q
+   }
+ });
+ if(r.error){
+   statusBox.textContent=r.error.message;
+   return;
+ }
+
+ if(r.data.session){
+   const m=await sb.rpc("complete_visitor_membership",{
+     p_azienda_slug:azienda,
+     p_nome:nome,
+     p_cognome:cognome,
+     p_telefono:telefono
+   });
+   if(m.error){
+     statusBox.textContent=m.error.message;
+     return;
+   }
+
+   const p=await sb.from("profili").upsert({
+     user_id:r.data.user.id,
+     email,
+     nome,
+     cognome,
+     telefono,
+     livello,
+     alias,
+     note,
+     ruolo:"user",
+     updated_at:new Date().toISOString()
+   },{onConflict:"user_id"});
+
+   if(p.error){
+     statusBox.textContent=p.error.message;
+     return;
+   }
+
+   statusBox.textContent="Registrazione avvenuta con successo.";
+   setTimeout(()=>{location.href="societa.html?slug="+q},900);
+   return;
+ }
+
+ statusBox.textContent="Registrazione completata. Controlla la tua email per confermare l’account, poi accedi da questa società.";
+}
+
+document.getElementById("go").onclick=go;
+init();
+</script>
+</body>
+</html>
