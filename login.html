@@ -62,9 +62,9 @@ button:hover{background:#fff;transform:translateY(-1px);box-shadow:0 11px 25px r
 <div class="brand"><img src="/loghi/icona_app1.jpg" alt="NEXT POINT PADEL"><h1>NEXT POINT PADEL</h1><p data-i18n="brandSub">Tornei • Eventi • Competizioni di padel</p></div>
 <h2 class="section-title" data-i18n="access">Accesso utenti</h2>
 <form id="loginForm" onsubmit="return false">
-<div class="field"><label for="piva">Partita IVA della società</label><input id="piva" type="text" inputmode="text" autocomplete="off" placeholder="Inserisci la Partita IVA della società" maxlength="32"></div>
+<div class="field"><label for="piva" id="identifierLabel">Partita IVA della società</label><input id="piva" type="text" inputmode="text" autocomplete="off" placeholder="Inserisci la Partita IVA della società" maxlength="32"></div>
 <div class="field"><label for="password" data-i18n="passwordLabel">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Inserisci la tua password" data-i18n-placeholder="passwordPlaceholder"></div>
-<div class="options"><label class="remember"><input id="ricordami" type="checkbox"><span data-i18n="remember">Ricordami</span></label><span class="link" id="forgotPassword">Password dimenticata?</span></div>
+<div class="options"><label class="remember"><input id="ricordami" type="checkbox"><span data-i18n="remember">Ricordami</span></label><span class="link" id="forgotPassword">Password dimenticata?</span></div><div style="text-align:center;margin:-8px 0 16px;font-size:11px"><span class="link" id="adminAccessToggle">Accesso amministratore piattaforma</span></div>
 <button type="button" id="loginBtn" data-i18n="login">ACCEDI</button>
 <button type="button" class="secondary" id="registerBtn" data-i18n="register">REGISTRA LA TUA SOCIETÀ</button>
 </form>
@@ -81,6 +81,8 @@ const loginBtn=document.getElementById("loginBtn");
 const registerBtn=document.getElementById("registerBtn");
 const registerLink=document.getElementById("registerLink");
 const forgotPassword=document.getElementById("forgotPassword");
+const adminAccessToggle=document.getElementById("adminAccessToggle");
+let adminAccessMode=false;
 function tr(key){return window.NextPointLanguage?window.NextPointLanguage.getText(key):key}
 function registrationReturnPath(){
  const raw=new URLSearchParams(window.location.search).get("next")||"";
@@ -91,14 +93,14 @@ const returnPath=registrationReturnPath();
 const requestedEmail=new URLSearchParams(window.location.search).get("email");
 if(requestedEmail){}
 async function loginUser(){
- const piva=pivaInput.value.trim().toUpperCase().replace(/\s+/g,""),password=passwordInput.value;
- if(!piva||!password){status.innerHTML="Inserisci Partita IVA e password.";return}
+ const identifier=pivaInput.value.trim(),piva=identifier.toUpperCase().replace(/\s+/g,""),password=passwordInput.value;
+ if(!identifier||!password){status.innerHTML=adminAccessMode?"Inserisci email e password.":"Inserisci Partita IVA e password.";return}
  status.innerHTML="Accesso in corso…";
  try{
    const response=await fetch("https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/login-piva",{
      method:"POST",
      headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({piva,password})
+     body:JSON.stringify(adminAccessMode?{email:identifier,password}:{piva,password})
    });
    const result=await response.json().catch(()=>({}));
    if(!response.ok||!result?.ok||!result?.session){status.innerHTML=result?.error||"Credenziali non valide.";return}
