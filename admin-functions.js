@@ -39,61 +39,86 @@ async function wireDashboard(){
   caricaAdminState();
   try{
     let session=null;
+    let sessionError=null;
     for(let i=0;i<20;i++){
-      const{data,error}=await sb.auth.getSession();
-      if(error)throw error;
-      session=data?.session||null;
+      const result=await sb.auth.getSession();
+      sessionError=result.error||null;
+      session=result.data?.session||null;
       if(session)break;
       await new Promise(r=>setTimeout(r,250));
     }
     if(!session){
-      adminState.adminLoggato=false;adminState.adminEmail="";
-      window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
-      document.documentElement.dataset.adminRole="";
-      salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
-      window.location.replace("index.html");return false;
+      console.error("Admin: sessione assente",sessionError||"nessuna sessione");
+      adminState.adminLoggato=false;
+      document.getElementById("areaAdmin")?.classList.add("hidden");
+      const box=document.getElementById("boxLoginAdmin");
+      if(box)box.classList.remove("hidden");
+      return false;
     }
 
     const email=String(session.user?.email||"").trim().toLowerCase();
     const isGlobalSuperadmin=email==="giose.rizzi@gmail.com";
     const isGlobalAdmin=email==="boverob@libero.it"||email==="cfalba@libero.it";
-
-    // Per gli account globali il ruolo è determinato dall'email amministrativa.
     let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
     let aziendaAccess=null;
 
-    // Per gli account delle società verifichiamo direttamente l'appartenenza
-    // tenant tramite RPC. Non dipendiamo dall'evento asincrono del guard.
     if(!role){
       let lastError=null;
       for(let i=0;i<3;i++){
-        const{data,error}=await sb.rpc("get_my_azienda_access");
-        lastError=error||null;
-        if(!error){
-          const row=Array.isArray(data)?data[0]:data;
-          if(row?.azienda_id){
-            aziendaAccess=row;
-            if(row.accesso_consentito===true){
-              role=String(row.ruolo||"owner").toLowerCase();
-              if(!["owner","admin","superadmin"].includes(role))role="";
-            }
-            break;
-          }
+        const result=await sb.rpc("get_my_azienda_access");
+        lastError=result.error||null;
+        const row=Array.isArray(result.data)?result.data[0]:result.data;
+        if(row?.azienda_id){
+          aziendaAccess=row;
           break;
         }
+        if(!lastError)break;
         await new Promise(r=>setTimeout(r,500));
       }
-      if(lastError && !aziendaAccess){
-        console.error("Errore verifica accesso azienda:",lastError);
-      }
-    }
 
-    if(!role){
-      adminState.adminLoggato=false;adminState.adminEmail="";
-      window.adminRuolo="";window.isSuperadmin=false;window.isAdmin=false;
-      document.documentElement.dataset.adminRole="";
-      salvaAdminState();document.getElementById("areaAdmin")?.classList.add("hidden");
-      window.location.replace("dashboard.html");return false;
+      // Fallback diretto sulla membership tenant.
+      if(!aziendaAccess?.azienda_id){
+        const membership=await sb.from("azienda_utenti")
+          .select("azienda_id,ruolo,attivo")
+          .eq("user_id",session.user.id)
+          .eq("attivo",true)
+          .maybeSingle();
+        if(!membership.error&&membership.data?.azienda_id){
+          const company=await sb.from("aziende")
+            .select("id,nome_app,slug,tipo_account,stato,demo_inizio,demo_scadenza")
+            .eq("id",membership.data.azienda_id)
+            .maybeSingle();
+          if(!company.error&&company.data){
+            aziendaAccess={
+              azienda_id:company.data.id,
+              nome_app:company.data.nome_app,
+              slug:company.data.slug,
+              tipo_account:company.data.tipo_account,
+              stato:company.data.stato,
+              demo_inizio:company.data.demo_inizio,
+              demo_scadenza:company.data.demo_scadenza,
+              accesso_consentito:["attiva","configurazione"].includes(String(company.data.stato||"").toLowerCase()),
+              ruolo:membership.data.ruolo
+            };
+          }
+        }
+      }
+
+      if(aziendaAccess?.azienda_id && aziendaAccess.accesso_consentito!==false){
+        role=String(aziendaAccess.ruolo||"owner").toLowerCase();
+        if(!["owner","admin","superadmin"].includes(role))role="";
+      }
+
+      if(!role){
+        console.error("Admin: autorizzazione tenant non determinata",lastError||"nessun accesso");
+        const area=document.getElementById("areaAdmin");
+        const box=document.getElementById("boxLoginAdmin");
+        if(area)area.classList.remove("hidden");
+        if(box)box.classList.add("hidden");
+        const status=document.getElementById("adminAccessStatus");
+        if(status)status.textContent="Accesso amministratore non determinato. Controllo autorizzazione non completato.";
+        return false;
+      }
     }
 
     const owner=role==="owner";
@@ -132,8 +157,11 @@ async function wireDashboard(){
     return true;
   }catch(e){
     console.error("Errore verifica sessione Admin:",e);
-    document.getElementById("areaAdmin")?.classList.add("hidden");
-    window.location.replace("index.html");return false
+    document.getElementById("areaAdmin")?.classList.remove("hidden");
+    document.getElementById("boxLoginAdmin")?.classList.add("hidden");
+    const status=document.getElementById("adminAccessStatus");
+    if(status)status.textContent="Errore controllo accesso: "+(e?.message||e);
+    return false;
   }
 }
 document.addEventListener("DOMContentLoaded",wireDashboard);
