@@ -8,10 +8,17 @@ let adminState = {
   adminLoggato:false,adminEmail:"",torneoSelezionato:null,tornei:[],sponsor:[],news:[]
 };
 window.adminState=adminState;
-const ADMIN_STORAGE="padel_admin_state";
+const ADMIN_STORAGE_BASE="padel_admin_state";
+let adminStorageKey=ADMIN_STORAGE_BASE;
 window.iscrizioniTorneo=[];window.giocatoreSelezionatoCorrente=null;
-function salvaAdminState(){try{localStorage.setItem(ADMIN_STORAGE,JSON.stringify(adminState));window.adminState=adminState}catch(e){console.error("Errore salvataggio stato admin:",e)}}
-function caricaAdminState(){try{const raw=localStorage.getItem(ADMIN_STORAGE);if(!raw)return;adminState={...adminState,...JSON.parse(raw)};if(!Array.isArray(adminState.tornei))adminState.tornei=[];if(!Array.isArray(adminState.sponsor))adminState.sponsor=[];if(!Array.isArray(adminState.news))adminState.news=[];window.adminState=adminState}catch(e){console.error("Errore caricamento stato admin:",e)}}
+function setAdminStorageScope(userId,aziendaId){
+  const uid=String(userId||"").trim();
+  const aid=String(aziendaId||"").trim();
+  adminStorageKey=(aid&&uid)?ADMIN_STORAGE_BASE+"__"+aid+"__"+uid:(uid?ADMIN_STORAGE_BASE+"__global__"+uid:ADMIN_STORAGE_BASE);
+  try{localStorage.removeItem(ADMIN_STORAGE_BASE)}catch(e){}
+}
+function salvaAdminState(){try{localStorage.setItem(adminStorageKey,JSON.stringify(adminState));window.adminState=adminState}catch(e){console.error("Errore salvataggio stato admin:",e)}}
+function caricaAdminState(){try{const raw=localStorage.getItem(adminStorageKey);if(!raw)return;const parsed=JSON.parse(raw);adminState={...adminState,...parsed};if(!Array.isArray(adminState.tornei))adminState.tornei=[];if(!Array.isArray(adminState.sponsor))adminState.sponsor=[];if(!Array.isArray(adminState.news))adminState.news=[];window.adminState=adminState}catch(e){console.error("Errore caricamento stato admin:",e)}}
 function getTorneoAdminCorrente(){if(!Array.isArray(adminState.tornei))return null;return adminState.tornei.find(t=>String(t.id)===String(adminState.torneoSelezionato))||null}
 function aggiornaGiocatoriAdmin(){const squadre=Number(document.getElementById("adminPosti")?.value)||8;const campo=document.getElementById("adminGiocatori");if(campo)campo.value=squadre*2}
 async function caricaTorneiSupabase(){try{const{data,error}=await sb.from("tornei").select("*").order("id",{ascending:false});if(error)throw error;if(Array.isArray(data))adminState.tornei=data;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();else renderAdmin()}catch(e){console.error("Errore caricamento tornei Supabase:",e)}}
@@ -36,7 +43,6 @@ function renderAdmin(){if(typeof window.renderCleanAdmin==='function')window.ren
 function syncDashboard(){}
 function openWorkspace(section){if(section==='link')generaLinkBove()}
 async function wireDashboard(){
-  caricaAdminState();
   try{
     let session=null;
     let sessionError=null;
@@ -133,6 +139,10 @@ async function wireDashboard(){
       window.nomeAppAzienda=aziendaAccess.nome_app||"";
     }
     document.documentElement.dataset.adminRole=role;
+
+    setAdminStorageScope(session.user?.id,aziendaAccess?.azienda_id||null);
+    adminState={adminLoggato:true,adminEmail:session.user?.email||email,torneoSelezionato:null,tornei:[],sponsor:[],news:[]};
+    caricaAdminState();
 
     adminState.adminLoggato=true;
     adminState.adminEmail=session.user?.email||email;
