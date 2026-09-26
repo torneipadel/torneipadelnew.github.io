@@ -30,6 +30,8 @@ const SUPABASE_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
 const sbSponsor=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);window.sb=sbSponsor;
 let sponsorList=[];
 function valore(id){return document.getElementById(id)?.value.trim()||""}
+function salvaLocale(){try{localStorage.setItem(SPONSOR_STORAGE,JSON.stringify(sponsorList))}catch(e){}}
+function leggiLocale(){try{const raw=localStorage.getItem(SPONSOR_STORAGE);const a=raw?JSON.parse(raw):[];return Array.isArray(a)?a:[]}catch(e){return[]}}
 async function caricaSponsor(){
   try{
     const {data,error}=await sbSponsor.from("sponsor").select("id,nome,immagine,video,link").order("id",{ascending:true});
