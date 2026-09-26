@@ -52,7 +52,7 @@ const SUPABASE_ANON_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const grid=document.getElementById("companyGrid"),statusEl=document.getElementById("companyStatus"),searchInput=document.getElementById("searchInput");
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
-function companyUrl(company){const appUrl=String(company.app_url||"").trim();if(appUrl)return appUrl.replace(/\/$/,"")+"/";if(company.slug)return "societa.html?slug="+encodeURIComponent(company.slug);return "#"}
+function companyUrl(company){if(company.slug)return "societa.html?slug="+encodeURIComponent(company.slug);const appUrl=String(company.app_url||"").trim();if(appUrl)return appUrl.replace(/\/$/,"")+"/";return "#"}
 function renderCompanies(companies){
 grid.innerHTML="";
 if(!companies.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nessuna società trovata. Prova con un altro nome.</div>';return}
