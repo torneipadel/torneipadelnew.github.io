@@ -55,6 +55,19 @@ async function wireDashboard(){
       window.location.replace("index.html");return false;
     }
     const email=String(session.user?.email||"").trim().toLowerCase();
+
+    // admin-access-guard-v1.js verifica in modo asincrono il ruolo tenant tramite RPC.
+    // Aspettiamo il suo evento prima di decidere se l'utente può entrare:
+    // evita il race condition che rimandava subito l'owner alla dashboard.
+    if(!window.adminRuolo && !window.isTenantOwner && !window.isAdmin){
+      await new Promise(resolve=>{
+        let done=false;
+        const finish=()=>{if(done)return;done=true;window.removeEventListener("admin:role-ready",finish);resolve()};
+        window.addEventListener("admin:role-ready",finish,{once:true});
+        setTimeout(finish,6000);
+      });
+    }
+
     const guardRole=String(window.adminRuolo||"").toLowerCase();
     const owner=guardRole==="owner"||window.isTenantOwner===true;
     const superadmin=guardRole==="superadmin"||email==="giose.rizzi@gmail.com";
