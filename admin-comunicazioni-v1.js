@@ -55,7 +55,24 @@ if(!link){alert('Inserisci il link del sito dello sponsor.');return}
 if(logoFile){const allowedTypes=['image/png','image/jpeg','image/webp','image/svg+xml'];if(!allowedTypes.includes(logoFile.type)){alert('Il logo deve essere un file PNG, JPG, WEBP o SVG.');return}if(logoFile.size>2*1024*1024){alert('Il logo è troppo grande. Usa un file massimo di 2 MB.');return}}
 const sb=window.supabaseClient||window.sb;if(!sb){alert('Connessione Supabase non disponibile.');return}
 const saveButton=$('sponsorSave'),editId=saveButton?.dataset.editId;if(saveButton){saveButton.disabled=true;saveButton.textContent='⏳ Salvataggio...'}
-try{let immagine=editId?(items.find(x=>String(x.id)===String(editId))?.immagine||''):'';if(logoFile){immagine=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Impossibile leggere il file del logo.'));reader.readAsDataURL(logoFile)})}if(editId){const {data,error}=await sb.from('sponsor').update({nome,immagine,video,link}).eq('id',editId).select('id,nome,immagine,video,link').maybeSingle();if(error)throw new Error('Errore salvataggio sponsor: '+error.message);if(!data)throw new Error('Lo sponsor selezionato non è stato aggiornato.')}else{const {data,error}=await sb.from('sponsor').insert({nome,immagine,video,link}).select('id,nome,immagine,video,link').single();if(error)throw new Error('Errore salvataggio sponsor: '+error.message);if(!data)throw new Error('Sponsor salvato senza ricevere il relativo ID.')}await sponsor()}catch(error){console.error('Errore gestione sponsor:',error);alert(error?.message||'Errore durante il salvataggio dello sponsor.');if(saveButton){saveButton.disabled=false;saveButton.textContent=editId?'💾 Salva modifiche':'＋ Aggiungi sponsor'}}
+try{let immagine=editId?(items.find(x=>String(x.id)===String(editId))?.immagine||''):'';if(logoFile){immagine=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Impossibile leggere il file del logo.'));reader.readAsDataURL(logoFile)})}let savedId=editId||null;
+if(editId){
+ const {data,error}=await sb.from('sponsor').update({nome,immagine,video,link}).eq('id',editId).select('id,nome,immagine,video,link').maybeSingle();
+ if(error)throw new Error('Errore salvataggio sponsor: '+error.message);
+ if(!data)throw new Error('Lo sponsor selezionato non è stato aggiornato.');
+ savedId=data.id;
+}else{
+ const {data,error}=await sb.from('sponsor').insert({nome,immagine,video,link}).select('id,nome,immagine,video,link').single();
+ if(error)throw new Error('Errore salvataggio sponsor: '+error.message);
+ if(!data)throw new Error('Sponsor salvato senza ricevere il relativo ID.');
+ savedId=data.id;
+}
+if(!logoFile && savedId && link){
+ const {data:logoData,error:logoError}=await sb.functions.invoke('sponsor-logo-from-site',{body:{sponsorId:Number(savedId),link}});
+ if(logoError)console.warn('Logo automatico non disponibile:',logoError);
+ else if(!logoData?.ok)console.warn('Logo automatico non trovato:',logoData?.error||logoData);
+}
+await sponsor()}catch(error){console.error('Errore gestione sponsor:',error);alert(error?.message||'Errore durante il salvataggio dello sponsor.');if(saveButton){saveButton.disabled=false;saveButton.textContent=editId?'💾 Salva modifiche':'＋ Aggiungi sponsor'}}
 });
 };
 bindForm();
