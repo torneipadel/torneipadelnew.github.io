@@ -23,3 +23,38 @@ window.logoutAdmin=async function(){try{if(window.sb?.auth?.signOut){await Promi
   observer.observe(document.body, { childList:true, subtree:true });
 })();
 
+
+
+/* Consolidated small Admin fixes: duplicate controls + central calendar routing. */
+(function(){
+  'use strict';
+  const removeDuplicates=()=>{
+    document.getElementById('newTournament')?.remove();
+    document.getElementById('refreshTournaments')?.remove();
+  };
+  const bindParticipantsRefresh=()=>{
+    const original=window.openAdminPage;
+    if(typeof original!=='function'||original.__participantsFixBound)return;
+    const wrapped=async function(page){
+      if(page==='partecipanti'&&typeof window.caricaRichiesteIscrizione==='function') await window.caricaRichiesteIscrizione();
+      return original.apply(this,arguments);
+    };
+    wrapped.__participantsFixBound=true;
+    window.openAdminPage=wrapped;
+  };
+  const initDuplicateFix=()=>{
+    const root=document.getElementById('appContent');
+    if(!root)return;
+    removeDuplicates();
+    bindParticipantsRefresh();
+    new MutationObserver(removeDuplicates).observe(root,{childList:true,subtree:true});
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initDuplicateFix,{once:true});else initDuplicateFix();
+
+  document.addEventListener('click',e=>{
+    const button=e.target?.closest?.('#calendar');
+    if(!button)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    if(typeof window.openAdminCalendar==='function')window.openAdminCalendar();
+  },true);
+})();
