@@ -127,7 +127,7 @@ async function createCompany(user){
  });
  if(error)throw error;
  if(!data?.ok)throw new Error(data?.message||"La società non è stata creata.");
- sessionStorage.removeItem(PENDING_KEY);
+ PENDING_STORAGE.removeItem(PENDING_KEY);
  form.style.display="none";
  $("success").style.display="block";
  status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! La richiesta della società è stata acquisita.";
@@ -147,6 +147,11 @@ async function startRegistration(){
      if(signOutError)throw signOutError;
      user=null;
    }else{
+     if(currentAccountType!=="societa"){
+       submit.disabled=false;
+       status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+       return;
+     }
      await createCompany(user);return;
    }
  }
@@ -157,7 +162,14 @@ async function startRegistration(){
  status.textContent="Accesso all'account amministratore…";
  const signIn=await sb.auth.signInWithPassword({email:d.email,password});
  if(!signIn.error&&signIn.data?.user){
-   await createCompany(signIn.data.user);return;
+   const existingUser=signIn.data.user;
+   const existingAccountType=String(existingUser?.user_metadata?.account_type||"").toLowerCase();
+   if(existingAccountType!=="societa"){
+     submit.disabled=false;
+     status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+     return;
+   }
+   await createCompany(existingUser);return;
  }
 
  status.textContent="Account non ancora presente: creazione dell'account…";
