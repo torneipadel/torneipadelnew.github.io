@@ -60,6 +60,7 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id),status=$("status"),submit=$("submit"),form=$("companyRegistration");
 const PENDING_KEY="nextpoint_company_registration_pending";
+const PENDING_STORAGE=window.localStorage;
 $("back").onclick=()=>location.href="login.html";
 $('configure').onclick=async()=>{
   try{
@@ -74,8 +75,13 @@ $('configure').onclick=async()=>{
     status.textContent="Impossibile aprire la configurazione: "+(e?.message||e);
   }
 };
-$("exit").onclick=async()=>{try{await sb.auth.signOut()}catch(e){console.warn("Uscita:",e)}sessionStorage.removeItem(PENDING_KEY);location.href="index.html";};
+$("exit").onclick=async()=>{try{await sb.auth.signOut()}catch(e){console.warn("Uscita:",e)}PENDING_STORAGE.removeItem(PENDING_KEY);location.href="index.html";};
 
+function hydrateFromUser(user){
+ const m=user?.user_metadata||{};
+ const map={email:m.email_aziendale||user?.email,ragione:m.ragione_sociale,nomeApp:m.nome_app,titolare:m.titolare,telefono:m.telefono,pec:m.pec,sede:m.sede,cf:m.cf_piva,nome:m.nome,cognome:m.cognome};
+ Object.entries(map).forEach(([k,v])=>{if($(k)&&v!=null&&String(v).trim())$(k).value=String(v).trim()});
+}
 function fields(){
  return {
    ragione:$("ragione").value.trim(),nomeApp:$("nomeApp").value.trim(),titolare:$("titolare").value.trim(),
@@ -85,12 +91,12 @@ function fields(){
 }
 function savePending(){
  const data=fields();
- sessionStorage.setItem(PENDING_KEY,JSON.stringify(data));
+ PENDING_STORAGE.setItem(PENDING_KEY,JSON.stringify(data));
  return data;
 }
 function restorePending(){
  try{
-   const raw=sessionStorage.getItem(PENDING_KEY);if(!raw)return;
+   const raw=PENDING_STORAGE.getItem(PENDING_KEY);if(!raw)return;
    const d=JSON.parse(raw);
    Object.keys(d).forEach(k=>{if($(k)&&d[k]!=null)$(k).value=d[k]});
  }catch(e){console.warn("Ripristino registrazione:",e)}
@@ -113,6 +119,7 @@ async function getSessionUser(){
  }catch(e){return null}
 }
 async function createCompany(user){
+ hydrateFromUser(user);
  const d=fields();
  const {data,error}=await sb.rpc("create_company_for_current_user",{
    p_ragione_sociale:d.ragione,p_nome_app:d.nomeApp,p_titolare:d.titolare,p_sede:d.sede,
@@ -168,7 +175,7 @@ async function startRegistration(){
    await createCompany(signUp.data.session.user);return;
  }
 
- status.textContent="✓ Account creato. Controlla l'email e conferma l'account. Dopo la conferma verrai riportato qui e la società verrà creata automaticamente.";
+ status.textContent="✓ Account creato. Controlla l'email e conferma l'account. Dopo la conferma la società verrà creata automaticamente.";
  submit.disabled=false;
 }
 form.addEventListener("submit",async e=>{
@@ -184,13 +191,15 @@ restorePending();
 let completionStarted=false;
 async function completePendingRegistration(){
  if(completionStarted)return;
- const raw=sessionStorage.getItem(PENDING_KEY);
- if(!raw)return;
+ const raw=PENDING_STORAGE.getItem(PENDING_KEY);
  const user=await getSessionUser();
  if(!user)return;
+ const isCompanyRegistration=String(user?.user_metadata?.account_type||"").toLowerCase()==="societa";
+ if(!raw && !isCompanyRegistration)return;
+ hydrateFromUser(user);
  const expectedEmail=String($("email").value||"").trim().toLowerCase();
  const currentEmail=String(user.email||"").trim().toLowerCase();
- if(!expectedEmail||expectedEmail!==currentEmail)return;
+ if(!isCompanyRegistration && (!expectedEmail||expectedEmail!==currentEmail))return;
  completionStarted=true;
  setAuthenticatedMode(user);
  try{
