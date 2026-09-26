@@ -4,7 +4,7 @@
   function init(){
     const client=window.sb||window.supabaseClient;
     if(!client){
-      setTimeout(init,25);
+      setTimeout(init,50);
       return;
     }
 
@@ -25,22 +25,13 @@
           window.isSuperadmin=superadminEmail;
           window.isAdmin=true;
           document.documentElement.dataset.adminRole=ruolo;
-
-          const mini=document.getElementById("adminEmailMini");
-          if(mini && session.user?.email) mini.textContent=session.user.email;
-
-          const badge=document.getElementById("adminRoleBadge");
-          if(badge){
-            badge.textContent=superadminEmail?"👑 SUPERADMIN":"👤 ADMIN";
-            badge.dataset.role=ruolo;
-          }
-
-          window.dispatchEvent(new CustomEvent("admin:role-ready",{
-            detail:{ruolo,isSuperadmin:superadminEmail,isAdmin:true}
-          }));
+          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo,isSuperadmin:superadminEmail,isAdmin:true}}));
           return true;
         }
 
+        // Gli account societari vengono autorizzati dal controllo completo di
+        // admin-functions.js. Il guard NON deve più rimandare alla dashboard
+        // per un errore transitorio RPC/RLS: altrimenti crea il loop dashboard -> admin -> dashboard.
         let access=null;
         let rpcError=null;
         for(let attempt=0;attempt<3;attempt++){
@@ -52,92 +43,33 @@
           await new Promise(resolve=>setTimeout(resolve,500));
         }
 
-        if(rpcError){
-          console.error("Errore verifica accesso azienda:",rpcError);
-          window.location.href="dashboard.html";
-          return false;
+        const row=Array.isArray(access)?access[0]:access;
+        if(row?.azienda_id){
+          const ruolo=String(row.ruolo||"owner").toLowerCase();
+          window.adminRuolo=ruolo;
+          window.isSuperadmin=false;
+          window.isAdmin=["owner","admin","superadmin"].includes(ruolo);
+          window.isTenantOwner=ruolo==="owner";
+          window.isTenantSuperadmin=ruolo==="superadmin";
+          window.aziendaId=row.azienda_id;
+          window.nomeAppAzienda=row.nome_app||"";
+          document.documentElement.dataset.adminRole=ruolo;
+          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{
+            ruolo,isSuperadmin:false,isAdmin:window.isAdmin,
+            isTenantOwner:window.isTenantOwner,aziendaId:row.azienda_id
+          }}));
+        }else{
+          console.warn("Admin guard: accesso tenant non determinato; il controllo definitivo resta in admin-functions.js",rpcError||"nessun accesso");
         }
-
-        let row=Array.isArray(access)?access[0]:access;
-
-        // Fallback affidabile per gli owner tenant: se la RPC non restituisce
-        // la riga durante il caricamento iniziale, leggiamo direttamente
-        // l'appartenenza dell'utente autenticato.
-        if(!row?.azienda_id){
-          const membership=await client.from("azienda_utenti")
-            .select("azienda_id,ruolo,attivo")
-            .eq("user_id",session.user.id)
-            .eq("attivo",true)
-            .maybeSingle();
-          if(!membership.error && membership.data?.azienda_id){
-            const company=await client.from("aziende")
-              .select("id,nome_app,slug,tipo_account,stato,demo_inizio,demo_scadenza")
-              .eq("id",membership.data.azienda_id)
-              .maybeSingle();
-            if(!company.error && company.data){
-              row={
-                azienda_id:company.data.id,
-                nome_app:company.data.nome_app,
-                slug:company.data.slug,
-                tipo_account:company.data.tipo_account,
-                stato:company.data.stato,
-                demo_inizio:company.data.demo_inizio,
-                demo_scadenza:company.data.demo_scadenza,
-                accesso_consentito:["attiva","configurazione"].includes(String(company.data.stato||"").toLowerCase()),
-                ruolo:membership.data.ruolo
-              };
-            }
-          }
-        }
-
-        if(!row?.azienda_id){
-          window.location.href="dashboard.html";
-          return false;
-        }
-
-        if(row.accesso_consentito!==true){
-          window.location.href="dashboard.html?demo=scaduta";
-          return false;
-        }
-
-        const tenantRole=String(row.ruolo||"owner").toLowerCase();
-        const tenantIsSuperadmin=tenantRole==="superadmin";
-        const tenantIsAdmin=tenantRole==="admin"||tenantIsSuperadmin||tenantRole==="owner";
-        if(!tenantIsAdmin){
-          window.location.href="dashboard.html";
-          return false;
-        }
-        window.adminRuolo=tenantRole;
-        window.isSuperadmin=false;
-        window.isAdmin=true;
-        window.isTenantOwner=tenantRole==="owner";
-        window.isTenantSuperadmin=tenantIsSuperadmin;
-        window.aziendaId=row.azienda_id;
-        window.nomeAppAzienda=row.nome_app||"";
-        document.documentElement.dataset.adminRole=tenantRole;
-
-        const mini=document.getElementById("adminEmailMini");
-        if(mini && session.user?.email) mini.textContent=session.user.email;
-
-        const badge=document.getElementById("adminRoleBadge");
-        if(badge){
-          badge.textContent=tenantRole==="owner"?"🏢 OWNER":(tenantRole==="superadmin"?"👑 SUPERADMIN SOCIETÀ":"👤 ADMIN SOCIETÀ");
-          badge.dataset.role=tenantRole;
-        }
-
-        window.dispatchEvent(new CustomEvent("admin:role-ready",{
-          detail:{ruolo:"owner",isSuperadmin:false,isAdmin:true,isTenantOwner:true,aziendaId:row.azienda_id}
-        }));
         return true;
       }catch(e){
-        console.error("Errore verifica accesso amministratore:",e);
-        window.location.href="dashboard.html";
-        return false;
+        console.error("Errore guard Admin:",e);
+        // Mai creare un loop verso dashboard per un errore del guard.
+        return true;
       }
     }
 
     client.auth.getSession().then(({data:{session}})=>verificaAccessoAdmin(session));
-
     client.auth.onAuthStateChange((event,session)=>{
       if(event==="SIGNED_IN" && session) verificaAccessoAdmin(session);
       if(event==="SIGNED_OUT") window.location.href="index.html";
