@@ -46,6 +46,10 @@
         const row=Array.isArray(access)?access[0]:access;
         if(row?.azienda_id){
           const ruolo=String(row.ruolo||"owner").toLowerCase();
+          if(!["owner","admin","superadmin"].includes(ruolo)){
+            window.location.href="dashboard.html?v=member";
+            return false;
+          }
           window.adminRuolo=ruolo;
           window.isSuperadmin=false;
           window.isAdmin=["owner","admin","superadmin"].includes(ruolo);
