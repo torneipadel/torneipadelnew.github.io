@@ -8145,16 +8145,49 @@ function formatCoppiaDisplay(coppia){
         if(typeof g==="string" || typeof g==="number"){
             const t=String(g).trim();
             if(!t) return "";
-            if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\\./.test(t)) return t;
-            const p=t.split(/\\s+/).filter(Boolean);
+
+            /* Il tabellone non pubblica l'e-mail dell'iscritto.
+               Se una coppia/partecipante contiene ancora l'e-mail,
+               la risolve con il nome dell'iscrizione approvata. */
+            if(t.includes("@") && Array.isArray(state.iscritti)){
+                const iscritto=state.iscritti.find(x=>
+                    String(x?.email||"").trim().toLowerCase()===t.toLowerCase()
+                );
+                if(iscritto){
+                    const nome=String(iscritto.nome||"").trim();
+                    const cognome=String(iscritto.cognome||"").trim();
+                    if(nome && cognome)
+                        return nome.charAt(0).toUpperCase()+"."+cognome;
+                    if(cognome) return cognome;
+                    if(nome) return nome;
+                }
+            }
+
+            if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\./.test(t)) return t;
+            const p=t.split(/\s+/).filter(Boolean);
             if(p.length>=2)
                 return p[0].charAt(0).toUpperCase()+"."+p.slice(1).join(" ");
             return t;
         }
 
         if(typeof g==="object"){
+            const email=String(g.email||"").trim();
             const nome=String(g.nome||g.name||"").trim();
             const cognome=String(g.cognome||g.surname||"").trim();
+
+            if((!nome && !cognome) && email && Array.isArray(state.iscritti)){
+                const iscritto=state.iscritti.find(x=>
+                    String(x?.email||"").trim().toLowerCase()===email.toLowerCase()
+                );
+                if(iscritto){
+                    const n=String(iscritto.nome||"").trim();
+                    const c=String(iscritto.cognome||"").trim();
+                    if(n && c) return n.charAt(0).toUpperCase()+"."+c;
+                    if(c) return c;
+                    if(n) return n;
+                }
+            }
+
             if(nome && cognome)
                 return nome.charAt(0).toUpperCase()+"."+cognome;
             if(cognome) return cognome;
@@ -8175,13 +8208,12 @@ function formatCoppiaDisplay(coppia){
             return [giocatore(coppia.g1),giocatore(coppia.g2)].filter(Boolean).join(" / ");
         if(coppia.giocatore1!==undefined || coppia.giocatore2!==undefined)
             return [giocatore(coppia.giocatore1),giocatore(coppia.giocatore2)].filter(Boolean).join(" / ");
-        if(coppia.nome!==undefined || coppia.cognome!==undefined)
+        if(coppia.nome!==undefined || coppia.cognome!==undefined || coppia.email!==undefined)
             return giocatore(coppia);
     }
 
     return String(coppia);
 }
-
 function calc(squadre, risultati){
     if(!Array.isArray(squadre) || !Array.isArray(risultati)) return [];
     const classifica=squadre.map(nome=>({n:nome,pt:0,gf:0,gs:0,df:0,qual:false}));
