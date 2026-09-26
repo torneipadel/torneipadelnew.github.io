@@ -156,9 +156,7 @@ async function startRegistration(){
    await createCompany(signUp.data.session.user);return;
  }
 
- form.style.display="none";
- $("success").style.display="block";
- status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! Account e richiesta della società creati correttamente. Conferma l'email per completare l'accesso.";
+ status.textContent="✓ Account creato. Controlla l'email e conferma l'account. Dopo la conferma verrai riportato qui e la società verrà creata automaticamente.";
  submit.disabled=false;
 }
 form.addEventListener("submit",async e=>{
@@ -170,23 +168,37 @@ form.addEventListener("submit",async e=>{
  }
 });
 restorePending();
-(async()=>{
+
+let completionStarted=false;
+async function completePendingRegistration(){
+ if(completionStarted)return;
+ const raw=sessionStorage.getItem(PENDING_KEY);
+ if(!raw)return;
  const user=await getSessionUser();
- if(user&&$("email").value.trim().toLowerCase()===String(user.email||"").trim().toLowerCase()){
-   setAuthenticatedMode(user);
-   try{
-     const raw=sessionStorage.getItem(PENDING_KEY);
-     if(raw){
-       status.textContent="Sessione autenticata: completamento automatico della registrazione della società…";
-       await createCompany(user);
-     }
-   }catch(error){
-     console.error("Completamento automatico registrazione società:",error);
-     status.textContent="Registrazione non completata: "+(error?.message||error);
-     submit.disabled=false;
-   }
+ if(!user)return;
+ const expectedEmail=String($("email").value||"").trim().toLowerCase();
+ const currentEmail=String(user.email||"").trim().toLowerCase();
+ if(!expectedEmail||expectedEmail!==currentEmail)return;
+ completionStarted=true;
+ setAuthenticatedMode(user);
+ try{
+   status.textContent="Account confermato. Creazione della società in corso…";
+   await createCompany(user);
+ }catch(error){
+   completionStarted=false;
+   console.error("Completamento registrazione società:",error);
+   status.textContent="Account confermato, ma la società non è stata ancora creata: "+(error?.message||error);
+   submit.disabled=false;
  }
-})();
+}
+
+sb.auth.onAuthStateChange((event,session)=>{
+ if(session?.user && (event==="SIGNED_IN"||event==="INITIAL_SESSION"||event==="TOKEN_REFRESHED")){
+   setTimeout(()=>completePendingRegistration(),0);
+ }
+});
+
+(async()=>{ await completePendingRegistration(); })();
 </script>
 </body>
 </html>
