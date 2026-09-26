@@ -58,7 +58,38 @@
           return false;
         }
 
-        const row=Array.isArray(access)?access[0]:access;
+        let row=Array.isArray(access)?access[0]:access;
+
+        // Fallback affidabile per gli owner tenant: se la RPC non restituisce
+        // la riga durante il caricamento iniziale, leggiamo direttamente
+        // l'appartenenza dell'utente autenticato.
+        if(!row?.azienda_id){
+          const membership=await client.from("azienda_utenti")
+            .select("azienda_id,ruolo,attivo")
+            .eq("user_id",session.user.id)
+            .eq("attivo",true)
+            .maybeSingle();
+          if(!membership.error && membership.data?.azienda_id){
+            const company=await client.from("aziende")
+              .select("id,nome_app,slug,tipo_account,stato,demo_inizio,demo_scadenza")
+              .eq("id",membership.data.azienda_id)
+              .maybeSingle();
+            if(!company.error && company.data){
+              row={
+                azienda_id:company.data.id,
+                nome_app:company.data.nome_app,
+                slug:company.data.slug,
+                tipo_account:company.data.tipo_account,
+                stato:company.data.stato,
+                demo_inizio:company.data.demo_inizio,
+                demo_scadenza:company.data.demo_scadenza,
+                accesso_consentito:["attiva","configurazione"].includes(String(company.data.stato||"").toLowerCase()),
+                ruolo:membership.data.ruolo
+              };
+            }
+          }
+        }
+
         if(!row?.azienda_id){
           window.location.href="dashboard.html";
           return false;
