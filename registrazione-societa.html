@@ -147,6 +147,7 @@ async function startRegistration(){
      if(signOutError)throw signOutError;
      user=null;
    }else{
+     const currentAccountType=String(user?.user_metadata?.account_type||"").toLowerCase();
      if(currentAccountType!=="societa"){
        submit.disabled=false;
        status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
