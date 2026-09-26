@@ -1,8 +1,7 @@
-const sb = window.supabase.createClient(
-  "https://dkeqicstprvvfebiaooc.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg",
-  { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }
-);
+const sb = window.sb || window.supabaseClient || window.supabase;
+if(!sb){
+  throw new Error("Supabase client singleton non inizializzato");
+}
 window.sb = sb;
 window.supabaseClient = sb;
 let adminState = {
