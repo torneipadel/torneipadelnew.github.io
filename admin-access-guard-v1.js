@@ -41,9 +41,19 @@
           return true;
         }
 
-        const {data:access,error}=await client.rpc("get_my_azienda_access");
-        if(error){
-          console.error("Errore verifica accesso azienda:",error);
+        let access=null;
+        let rpcError=null;
+        for(let attempt=0;attempt<3;attempt++){
+          const result=await client.rpc("get_my_azienda_access");
+          access=result.data;
+          rpcError=result.error||null;
+          const candidate=Array.isArray(access)?access[0]:access;
+          if(!rpcError || candidate?.azienda_id)break;
+          await new Promise(resolve=>setTimeout(resolve,500));
+        }
+
+        if(rpcError){
+          console.error("Errore verifica accesso azienda:",rpcError);
           window.location.href="dashboard.html";
           return false;
         }
