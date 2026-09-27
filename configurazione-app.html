@@ -86,7 +86,7 @@ const PAGE_THEMES=[
 ];
 function renderPageThemeEditor(){
  const root=document.getElementById('pageThemeEditor'); if(!root)return;
- root.innerHTML=PAGE_THEMES.map(p=>'<div class="page-theme-row" data-page-theme="'+p.key+'" style="margin:0 0 12px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045)"><div style="font-weight:800;font-size:12px;margin-bottom:9px">'+p.label+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><div><label style="font-size:9px">LOGO PAGINA</label><input type="file" class="pt-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"><div class="hint pt-logo-preview"></div></div><div><label style="font-size:9px">SFONDO PAGINA</label><input type="file" class="pt-bg" accept="image/png,image/jpeg,image/webp"><div class="hint pt-bg-preview"></div></div><div><label style="font-size:9px">BANNER PAGINA</label><input type="file" class="pt-banner" accept="image/png,image/jpeg,image/webp"><div class="hint pt-banner-preview"></div></div><div><label style="font-size:9px">COLORI</label><div style="display:flex;gap:7px"><input type="color" class="pt-primary" title="Colore principale"><input type="color" class="pt-accent" title="Colore accento"></div><div class="hint">Lascia i colori invariati per usare quelli generali.</div></div></div><div class="pt-visual-preview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div></div>').join('');
+ root.innerHTML=PAGE_THEMES.map(p=>'<div class="page-theme-row" data-page-theme="'+p.key+'" style="margin:0 0 12px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045)"><div style="font-weight:800;font-size:12px;margin-bottom:9px">'+p.label+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><div><label style="font-size:9px">LOGO PAGINA</label><input type="file" class="pt-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"><div class="hint pt-logo-preview"></div></div><div><label style="font-size:9px">SFONDO PAGINA</label><input type="file" class="pt-bg" accept="image/png,image/jpeg,image/webp"><div class="hint pt-bg-preview"></div></div><div><label style="font-size:9px">BANNER PAGINA</label><input type="file" class="pt-banner" accept="image/png,image/jpeg,image/webp"><div class="hint pt-banner-preview"></div></div><div><label style="font-size:9px">COLORI</label><div style="display:flex;gap:7px"><input type="color" class="pt-primary" title="Colore principale"><input type="color" class="pt-accent" title="Colore accento"></div><div class="hint">Lascia i colori invariati per usare quelli generali.</div></div></div><div class="pt-visual-preview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div><div class="pt-live-preview" style="margin-top:12px"></div></div>').join('');
  document.querySelectorAll('[data-page-theme] input[type=file]').forEach(input=>input.addEventListener('change',()=>updatePageFilePreview(input)));
  applyPageThemeEditor(azienda?.tema||{});
 }
@@ -97,6 +97,20 @@ function updatePageFilePreview(input){
  const img=document.createElement('img'); img.dataset.previewType=input.className; img.src=URL.createObjectURL(file); img.alt='Anteprima'; img.style.cssText='width:150px;height:85px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#fff1';
  host.appendChild(img);
  const hint=row.querySelector('.'+input.className+'-preview'); if(hint)hint.textContent='Anteprima del nuovo file';
+ renderLivePagePreview(row);
+}
+function renderLivePagePreview(row){
+ const page=(PAGE_THEMES.find(x=>x.key===row?.dataset.pageTheme)||{}).label||'Pagina';
+ const cfg=(azienda?.tema?.pages&&azienda.tema.pages[row?.dataset.pageTheme])||{};
+ const global=azienda?.tema?.global||{};
+ const primary=row?.querySelector('.pt-primary')?.value||cfg.primary||global.primary||'#073b72';
+ const accent=row?.querySelector('.pt-accent')?.value||cfg.accent||global.accent||'#ffe76b';
+ const logoFile=row?.querySelector('.pt-logo')?.files?.[0], bgFile=row?.querySelector('.pt-bg')?.files?.[0], bannerFile=row?.querySelector('.pt-banner')?.files?.[0];
+ const logo=logoFile?URL.createObjectURL(logoFile):(cfg.logo||azienda?.logo_url||'');
+ const bg=bgFile?URL.createObjectURL(bgFile):(cfg.background||azienda?.sfondo_url||'');
+ const banner=bannerFile?URL.createObjectURL(bannerFile):(cfg.banner||'');
+ const host=row?.querySelector('.pt-live-preview'); if(!host)return;
+ host.innerHTML='<div style="position:relative;overflow:hidden;min-height:210px;border:2px solid '+primary+';border-radius:16px;background:'+primary+';font-family:Arial,sans-serif;color:#fff"><div style="position:absolute;inset:0;background-image:'+(bg?'linear-gradient(rgba(3,12,24,.28),rgba(3,12,24,.72)),url(&quot;'+bg+'&quot;)':'linear-gradient(135deg,'+primary+','+primary+')')+';background-size:cover;background-position:center"></div><div style="position:relative;padding:12px"><div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22)">'+(logo?'<img src="'+logo+'" style="width:38px;height:38px;object-fit:contain;border-radius:7px;background:#fff">':'<div style="width:38px;height:38px;border-radius:7px;background:rgba(255,255,255,.18)"></div>')+'<strong style="font-size:12px">'+esc(azienda?.nome_app||azienda?.ragione_sociale||'Nome società')+'</strong><span style="margin-left:auto;font-size:10px;color:'+accent+'">'+esc(page)+'</span></div>'+(banner?'<img src="'+banner+'" style="display:block;width:100%;height:68px;object-fit:cover;border-radius:10px;margin-top:10px">':'<div style="height:68px;border-radius:10px;margin-top:10px;border:1px dashed rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:'+accent+'">Banner pagina</div>')+'<div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,.94);color:#172033"><div style="font-weight:800;font-size:12px">'+esc(page)+'</div><div style="font-size:9px;margin-top:4px;opacity:.72">Anteprima della pagina con il tema selezionato</div><button type="button" style="margin-top:8px;border:0;border-radius:8px;padding:6px 10px;background:'+primary+';color:#fff;font-size:9px">AZIONE</button></div></div></div>';
 }
 function applyPageThemeEditor(theme){
  document.querySelectorAll('[data-page-theme]').forEach(row=>{
@@ -115,7 +129,9 @@ function applyPageThemeEditor(theme){
    });
    const sw=document.createElement('div'); sw.style.cssText='width:150px;height:85px;border-radius:10px;border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:'+a.value+';background:'+p.value; sw.textContent='Anteprima colori'; host.appendChild(sw);
   }
+  renderLivePagePreview(row);
  });
+ document.querySelectorAll('[data-page-theme] .pt-primary,[data-page-theme] .pt-accent').forEach(input=>input.addEventListener('input',()=>renderLivePagePreview(input.closest('[data-page-theme]'))));
 }
 async function uploadPageThemeFile(file,max,folder,userId){
  if(!file)return null;if(file.size>max)throw new Error('Il file supera il limite consentito.');
