@@ -143,6 +143,11 @@ async function initPublicCompany(slug){
  document.getElementById("welcomeName").textContent=c.sede||"Pagina della società";
  document.getElementById("emailBox").textContent="";
  if(c.logo_url)document.querySelector(".logo").src=c.logo_url;
+ const legalLinks={privacy:"privacy.html",cookie:"cookie.html",terms:"termini.html"};
+ Object.entries(legalLinks).forEach(([key,file])=>{
+  const link=document.querySelector(`a[href="${file}"]`);
+  if(link)link.href=file+"?azienda="+encodeURIComponent(c.slug);
+ });
  document.querySelector(".subtitle").textContent="Accedi o registrati per entrare nell'area della società.";
  document.querySelector(".main-actions").innerHTML='<button class="action" onclick="location.href=\'login-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">🔐</span><span class="action-title">ACCEDI</span><span class="action-text">Accedi al tuo account</span></button><button class="action" onclick="location.href=\'registrazione-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">📝</span><span class="action-title">REGISTRATI</span><span class="action-text">Crea il tuo account</span></button>';
  document.getElementById("adminMenu").classList.add("hidden");
