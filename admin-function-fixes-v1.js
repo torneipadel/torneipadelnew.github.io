@@ -81,7 +81,9 @@ async function create(nome,data,posti,descrizione,formula,formulaConfig){
  const formulaFinale=formula==='gironiFinale'?(formulaConfig?.formulaFinale||'eliminazione'):(formulaConfig?.formulaFinale||'');
  const configurazione={nomeTorneo:nome,dataTorneo:data,coppie:[],partecipanti:[],sCamp,sTime,fCamp,fTime,rules:{locked:false,tipoTorneo:formula||'',formatoTorneo:formula||'',numeroSquadre:formula==='individualeCoppieVariabili'?0:posti,numeroGiocatori:formula==='individualeCoppieVariabili'?posti:posti*2,numeroGironi:formula==='individualeCoppieVariabili'?0:numeroGironi,squadrePerGirone:formulaConfig?.squadrePerGirone||4,formulaGironi,formulaFinale,formulaScelta:formula||'',formulaConfig:formulaConfig||{}}};if(formula==='individualeCoppieVariabili'){configurazione.rotazione={version:2,numeroGiocatori:posti,giornate:[],puntiVittoria:Number(formulaConfig?.puntiVittoria??3),puntiPareggio:Number(formulaConfig?.puntiPareggio??1),puntiSconfitta:Number(formulaConfig?.puntiSconfitta??0),campoDefault:formulaConfig?.campoDefault||'',oraDefault:formulaConfig?.oraDefault||''};}
  if(!window.sb)throw Error('Supabase non disponibile');
- const r=await window.sb.from('tornei').upsert({id,nome,data,data_torneo:data,posti,descrizione,formula:formula||null,stato:'bozza',pubblicato:false,iscrizioni_chiuse:false,configurazione},{onConflict:'id'});
+ const aziendaId=String(window.aziendaId||'').trim();
+ if(!aziendaId)throw Error('Società non determinata: creazione torneo bloccata per sicurezza.');
+ const r=await window.sb.from('tornei').upsert({id,nome,data,data_torneo:data,posti,descrizione,formula:formula||null,stato:'bozza',pubblicato:false,iscrizioni_chiuse:false,configurazione,azienda_id:aziendaId},{onConflict:'id'});
  if(r.error)throw r.error;
  try{localStorage.setItem('torneoState',JSON.stringify({idTorneo:id,nomeTorneo:nome,dataTorneo:data,formato:posti,partecipanti:[],coppie:[],sCamp,sTime,fCamp,fTime,rules:{...configurazione.rules}}))}catch(e){}
  if(typeof window.openAdminPage==='function')window.openAdminPage('dashboard');
