@@ -36,6 +36,13 @@ body {
 }
 
 .subtitle{font-size:0.7rem;color:#94a3b8;line-height:1.1;text-align:center;margin-top:5px}
+.direttore-societa-box{min-width:230px;max-width:360px;text-align:center}
+.direttore-societa-display,.direttore-societa-edit{background:rgba(17,24,39,.55);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:8px 10px}
+.direttore-label{display:block;font-size:.68rem;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+#direttoreSocietaNome{font-size:1rem;color:#fff}
+.direttore-fields{display:flex;gap:5px;align-items:center;justify-content:center}
+.direttore-fields input{width:105px!important;padding:6px 7px!important}
+.direttore-fields button{padding:6px 9px;font-size:12px}
 
 .date-input-field{background:#0b1220; border:1px solid #334155; color:#fff; padding:2px 5px; border-radius:4px; font-family:system-ui; font-size:0.9rem; cursor:pointer; width:110px; text-align:center;}
 
@@ -704,6 +711,72 @@ async function verifyAccess(){
 
     if(aziendaAccess && aziendaAccess.azienda_id){
         window.__BOVE_TENANT_ID__ = String(aziendaAccess.azienda_id);
+
+        /* Il direttore appartiene alla società, non al singolo torneo. */
+        try{
+            const direttoreResult = await sb
+                .from("aziende")
+                .select("direttore_nome,direttore_cognome")
+                .eq("id", aziendaAccess.azienda_id)
+                .maybeSingle();
+
+            const direttoreNome = String(direttoreResult.data?.direttore_nome || "").trim();
+            const direttoreCognome = String(direttoreResult.data?.direttore_cognome || "").trim();
+            const direttoreCompleto = [direttoreNome,direttoreCognome].filter(Boolean).join(" ");
+
+            window.__DIRETTORE_SOCIETA__ = {
+                nome: direttoreNome,
+                cognome: direttoreCognome
+            };
+
+            const display = document.getElementById("direttoreSocietaNome");
+            const nomeInput = document.getElementById("direttoreNomeInput");
+            const cognomeInput = document.getElementById("direttoreCognomeInput");
+            if(display) display.textContent = direttoreCompleto || "Direttore non inserito";
+            if(nomeInput) nomeInput.value = direttoreNome;
+            if(cognomeInput) cognomeInput.value = direttoreCognome;
+
+            const editBox = document.getElementById("direttoreSocietaEdit");
+            const displayBox = document.getElementById("direttoreSocietaDisplay");
+            const canEditDirettore = ["admin","superadmin","owner"].includes(String(ruoloEffettivo || "").toLowerCase());
+
+            if(canEditDirettore){
+                if(editBox) editBox.hidden = false;
+                if(displayBox) displayBox.hidden = true;
+            }
+
+            const saveDirettore = document.getElementById("salvaDirettoreSocieta");
+            if(saveDirettore && canEditDirettore){
+                saveDirettore.onclick = async function(){
+                    const nome = String(nomeInput?.value || "").trim();
+                    const cognome = String(cognomeInput?.value || "").trim();
+                    saveDirettore.disabled = true;
+                    try{
+                        const {error:updateError} = await sb
+                            .from("aziende")
+                            .update({
+                                direttore_nome: nome || null,
+                                direttore_cognome: cognome || null
+                            })
+                            .eq("id", aziendaAccess.azienda_id);
+
+                        if(updateError) throw updateError;
+
+                        const nuovoNome = [nome,cognome].filter(Boolean).join(" ");
+                        if(display) display.textContent = nuovoNome || "Direttore non inserito";
+                        window.__DIRETTORE_SOCIETA__ = {nome,cognome};
+                        alert("Direttore della società salvato.");
+                    }catch(e){
+                        console.error("Errore salvataggio direttore società:",e);
+                        alert("Impossibile salvare il direttore della società.");
+                    }finally{
+                        saveDirettore.disabled = false;
+                    }
+                };
+            }
+        }catch(e){
+            console.warn("Impossibile caricare il direttore della società:",e);
+        }
 
         const urlTenant =
             new URLSearchParams(window.location.search).get("azienda_id");
@@ -2523,40 +2596,19 @@ Chiudi
 
 <div class="header-box">
 
-
-
-<div style="text-align:center;">
-
-
-
-<img 
-
-src="logo.jpg" 
-
-alt="Logo" 
-
-style="
-
-width:60px;
-
-height:60px;
-
-border-radius:50%;
-
-object-fit:cover;
-
-border:2px solid #2563eb;
-
-">
-
-<div class="subtitle">
-
-Roberto Bove<br>
-
-Director & Event Organizer
-
-</div>
-
+<div id="direttoreSocietaBox" class="direttore-societa-box" aria-label="Direttore della società">
+    <div id="direttoreSocietaDisplay" class="direttore-societa-display">
+        <span class="direttore-label">Direttore</span>
+        <strong id="direttoreSocietaNome">—</strong>
+    </div>
+    <div id="direttoreSocietaEdit" class="direttore-societa-edit" hidden>
+        <span class="direttore-label">Direttore della società</span>
+        <div class="direttore-fields">
+            <input id="direttoreNomeInput" type="text" maxlength="80" placeholder="Nome">
+            <input id="direttoreCognomeInput" type="text" maxlength="80" placeholder="Cognome">
+            <button id="salvaDirettoreSocieta" type="button">Salva</button>
+        </div>
+    </div>
 </div>
 
 <div style="text-align:center;">
