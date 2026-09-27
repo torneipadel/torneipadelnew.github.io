@@ -2,7 +2,11 @@
   'use strict';
   const getClient=()=>window.sb||window.supabaseClient||window.supabase;
   const tenantId=()=>String(window.aziendaId||'').trim();
-  const isGlobal=()=>window.isSuperadmin===true&&window.isTenantSuperadmin!==true || window.adminRuolo==='admin';
+  const isGlobal=()=>{
+    if(window.isPlatformAdmin===true) return true;
+    const email=String(window.adminState?.adminEmail||'').trim().toLowerCase();
+    return email==='giose.rizzi@gmail.com'||email==='boverob@libero.it'||email==='cfalba@libero.it';
+  };
   function companyLabel(){
     const name=String(window.nomeAppAzienda||'').trim();
     const email=String(window.adminState?.adminEmail||'').trim();
