@@ -641,8 +641,42 @@ async function verifyAccess(){
     ADMIN
     ============================
 
-    Lascia tutto disponibile.
+    Riabilita il gestionale dopo il controllo sessione.
     */
+    document.body.classList.remove("user-mode");
+    document.querySelectorAll('input, button, textarea, select').forEach(function(el){
+        el.disabled = false;
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+    });
+
+    if(aziendaAccess && aziendaAccess.azienda_id){
+        window.__BOVE_TENANT_ID__ = String(aziendaAccess.azienda_id);
+    }else{
+        window.__BOVE_TENANT_ID__ = "";
+    }
+
+    const adminMenu = document.getElementById("menuComandi");
+    if(adminMenu){
+        adminMenu.querySelectorAll("button").forEach(function(button){
+            button.disabled = false;
+            button.style.setProperty("display","block","important");
+            button.style.setProperty("visibility","visible","important");
+            button.style.setProperty("opacity","1","important");
+            button.style.setProperty("pointer-events","auto","important");
+        });
+    }
+
+    const adminHamburger = document.querySelector(".menu-button");
+    if(adminHamburger){
+        adminHamburger.disabled = false;
+        adminHamburger.style.setProperty("display","flex","important");
+        adminHamburger.style.setProperty("visibility","visible","important");
+        adminHamburger.style.setProperty("opacity","1","important");
+        adminHamburger.style.setProperty("pointer-events","auto","important");
+    }
+
+    /* Lascia tutto disponibile. */
 
     const adminSaveResultButton =
         document.getElementById("adminSaveResultButton");
@@ -12737,7 +12771,11 @@ window.print();
                 "GET",
                 "https://dkeqicstprvvfebiaooc.supabase.co/rest/v1/tornei?id=eq."+
                 encodeURIComponent(idTorneo)+
-                "&select=id,nome,data,configurazione,updated_at&_="+Date.now(),
+                "&select=id,nome,data,azienda_id,configurazione,updated_at"+
+                (window.__BOVE_TENANT_ID__
+                    ? "&azienda_id=eq."+encodeURIComponent(window.__BOVE_TENANT_ID__)
+                    : "")+
+                "&_="+Date.now(),
                 true
             );
 
