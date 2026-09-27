@@ -120,7 +120,7 @@ async function loginUser(){
  setStatus("Accesso in corso…");
  const {data,error}=await sb.auth.signInWithPassword({email,password});
  if(error||!data?.session){setStatus("Credenziali non valide.");return}
- const {data:access,error:accessError}=await sb.rpc("get_my_azienda_access");
+ const {data:access,error:accessError}=await sb.rpc("get_my_azienda_access",{p_azienda_id:company.id});
  const a=Array.isArray(access)?access[0]:access;
  if(accessError||!a||String(a.azienda_id)!==String(company.id)||!a.accesso_consentito){
    await sb.auth.signOut();
