@@ -12630,6 +12630,73 @@ window.print();
             ensureRules();
         }
 
+        /*
+         * I dati attuali di MASTER salvano le squadre in
+         * configurazione.coppie. Il renderer dei gironi lavora
+         * invece sugli array A-F. Se A/B-F non sono presenti,
+         * ricostruiamo i gironi dalla configurazione senza
+         * perdere eventuali risultati già salvati.
+         */
+        if(
+            Array.isArray(state.coppie) &&
+            state.coppie.length > 0 &&
+            (!Array.isArray(state.A) || state.A.length === 0)
+        ){
+            var numeroCoppieDB = state.coppie.length;
+            var perGironeDB = 4;
+            var lettereDB = ["A","B","C","D","E","F"];
+
+            lettereDB.forEach(function(tag){
+                state[tag] = [];
+                state[tag+"res"] = [];
+                state[tag+"time"] = [];
+                state[tag+"camp"] = [];
+            });
+
+            state.coppie
+                .slice(0, numeroCoppieDB)
+                .forEach(function(coppia,index){
+                    var tag =
+                        lettereDB[
+                            Math.floor(index / perGironeDB)
+                        ];
+
+                    if(tag){
+                        state[tag].push(coppia);
+                    }
+                });
+
+            lettereDB.forEach(function(tag){
+                var n =
+                    Array.isArray(state[tag])
+                        ? state[tag].length
+                        : 0;
+
+                if(n >= 2){
+                    var partite =
+                        n * (n - 1) / 2;
+
+                    state[tag+"res"] =
+                        Array(partite).fill("-");
+
+                    state[tag+"time"] =
+                        Array(partite).fill("");
+
+                    state[tag+"camp"] =
+                        Array(partite).fill("");
+                }
+            });
+
+            console.log(
+                "BOVE MASTER: squadre ricostruite da configurazione.coppie",
+                {
+                    totale: numeroCoppieDB,
+                    A: state.A.length,
+                    B: state.B.length
+                }
+            );
+        }
+
         var numeroCoppie = Array.isArray(state.coppie)
             ? state.coppie.length
             : 0;
