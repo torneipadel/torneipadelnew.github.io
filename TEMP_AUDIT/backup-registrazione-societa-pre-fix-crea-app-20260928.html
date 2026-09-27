@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#071219">
+<title>Registra la tua società — Next Point Padel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:"Open Sans",Arial,sans-serif;color:#fff}
+body{min-height:100vh;padding:28px 16px;background:linear-gradient(135deg,rgba(4,14,21,.62),rgba(7,18,25,.34) 45%,rgba(3,12,18,.68)),url("2pages.jpg") center/cover fixed no-repeat}
+.shell{width:min(860px,100%);margin:auto;padding:34px 38px 28px;border:1px solid rgba(255,255,255,.23);border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.06));backdrop-filter:blur(20px);box-shadow:0 24px 65px rgba(0,0,0,.34)}
+.brand{text-align:center;margin-bottom:28px}.brand img{width:auto;max-width:230px;max-height:110px;object-fit:contain;filter:brightness(1.18) contrast(.92) saturate(.82) drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+.brand h1{font-size:22px;letter-spacing:2px;margin:8px 0 5px}.brand p{margin:0;color:rgba(255,255,255,.68);font-size:13px}
+.progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 26px}.step{padding:9px;border-radius:10px;text-align:center;font-size:11px;font-weight:700;background:rgba(255,255,255,.07);color:rgba(255,255,255,.55)}.step.active{background:rgba(255,255,255,.18);color:#fff}
+h2{margin:0 0 8px;font-size:21px}.intro{margin:0 0 22px;color:rgba(255,255,255,.68);font-size:13px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field{margin-bottom:2px}.full{grid-column:1/-1}
+label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:100%;height:46px;border:1px solid rgba(255,255,255,.22);border-radius:11px;background:rgba(255,255,255,.08);color:#fff;padding:0 13px;font:14px Arial,sans-serif;outline:none}input:focus{border-color:rgba(255,255,255,.62);background:rgba(255,255,255,.12)}small{display:block;margin-top:5px;color:rgba(255,255,255,.48);font-size:10px}
+.checks{margin-top:20px;padding:15px;border:1px solid rgba(255,255,255,.14);border-radius:13px;background:rgba(255,255,255,.05)}.check{display:flex;gap:9px;align-items:flex-start;margin:9px 0;font-size:11px;line-height:1.45;color:rgba(255,255,255,.78)}.check input{width:auto;height:auto;margin-top:2px}
+.actions{display:flex;gap:10px;margin-top:22px}.actions button{flex:1;height:48px;border:1px solid rgba(255,255,255,.25);border-radius:11px;font-weight:800;cursor:pointer}.back{background:rgba(255,255,255,.07);color:#fff}.submit{background:#fff;color:#073b72}.submit:disabled{opacity:.55;cursor:wait}
+.status{min-height:22px;margin-top:15px;text-align:center;font-size:12px;line-height:1.5;color:#ffe76b}.success{color:#fff;background:rgba(255,255,255,.08);padding:16px;border-radius:12px;text-align:center;margin-top:18px;display:none}.success strong{display:block;font-size:15px;margin-bottom:5px}.success-actions{display:flex;justify-content:center;margin-top:14px}.exit{min-width:180px;height:44px;border:1px solid rgba(255,255,255,.3);border-radius:11px;background:#fff;color:#073b72;font-weight:800;cursor:pointer}
+.footer{text-align:center;margin-top:20px;color:rgba(255,255,255,.48);font-size:10px}.footer a{color:#fff;margin:0 6px;text-decoration:none}
+@media(max-width:650px){body{padding:14px 10px}.shell{padding:25px 17px 20px;border-radius:20px}.grid{grid-template-columns:1fr}.full{grid-column:auto}.actions{flex-direction:column}.brand img{max-width:200px;max-height:95px}}
+</style>
+</head>
+<body>
+<main class="shell">
+<div class="brand"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><h1>NEXT POINT PADEL</h1><p>Attiva la tua app professionale per la gestione del club</p></div>
+<div class="progress"><div class="step active">1 · Società</div><div class="step active">2 · Amministratore</div><div class="step active">3 · Attivazione automatica</div></div>
+<section id="formSection">
+<h2>Registra la tua società</h2>
+<p class="intro">Inserisci i dati una sola volta. Al termine verranno creati automaticamente l'account amministratore, l'ambiente della società e la richiesta di attivazione della tua app.</p>
+<form id="companyRegistration">
+<div class="grid">
+<div class="field"><label for="ragione">Ragione sociale *</label><input id="ragione" required autocomplete="organization" placeholder="Es. Next Point Padel S.r.l."></div>
+<div class="field"><label for="nomeApp">Nome dell'app *</label><input id="nomeApp" required placeholder="Es. Next Point Padel"></div>
+<div class="field"><label for="titolare">Titolare / referente *</label><input id="titolare" required autocomplete="name" placeholder="Nome e cognome"></div>
+<div class="field"><label for="email">Email amministratore *</label><input id="email" type="email" required autocomplete="email" placeholder="La userai per accedere"></div>
+<div class="field"><label for="telefono">Telefono *</label><input id="telefono" type="tel" required autocomplete="tel" placeholder="+39 ..."></div>
+<div class="field"><label for="pec">PEC</label><input id="pec" type="email" autocomplete="email" placeholder="pec@azienda.it"></div>
+<div class="field"><label for="sede">Sede</label><input id="sede" autocomplete="street-address" placeholder="Indirizzo / città"></div>
+<div class="field"><label for="cf">Partita IVA / Codice Fiscale *</label><input id="cf" required autocomplete="off" placeholder="Inserisci Partita IVA o Codice Fiscale"></div>
+<div class="field"><label for="nome">Nome amministratore *</label><input id="nome" required autocomplete="given-name"></div>
+<div class="field"><label for="cognome">Cognome amministratore *</label><input id="cognome" required autocomplete="family-name"></div>
+<div class="field"><label for="password">Password *</label><input id="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimo 8 caratteri"></div>
+<div class="field"><label for="password2">Conferma password *</label><input id="password2" type="password" required minlength="8" autocomplete="new-password"></div>
+</div>
+<div class="checks">
+<label class="check"><input id="privacy" type="checkbox" required><span>Ho letto e accetto l'informativa Privacy.</span></label>
+<label class="check"><input id="terms" type="checkbox" required><span>Accetto i Termini del servizio e richiedo l'attivazione dell'app per la società indicata.</span></label>
+</div>
+<div class="actions"><button type="button" class="back" id="back">INDIETRO</button><button type="submit" class="submit" id="submit">CREA LA MIA APP</button></div>
+<div id="status" class="status"></div>
+</form>
+<div id="success" class="success"><strong>Registrazione avvenuta con successo!</strong><span>La registrazione è stata acquisita correttamente. Se richiesto, conferma l'email e poi accedi dal Login.</span><div class="success-actions" style="gap:10px"><button type="button" class="exit" id="configure">CONFIGURA LA PAGINA</button><button type="button" class="exit" id="exit">ESCI</button></div></div>
+</section>
+<div class="footer"><a href="privacy.html">Privacy</a><a href="cookie.html">Cookie</a><a href="termini.html">Termini</a><a href="contatti.html">Contatti</a></div>
+</main>
+<script>
+const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id),status=$("status"),submit=$("submit"),form=$("companyRegistration");
+const PENDING_KEY="nextpoint_company_registration_pending";
+const REG_PIVA_KEY="nextpoint_registration_piva";
+const PENDING_STORAGE=window.localStorage;
+$("back").onclick=()=>location.href="login.html";
+$('configure').onclick=async()=>{
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){
+      status.textContent="Sessione non disponibile. Accedi con l'account appena registrato per continuare la configurazione.";
+      return;
+    }
+    location.href='configurazione-app.html';
+  }catch(e){
+    console.error("Apertura configurazione:",e);
+    status.textContent="Impossibile aprire la configurazione: "+(e?.message||e);
+  }
+};
+$("exit").onclick=async()=>{try{await sb.auth.signOut()}catch(e){console.warn("Uscita:",e)}PENDING_STORAGE.removeItem(PENDING_KEY);location.href="index.html";};
+
+function hydrateFromUser(user){
+ const m=user?.user_metadata||{};
+ const map={email:m.email_aziendale||user?.email,ragione:m.ragione_sociale,nomeApp:m.nome_app,titolare:m.titolare,telefono:m.telefono,pec:m.pec,sede:m.sede,cf:m.cf_piva,nome:m.nome,cognome:m.cognome};
+ Object.entries(map).forEach(([k,v])=>{if($(k)&&v!=null&&String(v).trim())$(k).value=String(v).trim()});
+}
+function fields(){
+ return {
+   ragione:$("ragione").value.trim(),nomeApp:$("nomeApp").value.trim(),titolare:$("titolare").value.trim(),
+   email:$("email").value.trim().toLowerCase(),telefono:$("telefono").value.trim(),pec:$("pec").value.trim(),
+   sede:$("sede").value.trim(),cf:$("cf").value.trim(),nome:$("nome").value.trim(),cognome:$("cognome").value.trim()
+ };
+}
+function savePending(){
+ const data=fields();
+ PENDING_STORAGE.setItem(PENDING_KEY,JSON.stringify(data));
+ return data;
+}
+function restorePending(){
+ try{
+   const raw=PENDING_STORAGE.getItem(PENDING_KEY);if(!raw)return;
+   const d=JSON.parse(raw);
+   Object.keys(d).forEach(k=>{if($(k)&&d[k]!=null)$(k).value=d[k]});
+ }catch(e){console.warn("Ripristino registrazione:",e)}
+}
+function setAuthenticatedMode(user){
+ const current=String(user?.email||"").trim().toLowerCase(), email=String($("email").value||"").trim().toLowerCase();
+ const ok=!!current&&!!email&&current===email;
+ $("password").required=!ok;
+ $("password2").required=!ok;
+ if(ok){
+   $("password").value="";$("password2").value="";
+   status.textContent="Account già autenticato: puoi completare la configurazione della società.";
+ }
+ return ok;
+}
+async function getSessionUser(){
+ try{
+   const {data}=await sb.auth.getSession();
+   return data?.session?.user||null;
+ }catch(e){return null}
+}
+async function createCompany(user){
+ hydrateFromUser(user);
+ const d=fields();
+ const {data,error}=await sb.rpc("create_company_for_current_user",{
+   p_ragione_sociale:d.ragione,p_nome_app:d.nomeApp,p_titolare:d.titolare,p_sede:d.sede,
+   p_cf_piva:d.cf,p_telefono:d.telefono,p_pec:d.pec,p_email_aziendale:d.email,p_tipo_account:"societa"
+ });
+ if(error)throw error;
+ if(!data?.ok)throw new Error(data?.message||"La società non è stata creata.");
+ PENDING_STORAGE.removeItem(PENDING_KEY);
+ sessionStorage.removeItem(REG_PIVA_KEY);
+ form.style.display="none";
+ $("success").style.display="block";
+ status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! La richiesta della società è stata acquisita.";
+ submit.disabled=true;
+ return data;
+}
+async function startRegistration(){
+ submit.disabled=true;
+ status.textContent="Verifica dell'account e configurazione della società…";
+ const d=savePending();
+ let user=await getSessionUser();
+ if(user){
+   const currentEmail=String(user.email||"").trim().toLowerCase();
+   if(currentEmail!==d.email){
+     status.textContent="È presente una sessione con un altro account. Chiusura della sessione e prosecuzione con l'email amministratore indicata…";
+     const {error:signOutError}=await sb.auth.signOut();
+     if(signOutError)throw signOutError;
+     user=null;
+   }else{
+     const currentAccountType=String(user?.user_metadata?.account_type||"").toLowerCase();
+     if(currentAccountType!=="societa"){
+       submit.disabled=false;
+       status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+       return;
+     }
+     await createCompany(user);return;
+   }
+ }
+ const password=$("password").value,password2=$("password2").value;
+ if(!password||password.length<8){submit.disabled=false;status.textContent="La password deve contenere almeno 8 caratteri.";return}
+ if(password!==password2){submit.disabled=false;status.textContent="Le password non coincidono.";return}
+
+ status.textContent="Accesso all'account amministratore…";
+ const signIn=await sb.auth.signInWithPassword({email:d.email,password});
+ if(!signIn.error&&signIn.data?.user){
+   const existingUser=signIn.data.user;
+   const existingAccountType=String(existingUser?.user_metadata?.account_type||"").toLowerCase();
+   if(existingAccountType!=="societa"){
+     submit.disabled=false;
+     status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+     return;
+   }
+   await createCompany(existingUser);return;
+ }
+
+ status.textContent="Account non ancora presente: creazione dell'account…";
+ const signUp=await sb.auth.signUp({email:d.email,password,options:{emailRedirectTo:location.origin+location.pathname,data:{
+   account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
+   titolare:d.titolare,telefono:d.telefono,pec:d.pec,sede:d.sede,cf_piva:d.cf,email_aziendale:d.email,
+   privacy_accettata:"true",termini_accettati:"true",richiesta_at:new Date().toISOString()
+ }}}); 
+ if(signUp.error){
+   submit.disabled=false;
+   status.textContent="Registrazione non completata: "+signUp.error.message+" Se l'account esiste già, accedi dal Login e torna qui per completare la registrazione.";
+   return;
+ }
+ if(signUp.data?.session?.user){
+   await createCompany(signUp.data.session.user);return;
+ }
+
+ status.textContent="✓ Account creato. Controlla l'email e conferma l'account. Dopo la conferma la società verrà creata automaticamente.";
+ submit.disabled=false;
+}
+form.addEventListener("submit",async e=>{
+ e.preventDefault();
+ try{await startRegistration()}catch(error){
+   console.error("Registrazione società:",error);
+   submit.disabled=false;
+   status.textContent="Registrazione non completata: "+(error?.message||error);
+ }
+});
+restorePending();
+const savedPiva=sessionStorage.getItem(REG_PIVA_KEY);
+if(savedPiva && !$("cf").value.trim()) $("cf").value=savedPiva.trim();
+
+let completionStarted=false;
+async function completePendingRegistration(){
+ if(completionStarted)return;
+ const raw=PENDING_STORAGE.getItem(PENDING_KEY);
+ const user=await getSessionUser();
+ if(!user)return;
+ const isCompanyRegistration=String(user?.user_metadata?.account_type||"").toLowerCase()==="societa";
+ if(!raw && !isCompanyRegistration)return;
+ hydrateFromUser(user);
+ const expectedEmail=String($("email").value||"").trim().toLowerCase();
+ const currentEmail=String(user.email||"").trim().toLowerCase();
+ if(!isCompanyRegistration && (!expectedEmail||expectedEmail!==currentEmail))return;
+ completionStarted=true;
+ setAuthenticatedMode(user);
+ try{
+   status.textContent="Account confermato. Creazione della società in corso…";
+   await createCompany(user);
+ }catch(error){
+   completionStarted=false;
+   console.error("Completamento registrazione società:",error);
+   status.textContent="Account confermato, ma la società non è stata ancora creata: "+(error?.message||error);
+   submit.disabled=false;
+ }
+}
+
+sb.auth.onAuthStateChange((event,session)=>{
+ if(session?.user && (event==="SIGNED_IN"||event==="INITIAL_SESSION"||event==="TOKEN_REFRESHED")){
+   setTimeout(()=>completePendingRegistration(),0);
+ }
+});
+
+(async()=>{ await completePendingRegistration(); })();
+</script>
+</body>
+</html>
