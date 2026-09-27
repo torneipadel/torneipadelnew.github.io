@@ -2536,7 +2536,7 @@ width:100%;
 
 <h1 id="titoloTorneo" style="margin:0;font-size:1.4rem;">
 
-🏆 Torneo Amatoriale Padel
+⏳ Caricamento torneo…
 
 </h1>
 
@@ -7056,6 +7056,9 @@ try{
                     error
                 );
 
+                window.__BOVE_REMOTE_LOAD_ERROR__ = error;
+                window.__BOVE_REMOTE_NOT_FOUND__ = true;
+
             }
 
             const torneo =
@@ -10237,7 +10240,19 @@ function render(){
 
     const titolo=document.getElementById("titoloTorneo");
     if(titolo){
-        titolo.innerHTML="🏆 "+(state.nomeTorneo||"Torneo Amatoriale Padel");
+        const nomeTorneoRender =
+            String(state.nomeTorneo || "").trim();
+
+        if(nomeTorneoRender){
+            titolo.innerHTML =
+                "🏆 " + nomeTorneoRender;
+        }else if(window.__BOVE_REMOTE_NOT_FOUND__){
+            titolo.innerHTML =
+                "⚠️ Torneo non trovato";
+        }else{
+            titolo.innerHTML =
+                "⏳ Caricamento torneo…";
+        }
     }
 
     const inputNome=document.getElementById("nomeTorneoInput");
