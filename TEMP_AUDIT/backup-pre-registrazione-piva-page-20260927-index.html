@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Next Point Padel — Trova la tua società</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#073b72;--blue2:#0b568f;--gold:#ffe76b;--ink:#10233a;--muted:#64748b;--line:#dbe5ef;--bg:#f4f8fc}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,"Open Sans",Arial,sans-serif;color:var(--ink);background:var(--bg)}a{text-decoration:none}
+.hero{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:34px 18px;background:linear-gradient(135deg,rgba(7,59,114,.96),rgba(11,86,143,.88)),url("sfondo2.jpg") center/cover no-repeat}
+.hero-card{width:min(1080px,100%);padding:48px 44px;border:1px solid rgba(255,255,255,.2);border-radius:28px;background:rgba(255,255,255,.1);box-shadow:0 28px 80px rgba(0,0,0,.24);backdrop-filter:blur(18px);color:#fff;text-align:center}
+.logo img{width:auto;max-width:190px;max-height:115px;display:block;margin:0 auto 12px;border-radius:18px;object-fit:contain;filter:drop-shadow(0 10px 20px rgba(0,0,0,.2))}
+.logo h1{margin:0;font-size:clamp(30px,5vw,50px);letter-spacing:2px}.logo p{margin:10px 0 0;font-size:16px;opacity:.88}
+.hero h2{margin:34px auto 12px;font-size:clamp(27px,4vw,42px);line-height:1.12}.hero-copy{max-width:760px;margin:0 auto;color:rgba(255,255,255,.82);line-height:1.7}
+.search-box{max-width:720px;margin:30px auto 0;display:flex;gap:10px}.search-box input{flex:1;min-height:54px;padding:0 18px;border:0;border-radius:14px;font-size:16px;outline:none}
+.btn{min-height:50px;padding:0 22px;border:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;letter-spacing:.35px;cursor:pointer}
+.btn-primary{background:#fff;color:var(--blue)}.btn-gold{background:var(--gold);color:var(--blue)}.btn-ghost{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff}
+.hero-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+main{width:min(1080px,calc(100% - 36px));margin:0 auto;padding:58px 0 20px}.section-head{text-align:center;margin-bottom:26px}.section-head h2{margin:0;color:var(--blue);font-size:30px}.section-head p{margin:9px auto 0;color:var(--muted);max-width:680px}
+.status{text-align:center;color:var(--muted);padding:24px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.company-card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 12px 30px rgba(7,59,114,.08);display:flex;flex-direction:column}
+.company-brand{height:155px;background:linear-gradient(135deg,#edf5fc,#dfeaf5);display:flex;align-items:center;justify-content:center;padding:20px}.company-brand img{max-width:180px;max-height:105px;object-fit:contain;border-radius:12px}.company-fallback{font-size:27px;font-weight:900;color:var(--blue);text-align:center}
+.company-body{padding:20px;display:flex;flex-direction:column;flex:1}.company-body h3{margin:0;color:var(--blue);font-size:20px}.company-body p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.5;min-height:40px}.company-body .btn{margin-top:auto;width:100%;background:var(--blue);color:#fff}
+.empty{padding:35px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:18px;color:var(--muted)}
+.join{margin:52px 0 20px;padding:34px;border-radius:22px;background:#fff;border:1px solid var(--line);text-align:center;box-shadow:0 12px 30px rgba(7,59,114,.06)}.join h2{margin:0;color:var(--blue)}.join p{color:var(--muted);line-height:1.6}.join .btn{background:var(--blue);color:#fff}
+footer{margin-top:45px;padding:30px 20px;text-align:center;background:#092f57;color:rgba(255,255,255,.75);font-size:13px;line-height:1.9}footer a{color:#fff}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.hero{min-height:auto;padding:18px 10px}.hero-card{padding:32px 18px;border-radius:22px}.search-box{flex-direction:column}.search-box .btn{width:100%}.hero-actions{flex-direction:column}.hero-actions .btn{width:100%}main{width:min(100% - 22px,1080px);padding-top:42px}.grid{grid-template-columns:1fr}.company-brand{height:135px}}
+</style>
+</head>
+<body>
+<header class="hero">
+<div class="hero-card">
+<div class="logo"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><h1>NEXT POINT PADEL</h1><p>Il punto di accesso alle società, ai tornei e agli eventi di padel.</p></div>
+<h2>Trova la tua società</h2>
+<div class="hero-copy">Cerca il tuo club, entra nella sua pagina pubblica e accedi direttamente a tornei, eventi e servizi.</div>
+<form class="search-box" id="companySearch"><input id="searchInput" type="search" placeholder="Cerca società o club..." autocomplete="off" aria-label="Cerca società o club"><button class="btn btn-gold" type="submit">CERCA</button></form>
+<div class="hero-actions"><a class="btn btn-ghost" href="#societa">VEDI LE SOCIETÀ</a><a class="btn btn-primary" href="registrazione-societa.html">REGISTRA LA TUA SOCIETÀ</a></div>
+</div>
+</header>
+<main>
+<section id="societa">
+<div class="section-head"><h2>Società presenti su Next Point Padel</h2><p>Scegli la società a cui vuoi accedere. Dopo l'ingresso, la registrazione sarà quella del visitatore e non della società.</p></div>
+<div id="companyStatus" class="status">Caricamento delle società...</div><div id="companyGrid" class="grid"></div>
+</section>
+<section class="join"><h2>Sei una società?</h2><p>Crea la tua presenza su Next Point Padel e offri ai tuoi giocatori un accesso diretto al tuo ambiente digitale.</p><a class="btn" href="registrazione-societa.html">REGISTRA LA TUA SOCIETÀ</a></section>
+</main>
+<footer><a href="informazioni.html">Informazioni</a> · <a href="contatti.html">Contatti</a> · <a href="privacy.html">Privacy</a> · <a href="cookie.html">Cookie</a> · <a href="termini.html">Termini</a><br><br>© Next Point Padel</footer>
+<script>
+const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const grid=document.getElementById("companyGrid"),statusEl=document.getElementById("companyStatus"),searchInput=document.getElementById("searchInput");
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
+function companyUrl(company){if(company.slug)return "dashboard.html?azienda="+encodeURIComponent(company.slug);const appUrl=String(company.app_url||"").trim();if(appUrl)return appUrl.replace(/\/$/,"")+"/";return "#"}
+function renderCompanies(companies){
+grid.innerHTML="";
+if(!companies.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nessuna società trovata. Prova con un altro nome.</div>';return}
+for(const company of companies){
+const name=company.nome_app||company.ragione_sociale||"Società",url=companyUrl(company),logo=company.logo_url||"";
+const card=document.createElement("article");card.className="company-card";
+card.innerHTML='<div class="company-brand">'+(logo?'<img src="'+escapeHtml(logo)+'" alt="'+escapeHtml(name)+'">':'<div class="company-fallback">'+escapeHtml(name)+'</div>')+'</div><div class="company-body"><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(company.sede||"Società attiva su Next Point Padel")+'</p><a class="btn" href="'+escapeHtml(url)+'">ENTRA NELLA SOCIETÀ</a></div>';
+grid.appendChild(card)
+}}
+async function loadCompanies(search){
+statusEl.textContent="Caricamento delle società...";grid.innerHTML="";
+const result=await sb.rpc("get_public_companies",{search_text:search||null});
+if(result.error){console.error(result.error);statusEl.textContent="Impossibile caricare le società al momento.";return}
+const data=result.data||[];statusEl.textContent=data.length?(data.length+" società disponibil"+(data.length===1?"e":"i")):"";renderCompanies(data)
+}
+document.getElementById("companySearch").addEventListener("submit",function(e){e.preventDefault();loadCompanies(searchInput.value.trim());document.getElementById("societa").scrollIntoView({behavior:"smooth",block:"start"})});
+loadCompanies("");
+</script>
+</body>
+</html>
