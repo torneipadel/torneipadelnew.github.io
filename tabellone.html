@@ -7070,6 +7070,9 @@ try{
                     if(Array.isArray(cfg.coppie))
                         configurazione.coppie =
                             cfg.coppie;
+                    else if(Array.isArray(cfg.squadre))
+                        configurazione.coppie =
+                            cfg.squadre;
 
                     if(Array.isArray(cfg.partecipanti))
                         configurazione.partecipanti =
@@ -7079,7 +7082,11 @@ try{
                 state.coppie =
                     Array.isArray(configurazione.coppie)
                         ? configurazione.coppie
-                        : [];
+                        : (
+                            Array.isArray(configurazione.squadre)
+                                ? configurazione.squadre
+                                : []
+                        );
 
                 state.partecipanti =
                     Array.isArray(configurazione.partecipanti)
@@ -7332,6 +7339,8 @@ try{
 
             if(Array.isArray(cfg.coppie))
                 state.coppie=cfg.coppie;
+            else if(Array.isArray(cfg.squadre))
+                state.coppie=cfg.squadre;
 
             if(Array.isArray(cfg.partecipanti))
                 state.partecipanti=
@@ -7536,6 +7545,21 @@ try{
             JSON.stringify(state)
         );
 
+    }
+
+    /* Intestazione remota: sincronizzazione esplicita dopo il caricamento completo. */
+    if(torneoRemoto){
+        const titoloRemoto=document.getElementById("titoloTorneo");
+        if(titoloRemoto)
+            titoloRemoto.textContent="🏆 "+(state.nomeTorneo||"Torneo Amatoriale Padel");
+
+        const nomeRemoto=document.getElementById("nomeTorneoInput");
+        if(nomeRemoto)
+            nomeRemoto.value=state.nomeTorneo||"";
+
+        const dataRemota=document.querySelector("input[type='date']");
+        if(dataRemota)
+            dataRemota.value=state.dataTorneo||"";
     }
 
     console.log(
