@@ -92,9 +92,30 @@ async function loginUser(){
  setStatus("Accesso in corso…");
  const {data,error}=await sb.auth.signInWithPassword({email,password});
  if(error||!data?.session){setStatus(error?.message||"Credenziali non valide.");return}
+ const params=new URLSearchParams(location.search);
+ const reservedSlug=params.get("azienda")||"";
+ const reservedNext=params.get("next")||"";
+ if(reservedSlug&&reservedNext==="admin"){
+  const selectedAziendaId=sessionStorage.getItem("nextpoint_login_azienda_id")||"";
+  const {data:access,error:accessError}=await sb.rpc("get_my_azienda_access",selectedAziendaId?{p_azienda_id:selectedAziendaId}:{});
+  const a=Array.isArray(access)?access[0]:access;
+  const role=String(a?.ruolo||"").toLowerCase();
+  if(accessError||!a?.accesso_consentito||!["admin","superadmin","owner"].includes(role)){
+   await sb.auth.signOut();
+   setStatus("L'account non è autorizzato alla gestione della società selezionata.");
+   return;
+  }
+  sessionStorage.setItem("nextpoint_login_azienda_id",a.azienda_id||selectedAziendaId);
+  sessionStorage.setItem("nextpoint_login_role",role);
+  sessionStorage.setItem("nextpoint_login_azienda_slug",reservedSlug);
+  setStatus("Accesso effettuato. Apertura della gestione tornei…");
+  setTimeout(()=>window.location.replace("admin.html?v=20260927"),200);
+  return;
+ }
  sessionStorage.removeItem("nextpoint_login_azienda_id");
  sessionStorage.removeItem("nextpoint_login_azienda_nome");
  sessionStorage.removeItem("nextpoint_login_role");
+ sessionStorage.removeItem("nextpoint_login_azienda_slug");
  setStatus("Accesso effettuato. Apertura della tua area…");
  setTimeout(()=>window.location.replace("dashboard.html"),200);
 }
