@@ -11815,12 +11815,51 @@ function aggiornaDescrizioneTipoTorneo(){
 }
 function toggleMenu(){
 
-    let menu = document.getElementById("menuComandi");
+    const menu =
+        document.getElementById("menuComandi");
+
+    const button =
+        document.querySelector(".menu-button");
 
     if(!menu)
         return;
 
-    menu.classList.toggle("show");
+    const apertura =
+        !menu.classList.contains("show");
+
+    menu.classList.toggle("show",apertura);
+
+    menu.style.setProperty(
+        "display",
+        apertura ? "flex" : "none",
+        "important"
+    );
+
+    menu.style.setProperty(
+        "visibility",
+        apertura ? "visible" : "hidden",
+        "important"
+    );
+
+    menu.style.setProperty(
+        "opacity",
+        apertura ? "1" : "0",
+        "important"
+    );
+
+    menu.style.setProperty(
+        "pointer-events",
+        apertura ? "auto" : "none",
+        "important"
+    );
+
+    if(button){
+        button.disabled=false;
+        button.style.setProperty("display","flex","important");
+        button.style.setProperty("visibility","visible","important");
+        button.style.setProperty("opacity","1","important");
+        button.style.setProperty("pointer-events","auto","important");
+    }
 
 }
 
@@ -12308,6 +12347,90 @@ async function initDefaults(){
 
 
 
+
+        /*
+         * NORMALIZZAZIONE FINALE DELLE SQUADRE:
+         * il torneo può arrivare dall'admin tramite ?torneo=... oppure
+         * direttamente da Supabase tramite ?idTorneo=....
+         * In entrambi i casi il renderer lavora sugli array A-F.
+         */
+        ensureRules();
+
+        const coppieCaricate =
+            Array.isArray(state.coppie)
+                ? state.coppie
+                : [];
+
+        if(
+            coppieCaricate.length > 0 &&
+            (!Array.isArray(state.A) || state.A.length === 0)
+        ){
+            const totaleRichiesto =
+                Number(state.rules.numeroSquadre) ||
+                coppieCaricate.length;
+
+            const gironi =
+                Number(state.rules.numeroGironi) ||
+                Math.ceil(totaleRichiesto / 4);
+
+            const perGirone =
+                Number(state.rules.squadrePerGirone) ||
+                4;
+
+            const lettere =
+                ["A","B","C","D","E","F"];
+
+            lettere.forEach(function(g){
+                state[g] = [];
+                state[g+"res"] = [];
+                state[g+"time"] = [];
+                state[g+"camp"] = [];
+            });
+
+            coppieCaricate
+                .slice(0, totaleRichiesto)
+                .forEach(function(coppia,index){
+                    const gruppo =
+                        lettere[Math.floor(index / perGirone)];
+
+                    if(gruppo)
+                        state[gruppo].push(coppia);
+                });
+
+            lettere.forEach(function(g){
+                const n =
+                    Array.isArray(state[g])
+                        ? state[g].length
+                        : 0;
+
+                if(n >= 2){
+                    const partite =
+                        n * (n - 1) / 2;
+
+                    state[g+"res"] =
+                        Array(partite).fill("-");
+
+                    state[g+"time"] =
+                        Array(partite).fill("");
+
+                    state[g+"camp"] =
+                        Array(partite).fill("");
+                }
+            });
+
+            console.log(
+                "TABELLONE MASTER: squadre caricate nei gironi",
+                {
+                    coppie:coppieCaricate.length,
+                    A:state.A.length,
+                    B:state.B.length,
+                    C:state.C.length,
+                    D:state.D.length,
+                    E:state.E.length,
+                    F:state.F.length
+                }
+            );
+        }
 
         if(typeof render==="function"){
 
