@@ -16,7 +16,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:'Open Sans',Arial,sans-serif;color:#fff}
 body{background:linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.62)),url('2pages.jpg') center/cover fixed no-repeat;min-height:100vh;padding:22px 16px 40px;overflow-x:hidden}
-.menu-button{position:fixed;top:18px;right:18px;width:44px;height:44px;border:1px solid rgba(255,255,255,.20);border-radius:12px;background:rgba(255,255,255,.10);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#fff;font:22px/1 'Open Sans',Arial,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.exit-public{position:fixed;top:18px;left:18px;width:30px;height:30px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:16px/1 'Open Sans',Arial,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;opacity:.78}.exit-public:hover{opacity:1;background:rgba(255,255,255,.14)}.menu-button{position:fixed;top:18px;right:18px;width:44px;height:44px;border:1px solid rgba(255,255,255,.20);border-radius:12px;background:rgba(255,255,255,.10);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#fff;font:22px/1 'Open Sans',Arial,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;box-shadow:0 6px 20px rgba(0,0,0,.18)}
 .menu-button:hover{background:rgba(255,255,255,.17)}
 .menu-panel{position:fixed;top:0;right:-290px;width:280px;height:100vh;background:rgba(7,20,38,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-left:1px solid rgba(255,255,255,.20);box-shadow:-10px 0 35px rgba(0,0,0,.24);transition:.3s;padding-top:78px;z-index:999}.menu-panel.open{right:0}.menu-item{padding:15px 22px;font-size:14px;line-height:1.4;font-weight:600;text-align:left;cursor:pointer;color:#fff}.menu-item:hover{background:rgba(255,255,255,.12)}
 .page{width:min(760px,100%);margin:0 auto}
@@ -48,6 +48,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <script src="tenant-theme-v1.js?v=1"></script>
 </head>
 <body>
+<button class="exit-public" onclick="logout()" aria-label="Esci" title="Esci">←</button>
 <div class="menu-button" onclick="toggleMenu()" aria-label="Apri menu">☰</div>
 <div class="menu-panel" id="menuPanel">
 <div class="menu-item" onclick="location.href='dashboard.html'">⌂ Home</div>
@@ -160,7 +161,7 @@ async function initPublicCompany(slug){
  document.getElementById("emailBox").textContent="";
  if(c.logo_url)document.querySelector(".logo").src=c.logo_url;
  document.querySelector(".subtitle").textContent="Accedi alla società oppure registrati per partecipare alle attività del club.";
- document.querySelector(".main-actions").innerHTML='<button class="action" onclick="location.href=\'login-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">🔐</span><span class="action-title">ACCEDI</span><span class="action-text">Accedi al tuo account</span></button><button class="action" onclick="location.href=\'registrazione-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">📝</span><span class="action-title">REGISTRATI</span><span class="action-text">Crea il tuo account</span></button><button class="action" onclick="location.href=\'index.html\'"><span class="action-icon">🏢</span><span class="action-title">CAMBIA SOCIETÀ</span><span class="action-text">Torna all’elenco</span></button><button class="action" id="reservedBtn" type="button"><span class="action-icon">🔒</span><span class="action-title">ACCESSO RISERVATO</span><span class="action-text">Gestione della società</span></button>';
+ document.querySelector(".main-actions").innerHTML='<button class="action" onclick="location.href=\'login-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">🔐</span><span class="action-title">ACCEDI</span><span class="action-text">Accedi al tuo account</span></button><button class="action" onclick="location.href=\'registrazione-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">📝</span><span class="action-title">REGISTRATI</span><span class="action-text">Crea il tuo account</span></button><button class="action" id="reservedBtn" type="button"><span class="action-icon">🔒</span><span class="action-title">ACCESSO RISERVATO</span><span class="action-text">Gestione della società</span></button>';
  document.getElementById("adminMenu").classList.add("hidden");
  document.querySelectorAll("main.page .section").forEach(x=>x.style.display="none");
  document.getElementById("status").textContent="";
