@@ -607,8 +607,18 @@ async function verifyAccess(){
         }
     }
 
+    const ruoloAzienda =
+        String(aziendaAccess?.ruolo || "")
+            .toLowerCase()
+            .trim();
+
+    const ruoloEffettivo =
+        ["admin","superadmin","owner"].includes(ruoloAzienda)
+            ? ruoloAzienda
+            : ruoloProfilo;
+
     if(
-        !["admin","superadmin","owner"].includes(ruoloProfilo)
+        !["admin","superadmin","owner"].includes(ruoloEffettivo)
     ){
 
         console.warn(
