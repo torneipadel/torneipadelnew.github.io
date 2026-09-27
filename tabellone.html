@@ -567,7 +567,11 @@ async function verifyAccess(){
             .toLowerCase()
             .trim();
 
-    /* Recupera la società reale dell'utente tenant. */
+    /*
+     * Recupera la società reale dell'utente.
+     * get_my_azienda_access usa azienda_utenti; gli account proprietari
+     * registrati possono invece essere collegati direttamente da aziende.owner_user_id.
+     */
     try{
         const accessResult = await sb.rpc("get_my_azienda_access");
         const accessRow =
@@ -580,6 +584,27 @@ async function verifyAccess(){
         }
     }catch(e){
         console.warn("Impossibile determinare la società dell'utente:",e);
+    }
+
+    if(!aziendaAccess || !aziendaAccess.azienda_id){
+        try{
+            const ownerResult = await sb
+                .from("aziende")
+                .select("id,nome_app,slug")
+                .eq("owner_user_id", userId)
+                .limit(1)
+                .maybeSingle();
+
+            if(ownerResult.data && ownerResult.data.id){
+                aziendaAccess = {
+                    azienda_id: ownerResult.data.id,
+                    nome_app: ownerResult.data.nome_app || "",
+                    slug: ownerResult.data.slug || ""
+                };
+            }
+        }catch(e){
+            console.warn("Impossibile determinare la società proprietaria:",e);
+        }
     }
 
     if(
@@ -761,7 +786,7 @@ function bloccaGestionale(){
 
 }
 
-    verifyAccess();
+    window.__BOVE_ACCESS_READY__ = verifyAccess();
 
 });
    </script>
@@ -6923,6 +6948,11 @@ async function updateAndSync(showSaveResult=false){
 
 async function loadState(){
 
+/* Prima di leggere il torneo remoto, attendi la verifica sessione/azienda. */
+if(window.__BOVE_ACCESS_READY__){
+    try{ await window.__BOVE_ACCESS_READY__; }catch(e){ console.warn("BOVE access check:",e); }
+}
+
 const params = new URLSearchParams(window.location.search);
 const idParam = params.get("idTorneo") || (window.__BOVE_TV_ID__ ? String(window.__BOVE_TV_ID__) : "");
 const torneoParam = params.get("torneo");
@@ -12660,6 +12690,16 @@ window.print();
 
     function applicaSnapshot(row){
         if(!row || !row.configurazione) return false;
+
+        if(
+            window.__BOVE_TENANT_ID__ &&
+            window.__BOVE_TENANT_ID__ !== "__INVALID__" &&
+            String(row.azienda_id || "") !== String(window.__BOVE_TENANT_ID__)
+        ){
+            console.error("BOVE: snapshot di una società diversa da quella autenticata.");
+            window.__BOVE_REMOTE_NOT_FOUND__ = true;
+            return false;
+        }
         if(typeof state === "undefined" || !state) return false;
 
         var cfg = row.configurazione || {};
