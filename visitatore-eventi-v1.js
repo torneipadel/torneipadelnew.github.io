@@ -10,6 +10,17 @@ const SUPABASE_KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 
 let sb=null;
 let allTournaments=[];
+let publicCompany=null;
+const publicSlug=new URLSearchParams(location.search).get('azienda')||'';
+async function resolvePublicCompany(){
+ if(!publicSlug)return null;
+ try{
+  const response=await fetch(SUPABASE_URL+'/functions/v1/login-piva',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:publicSlug})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result?.ok||!result?.azienda)return null;
+  return result.azienda;
+ }catch(e){console.error('[EVENTI SOCIETA PUBBLICA]',e);return null}
+}
 let currentMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -340,10 +351,16 @@ async function load(){
 
   window.sb=sb;
 
-  const {data,error}=await sb
+  publicCompany=await resolvePublicCompany();
+  let q=sb
    .from('tornei')
-   .select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione')
+   .select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione,azienda_id')
    .order('data',{ascending:true});
+  if(publicSlug){
+   if(!publicCompany?.id)throw new Error('Società pubblica non trovata');
+   q=q.eq('azienda_id',publicCompany.id);
+  }
+  const {data,error}=await q;
 
   if(error)throw error;
 
