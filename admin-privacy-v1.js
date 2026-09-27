@@ -7,7 +7,7 @@ async function loadPrivacyAdmin(){
  const root=document.getElementById('appContent');const sb=S();if(!root||!sb)return;
  let aziende=[];
  if(isGlobal()){
-   const r=await sb.from('aziende').select('id,ragione_sociale,nome_app,titolare,sede,cf_piva,email,pec,dpo,privacy_text,cookie_text,termini_text').order('ragione_sociale',{ascending:true});
+   const r=await sb.from('aziende').select('id,ragione_sociale,nome_app,slug,titolare,sede,cf_piva,email,pec,dpo,privacy_text,cookie_text,termini_text').order('ragione_sociale',{ascending:true});
    if(r.error){root.innerHTML='<div class="card"><div class="card-body"><div class="empty">Impossibile caricare le società.</div></div></div>';console.error(r.error);return}
    aziende=r.data||[];
  }else{
