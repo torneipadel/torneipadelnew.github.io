@@ -94,7 +94,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <span class="action-icon">🤝</span><span class="action-title">SPONSOR</span><span class="action-text">Scopri i partner del club</span>
 </button>
 </div>
-<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><div style="font-size:10px;color:var(--gold);margin:6px 0 10px">La password dell’ADMIN coincide con la Partita IVA / Codice Fiscale.</div><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
+<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><div style="font-size:10px;color:rgba(255,255,255,.68);margin:6px 0 10px">Dopo il riconoscimento della società verrà aperta la pagina di accesso con email e password dell’account amministratore.</div><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
 </section>
 
 <section class="section">
@@ -163,8 +163,7 @@ function setupReserved(c){
   e.preventDefault();
   const st=document.getElementById("reservedStatus");
   const id=document.getElementById("reservedIdentifier").value.trim();
-  const password=id;
-  st.textContent="Verifica in corso…";
+  st.textContent="Verifica della società in corso…";
   try{
    const r=await fetch("https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/login-piva",{
     method:"POST",
@@ -173,34 +172,14 @@ function setupReserved(c){
    });
    const d=await r.json().catch(()=>({}));
    if(!r.ok||!d.ok||!d.azienda||d.azienda.id!==c.id){
-    st.textContent=d.error||"Credenziali non valide.";
-    return;
-   }
-   const sessionResult=await sb.auth.setSession({
-    access_token:d.session?.access_token||"",
-    refresh_token:d.session?.refresh_token||""
-   });
-   if(sessionResult.error){
-    st.textContent=sessionResult.error.message||"Impossibile completare l'accesso.";
-    return;
-   }
-   const access=await sb.rpc("get_my_azienda_access",{p_azienda_id:c.id});
-   if(access.error){
-    st.textContent=access.error.message||"Impossibile verificare l'accesso.";
-    await sb.auth.signOut();
-    return;
-   }
-   const a=Array.isArray(access.data)?access.data[0]:access.data;
-   const role=String(a?.ruolo||d.role||"").toLowerCase();
-   if(!a?.accesso_consentito||!["admin","superadmin","owner"].includes(role)){
-    st.textContent="L'account non è autorizzato ad accedere alla gestione della società.";
-    await sb.auth.signOut();
+    st.textContent=d.error||"Partita IVA / Codice Fiscale non riconosciuto.";
     return;
    }
    sessionStorage.setItem("nextpoint_login_azienda_id",c.id);
-   sessionStorage.setItem("nextpoint_login_role",role);
    sessionStorage.setItem("nextpoint_login_azienda_slug",c.slug);
-   window.location.href="admin.html?v=20260927";
+   sessionStorage.setItem("nextpoint_login_role",String(d.role||"").toLowerCase());
+   st.textContent="Società riconosciuta. Inserisci ora email e password dell'account amministratore.";
+   setTimeout(()=>window.location.href="login.html?azienda="+encodeURIComponent(c.slug)+"&next=admin",250);
   }catch(err){
    console.error(err);
    st.textContent="Errore di collegamento. Riprova.";
