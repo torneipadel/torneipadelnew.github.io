@@ -102,3 +102,4 @@ setTimeout(removeDuplicateSponsorBanner,1000);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',filterSelector,{once:true});
   else requestAnimationFrame(filterSelector);
 })();
+})();
