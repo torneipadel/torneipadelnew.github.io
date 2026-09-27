@@ -86,18 +86,35 @@ const PAGE_THEMES=[
 ];
 function renderPageThemeEditor(){
  const root=document.getElementById('pageThemeEditor'); if(!root)return;
- root.innerHTML=PAGE_THEMES.map(p=>'<div class="page-theme-row" data-page-theme="'+p.key+'" style="margin:0 0 12px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045)"><div style="font-weight:800;font-size:12px;margin-bottom:9px">'+p.label+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><div><label style="font-size:9px">LOGO PAGINA</label><input type="file" class="pt-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"><div class="hint pt-logo-preview"></div></div><div><label style="font-size:9px">SFONDO PAGINA</label><input type="file" class="pt-bg" accept="image/png,image/jpeg,image/webp"><div class="hint pt-bg-preview"></div></div><div><label style="font-size:9px">BANNER PAGINA</label><input type="file" class="pt-banner" accept="image/png,image/jpeg,image/webp"><div class="hint pt-banner-preview"></div></div><div><label style="font-size:9px">COLORI</label><div style="display:flex;gap:7px"><input type="color" class="pt-primary" title="Colore principale"><input type="color" class="pt-accent" title="Colore accento"></div><div class="hint">Lascia i colori invariati per usare quelli generali.</div></div></div></div>').join('');
+ root.innerHTML=PAGE_THEMES.map(p=>'<div class="page-theme-row" data-page-theme="'+p.key+'" style="margin:0 0 12px;padding:13px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.045)"><div style="font-weight:800;font-size:12px;margin-bottom:9px">'+p.label+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><div><label style="font-size:9px">LOGO PAGINA</label><input type="file" class="pt-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml"><div class="hint pt-logo-preview"></div></div><div><label style="font-size:9px">SFONDO PAGINA</label><input type="file" class="pt-bg" accept="image/png,image/jpeg,image/webp"><div class="hint pt-bg-preview"></div></div><div><label style="font-size:9px">BANNER PAGINA</label><input type="file" class="pt-banner" accept="image/png,image/jpeg,image/webp"><div class="hint pt-banner-preview"></div></div><div><label style="font-size:9px">COLORI</label><div style="display:flex;gap:7px"><input type="color" class="pt-primary" title="Colore principale"><input type="color" class="pt-accent" title="Colore accento"></div><div class="hint">Lascia i colori invariati per usare quelli generali.</div></div></div><div class="pt-visual-preview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"></div></div>').join('');
+ document.querySelectorAll('[data-page-theme] input[type=file]').forEach(input=>input.addEventListener('change',()=>updatePageFilePreview(input)));
  applyPageThemeEditor(azienda?.tema||{});
+}
+function updatePageFilePreview(input){
+ const row=input.closest('[data-page-theme]'), host=row?.querySelector('.pt-visual-preview'); if(!host)return;
+ const file=input.files?.[0]; if(!file)return;
+ const old=host.querySelector('[data-preview-type="'+input.className+'"]'); if(old)old.remove();
+ const img=document.createElement('img'); img.dataset.previewType=input.className; img.src=URL.createObjectURL(file); img.alt='Anteprima'; img.style.cssText='width:150px;height:85px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#fff1';
+ host.appendChild(img);
+ const hint=row.querySelector('.'+input.className+'-preview'); if(hint)hint.textContent='Anteprima del nuovo file';
 }
 function applyPageThemeEditor(theme){
  document.querySelectorAll('[data-page-theme]').forEach(row=>{
   const key=row.dataset.pageTheme, cfg=(theme.pages&&theme.pages[key])||{};
-  const p=row.querySelector('.pt-primary'), a=row.querySelector('.pt-accent');
+  const p=row.querySelector('.pt-primary'), a=row.querySelector('.pt-accent'), host=row.querySelector('.pt-visual-preview');
   if(p)p.value=cfg.primary||theme.global?.primary||primary?.value||'#073b72';
   if(a)a.value=cfg.accent||theme.global?.accent||accent?.value||'#ffe76b';
   row.querySelector('.pt-logo-preview').textContent=cfg.logo?'Logo attuale configurato':'Nessun logo specifico';
   row.querySelector('.pt-bg-preview').textContent=cfg.background?'Sfondo attuale configurato':'Nessuno sfondo specifico';
   row.querySelector('.pt-banner-preview').textContent=cfg.banner?'Banner attuale configurato':'Nessun banner specifico';
+  if(host){
+   host.innerHTML='';
+   [['logo',cfg.logo],['background',cfg.background],['banner',cfg.banner]].forEach(([type,url])=>{
+    if(!url)return;
+    const img=document.createElement('img'); img.src=url; img.alt='Anteprima '+type; img.style.cssText='width:150px;height:85px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#fff1'; host.appendChild(img);
+   });
+   const sw=document.createElement('div'); sw.style.cssText='width:150px;height:85px;border-radius:10px;border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:'+a.value+';background:'+p.value; sw.textContent='Anteprima colori'; host.appendChild(sw);
+  }
  });
 }
 async function uploadPageThemeFile(file,max,folder,userId){
