@@ -60,6 +60,7 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id),status=$("status"),submit=$("submit"),form=$("companyRegistration");
 const PENDING_KEY="nextpoint_company_registration_pending";
+const REG_PIVA_KEY="nextpoint_registration_piva";
 const PENDING_STORAGE=window.localStorage;
 $("back").onclick=()=>location.href="login.html";
 $('configure').onclick=async()=>{
@@ -128,6 +129,7 @@ async function createCompany(user){
  if(error)throw error;
  if(!data?.ok)throw new Error(data?.message||"La società non è stata creata.");
  PENDING_STORAGE.removeItem(PENDING_KEY);
+ sessionStorage.removeItem(REG_PIVA_KEY);
  form.style.display="none";
  $("success").style.display="block";
  status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! La richiesta della società è stata acquisita.";
@@ -200,6 +202,8 @@ form.addEventListener("submit",async e=>{
  }
 });
 restorePending();
+const savedPiva=sessionStorage.getItem(REG_PIVA_KEY);
+if(savedPiva && !$("cf").value.trim()) $("cf").value=savedPiva.trim();
 
 let completionStarted=false;
 async function completePendingRegistration(){
