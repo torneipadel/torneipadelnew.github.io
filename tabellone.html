@@ -560,85 +560,15 @@ async function verifyAccess(){
     }
 
 
-    let selectedAziendaId =
-        sessionStorage.getItem("nextpoint_login_azienda_id") || "";
-
-    let ruoloAzienda = "";
-
-    async function recuperaAccessoAzienda(){
-        let accessoAzienda = null;
-
-        if(selectedAziendaId){
-            const rAzienda = await sb
-                .from("azienda_utenti")
-                .select("azienda_id,ruolo")
-                .eq("azienda_id", selectedAziendaId)
-                .eq("user_id", userId)
-                .eq("attivo", true)
-                .maybeSingle();
-
-            if(rAzienda.error){
-                console.error("Errore verifica ruolo aziendale:", rAzienda.error);
-            }else if(rAzienda.data){
-                accessoAzienda = rAzienda.data;
-            }
-        }
-
-        if(!accessoAzienda){
-            const rAzienda = await sb
-                .from("azienda_utenti")
-                .select("azienda_id,ruolo")
-                .eq("user_id", userId)
-                .eq("attivo", true)
-                .in("ruolo", ["owner","admin","superadmin"])
-                .limit(1)
-                .maybeSingle();
-
-            if(rAzienda.error){
-                console.error("Errore recupero azienda dell'utente:", rAzienda.error);
-            }else if(rAzienda.data){
-                accessoAzienda = rAzienda.data;
-                selectedAziendaId = String(rAzienda.data.azienda_id || "");
-                if(selectedAziendaId){
-                    sessionStorage.setItem("nextpoint_login_azienda_id", selectedAziendaId);
-                }
-                sessionStorage.setItem(
-                    "nextpoint_login_role",
-                    String(rAzienda.data.ruolo || "").toLowerCase().trim()
-                );
-            }
-        }
-
-        if(accessoAzienda){
-            ruoloAzienda =
-                String(accessoAzienda.ruolo || "")
-                    .toLowerCase()
-                    .trim();
-        }
-    }
-
-    await recuperaAccessoAzienda();
-
-    const email =
-        String(session.user.email || "")
+    if(
+        String(profilo.ruolo)
             .toLowerCase()
-            .trim();
-
-    const adminPiattaforma =
-        email === "boverob@libero.it" ||
-        email === "cfalba@libero.it" ||
-        email === "admin@test.it" ||
-        email === "giose.rizzi@gmail.com";
-
-    const accessoAdmin =
-        adminPiattaforma ||
-        ["owner","admin","superadmin"].includes(ruoloAzienda);
-
-    if(!accessoAdmin){
+            .trim() !== "admin"
+    ){
 
         console.warn(
-            "Utente senza permessi di gestione del torneo:",
-            {profilo,ruoloAzienda,selectedAziendaId}
+            "Utente senza permessi admin:",
+            profilo
         );
 
         bloccaGestionale();
@@ -7098,9 +7028,8 @@ try{
                         };
 
                     if(Array.isArray(cfg.coppie))
-                        configurazione.coppie = cfg.coppie;
-                    else if(Array.isArray(cfg.squadre))
-                        configurazione.coppie = cfg.squadre;
+                        configurazione.coppie =
+                            cfg.coppie;
 
                     if(Array.isArray(cfg.partecipanti))
                         configurazione.partecipanti =
@@ -7110,9 +7039,7 @@ try{
                 state.coppie =
                     Array.isArray(configurazione.coppie)
                         ? configurazione.coppie
-                        : (Array.isArray(configurazione.squadre)
-                            ? configurazione.squadre
-                            : []);
+                        : [];
 
                 state.partecipanti =
                     Array.isArray(configurazione.partecipanti)
@@ -7365,8 +7292,6 @@ try{
 
             if(Array.isArray(cfg.coppie))
                 state.coppie=cfg.coppie;
-            else if(Array.isArray(cfg.squadre))
-                state.coppie=cfg.squadre;
 
             if(Array.isArray(cfg.partecipanti))
                 state.partecipanti=
