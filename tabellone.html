@@ -12267,88 +12267,7 @@ async function initDefaults(){
 
 
 
-                if(typeof render==="function"){
-
-                    render();
-
-                }
-
-
-                return;
-
-
-            }
-            catch(e){
-
-                console.error(
-                    "Errore caricamento torneo Admin:",
-                    e
-                );
-
-            }
-
-        }
-
-
-
-
-
-        /*
-        ============================
-        CARICAMENTO NORMALE
-        ============================
-        */
-
-
-        let salvato =
-            idTorneo
-                ? null
-                : localStorage.getItem(
-                    "torneoState"
-                );
-
-
-        if(salvato){
-
-            try{
-
-                let vecchio =
-                    JSON.parse(
-                        salvato
-                    );
-
-
-                state={
-
-                    ...state,
-
-                    ...vecchio,
-
-                    rules:{
-                        ...state.rules,
-                        ...(vecchio.rules||{})
-                    }
-
-                };
-
-
-            }
-            catch(e){
-
-                console.error(
-                    "Errore localStorage:",
-                    e
-                );
-
-            }
-
-        }
-
-
-
-
-
-        /*
+                /*
          * NORMALIZZAZIONE FINALE DELLE SQUADRE:
          * il torneo può arrivare dall'admin tramite ?torneo=... oppure
          * direttamente da Supabase tramite ?idTorneo=....
@@ -12431,6 +12350,87 @@ async function initDefaults(){
                 }
             );
         }
+
+        if(typeof render==="function"){
+
+                    render();
+
+                }
+
+
+                return;
+
+
+            }
+            catch(e){
+
+                console.error(
+                    "Errore caricamento torneo Admin:",
+                    e
+                );
+
+            }
+
+        }
+
+
+
+
+
+        /*
+        ============================
+        CARICAMENTO NORMALE
+        ============================
+        */
+
+
+        let salvato =
+            idTorneo
+                ? null
+                : localStorage.getItem(
+                    "torneoState"
+                );
+
+
+        if(salvato){
+
+            try{
+
+                let vecchio =
+                    JSON.parse(
+                        salvato
+                    );
+
+
+                state={
+
+                    ...state,
+
+                    ...vecchio,
+
+                    rules:{
+                        ...state.rules,
+                        ...(vecchio.rules||{})
+                    }
+
+                };
+
+
+            }
+            catch(e){
+
+                console.error(
+                    "Errore localStorage:",
+                    e
+                );
+
+            }
+
+        }
+
+
+
+
 
         if(typeof render==="function"){
 
