@@ -2,6 +2,6 @@
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu"),p=new URLSearchParams(location.search),azienda=p.get("azienda")||"",q=encodeURIComponent(azienda),msg=document.getElementById("msg");
 back.href="societa.html?slug="+q;reg.href="registrazione-utente.html?azienda="+q;
 async function init(){const r=await sb.rpc("get_public_company",{p_slug:azienda}),c=Array.isArray(r.data)?r.data[0]:r.data;if(c)company.textContent="Accesso a "+(c.nome_app||c.ragione_sociale);}
-async function go(){msg.textContent="Accesso in corso…";const r=await sb.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(r.error){msg.textContent=r.error.message;return}const m=await sb.rpc("complete_visitor_membership",{p_azienda_slug:azienda});if(m.error){await sb.auth.signOut();msg.textContent=m.error.message;return}location.href="societa.html?slug="+q}
+async function go(){msg.textContent="Accesso in corso…";const r=await sb.auth.signInWithPassword({email:email.value.trim(),password:password.value});if(r.error){msg.textContent=r.error.message;return}const m=await sb.rpc("complete_visitor_membership",{p_azienda_slug:azienda});if(m.error){await sb.auth.signOut();msg.textContent=m.error.message;return}location.href="dashboard.html"}
 document.getElementById("go").onclick=go;init();
 </script></body></html>
