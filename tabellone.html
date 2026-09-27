@@ -560,10 +560,13 @@ async function verifyAccess(){
     }
 
 
-    if(
-        String(profilo.ruolo)
+    const ruoloProfilo =
+        String(profilo.ruolo || "")
             .toLowerCase()
-            .trim() !== "admin"
+            .trim();
+
+    if(
+        !["admin","superadmin","owner"].includes(ruoloProfilo)
     ){
 
         console.warn(
@@ -7045,6 +7048,118 @@ try{
                     Array.isArray(configurazione.partecipanti)
                         ? configurazione.partecipanti
                         : [];
+
+                /*
+                 * COMPATIBILITÀ TORNEI MASTER:
+                 * alcuni tornei salvano le squadre esclusivamente
+                 * in configurazione.coppie. Il motore del tabellone
+                 * lavora invece sugli array A-F. In quel caso
+                 * ricostruiamo i gironi dalla lista coppie senza
+                 * modificare i dati di Supabase.
+                 */
+                const numeroSquadreRemote =
+                    Number(state.rules.numeroSquadre) ||
+                    state.coppie.length;
+
+                const numeroGironiRemote =
+                    Number(state.rules.numeroGironi) || 1;
+
+                const squadrePerGironeRemote =
+                    Number(state.rules.squadrePerGirone) ||
+                    Math.ceil(numeroSquadreRemote / numeroGironiRemote);
+
+                const coppieRemote =
+                    Array.isArray(state.coppie)
+                        ? state.coppie
+                        : [];
+
+                if(
+                    coppieRemote.length > 0 &&
+                    (
+                        !Array.isArray(state.A) ||
+                        state.A.length === 0
+                    )
+                ){
+
+                    const lettereRemote =
+                        ["A","B","C","D","E","F"];
+
+                    lettereRemote.forEach(function(g){
+                        state[g] = [];
+                    });
+
+                    coppieRemote
+                        .slice(0, numeroSquadreRemote)
+                        .forEach(function(coppia, index){
+
+                            const gruppoIndex =
+                                Math.floor(
+                                    index / squadrePerGironeRemote
+                                );
+
+                            const gruppo =
+                                lettereRemote[gruppoIndex];
+
+                            if(gruppo){
+                                state[gruppo].push(coppia);
+                            }
+
+                        });
+
+                    lettereRemote.forEach(function(g){
+
+                        const n =
+                            Array.isArray(state[g])
+                                ? state[g].length
+                                : 0;
+
+                        if(n >= 2){
+
+                            const totale =
+                                n * (n - 1) / 2;
+
+                            if(
+                                !Array.isArray(state[g+"res"]) ||
+                                state[g+"res"].length !== totale
+                            ){
+                                state[g+"res"] =
+                                    Array(totale).fill("-");
+                            }
+
+                            if(
+                                !Array.isArray(state[g+"time"]) ||
+                                state[g+"time"].length !== totale
+                            ){
+                                state[g+"time"] =
+                                    Array(totale).fill("-");
+                            }
+
+                            if(
+                                !Array.isArray(state[g+"camp"]) ||
+                                state[g+"camp"].length !== totale
+                            ){
+                                state[g+"camp"] =
+                                    Array(totale).fill("");
+                            }
+
+                        }
+
+                    });
+
+                    console.log(
+                        "TABELLONE: squadre ricostruite da configurazione.coppie",
+                        {
+                            coppie: coppieRemote.length,
+                            A: state.A?.length || 0,
+                            B: state.B?.length || 0,
+                            C: state.C?.length || 0,
+                            D: state.D?.length || 0,
+                            E: state.E?.length || 0,
+                            F: state.F?.length || 0
+                        }
+                    );
+
+                }
 
             }
             else{
