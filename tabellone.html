@@ -560,10 +560,13 @@ async function verifyAccess(){
     }
 
 
-    if(
-        String(profilo.ruolo)
+    const ruoloProfilo =
+        String(profilo.ruolo || "")
             .toLowerCase()
-            .trim() !== "admin"
+            .trim();
+
+    if(
+        !["admin","superadmin","owner"].includes(ruoloProfilo)
     ){
 
         console.warn(
