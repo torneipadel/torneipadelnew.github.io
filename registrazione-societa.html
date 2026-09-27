@@ -130,6 +130,8 @@ async function createCompany(user){
  if(!data?.ok)throw new Error(data?.message||"La società non è stata creata.");
  PENDING_STORAGE.removeItem(PENDING_KEY);
  sessionStorage.removeItem(REG_PIVA_KEY);
+ if(data?.azienda_id) sessionStorage.setItem("nextpoint_login_azienda_id",data.azienda_id);
+ if(data?.slug) sessionStorage.setItem("nextpoint_login_azienda_slug",data.slug);
  form.style.display="none";
  $("success").style.display="block";
  status.textContent="✓ REGISTRAZIONE AVVENUTA CON SUCCESSO! La richiesta della società è stata acquisita.";
