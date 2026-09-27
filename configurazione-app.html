@@ -141,6 +141,25 @@ async function uploadPageThemeFile(file,max,folder,userId){
  if(r.error)throw r.error;return sb.storage.from('azienda-assets').getPublicUrl(path).data.publicUrl;
 }
 
+const form=document.getElementById('form');
+const ragione=document.getElementById('ragione');
+const nomeApp=document.getElementById('nomeApp');
+const titolare=document.getElementById('titolare');
+const sede=document.getElementById('sede');
+const cf=document.getElementById('cf');
+const email=document.getElementById('email');
+const telefono=document.getElementById('telefono');
+const pec=document.getElementById('pec');
+const direttoreNome=document.getElementById('direttoreNome');
+const direttoreCognome=document.getElementById('direttoreCognome');
+const direttoreFoto=document.getElementById('direttoreFoto');
+const logo=document.getElementById('logo');
+const sfondo=document.getElementById('sfondo');
+const primary=document.getElementById('primary');
+const accent=document.getElementById('accent');
+const privacy=document.getElementById('privacy');
+const cookie=document.getElementById('cookie');
+const termini=document.getElementById('termini');
 let azienda=null;
 const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 function preview(id,url,label){const el=document.getElementById(id);el.innerHTML=url?'<img src="'+esc(url)+'" alt="'+label+'"><span>'+label+' attuale</span>':''}
