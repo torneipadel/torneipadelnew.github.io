@@ -499,6 +499,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 async function verifyAccess(){
 
+    let aziendaAccess = null;
+
     const result = await sb.auth.getSession();
 
     const session =
@@ -564,6 +566,21 @@ async function verifyAccess(){
         String(profilo.ruolo || "")
             .toLowerCase()
             .trim();
+
+    /* Recupera la società reale dell'utente tenant. */
+    try{
+        const accessResult = await sb.rpc("get_my_azienda_access");
+        const accessRow =
+            Array.isArray(accessResult.data)
+                ? accessResult.data[0]
+                : accessResult.data;
+
+        if(accessRow && accessRow.azienda_id){
+            aziendaAccess = accessRow;
+        }
+    }catch(e){
+        console.warn("Impossibile determinare la società dell'utente:",e);
+    }
 
     if(
         !["admin","superadmin","owner"].includes(ruoloProfilo)
@@ -652,6 +669,19 @@ async function verifyAccess(){
 
     if(aziendaAccess && aziendaAccess.azienda_id){
         window.__BOVE_TENANT_ID__ = String(aziendaAccess.azienda_id);
+
+        const urlTenant =
+            new URLSearchParams(window.location.search).get("azienda_id");
+
+        if(
+            urlTenant &&
+            String(urlTenant) !== String(aziendaAccess.azienda_id)
+        ){
+            console.error("BOVE: società del torneo non coincide con la società autenticata.");
+            alert("Il torneo selezionato non appartiene alla società corrente.");
+            window.__BOVE_TENANT_ID__ = "__INVALID__";
+            return;
+        }
     }else{
         window.__BOVE_TENANT_ID__ = "";
     }
