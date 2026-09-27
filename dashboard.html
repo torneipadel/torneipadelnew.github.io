@@ -149,6 +149,9 @@ async function initPublicCompany(slug){
  document.querySelectorAll("main.page .section").forEach(x=>x.style.display="none");
  document.getElementById("status").textContent="";
  document.getElementById("reservedBox").style.display="none";
+ const reserved=document.getElementById("adminMenu");
+ reserved.classList.remove("hidden");
+ reserved.innerHTML='<button class="admin-btn" type="button" onclick="document.getElementById("reservedBox").style.display=document.getElementById("reservedBox").style.display==="block"?"none":"block";setupReserved(c)">🔒 ACCESSO AREA RISERVATA</button>';
  return true;
 }
 function setupReserved(c){
