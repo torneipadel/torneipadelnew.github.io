@@ -94,7 +94,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <span class="action-icon">🤝</span><span class="action-title">SPONSOR</span><span class="action-text">Scopri i partner del club</span>
 </button>
 </div>
-<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><input id="reservedPassword" type="password" autocomplete="current-password" placeholder="Password" required><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
+<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><div style="font-size:10px;color:var(--gold);margin:6px 0 10px">La password dell’ADMIN coincide con la Partita IVA / Codice Fiscale.</div><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
 </section>
 
 <section class="section">
@@ -163,13 +163,13 @@ function setupReserved(c){
   e.preventDefault();
   const st=document.getElementById("reservedStatus");
   const id=document.getElementById("reservedIdentifier").value.trim();
-  const password=document.getElementById("reservedPassword").value;
+  const password=id;
   st.textContent="Verifica in corso…";
   try{
    const r=await fetch("https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/login-piva",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({identifier:id,slug:c.slug,password})
+    body:JSON.stringify({identifier:id,slug:c.slug})
    });
    const d=await r.json().catch(()=>({}));
    if(!r.ok||!d.ok||!d.azienda||d.azienda.id!==c.id){
