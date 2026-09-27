@@ -112,6 +112,43 @@ async function loginUser(){
   setTimeout(()=>window.location.replace("admin.html?v=20260927"),200);
   return;
  }
+
+ // Gli utenti con ruolo amministrativo entrano direttamente nella gestione tornei.
+ // Non serve più un parametro "next=admin": il ruolo viene verificato dopo il login.
+ const loginEmail=String(data.session.user?.email||email).trim().toLowerCase();
+ let adminRole="";
+ let aziendaAccess=null;
+ if(loginEmail==="giose.rizzi@gmail.com"){
+  adminRole="superadmin";
+ }else if(loginEmail==="boverob@libero.it"||loginEmail==="cfalba@libero.it"){
+  adminRole="admin";
+ }else{
+  const profileResult=await sb.from("profili").select("ruolo").eq("user_id",data.session.user.id).maybeSingle();
+  const profileRole=String(profileResult.data?.ruolo||"").toLowerCase();
+  if(["admin","superadmin"].includes(profileRole)) adminRole=profileRole;
+  if(!adminRole){
+   const accessResult=await sb.rpc("get_my_azienda_access");
+   const a=Array.isArray(accessResult.data)?accessResult.data[0]:accessResult.data;
+   if(!accessResult.error&&a?.accesso_consentito&&["owner","admin","superadmin"].includes(String(a.ruolo||"").toLowerCase())){
+    adminRole=String(a.ruolo).toLowerCase();
+    aziendaAccess=a;
+   }
+  }
+ }
+ if(adminRole){
+  sessionStorage.removeItem("nextpoint_login_azienda_nome");
+  sessionStorage.setItem("nextpoint_login_role",adminRole);
+  if(aziendaAccess?.azienda_id){
+   sessionStorage.setItem("nextpoint_login_azienda_id",aziendaAccess.azienda_id);
+   sessionStorage.setItem("nextpoint_login_azienda_slug",aziendaAccess.slug||"");
+  }else{
+   sessionStorage.removeItem("nextpoint_login_azienda_id");
+   sessionStorage.removeItem("nextpoint_login_azienda_slug");
+  }
+  setStatus("Accesso effettuato. Apertura della gestione tornei…");
+  setTimeout(()=>window.location.replace("admin.html?v=20260927"),200);
+  return;
+ }
  sessionStorage.removeItem("nextpoint_login_azienda_id");
  sessionStorage.removeItem("nextpoint_login_azienda_nome");
  sessionStorage.removeItem("nextpoint_login_role");
