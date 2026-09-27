@@ -2,33 +2,8 @@
 'use strict';
 const SUPABASE_URL='https://dkeqicstprvvfebiaooc.supabase.co';
 const ENDPOINT=SUPABASE_URL+'/functions/v1/public-company-legal';
-function apply(a){
- if(!a)return;
- const colors=a.colori||a.colori||{};
- const primary=colors.primary||colors.primaryColor||colors.principale||'#073b72';
- const accent=colors.accent||colors.accentColor||colors.accento||'#ffe76b';
- document.documentElement.style.setProperty('--tenant-primary',primary);document.documentElement.style.setProperty('--blue',primary);document.documentElement.style.setProperty('--blue2',primary);
- document.documentElement.style.setProperty('--tenant-accent',accent);document.documentElement.style.setProperty('--gold',accent);document.documentElement.style.setProperty('--yellow',accent);
- document.documentElement.dataset.tenantTheme='1';
- if(a.sfondo_url) document.body.style.setProperty('background-image',`linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.68)),url("${a.sfondo_url}")`,'important');
- document.querySelectorAll('img.logo,img.brand-logo,[data-tenant-logo]').forEach(el=>{if(a.logo_url)el.src=a.logo_url;});
- document.querySelectorAll('[data-tenant-name],.brand-name').forEach(el=>{el.textContent=a.nome_app||a.ragione_sociale||el.textContent;});
- document.querySelectorAll('[data-tenant-primary]').forEach(el=>{el.style.backgroundColor=primary;});
- document.querySelectorAll('[data-tenant-accent]').forEach(el=>{el.style.color=accent;});const style=document.createElement('style');style.textContent='.tenant-themed{--tenant-primary:'+primary+';--tenant-accent:'+accent+'}.btn.primary,.main-action,.cta{background:var(--tenant-primary)!important}.eyebrow,.badge,.type{color:var(--tenant-accent)!important}';document.head.appendChild(style);
-}
-async function load(){
- try{
-  const p=new URLSearchParams(location.search);
-  const slug=(p.get('azienda')||'').trim();
-  const torneo=(p.get('torneo')||p.get('idTorneo')||'').trim();
-  let url=ENDPOINT+(slug?'?slug='+encodeURIComponent(slug):torneo?'?torneo='+encodeURIComponent(torneo):'');
-  if(!slug&&!torneo){
-    const sb=window.supabaseClient||window.sb;
-    if(sb){const r=await sb.rpc('get_my_azienda_access');const row=Array.isArray(r.data)?r.data[0]:r.data;if(row?.slug)url=ENDPOINT+'?slug='+encodeURIComponent(row.slug);}
-  }
-  if(!url.endsWith('legal')){const r=await fetch(url);if(r.ok){const j=await r.json();apply(j.azienda);}}
- }catch(e){console.warn('Tema società non disponibile:',e)}
-}
-window.tenantTheme={load,apply};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+function pageKey(){const p=location.pathname.toLowerCase().split('/').pop()||'index.html';if(p==='visitatore.html'||p==='dashboard.html')return 'home';if(p==='tabellone.html')return 'tabellone';if(p.includes('news'))return 'news';if(p.includes('mercatino'))return 'mercatino';if(p.includes('iscrizione'))return 'iscrizione';if(p.includes('contatti'))return 'contatti';if(p.includes('informazioni'))return 'info';if(p.includes('sponsor'))return 'sponsor';if(p.includes('tv'))return 'tv';if(p.includes('privacy'))return 'privacy';if(p.includes('cookie'))return 'cookie';if(p.includes('termini'))return 'termini';return 'home'}
+function apply(a){if(!a)return;const colors=a.colori||{};const theme=a.tema||{};const page=pageKey();const cfg={...(theme.global||{}),...(theme.pages?.[page]||{})};const primary=cfg.primary||colors.primary||'#073b72';const accent=cfg.accent||colors.accent||'#ffe76b';document.documentElement.style.setProperty('--tenant-primary',primary);document.documentElement.style.setProperty('--blue',primary);document.documentElement.style.setProperty('--blue2',primary);document.documentElement.style.setProperty('--tenant-accent',accent);document.documentElement.style.setProperty('--gold',accent);document.documentElement.style.setProperty('--yellow',accent);document.documentElement.dataset.tenantTheme='1';if(cfg.background||a.sfondo_url)document.body.style.setProperty('background-image',`linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.68)),url("${cfg.background||a.sfondo_url}")`,'important');const logo=cfg.logo||a.logo_url;document.querySelectorAll('img.logo,img.brand-logo,[data-tenant-logo],.np-brandline-logo').forEach(el=>{if(logo)el.src=logo});document.querySelectorAll('[data-tenant-name],.brand-name,.np-brandline-name').forEach(el=>{el.textContent=a.nome_app||a.ragione_sociale||el.textContent});document.querySelectorAll('[data-tenant-primary]').forEach(el=>{el.style.backgroundColor=primary});document.querySelectorAll('[data-tenant-accent]').forEach(el=>{el.style.color=accent});if(cfg.banner){let host=document.querySelector('[data-tenant-banner]');if(!host){host=document.createElement('div');host.dataset.tenantBanner='1';host.style.cssText='width:100%;margin:0 auto 18px;border-radius:18px;overflow:hidden;';const img=document.createElement('img');img.alt='';img.style.cssText='width:100%;max-height:280px;object-fit:cover;display:block;';host.appendChild(img);document.body.insertBefore(host,document.body.firstElementChild)}host.querySelector('img').src=cfg.banner}const style=document.createElement('style');style.textContent=`:root{--tenant-primary:${primary};--tenant-accent:${accent}}.tenant-themed{--tenant-primary:${primary};--tenant-accent:${accent}}.btn.primary,.main-action,.cta,.np-primary{background:var(--tenant-primary)!important}.eyebrow,.badge,.type,.np-eyebrow,.np-kicker,.np-news-type{color:var(--tenant-accent)!important}`;document.head.appendChild(style);window.tenantTheme.current={azienda:a,page,config:cfg}}
+async function load(){try{const p=new URLSearchParams(location.search);const slug=(p.get('azienda')||'').trim();const torneo=(p.get('torneo')||p.get('idTorneo')||'').trim();let url=ENDPOINT+(slug?'?slug='+encodeURIComponent(slug):torneo?'?torneo='+encodeURIComponent(torneo):'');if(!slug&&!torneo){const sb=window.supabaseClient||window.sb;if(sb){const r=await sb.rpc('get_my_azienda_access');const row=Array.isArray(r.data)?r.data[0]:r.data;if(row?.slug)url=ENDPOINT+'?slug='+encodeURIComponent(row.slug)}}if(!url) return;const r=await fetch(url);if(r.ok){const j=await r.json();apply(j.azienda)}}catch(e){console.warn('Tema società non disponibile:',e)}}
+window.tenantTheme={load,apply,current:{}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
 })();
