@@ -90,14 +90,21 @@ $('waOpen').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent($(
 $('waCopy').onclick=()=>navigator.clipboard?.writeText(link).then(()=>alert('Link copiato negli appunti.'))
 }
 
+function openPosterAdmin(){
+ news();
+ setTimeout(()=>{
+  const panel=document.getElementById('naiManualPosterPanel');
+  if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});
+ },900);
+}
 function bindComLinks(){
-document.querySelectorAll('[data-com-page]').forEach(b=>{if(b.dataset.comBound)return;b.dataset.comBound='1';b.addEventListener('click',()=>{document.getElementById('mobileOverlay')?.classList.remove('open');const p=b.dataset.comPage;if(p==='news')news();else if(p==='sponsor')sponsor();else if(p==='whatsapp')whatsapp()})})
+document.querySelectorAll('[data-com-page]').forEach(b=>{if(b.dataset.comBound)return;b.dataset.comBound='1';b.addEventListener('click',()=>{document.getElementById('mobileOverlay')?.classList.remove('open');const p=b.dataset.comPage;if(p==='news')news();else if(p==='locandine')openPosterAdmin();else if(p==='sponsor')sponsor();else if(p==='whatsapp')whatsapp()})})
 }
 function bindSidebar(){document.querySelectorAll('#areaAdmin .sidebar [data-page]').forEach(b=>{if(b.dataset.sidebarBound)return;b.dataset.sidebarBound='1';b.addEventListener('click',async()=>{const page=b.dataset.page;if(!page)return;document.querySelectorAll('#areaAdmin .sidebar [data-page]').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(typeof window.openAdminPage==='function')await window.openAdminPage(page)})})}
 function bindAll(){bindSidebar();bindComLinks()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindAll,{once:true});else bindAll();
 window.openAdminSponsor=()=>sponsor();
-window.openAdminComPage=p=>p==='news'?news():p==='sponsor'?sponsor():whatsapp();
+window.openAdminComPage=p=>p==='news'?news():p==='locandine'?openPosterAdmin():p==='sponsor'?sponsor():whatsapp();
 
 })();
 
