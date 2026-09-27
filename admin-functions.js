@@ -138,6 +138,13 @@ async function wireDashboard(){
     if(aziendaAccess?.azienda_id){
       window.aziendaId=aziendaAccess.azienda_id;
       window.nomeAppAzienda=aziendaAccess.nome_app||"";
+      window.nomeAzienda=aziendaAccess.ragione_sociale||aziendaAccess.nome_app||"";
+      if(!window.nomeAzienda){
+        try{
+          const aziendaNome=await sb.from("aziende").select("ragione_sociale,nome_app").eq("id",aziendaAccess.azienda_id).maybeSingle();
+          window.nomeAzienda=aziendaNome.data?.ragione_sociale||aziendaNome.data?.nome_app||"";
+        }catch(_){}
+      }
     }
     document.documentElement.dataset.adminRole=role;
 
