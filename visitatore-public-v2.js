@@ -13,7 +13,7 @@ async function resolvePublicCompany(){
     const response=await fetch(URL_SUPABASE+'/functions/v1/login-piva',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:publicSlug})});
     const result=await response.json().catch(()=>({}));
     if(!response.ok||!result?.ok||!result?.azienda) return null;
-    return result.azienda;
+    try{localStorage.setItem('nextpoint_public_azienda_slug',String(result.azienda.slug||publicSlug));sessionStorage.setItem('nextpoint_public_azienda_slug',String(result.azienda.slug||publicSlug));}catch(_){} return result.azienda;
   }catch(e){console.error('[SOCIETA PUBBLICA]',e);return null}
 }
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
