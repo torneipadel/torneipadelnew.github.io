@@ -560,15 +560,52 @@ async function verifyAccess(){
     }
 
 
-    if(
-        String(profilo.ruolo)
+    const selectedAziendaId =
+        sessionStorage.getItem("nextpoint_login_azienda_id") || "";
+
+    let ruoloAzienda = "";
+
+    if(selectedAziendaId){
+
+        const accessoAzienda =
+            await sb
+                .from("azienda_utenti")
+                .select("ruolo")
+                .eq("azienda_id", selectedAziendaId)
+                .eq("user_id", userId)
+                .eq("attivo", true)
+                .maybeSingle();
+
+        if(accessoAzienda.error){
+            console.error("Errore verifica ruolo aziendale:", accessoAzienda.error);
+        }else if(accessoAzienda.data){
+            ruoloAzienda =
+                String(accessoAzienda.data.ruolo || "")
+                    .toLowerCase()
+                    .trim();
+        }
+    }
+
+    const email =
+        String(session.user.email || "")
             .toLowerCase()
-            .trim() !== "admin"
-    ){
+            .trim();
+
+    const adminPiattaforma =
+        email === "boverob@libero.it" ||
+        email === "cfalba@libero.it" ||
+        email === "admin@test.it" ||
+        email === "giose.rizzi@gmail.com";
+
+    const accessoAdmin =
+        adminPiattaforma ||
+        ["owner","admin","superadmin"].includes(ruoloAzienda);
+
+    if(!accessoAdmin){
 
         console.warn(
-            "Utente senza permessi admin:",
-            profilo
+            "Utente senza permessi di gestione del torneo:",
+            {profilo,ruoloAzienda,selectedAziendaId}
         );
 
         bloccaGestionale();
@@ -6950,6 +6987,8 @@ try{
 
                 if(Array.isArray(cfg.coppie))
                     state.coppie=cfg.coppie;
+                else if(Array.isArray(cfg.squadre))
+                    state.coppie=cfg.squadre;
 
                 if(Array.isArray(cfg.partecipanti))
                     state.partecipanti=cfg.partecipanti;
