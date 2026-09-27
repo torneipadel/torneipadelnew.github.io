@@ -28,21 +28,6 @@ setTimeout(removeDuplicateSponsorBanner,300);
 setTimeout(removeDuplicateSponsorBanner,1000);
 
 /* AUTENTICAZIONE CENTRALIZZATA: gestita esclusivamente da admin-functions.js. */
-/* Carica il modulo Broadcast WhatsApp dopo che Admin e le sue pagine sono disponibili. */
-(function(){
-  if(window.__WA_BROADCAST_LOADER__)return;
-  window.__WA_BROADCAST_LOADER__=true;
-  const load=()=>{
-    if(document.querySelector('script[data-wa-broadcast-loader]'))return;
-    const s=document.createElement('script');
-    s.src='admin-whatsapp-broadcast-v1.js?v=1';
-    s.async=false;
-    s.dataset.waBroadcastLoader='1';
-    document.body.appendChild(s);
-  };
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
-})();
-
 /* FIX ISOLATO ARCHIVIO: un torneo gia' archiviato non puo' essere ripubblicato.
    Non modifica il flusso di creazione, partecipanti, coppie, tabellone o calendario. */
 (function(){
