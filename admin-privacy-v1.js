@@ -13,7 +13,7 @@ async function loadPrivacyAdmin(){
  }else{
    const id=tenantId();
    if(!id){root.innerHTML='<div class="card"><div class="card-body"><div class="empty">Società non associata all\'account.</div></div></div>';return}
-   const r=await sb.from('aziende').select('id,ragione_sociale,nome_app,titolare,sede,cf_piva,email,pec,dpo,privacy_text,cookie_text,termini_text').eq('id',id).maybeSingle();
+   const r=await sb.from('aziende').select('id,ragione_sociale,nome_app,slug,titolare,sede,cf_piva,email,pec,dpo,privacy_text,cookie_text,termini_text').eq('id',id).maybeSingle();
    if(r.error||!r.data){root.innerHTML='<div class="card"><div class="card-body"><div class="empty">Impossibile caricare i dati Privacy della società.</div></div></div>';console.error(r.error);return}
    aziende=[r.data];
  }
