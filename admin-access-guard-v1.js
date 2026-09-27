@@ -19,8 +19,18 @@
         const superadminEmail=email==="giose.rizzi@gmail.com";
         const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it";
 
-        if(superadminEmail||adminEmail){
-          const ruolo=superadminEmail?"superadmin":"admin";
+        let profileRole="";
+        if(!superadminEmail&&!adminEmail){
+          try{
+            const profileResult=await client.from("profili").select("ruolo").eq("user_id",session.user.id).maybeSingle();
+            profileRole=String(profileResult.data?.ruolo||"").trim().toLowerCase();
+          }catch(e){
+            console.warn("Admin guard: profilo non leggibile",e);
+          }
+        }
+
+        if(superadminEmail||adminEmail||profileRole==="superadmin"||profileRole==="admin"){
+          const ruolo=superadminEmail||profileRole==="superadmin"?"superadmin":"admin";
           window.adminRuolo=ruolo;
           window.isSuperadmin=superadminEmail;
           window.isAdmin=true;
