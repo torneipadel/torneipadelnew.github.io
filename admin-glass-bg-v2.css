@@ -6,7 +6,7 @@ html,body{
   min-height:100% !important;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
   background-color:#0b1020 !important;
-  background-image:url('https://torneirobertobove.github.io/sfondo_tab.jpg') !important;
+  background-image:url('2pages.jpg') !important;
   background-size:cover !important;
   background-position:center !important;
   background-attachment:fixed !important;
@@ -105,7 +105,7 @@ input,textarea,select,.field input,.field select,.field textarea,.input,.pair-pl
 .login-wrap{
   min-height:100vh !important;
   background-color:#0b1020 !important;
-  background-image:url('https://torneirobertobove.github.io/sfondo_tab.jpg') !important;
+  background-image:url('2pages.jpg') !important;
   background-size:cover !important;
   background-position:center !important;
   background-attachment:fixed !important;
