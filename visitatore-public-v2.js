@@ -79,6 +79,10 @@ async function start(){
     return;
   }
   if(publicCompany){
+    // Applica subito il tema/logo/sfondo/colori della società alla pagina pubblica.
+    // tenant-theme-v1.js può aver già eseguito il caricamento in parallelo: qui riallineiamo
+    // il tema dopo aver risolto con certezza la società richiesta.
+    try{ window.tenantTheme?.apply?.(publicCompany); }catch(e){ console.warn('[TEMA SOCIETA]',e); }
     document.title=(publicCompany.nome_app||publicCompany.ragione_sociale||'Società')+' — Next Point Padel';
     document.querySelector('.np-brandline-name')?.replaceChildren(document.createTextNode(publicCompany.nome_app||publicCompany.ragione_sociale||''));
     document.querySelector('.np-brandline-logo')?.setAttribute('src',publicCompany.logo_url||'/loghi/icona_app1.jpg');
