@@ -347,6 +347,12 @@ body.user-mode .admin-save-result-button {
     display: none !important;
 }
 
+body.user-mode input,
+body.user-mode select,
+body.user-mode textarea {
+    pointer-events: none !important;
+}
+
 .menu-button {
     width: 36px;
     height: 36px;
@@ -511,6 +517,24 @@ async function verifyAccess(){
 
 
     if(!session){
+
+        const publicTenant =
+            new URLSearchParams(window.location.search).get("azienda_id");
+
+        if(publicTenant){
+
+            window.__BOVE_TENANT_ID__ = String(publicTenant);
+            window.__BOVE_PUBLIC_READONLY__ = true;
+            document.body.classList.add("user-mode");
+
+            console.log(
+                "ACCESSO PUBBLICO TABELLONE: sola lettura",
+                window.__BOVE_TENANT_ID__
+            );
+
+            return;
+
+        }
 
         console.warn(
             "Nessun utente autenticato"
@@ -7073,6 +7097,19 @@ try{
                     : null;
 
             if(torneo){
+
+                if(
+                    window.__BOVE_TENANT_ID__ &&
+                    window.__BOVE_TENANT_ID__ !== "__INVALID__" &&
+                    String(torneo.azienda_id || "") !== String(window.__BOVE_TENANT_ID__)
+                ){
+                    console.error(
+                        "TABELLONE: società del torneo diversa dalla società richiesta."
+                    );
+                    window.__BOVE_REMOTE_NOT_FOUND__ = true;
+                    bloccaGestionale();
+                    return;
+                }
 
                 configurazione =
                     torneo.configurazione || {};
