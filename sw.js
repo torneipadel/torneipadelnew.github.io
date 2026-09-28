@@ -1,4 +1,4 @@
-const CACHE_NAME = "next-point-padel-pwa-v1";
+const CACHE_NAME = "next-point-padel-pwa-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -8,9 +8,6 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-  const requestUrl = new URL(event.request.url);
-  if (requestUrl.origin !== self.location.origin) return;
-  event.respondWith(fetch(event.request));
-});
+// Il Service Worker non deve intercettare richieste applicative.
+// In particolare non deve toccare richieste Supabase cross-origin.
+// Lasciamo quindi il fetch completamente alla rete/browser.
