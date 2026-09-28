@@ -24,7 +24,7 @@ function poster(t){const a=Array.isArray(t?.configurazione?.news)?t.configurazio
 function openT(t){return (t.pubblicato===true||String(t.stato||'').toLowerCase()==='attivo')&&t.iscrizioni_chiuse!==true&&!['chiuso','concluso','archiviato'].includes(String(t.stato||'').toLowerCase())}
 function closedT(t){return t.iscrizioni_chiuse===true||['chiuso','concluso','archiviato'].includes(String(t.stato||'').toLowerCase())}
 function capacity(t){const current=counts[t.id]||0;const max=(Number(t.posti)||Number(t.configurazione?.rules?.numeroSquadre)||8)*2;return{current,max,remaining:Math.max(0,max-current)}}
-function vaiIscrizione(v){if(!v){alert('Torneo non valido');return}location.href='iscrizione.html?torneo='+encodeURIComponent(v)}
+function vaiIscrizione(v){if(!v){alert('Torneo non valido');return}const tenant=publicSlug?('&azienda='+encodeURIComponent(publicSlug)):'';location.href='iscrizione.html?torneo='+encodeURIComponent(v)+tenant}
 function apriTorneoPubblico(v){if(!v){alert('Torneo non valido');return}const tenant=publicCompany?.id?('&azienda_id='+encodeURIComponent(publicCompany.id)):'';location.href='tabellone.html?idTorneo='+encodeURIComponent(v)+tenant}
 window.vaiIscrizione=vaiIscrizione;window.apriTorneoPubblico=apriTorneoPubblico;
 function menu(open){document.getElementById('npMenu')?.classList.toggle('open',open)}
