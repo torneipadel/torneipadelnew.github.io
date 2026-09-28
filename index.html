@@ -3,50 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Next Point Padel — Trova la tua società</title>
+<meta name="description" content="Next Point Padel: la piattaforma digitale professionale per società e club di padel. Tornei, giocatori, eventi e comunicazione in un unico ambiente.">
+<title>Next Point Padel — La piattaforma digitale per il tuo club</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--blue:#073b72;--blue2:#0b568f;--gold:#ffe76b;--ink:#10233a;--muted:#64748b;--line:#dbe5ef;--bg:#f4f8fc}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,"Open Sans",Arial,sans-serif;color:var(--ink);background:var(--bg)}a{text-decoration:none}
-.hero{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:34px 18px;background:linear-gradient(135deg,rgba(7,59,114,.96),rgba(11,86,143,.88)),url("sfondo2.jpg") center/cover no-repeat}
-.hero-card{width:min(1080px,100%);padding:48px 44px;border:1px solid rgba(255,255,255,.2);border-radius:28px;background:rgba(255,255,255,.1);box-shadow:0 28px 80px rgba(0,0,0,.24);backdrop-filter:blur(18px);color:#fff;text-align:center}
-.logo img{width:auto;max-width:190px;max-height:115px;display:block;margin:0 auto 12px;border-radius:18px;object-fit:contain;filter:drop-shadow(0 10px 20px rgba(0,0,0,.2))}
-.logo h1{margin:0;font-size:clamp(30px,5vw,50px);letter-spacing:2px}.logo p{margin:10px 0 0;font-size:16px;opacity:.88}
-.hero h2{margin:34px auto 12px;font-size:clamp(27px,4vw,42px);line-height:1.12}.hero-copy{max-width:760px;margin:0 auto;color:rgba(255,255,255,.82);line-height:1.7}
-.search-box{max-width:720px;margin:30px auto 0;display:flex;gap:10px}.search-box input{flex:1;min-height:54px;padding:0 18px;border:0;border-radius:14px;font-size:16px;outline:none}
-.btn{min-height:50px;padding:0 22px;border:0;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;letter-spacing:.35px;cursor:pointer}
-.btn-primary{background:#fff;color:var(--blue)}.btn-gold{background:var(--gold);color:var(--blue)}.btn-ghost{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff}
-.hero-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
-main{width:min(1080px,calc(100% - 36px));margin:0 auto;padding:58px 0 20px}.section-head{text-align:center;margin-bottom:26px}.section-head h2{margin:0;color:var(--blue);font-size:30px}.section-head p{margin:9px auto 0;color:var(--muted);max-width:680px}
-.status{text-align:center;color:var(--muted);padding:24px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.company-card{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 12px 30px rgba(7,59,114,.08);display:flex;flex-direction:column}
-.company-brand{height:155px;background:linear-gradient(135deg,#edf5fc,#dfeaf5);display:flex;align-items:center;justify-content:center;padding:20px}.company-brand img{max-width:180px;max-height:105px;object-fit:contain;border-radius:12px}.company-fallback{font-size:27px;font-weight:900;color:var(--blue);text-align:center}
-.company-body{padding:20px;display:flex;flex-direction:column;flex:1}.company-body h3{margin:0;color:var(--blue);font-size:20px}.company-body p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.5;min-height:40px}.company-body .btn{margin-top:auto;width:100%;background:var(--blue);color:#fff}
-.empty{padding:35px;text-align:center;background:#fff;border:1px dashed var(--line);border-radius:18px;color:var(--muted)}
-.join{margin:52px 0 20px;padding:34px;border-radius:22px;background:#fff;border:1px solid var(--line);text-align:center;box-shadow:0 12px 30px rgba(7,59,114,.06)}.join h2{margin:0;color:var(--blue)}.join p{color:var(--muted);line-height:1.6}.join .btn{background:var(--blue);color:#fff}
-footer{margin-top:45px;padding:30px 20px;text-align:center;background:#092f57;color:rgba(255,255,255,.75);font-size:13px;line-height:1.9}footer a{color:#fff}
-@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.hero{min-height:auto;padding:18px 10px}.hero-card{padding:32px 18px;border-radius:22px}.search-box{flex-direction:column}.search-box .btn{width:100%}.hero-actions{flex-direction:column}.hero-actions .btn{width:100%}main{width:min(100% - 22px,1080px);padding-top:42px}.grid{grid-template-columns:1fr}.company-brand{height:135px}}
+:root{--navy:#071d35;--blue:#0a4778;--blue2:#0d6aa7;--lime:#d8ef45;--white:#fff;--ink:#12253a;--muted:#607286;--soft:#f4f7fa;--line:#dfe7ee;--dark:#061522}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,"Open Sans",Arial,sans-serif;color:var(--ink);background:#fff}a{text-decoration:none;color:inherit}button,input{font:inherit}
+.container{width:min(1180px,calc(100% - 40px));margin:auto}
+.nav{position:absolute;z-index:10;top:0;left:0;right:0;padding:22px 0;color:#fff}.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:25px}.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:1.5px}.brand img{width:48px;height:48px;object-fit:cover;border-radius:12px}.nav-links{display:flex;align-items:center;gap:25px;font-size:13px;font-weight:700}.nav-links a{opacity:.9}.nav-links a:hover{opacity:1}.nav-cta{padding:12px 18px;border-radius:999px;background:var(--lime);color:var(--navy)!important;opacity:1!important}
+.hero{min-height:780px;position:relative;display:flex;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(3,17,31,.93) 0%,rgba(3,26,48,.78) 43%,rgba(3,26,48,.28) 100%),url("FOTO_PADEL1.jpg") center/cover no-repeat;overflow:hidden}.hero:after{content:"";position:absolute;inset:auto 0 0;height:180px;background:linear-gradient(transparent,#fff);opacity:.95}.hero-content{position:relative;z-index:2;padding:145px 0 130px;max-width:760px}.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--lime);margin-bottom:22px}.eyebrow:before{content:"";width:34px;height:2px;background:var(--lime)}h1{font-size:clamp(48px,7vw,82px);line-height:.98;letter-spacing:-3px;margin:0 0 24px;max-width:850px}.hero-lead{font-size:clamp(19px,2.2vw,24px);line-height:1.55;max-width:690px;color:rgba(255,255,255,.88);margin:0 0 34px}.actions{display:flex;gap:12px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:0 24px;border-radius:9px;font-size:13px;font-weight:900;letter-spacing:.4px;border:1px solid transparent}.btn-main{background:var(--lime);color:var(--navy)}.btn-light{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.08);backdrop-filter:blur(10px)}.hero-note{margin-top:18px;font-size:12px;color:rgba(255,255,255,.65)}
+
+.intro{padding:82px 0 35px}.intro-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:70px;align-items:end}.kicker{font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--blue2);margin-bottom:13px}.intro h2,.section-title{font-size:clamp(34px,4vw,55px);line-height:1.04;letter-spacing:-1.8px;margin:0;color:var(--navy)}.intro p{font-size:18px;line-height:1.75;color:var(--muted);margin:0}
+.feature-strip{padding:45px 0 95px}.feature-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.feature{padding:28px 24px;border-right:1px solid var(--line)}.feature:last-child{border-right:0}.feature-number{font-size:12px;font-weight:900;color:var(--blue2);margin-bottom:38px}.feature h3{font-size:19px;margin:0 0 9px;color:var(--navy)}.feature p{font-size:13px;line-height:1.6;color:var(--muted);margin:0}
+
+.dark-section{background:var(--navy);color:#fff;padding:105px 0}.dark-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:75px;align-items:center}.dark-section .section-title{color:#fff}.dark-section .kicker{color:var(--lime)}.dark-copy{font-size:17px;line-height:1.75;color:rgba(255,255,255,.68);margin-top:22px}.photo-stack{position:relative;min-height:470px}.photo-main{position:absolute;right:0;top:0;width:82%;height:410px;object-fit:cover;border-radius:3px;box-shadow:0 28px 70px rgba(0,0,0,.35)}.photo-small{position:absolute;left:0;bottom:0;width:43%;height:205px;object-fit:cover;border:8px solid var(--navy);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+
+.solution{padding:105px 0}.solution-head{display:flex;justify-content:space-between;align-items:end;gap:35px;margin-bottom:48px}.solution-head p{max-width:430px;color:var(--muted);line-height:1.7;margin:0}.solution-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.solution-card{min-height:290px;padding:30px;background:var(--soft);border:1px solid var(--line);position:relative;overflow:hidden}.solution-card:after{content:"";position:absolute;right:-60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:#e8f1f7}.solution-card h3{font-size:23px;margin:50px 0 12px;color:var(--navy)}.solution-card p{font-size:14px;line-height:1.65;color:var(--muted);max-width:280px}.solution-tag{font-size:11px;font-weight:900;letter-spacing:1.5px;color:var(--blue2);text-transform:uppercase}
+
+.showcase{background:#f1f5f8;padding:105px 0}.showcase-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:70px;align-items:center}.showcase-photo{width:100%;height:520px;object-fit:cover;box-shadow:0 25px 60px rgba(7,29,53,.16)}.showcase-list{margin:35px 0 0;padding:0;list-style:none}.showcase-list li{padding:18px 0;border-top:1px solid #d5e0e8;font-weight:800;color:var(--navy)}.showcase-list span{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:6px;line-height:1.55}
+
+.steps{padding:105px 0}.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:55px}.step{padding:0 35px 0 0;border-top:2px solid var(--navy);margin-right:30px}.step:last-child{margin-right:0}.step-no{font-size:46px;font-weight:900;color:#b6c5d1;letter-spacing:-2px;margin:20px 0 25px}.step h3{font-size:22px;margin:0 0 10px;color:var(--navy)}.step p{color:var(--muted);line-height:1.65;font-size:14px}
+
+.audience{background:var(--soft);padding:100px 0}.audience-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:50px}.audience-card{position:relative;min-height:300px;display:flex;align-items:flex-end;overflow:hidden;color:#fff;background:#123}.audience-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.audience-card:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(3,17,31,.9))}.audience-text{position:relative;z-index:2;padding:28px}.audience-text h3{font-size:27px;margin:0 0 8px}.audience-text p{margin:0;color:rgba(255,255,255,.78);line-height:1.5;font-size:13px}
+
+.find{padding:100px 0}.find-head{text-align:center;max-width:700px;margin:0 auto 35px}.find-head p{color:var(--muted);line-height:1.65}.search-box{max-width:760px;margin:0 auto 35px;display:flex;gap:10px}.search-box input{flex:1;min-height:58px;border:1px solid var(--line);border-radius:8px;padding:0 18px;outline:none;background:#fff}.search-box input:focus{border-color:var(--blue2)}.search-box .btn{border:0;background:var(--blue);color:#fff;cursor:pointer}.status{text-align:center;color:var(--muted);padding:15px}.company-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.company-card{background:#fff;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(7,29,53,.06)}.company-brand{height:150px;background:#edf3f7;display:flex;align-items:center;justify-content:center;padding:20px}.company-brand img{max-width:180px;max-height:100px;object-fit:contain}.company-fallback{font-size:24px;font-weight:900;color:var(--blue);text-align:center}.company-body{padding:20px;display:flex;flex-direction:column;flex:1}.company-body h3{margin:0;color:var(--navy);font-size:19px}.company-body p{margin:7px 0 18px;color:var(--muted);font-size:13px;line-height:1.5}.company-body .btn{width:100%;background:var(--blue);color:#fff;min-height:48px}.empty{padding:35px;text-align:center;background:#fff;border:1px dashed var(--line);color:var(--muted);grid-column:1/-1}
+
+.cta{padding:105px 0;background:linear-gradient(120deg,#0a4778,#071d35);color:#fff;text-align:center}.cta h2{font-size:clamp(38px,5vw,64px);letter-spacing:-2px;line-height:1;margin:0 auto 18px}.cta p{color:rgba(255,255,255,.72);font-size:17px;line-height:1.6;max-width:620px;margin:0 auto 30px}.cta .actions{justify-content:center}
+footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-size:12px;line-height:1.9;text-align:center}footer a{color:#fff}
+
+@media(max-width:900px){.nav-links a:not(.nav-cta){display:none}.intro-grid,.dark-grid,.showcase-grid{grid-template-columns:1fr;gap:45px}.feature-grid{grid-template-columns:repeat(2,1fr)}.feature:nth-child(2){border-right:0}.feature:nth-child(-n+2){border-bottom:1px solid var(--line)}.solution-grid,.company-grid{grid-template-columns:repeat(2,1fr)}.audience-grid{grid-template-columns:1fr}.photo-stack{min-height:410px}.photo-main{height:360px}}
+@media(max-width:600px){.container{width:min(100% - 28px,1180px)}.nav{padding:15px 0}.brand span{display:none}.nav-cta{padding:10px 13px}.hero{min-height:690px}.hero-content{padding-top:125px}.hero:after{height:100px}h1{letter-spacing:-2px}.intro,.solution,.showcase,.steps,.audience,.find,.cta,.dark-section{padding:72px 0}.feature-grid,.solution-grid,.steps-grid,.company-grid{grid-template-columns:1fr}.feature{border-right:0!important;border-bottom:1px solid var(--line)!important}.feature:last-child{border-bottom:0!important}.solution-head{display:block}.solution-head p{margin-top:18px}.step{margin:0 0 35px;padding-right:0}.step:last-child{margin-bottom:0}.photo-stack{min-height:330px}.photo-main{width:88%;height:285px}.photo-small{width:48%;height:145px}.search-box{flex-direction:column}.search-box .btn{width:100%}.actions .btn{width:100%}.audience-card{min-height:270px}}
 </style>
 <script src="tenant-theme-v1.js?v=2"></script>
 </head>
 <body>
-<header class="hero">
-<div class="hero-card">
-<div class="logo"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><h1>NEXT POINT PADEL</h1><p>Il punto di accesso alle società, ai tornei e agli eventi di padel.</p></div>
-<h2>Trova la tua società</h2>
-<div class="hero-copy">Cerca il tuo club, entra nella sua pagina pubblica e accedi direttamente a tornei, eventi e servizi.</div>
-<form class="search-box" id="companySearch"><input id="searchInput" type="search" placeholder="Cerca società o club..." autocomplete="off" aria-label="Cerca società o club"><button class="btn btn-gold" type="submit">CERCA</button></form>
-<div class="hero-actions"><a class="btn btn-ghost" href="#societa">VEDI LE SOCIETÀ</a><a class="btn btn-primary" href="registrazione-piva.html">REGISTRA LA TUA SOCIETÀ</a></div>
+<nav class="nav">
+<div class="container nav-inner">
+<a class="brand" href="index.html"><img src="loghi/icona_app1.jpg" alt="Next Point Padel"><span>NEXT POINT PADEL</span></a>
+<div class="nav-links"><a href="#piattaforma">Piattaforma</a><a href="#come-funziona">Come funziona</a><a href="#societa">Società</a><a class="nav-cta" href="registrazione-piva.html">ATTIVA IL TUO CLUB</a></div>
 </div>
+</nav>
+
+<header class="hero">
+<div class="container"><div class="hero-content">
+<div class="eyebrow">La piattaforma digitale per il padel</div>
+<h1>Il tuo club.<br>Una nuova esperienza digitale.</h1>
+<p class="hero-lead">Next Point Padel aiuta le società a gestire tornei, giocatori, eventi e comunicazione in un unico ambiente professionale.</p>
+<div class="actions"><a class="btn btn-main" href="registrazione-piva.html">ATTIVA IL TUO CLUB</a><a class="btn btn-light" href="#piattaforma">SCOPRI LA PIATTAFORMA</a></div>
+<div class="hero-note">Pensata per società, circoli e organizzatori di padel.</div>
+</div></div>
 </header>
+
 <main>
-<section id="societa">
-<div class="section-head"><h2>Società presenti su Next Point Padel</h2><p>Scegli la società a cui vuoi accedere. Dopo l'ingresso, la registrazione sarà quella del visitatore e non della società.</p></div>
-<div id="companyStatus" class="status">Caricamento delle società...</div><div id="companyGrid" class="grid"></div>
-</section>
-<section class="join"><h2>Sei una società?</h2><p>Crea la tua presenza su Next Point Padel e offri ai tuoi giocatori un accesso diretto al tuo ambiente digitale.</p><a class="btn" href="registrazione-piva.html">REGISTRA LA TUA SOCIETÀ</a></section>
+<section class="intro" id="piattaforma"><div class="container intro-grid">
+<div><div class="kicker">Più controllo. Meno lavoro.</div><h2>Il club che vuoi gestire, in un solo posto.</h2></div>
+<p>Una piattaforma pensata per semplificare la gestione quotidiana e offrire ai tuoi giocatori un'esperienza digitale moderna. Tornei, risultati, eventi e comunicazioni fanno parte dello stesso ecosistema.</p>
+</div></section>
+
+<section class="feature-strip"><div class="container"><div class="feature-grid">
+<article class="feature"><div class="feature-number">01</div><h3>Tornei</h3><p>Organizza formule, gironi, tabelloni, risultati e classifiche.</p></article>
+<article class="feature"><div class="feature-number">02</div><h3>Giocatori</h3><p>Gestisci iscrizioni, partecipanti e accessi all'ambiente del club.</p></article>
+<article class="feature"><div class="feature-number">03</div><h3>Eventi & News</h3><p>Comunica iniziative, appuntamenti e contenuti direttamente ai tuoi utenti.</p></article>
+<article class="feature"><div class="feature-number">04</div><h3>Identità del club</h3><p>Uno spazio digitale costruito intorno alla tua società e al tuo pubblico.</p></article>
+</div></div></section>
+
+<section class="dark-section"><div class="container dark-grid">
+<div><div class="kicker">Dal caos all'organizzazione</div><h2 class="section-title">Meno strumenti separati. Più tempo per il tuo club.</h2><p class="dark-copy">Fogli, messaggi, iscrizioni, risultati e comunicazioni non devono vivere in posti diversi. Next Point Padel riunisce le attività principali del club in un'esperienza coordinata e semplice da utilizzare.</p><a class="btn btn-main" href="#come-funziona" style="margin-top:12px">VEDI COME FUNZIONA</a></div>
+<div class="photo-stack"><img class="photo-main" src="FOTO_PADEL1.jpg" alt="Campo da padel e giocatori"><img class="photo-small" src="2pages.jpg" alt="Esperienza digitale Next Point Padel"></div>
+</div></section>
+
+<section class="solution"><div class="container">
+<div class="solution-head"><div><div class="kicker">Cosa puoi fare</div><h2 class="section-title">Una piattaforma costruita per il club.</h2></div><p>Non un semplice elenco di funzioni: un ambiente digitale che accompagna la società dalla gestione interna all'esperienza del giocatore.</p></div>
+<div class="solution-grid">
+<article class="solution-card"><div class="solution-tag">Gestione</div><h3>Organizza i tornei</h3><p>Crea e gestisci competizioni, formule, squadre, partite, risultati e classifiche.</p></article>
+<article class="solution-card"><div class="solution-tag">Comunicazione</div><h3>Fatti vedere</h3><p>News, eventi e contenuti aiutano il club a mantenere attiva la relazione con i propri giocatori.</p></article>
+<article class="solution-card"><div class="solution-tag">Esperienza</div><h3>Coinvolgi i giocatori</h3><p>Un accesso digitale semplice per scoprire tornei, attività, risultati e servizi della società.</p></article>
+</div></div></section>
+
+<section class="showcase"><div class="container showcase-grid">
+<img class="showcase-photo" src="2pages.jpg" alt="Interfaccia e servizi Next Point Padel">
+<div><div class="kicker">Un ecosistema, non un semplice gestionale</div><h2 class="section-title">La tecnologia lavora dietro le quinte. Il club resta protagonista.</h2>
+<ul class="showcase-list"><li>Tornei e competizioni<span>Dalla creazione della competizione alla gestione dei risultati e del tabellone.</span></li><li>Comunicazione del club<span>News, eventi e contenuti in un ambiente coerente con la società.</span></li><li>Accesso per i giocatori<span>Una porta digitale semplice verso le attività del tuo club.</span></li></ul></div>
+</div></section>
+
+<section class="steps" id="come-funziona"><div class="container">
+<div class="kicker">Come funziona</div><h2 class="section-title">Tre passi per partire.</h2>
+<div class="steps-grid"><article class="step"><div class="step-no">01</div><h3>Attiva</h3><p>Registra la tua società e configura il tuo ambiente digitale.</p></article><article class="step"><div class="step-no">02</div><h3>Organizza</h3><p>Gestisci tornei, giocatori, eventi e comunicazioni dalla tua area.</p></article><article class="step"><div class="step-no">03</div><h3>Cresci</h3><p>Offri ai tuoi giocatori un'esperienza più ordinata, moderna e coinvolgente.</p></article></div>
+</div></section>
+
+<section class="audience"><div class="container"><div class="kicker">Per chi è Next Point Padel</div><h2 class="section-title">Pensato per chi vive il padel ogni giorno.</h2>
+<div class="audience-grid"><article class="audience-card"><img src="FOTO_PADEL1.jpg" alt="Club di padel"><div class="audience-text"><h3>Società e club</h3><p>Per strutture che vogliono centralizzare la gestione e offrire un servizio digitale professionale.</p></div></article><article class="audience-card"><img src="sfondo2.jpg" alt="Attività di padel"><div class="audience-text"><h3>Organizzatori e giocatori</h3><p>Per chi organizza competizioni e per chi vuole vivere tornei, eventi e attività del club in modo semplice.</p></div></article></div>
+</div></section>
+
+<section class="find" id="societa"><div class="container">
+<div class="find-head"><div class="kicker">Sei già un giocatore?</div><h2 class="section-title">Trova la tua società.</h2><p>Cerca il tuo club su Next Point Padel e accedi alla sua pagina pubblica, ai tornei, agli eventi e ai servizi disponibili.</p></div>
+<form class="search-box" id="companySearch"><input id="searchInput" type="search" placeholder="Cerca società o club..." autocomplete="off" aria-label="Cerca società o club"><button class="btn" type="submit">CERCA SOCIETÀ</button></form>
+<div id="companyStatus" class="status">Caricamento delle società...</div><div id="companyGrid" class="company-grid"></div>
+</div></section>
+
+<section class="cta"><div class="container"><h2>Il prossimo punto è il tuo.</h2><p>Porta il tuo club su Next Point Padel e costruisci un'esperienza digitale più moderna per la tua società e per i tuoi giocatori.</p><div class="actions"><a class="btn btn-main" href="registrazione-piva.html">ATTIVA IL TUO CLUB</a><a class="btn btn-light" href="contatti.html">PARLA CON NOI</a></div></div></section>
 </main>
+
 <footer><a href="informazioni.html">Informazioni</a> · <a href="contatti.html">Contatti</a> · <a href="privacy.html">Privacy</a> · <a href="cookie.html">Cookie</a> · <a href="termini.html">Termini</a><br><br>© Next Point Padel</footer>
+
 <script>
 const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
@@ -56,7 +115,7 @@ function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,function(
 function companyUrl(company){if(company.slug)return "dashboard.html?azienda="+encodeURIComponent(company.slug);const appUrl=String(company.app_url||"").trim();if(appUrl)return appUrl.replace(/\/$/,"")+"/";return "#"}
 function renderCompanies(companies){
 grid.innerHTML="";
-if(!companies.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nessuna società trovata. Prova con un altro nome.</div>';return}
+if(!companies.length){grid.innerHTML='<div class="empty">Nessuna società trovata. Prova con un altro nome.</div>';return}
 for(const company of companies){
 const name=company.nome_app||company.ragione_sociale||"Società",url=companyUrl(company),logo=company.logo_url||"";
 const card=document.createElement("article");card.className="company-card";
@@ -67,7 +126,7 @@ async function loadCompanies(search){
 statusEl.textContent="Caricamento delle società...";grid.innerHTML="";
 const result=await sb.rpc("get_public_companies",{search_text:search||null});
 if(result.error){console.error(result.error);statusEl.textContent="Impossibile caricare le società al momento.";return}
-const data=result.data||[];statusEl.textContent=data.length?(data.length+" società disponibil"+(data.length===1?"e":"i")):"";renderCompanies(data)
+const data=result.data||[];statusEl.textContent=data.length?(data.length+" societ"+(data.length===1?"à disponibile":"à disponibili")):"";renderCompanies(data)
 }
 document.getElementById("companySearch").addEventListener("submit",function(e){e.preventDefault();loadCompanies(searchInput.value.trim());document.getElementById("societa").scrollIntoView({behavior:"smooth",block:"start"})});
 loadCompanies("");
