@@ -89,7 +89,7 @@ async function start(){
     const homeLink=document.querySelector('#npMenu a[href="dashboard.html"]');
     if(homeLink) homeLink.href='visitatore.html?azienda='+encodeURIComponent(publicCompany.slug);
   }
-  client=window.sb=window.__NP_SUPABASE_CLIENT__||supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  client=window.sb=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||(supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
   window.__NP_SUPABASE_CLIENT__=client;
   await loadData();
   renderHero();
