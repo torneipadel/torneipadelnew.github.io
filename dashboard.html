@@ -15,7 +15,7 @@
 :root{--blue:#073b72;--gold:#ffe76b;--glass:rgba(255,255,255,.12);--border:rgba(255,255,255,.22)}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:'Open Sans',Arial,sans-serif;color:#fff}
-body{background:linear-gradient(rgba(3,12,24,.24),rgba(3,12,24,.60)),url('/torneipadelnew.github.io/sfondo_adm.jpg') center/cover fixed no-repeat;min-height:100vh;padding:22px 16px 40px;overflow-x:hidden}
+body{background:linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.62)),url('2pages.jpg') center/cover fixed no-repeat;min-height:100vh;padding:22px 16px 40px;overflow-x:hidden}
 .exit-public{position:fixed;top:18px;left:18px;width:30px;height:30px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:16px/1 'Open Sans',Arial,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;opacity:.78}.exit-public:hover{opacity:1;background:rgba(255,255,255,.14)}.page{width:min(760px,100%);margin:0 auto}
 .hero{position:relative;isolation:isolate;padding:34px 26px 28px;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.055));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.23);box-shadow:0 16px 45px rgba(0,0,0,.28);text-align:center;overflow:hidden}
 .hero:before{content:"";position:absolute;z-index:-1;left:50%;top:-28px;width:min(470px,88vw);height:245px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.52) 0%,rgba(0,0,0,.34) 38%,rgba(0,0,0,.14) 62%,rgba(0,0,0,0) 78%);filter:blur(11px);pointer-events:none}
@@ -42,7 +42,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 @media(max-width:390px){.hero{padding:26px 14px 19px}.hero:before{top:-14px;width:300px;height:180px}.logo{max-width:215px;max-height:112px;margin-bottom:10px}h1{font-size:23px}.welcome-name{font-size:15px}.main-actions{grid-template-columns:1fr;gap:8px}.action{min-height:70px;display:grid;grid-template-columns:38px 1fr;grid-template-rows:auto auto;column-gap:8px;text-align:left;align-items:center}.action-icon{grid-row:1/3;margin:0;text-align:center}.action-title{font-size:11px}.action-text{margin:0;font-size:9px}}
 </style>
 <style>#reservedBox{display:none;margin-top:14px;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:15px;background:rgba(255,255,255,.08);text-align:left}#reservedForm{display:grid;gap:10px}#reservedForm input{width:100%;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;padding:11px;font:14px Arial,sans-serif}#reservedForm input:focus{outline:none;border-color:rgba(255,255,255,.65)}</style>
-<script src="tenant-theme-v1.js?v=2"></script>
+<script src="tenant-theme-v1.js?v=1"></script>
 </head>
 <body>
 <button class="exit-public" onclick="logout()" aria-label="Esci" title="Esci">←</button>
@@ -94,7 +94,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <span class="action-icon">🤝</span><span class="action-title">SPONSOR</span><span class="action-text">Scopri i partner del club</span>
 </button>
 </div>
-<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><div style="font-size:10px;color:rgba(255,255,255,.68);margin:6px 0 10px">Dopo il riconoscimento della società verrà aperta la pagina di accesso con email e password dell’account amministratore.</div><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
+<div id="reservedBox"><div style="font-size:12px;font-weight:800;margin-bottom:10px">🔒 ACCESSO RISERVATO ALLA SOCIETÀ</div><form id="reservedForm"><input id="reservedIdentifier" autocomplete="username" placeholder="Partita IVA / Codice Fiscale" required><div style="font-size:10px;color:var(--gold);margin:6px 0 10px">La password dell’ADMIN coincide con la Partita IVA / Codice Fiscale.</div><button type="submit" class="small-btn">ACCEDI ALLA GESTIONE TORNEI</button><div id="reservedStatus" style="min-height:16px;color:var(--gold);font-size:10px;line-height:1.4"></div></form></div>
 </section>
 
 <section class="section">
@@ -143,18 +143,8 @@ async function initPublicCompany(slug){
  document.getElementById("welcomeName").textContent=c.sede||"Pagina della società";
  document.getElementById("emailBox").textContent="";
  if(c.logo_url)document.querySelector(".logo").src=c.logo_url;
- const legalLinks={privacy:"privacy.html",cookie:"cookie.html",terms:"termini.html"};
- Object.entries(legalLinks).forEach(([key,file])=>{
-  const link=document.querySelector(`a[href="${file}"]`);
-  if(link)link.href=file+"?azienda="+encodeURIComponent(c.slug);
- });
  document.querySelector(".subtitle").textContent="Accedi o registrati per entrare nell'area della società.";
  document.querySelector(".main-actions").innerHTML='<button class="action" onclick="location.href=\'login-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">🔐</span><span class="action-title">ACCEDI</span><span class="action-text">Accedi al tuo account</span></button><button class="action" onclick="location.href=\'registrazione-utente.html?azienda='+encodeURIComponent(c.slug)+'\'"><span class="action-icon">📝</span><span class="action-title">REGISTRATI</span><span class="action-text">Crea il tuo account</span></button>';
- const tenantQuery='?azienda='+encodeURIComponent(c.slug);
- document.querySelectorAll('a[href="visitatore.html"]').forEach(a=>a.href='visitatore.html'+tenantQuery);
- document.querySelectorAll('button[onclick*="visitatore.html"]').forEach(b=>{
-  b.setAttribute('onclick',"location.href='visitatore.html"+tenantQuery+"'");
- });
  document.getElementById("adminMenu").classList.add("hidden");
  document.querySelectorAll("main.page .section").forEach(x=>x.style.display="none");
  document.getElementById("status").textContent="";
@@ -173,29 +163,44 @@ function setupReserved(c){
   e.preventDefault();
   const st=document.getElementById("reservedStatus");
   const id=document.getElementById("reservedIdentifier").value.trim();
-  st.textContent="Verifica della società in corso…";
+  const password=id;
+  st.textContent="Verifica in corso…";
   try{
    const r=await fetch("https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/login-piva",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({identifier:id,slug:c.slug,password:id})
+    body:JSON.stringify({identifier:id,slug:c.slug})
    });
    const d=await r.json().catch(()=>({}));
    if(!r.ok||!d.ok||!d.azienda||d.azienda.id!==c.id){
-    st.textContent=d.error||"Partita IVA / Codice Fiscale non riconosciuto.";
+    st.textContent=d.error||"Credenziali non valide.";
     return;
    }
-   const sessionResult=await sb.auth.setSession({access_token:d.session?.access_token||"",refresh_token:d.session?.refresh_token||""});
-   if(sessionResult.error){st.textContent=sessionResult.error.message||"Impossibile completare l'accesso.";return;}
+   const sessionResult=await sb.auth.setSession({
+    access_token:d.session?.access_token||"",
+    refresh_token:d.session?.refresh_token||""
+   });
+   if(sessionResult.error){
+    st.textContent=sessionResult.error.message||"Impossibile completare l'accesso.";
+    return;
+   }
    const access=await sb.rpc("get_my_azienda_access",{p_azienda_id:c.id});
+   if(access.error){
+    st.textContent=access.error.message||"Impossibile verificare l'accesso.";
+    await sb.auth.signOut();
+    return;
+   }
    const a=Array.isArray(access.data)?access.data[0]:access.data;
    const role=String(a?.ruolo||d.role||"").toLowerCase();
-   if(access.error||!a?.accesso_consentito||!["admin","superadmin","owner"].includes(role)){await sb.auth.signOut();st.textContent="Account non autorizzato alla gestione della società.";return;}
+   if(!a?.accesso_consentito||!["admin","superadmin","owner"].includes(role)){
+    st.textContent="L'account non è autorizzato ad accedere alla gestione della società.";
+    await sb.auth.signOut();
+    return;
+   }
    sessionStorage.setItem("nextpoint_login_azienda_id",c.id);
-   sessionStorage.setItem("nextpoint_login_azienda_slug",c.slug);
    sessionStorage.setItem("nextpoint_login_role",role);
-   st.textContent="Accesso effettuato. Apertura della gestione tornei…";
-   setTimeout(()=>window.location.href="admin.html?v=20260929",250);
+   sessionStorage.setItem("nextpoint_login_azienda_slug",c.slug);
+   window.location.href="admin.html?v=20260927";
   }catch(err){
    console.error(err);
    st.textContent="Errore di collegamento. Riprova.";
@@ -209,7 +214,7 @@ function toggleReservedAccess(c){
  box.style.display=opening?"block":"none";
  if(opening)setupReserved(c);
 }
-async function init(){const publicSlug=new URLSearchParams(location.search).get("azienda");if(publicSlug){await initPublicCompany(publicSlug);return}const {data:{session}}=await sb.auth.getSession();if(!session){document.getElementById("welcomeName").textContent=displayName||"Scopri il club, i tornei e tutte le attività";document.getElementById("emailBox").textContent="";document.getElementById("adminMenu").classList.add("hidden");document.getElementById("status").textContent="";return}const user=session.user;const meta=user.user_metadata||{};const displayName=String(meta.display_name||meta.full_name||meta.fullName||[meta.first_name,meta.last_name].filter(Boolean).join(" ")||[meta.nome,meta.cognome].filter(Boolean).join(" ")||meta.name||"").trim();document.getElementById("emailBox").textContent=user.email||"";const email=String(user.email||"").trim().toLowerCase();const isAdminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";const isSuperadminEmail=email==="giose.rizzi@gmail.com";const {data:profilo,error}=await sb.from("profili").select("nome,cognome,telefono,ruolo").eq("user_id",user.id).maybeSingle();if(error){console.error("Errore caricamento profilo:",error);document.getElementById("welcomeName").textContent="";document.getElementById("status").textContent="";}if(isAdminEmail||isSuperadminEmail){document.getElementById("welcomeName").textContent=profilo?.nome?(profilo.nome+" "+(profilo.cognome||"")):"Area amministrazione piattaforma";document.getElementById("adminMenu").classList.remove("hidden");document.getElementById("status").textContent=isSuperadminEmail?"Accesso superadmin":"Accesso amministratore";return}const selectedAziendaId=sessionStorage.getItem("nextpoint_login_azienda_id")||""; const {data:access,error:accessError}=await sb.rpc("get_my_azienda_access",selectedAziendaId?{p_azienda_id:selectedAziendaId}:{});
+async function init(){const publicSlug=new URLSearchParams(location.search).get("azienda");if(publicSlug){await initPublicCompany(publicSlug);return}const {data:{session}}=await sb.auth.getSession();if(!session){document.getElementById("welcomeName").textContent="Scopri il club, i tornei e tutte le attività";document.getElementById("emailBox").textContent="";document.getElementById("adminMenu").classList.add("hidden");document.getElementById("status").textContent="";return}const user=session.user;document.getElementById("emailBox").textContent=user.email||"";const email=String(user.email||"").trim().toLowerCase();const isAdminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it"||email==="admin@test.it";const isSuperadminEmail=email==="giose.rizzi@gmail.com";const {data:profilo,error}=await sb.from("profili").select("nome,cognome,telefono,ruolo").eq("user_id",user.id).maybeSingle();if(error){console.error("Errore caricamento profilo:",error);document.getElementById("welcomeName").textContent="";document.getElementById("status").textContent="";}if(isAdminEmail||isSuperadminEmail){document.getElementById("welcomeName").textContent=profilo?.nome?(profilo.nome+" "+(profilo.cognome||"")):"Area amministrazione piattaforma";document.getElementById("adminMenu").classList.remove("hidden");document.getElementById("status").textContent=isSuperadminEmail?"Accesso superadmin":"Accesso amministratore";return}const selectedAziendaId=sessionStorage.getItem("nextpoint_login_azienda_id")||""; const {data:access,error:accessError}=await sb.rpc("get_my_azienda_access",selectedAziendaId?{p_azienda_id:selectedAziendaId}:{});
 if(accessError)console.error("Errore verifica accesso azienda:",accessError);
 const tenantAccess=Array.isArray(access)?access[0]:access;
 if(tenantAccess){
@@ -223,7 +228,7 @@ if(tenantAccess){
  if(aziendaError||!azienda){console.error("Errore caricamento società:",aziendaError);document.getElementById("status").textContent="Società non trovata.";return}
  document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
  document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
- document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):displayName||"Area riservata della società";
+ document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
  document.getElementById("emailBox").textContent=azienda.cf_piva?"P.IVA: "+azienda.cf_piva:"";
  if(azienda.logo_url)document.querySelector(".logo").src=azienda.logo_url;
  const tenantRole=String(tenantAccess.ruolo||"").toLowerCase();
@@ -241,21 +246,17 @@ if(!azienda){
 }
 document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
 document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
-document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):displayName||"Area riservata della società";
+document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
 document.getElementById("emailBox").textContent=azienda.cf_piva?"P.IVA: "+azienda.cf_piva:"";
 if(azienda.logo_url)document.querySelector(".logo").src=azienda.logo_url;
 document.getElementById("adminMenu").classList.remove("hidden");
 document.getElementById("status").textContent="";
 }
 function apriGestioneTorneo(){window.location.href="admin.html?v=20260926-2"}
-async function saveCompany(e){e.preventDefault();const st=document.getElementById("companySetupStatus");st.textContent="Salvataggio…";const {data:{session}}=await sb.auth.getSession();if(!session){window.location.href="login.html";return}const user=session.user;const slugBase=(document.getElementById("azNomeApp").value.trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"app");const slug=slugBase+"-"+user.id.slice(0,8);let logoUrl=null;const file=document.getElementById("azLogo").files[0];if(file){if(file.size>6291456){st.textContent="Il logo supera 6 MB.";return}const ext=(file.name.split(".").pop()||"png").toLowerCase();const path=user.id+"/"+crypto.randomUUID()+"."+ext;const up=await sb.storage.from("azienda-assets").upload(path,file,{contentType:file.type||"image/png",upsert:false});if(up.error){st.textContent="Errore caricamento logo: "+up.error.message;return}logoUrl=sb.storage.from("azienda-assets").getPublicUrl(path).data.publicUrl}const payload={owner_user_id:user.id,ragione_sociale:document.getElementById("azRagione").value.trim(),nome_app:document.getElementById("azNomeApp").value.trim(),slug,logo_url:logoUrl,sede:document.getElementById("azSede").value.trim(),cf_piva:document.getElementById("azCf").value.trim(),email:document.getElementById("azEmail").value.trim(),telefono:document.getElementById("azTelefono").value.trim(),pec:document.getElementById("azPec").value.trim(),titolare:document.getElementById("azTitolare").value.trim(),privacy_text:document.getElementById("azPrivacy").value.trim(),cookie_text:document.getElementById("azCookie").value.trim(),termini_text:document.getElementById("azTermini").value.trim(),colori:{primary:document.getElementById("azPrimary").value,accent:document.getElementById("azAccent").value},stato:"attiva"};const ins=await sb.from("aziende").insert(payload).select("id").single();if(ins.error){st.textContent="Errore salvataggio: "+ins.error.message;return}const mem=await sb.from("azienda_utenti").insert({azienda_id:ins.data.id,user_id:user.id,ruolo:"owner"});if(mem.error){st.textContent="Configurazione salvata ma appartenenza non completata: "+mem.error.message;return}const req=await sb.from("provisioning_requests").insert({owner_user_id:user.id,azienda_id:ins.data.id,stato:"richiesta",dettagli:{ragione_sociale:payload.ragione_sociale,nome_app:payload.nome_app,slug:payload.slug,logo_url:payload.logo_url,colori:payload.colori}}).select("id").single();if(req.error){st.textContent="App configurata, ma richiesta di creazione infrastruttura non registrata: "+req.error.message;return}st.textContent="Configurazione completata. La richiesta di creazione dell'ambiente autonomo è stata messa in coda.";setTimeout(()=>window.location.reload(),900)}async function logout(){sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");sessionStorage.removeItem("nextpoint_login_role");sessionStorage.removeItem("nextpoint_login_azienda_slug");await sb.auth.signOut();window.location.href="index.html"}
+async function saveCompany(e){e.preventDefault();const st=document.getElementById("companySetupStatus");st.textContent="Salvataggio…";const {data:{session}}=await sb.auth.getSession();if(!session){window.location.href="login.html";return}const user=session.user;const slugBase=(document.getElementById("azNomeApp").value.trim().toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"app");const slug=slugBase+"-"+user.id.slice(0,8);let logoUrl=null;const file=document.getElementById("azLogo").files[0];if(file){if(file.size>6291456){st.textContent="Il logo supera 6 MB.";return}const ext=(file.name.split(".").pop()||"png").toLowerCase();const path=user.id+"/"+crypto.randomUUID()+"."+ext;const up=await sb.storage.from("azienda-assets").upload(path,file,{contentType:file.type||"image/png",upsert:false});if(up.error){st.textContent="Errore caricamento logo: "+up.error.message;return}logoUrl=sb.storage.from("azienda-assets").getPublicUrl(path).data.publicUrl}const payload={owner_user_id:user.id,ragione_sociale:document.getElementById("azRagione").value.trim(),nome_app:document.getElementById("azNomeApp").value.trim(),slug,logo_url:logoUrl,sede:document.getElementById("azSede").value.trim(),cf_piva:document.getElementById("azCf").value.trim(),email:document.getElementById("azEmail").value.trim(),telefono:document.getElementById("azTelefono").value.trim(),pec:document.getElementById("azPec").value.trim(),titolare:document.getElementById("azTitolare").value.trim(),privacy_text:document.getElementById("azPrivacy").value.trim(),cookie_text:document.getElementById("azCookie").value.trim(),termini_text:document.getElementById("azTermini").value.trim(),colori:{primary:document.getElementById("azPrimary").value,accent:document.getElementById("azAccent").value},stato:"attiva"};const ins=await sb.from("aziende").insert(payload).select("id").single();if(ins.error){st.textContent="Errore salvataggio: "+ins.error.message;return}const mem=await sb.from("azienda_utenti").insert({azienda_id:ins.data.id,user_id:user.id,ruolo:"owner"});if(mem.error){st.textContent="Configurazione salvata ma appartenenza non completata: "+mem.error.message;return}const req=await sb.from("provisioning_requests").insert({owner_user_id:user.id,azienda_id:ins.data.id,stato:"richiesta",dettagli:{ragione_sociale:payload.ragione_sociale,nome_app:payload.nome_app,slug:payload.slug,logo_url:payload.logo_url,colori:payload.colori}}).select("id").single();if(req.error){st.textContent="App configurata, ma richiesta di creazione infrastruttura non registrata: "+req.error.message;return}st.textContent="Configurazione completata. La richiesta di creazione dell'ambiente autonomo è stata messa in coda.";setTimeout(()=>window.location.reload(),900)}async function logout(){await sb.auth.signOut();window.location.href="index.html"}
 async function initTenantSafe(){
  const publicSlug=new URLSearchParams(location.search).get("azienda");
- if(publicSlug){
-   const {data:{session}}=await sb.auth.getSession();
-   if(!session){window.location.replace("societa.html?slug="+encodeURIComponent(publicSlug));return}
-   window.history.replaceState({},document.title,"dashboard.html");
- }
+ if(publicSlug){await init();return}
  const {data:{session},error:sessionError}=await sb.auth.getSession();
  if(sessionError){console.error("Errore sessione:",sessionError);}
  if(!session){await init();return}
@@ -270,16 +271,27 @@ async function initTenantSafe(){
  const rows=Array.isArray(members)?members:[];
  if(!rows.length){await init();return}
  const ids=[...new Set(rows.map(x=>x.azienda_id).filter(Boolean))];
- if(ids.length!==1){
-   console.error("Violazione separazione società: l'account risulta associato a più società attive.");
-   document.querySelector("main.page").style.display="none";
-   document.getElementById("status").textContent="Accesso bloccato: l'account non è associato a una singola società.";
+ const {data:companies,error:companiesError}=await sb.from("aziende").select("id,nome_app,ragione_sociale").in("id",ids);
+ if(companiesError){console.error("Errore caricamento società:",companiesError);document.getElementById("status").textContent="Impossibile caricare la società.";return}
+ if(ids.length===1){
+   sessionStorage.setItem("nextpoint_login_azienda_id",ids[0]);
+   const selected=rows.find(x=>x.azienda_id===ids[0]);
+   if(selected)sessionStorage.setItem("nextpoint_login_role",selected.ruolo||"user");
+   await init();
    return;
  }
- sessionStorage.setItem("nextpoint_login_azienda_id",ids[0]);
- const selected=rows.find(x=>x.azienda_id===ids[0]);
- if(selected)sessionStorage.setItem("nextpoint_login_role",selected.ruolo||"user");
- await init();
+ const byId=new Map((companies||[]).map(x=>[x.id,x]));
+ document.querySelector(".page").innerHTML='<section class="hero"><div class="eyebrow">NEXT POINT PADEL</div><h1>Seleziona la società</h1><div class="welcome-name">Il tuo account è associato a più società.</div><p class="subtitle">Scegli l’area alla quale vuoi accedere.</p><div id="companyChoices" style="display:grid;gap:10px;margin-top:22px"></div><button class="admin-btn" style="margin-top:12px" onclick="logout()">🚪 Esci</button></section>';
+ const box=document.getElementById("companyChoices");
+ rows.forEach(row=>{
+   const company=byId.get(row.azienda_id);
+   if(!company)return;
+   const btn=document.createElement("button");
+   btn.className="admin-btn";
+   btn.textContent=(company.nome_app||company.ragione_sociale||"Società")+" · "+(row.ruolo||"user");
+   btn.onclick=async()=>{sessionStorage.setItem("nextpoint_login_azienda_id",row.azienda_id);sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");sessionStorage.setItem("nextpoint_login_role",row.ruolo||"user");await init()};
+   box.appendChild(btn);
+ });
 }
 window.addEventListener("load",initTenantSafe);
 </script>
