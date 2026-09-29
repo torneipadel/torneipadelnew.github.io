@@ -11,7 +11,7 @@ async function auth(){
  if(!sb) throw new Error('Supabase non disponibile');
  const {data:{user}}=await sb.auth.getUser();
  if(!user) throw new Error('Sessione non autenticata');
- const {data,isSuper,error}=await sb.rpc('is_superadmin');
+ const {data:isSuper,error}=await sb.rpc('is_superadmin');
  if(error||isSuper!==true) throw new Error('Accesso riservato al Superadmin');
  return user;
 }
