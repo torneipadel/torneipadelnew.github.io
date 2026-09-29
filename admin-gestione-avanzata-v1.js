@@ -21,7 +21,14 @@ if(a==='superadmin'){close();const target=document.querySelector('#sideSuperadmi
 o.style.display='flex';o.classList.add('open');document.body.classList.add('admin-advanced-open');
 };
 function install(){if($('advancedAdminButton'))return true;const s=document.querySelector('#areaAdmin .sidebar');if(!s)return false;const f=s.querySelector('.sidebar-footer');const b=document.createElement('button');b.id='advancedAdminButton';b.type='button';b.textContent='⚙️ Gestione avanzata';b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();open()});(f?f.parentNode:s).insertBefore(b,f||null);const m=document.querySelector('.mobile-nav');if(m&&!$('mobileAdvancedAdminButton')){const x=document.createElement('button');x.id='mobileAdvancedAdminButton';x.type='button';x.textContent='⚙️ Gestione avanzata';x.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();document.querySelector('#mobileOverlay')?.classList.remove('open');open()});m.prepend(x)}return true}
-function hideAdvancedGroups(){document.querySelectorAll('#areaAdmin .sidebar .nav-group').forEach(g=>{const l=(g.querySelector('.nav-label')?.textContent||'').trim();if(['Comunicazioni','Contenuti','Società','Sistema'].includes(l))g.style.display='none'});}
+function hideAdvancedGroups(){
+  const sidebar=document.querySelector('#areaAdmin .sidebar'); if(!sidebar)return;
+  let css=document.getElementById('adminAdvancedSidebarHideStyle');
+  if(!css){css=document.createElement('style');css.id='adminAdvancedSidebarHideStyle';css.textContent='#areaAdmin .sidebar .nav-group[data-admin-advanced-hidden="1"]{display:none!important;}';document.head.appendChild(css);}
+  const apply=()=>sidebar.querySelectorAll('.nav-group').forEach(g=>{const l=(g.querySelector('.nav-label')?.textContent||'').trim();if(['Comunicazioni','Contenuti','Società','Sistema'].includes(l))g.setAttribute('data-admin-advanced-hidden','1');});
+  apply();
+  if(!sidebar.__advancedSidebarObserver){sidebar.__advancedSidebarObserver=new MutationObserver(apply);sidebar.__advancedSidebarObserver.observe(sidebar,{childList:true,subtree:true});}
+}
 function boot(){install();hideAdvancedGroups()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()},true);
