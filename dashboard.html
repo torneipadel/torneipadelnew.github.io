@@ -178,18 +178,24 @@ function setupReserved(c){
    const r=await fetch("https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/login-piva",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({identifier:id,slug:c.slug})
+    body:JSON.stringify({identifier:id,slug:c.slug,password:id})
    });
    const d=await r.json().catch(()=>({}));
    if(!r.ok||!d.ok||!d.azienda||d.azienda.id!==c.id){
     st.textContent=d.error||"Partita IVA / Codice Fiscale non riconosciuto.";
     return;
    }
+   const sessionResult=await sb.auth.setSession({access_token:d.session?.access_token||"",refresh_token:d.session?.refresh_token||""});
+   if(sessionResult.error){st.textContent=sessionResult.error.message||"Impossibile completare l'accesso.";return;}
+   const access=await sb.rpc("get_my_azienda_access",{p_azienda_id:c.id});
+   const a=Array.isArray(access.data)?access.data[0]:access.data;
+   const role=String(a?.ruolo||d.role||"").toLowerCase();
+   if(access.error||!a?.accesso_consentito||!["admin","superadmin","owner"].includes(role)){await sb.auth.signOut();st.textContent="Account non autorizzato alla gestione della società.";return;}
    sessionStorage.setItem("nextpoint_login_azienda_id",c.id);
    sessionStorage.setItem("nextpoint_login_azienda_slug",c.slug);
-   sessionStorage.setItem("nextpoint_login_role",String(d.role||"").toLowerCase());
-   st.textContent="Società riconosciuta. Inserisci ora email e password dell'account amministratore.";
-   setTimeout(()=>window.location.href="login.html?azienda="+encodeURIComponent(c.slug)+"&next=admin",250);
+   sessionStorage.setItem("nextpoint_login_role",role);
+   st.textContent="Accesso effettuato. Apertura della gestione tornei…";
+   setTimeout(()=>window.location.href="admin.html?v=20260929",250);
   }catch(err){
    console.error(err);
    st.textContent="Errore di collegamento. Riprova.";
