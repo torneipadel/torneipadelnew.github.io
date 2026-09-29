@@ -38,6 +38,11 @@ footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-siz
 
 .language-selector{position:fixed;top:18px;right:18px;z-index:1000;font-size:13px}.language-button{height:38px;min-width:76px;padding:0 12px;border:1px solid rgba(255,255,255,.28);border-radius:11px;background:rgba(7,18,25,.40);color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.20);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font:700 13px/1 "Open Sans",Arial,sans-serif;letter-spacing:.2px;cursor:pointer}.language-button:hover{background:rgba(7,18,25,.54);transform:none}.language-menu{position:absolute;right:0;top:44px;width:164px;padding:6px;border:1px solid rgba(255,255,255,.22);border-radius:13px;background:rgba(10,24,32,.90);box-shadow:0 14px 34px rgba(0,0,0,.34);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;visibility:hidden;transform:translateY(-5px);transition:.18s ease}.language-selector.open .language-menu{opacity:1;visibility:visible;transform:translateY(0)}.language-option{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#fff;text-align:left;font:600 13px/1.2 "Open Sans",Arial,sans-serif;cursor:pointer}.language-option:hover,.language-option.active{background:rgba(255,255,255,.12)}
 @media(max-width:767px){.language-selector{top:12px;right:12px}.language-button{height:36px;min-width:72px}.language-menu{top:42px}}@media(max-width:380px){.language-selector{top:10px;right:10px}.language-menu{width:154px}}
+
+/* EVENTOUR Superadmin entry */
+.superadmin-entry{display:inline-flex;align-items:center;gap:7px;margin-left:4px;padding:9px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(7,18,25,.30);color:#fff!important;font-size:11px;font-weight:800;letter-spacing:.3px;cursor:pointer}
+.superadmin-entry-mobile{display:none}
+@media(max-width:900px){.superadmin-entry{display:none}.superadmin-entry-mobile{display:inline-flex!important;align-items:center;padding:8px 12px;margin-right:8px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--navy);font-weight:800;font-size:11px;cursor:pointer}}
 </style>
 </head>
 <body>
@@ -46,7 +51,7 @@ footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-siz
 <nav class="nav">
 <div class="container nav-inner">
 <a class="brand" href="index.html"><span class="brand-logo-wrap"><img src="eventour_logo.jpg" alt="EVENTOUR — gestione eventi & tornei"><span class="brand-subtitle">gestione eventi &amp; tornei</span></span></a>
-<div class="nav-links"><a href="#piattaforma"><span data-i18n="navPlatform">Piattaforma</span></a><a href="#come-funziona"><span data-i18n="navHow"><span data-i18n="howKicker">Come funziona</span></span></a><a href="#societa"><span data-i18n="navSociety">Società</span></a><a class="nav-cta" href="registrazione-piva.html"><span data-i18n="activate">ATTIVA IL TUO CLUB</span></a></div>
+<div class="nav-links"><a href="#piattaforma"><span data-i18n="navPlatform">Piattaforma</span></a><a href="#come-funziona"><span data-i18n="navHow"><span data-i18n="howKicker">Come funziona</span></span></a><a href="#societa"><span data-i18n="navSociety">Società</span></a><a class="superadmin-entry" href="superadmin-login.html">🔐 Superadmin</a><a class="nav-cta" href="registrazione-piva.html"><span data-i18n="activate">ATTIVA IL TUO CLUB</span></a></div>
 </div>
 </nav>
 
@@ -110,7 +115,7 @@ footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-siz
 <section class="cta"><div class="container"><h2><span data-i18n="ctaTitle">Il prossimo punto è il tuo.</span></h2><p><span data-i18n="ctaText">Porta il tuo club su Next Point Padel e costruisci un'esperienza digitale più moderna per la tua società e per i tuoi giocatori.</span></p><div class="actions"><a class="btn btn-main" href="registrazione-piva.html"><span data-i18n="activate">ATTIVA IL TUO CLUB</span></a><a class="btn btn-light" href="contatti.html"><span data-i18n="contactUs">PARLA CON NOI</span></a></div></div></section>
 </main>
 
-<footer><a href="informazioni.html"><span data-i18n="info">Informazioni</span></a> · <a href="contatti.html"><span data-i18n="contacts">Contatti</span></a> · <a href="privacy.html"><span data-i18n="privacy">Privacy</span></a> · <a href="cookie.html"><span data-i18n="cookie">Cookie</span></a> · <a href="termini.html"><span data-i18n="terms">Termini</span></a><br><br>© Next Point Padel</footer>
+<footer><a class="superadmin-entry-mobile" href="superadmin-login.html">🔐 Accesso Superadmin</a> <a href="informazioni.html"><span data-i18n="info">Informazioni</span></a> · <a href="contatti.html"><span data-i18n="contacts">Contatti</span></a> · <a href="privacy.html"><span data-i18n="privacy">Privacy</span></a> · <a href="cookie.html"><span data-i18n="cookie">Cookie</span></a> · <a href="termini.html"><span data-i18n="terms">Termini</span></a><br><br>© Next Point Padel</footer>
 
 <script>
 const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
