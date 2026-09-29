@@ -1,0 +1,27 @@
+/* admin-gestione-avanzata-v1.js */
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const superAdmin=()=>window.isSuperadmin===true||String(document.documentElement.dataset.adminRole||'')==='superadmin';
+const close=()=>{const o=$('adminAdvancedOverlay');if(!o)return;o.classList.remove('open');o.style.display='none';document.body.classList.remove('admin-advanced-open')};
+const open=()=>{let o=$('adminAdvancedOverlay');if(!o){o=document.createElement('div');o.id='adminAdvancedOverlay';o.innerHTML='<div id="adminAdvancedPanel" role="dialog" aria-modal="true"><div class="aap-head"><div><h2>⚙️ Gestione avanzata</h2><p>Configurazioni e funzioni extra.</p></div><button type="button" class="aap-close" id="aapClose" aria-label="Chiudi">×</button></div><div class="aap-grid"><section class="aap-card"><h3>📰 Comunicazioni</h3><p>News, locandine, sponsor e WhatsApp.</p><div class="aap-actions"><button type="button" class="aap-action primary" data-a="news">📰 News</button><button type="button" class="aap-action" data-a="locandine">🎨 Locandine</button><button type="button" class="aap-action" data-a="sponsor">🤝 Sponsor</button><button type="button" class="aap-action" data-a="whatsapp">📱 WhatsApp</button></div></section><section class="aap-card"><h3>🏢 Società e utenti</h3><p>Configurazione app, dati società, utenti e ruoli.</p><div class="aap-actions"><button type="button" class="aap-action primary" data-a="config">⚙️ Configurazione App</button><button type="button" class="aap-action" data-a="users">👥 Utenti società</button><button type="button" class="aap-action" data-a="privacy">🔐 Privacy e legale</button></div></section><section class="aap-card"><h3>🛒 Contenuti</h3><p>Contenuti commerciali.</p><div class="aap-actions"><button type="button" class="aap-action primary" data-a="mercatino">🛒 Mercatino</button></div></section><section class="aap-card"><h3>📊 Sistema</h3><p>Controllo risorse e manuale.</p><div class="aap-actions"><button type="button" class="aap-action primary" data-a="monitor">📊 Stato risorse</button><button type="button" class="aap-action" data-a="manual">📘 Manuale operativo</button></div></section>'+(superAdmin()?'<section class="aap-card"><h3>👑 Superadmin</h3><p>Audit, backup, ripristino e versioni.</p><div class="aap-actions"><button type="button" class="aap-action primary" data-a="superadmin">👑 Area Superadmin</button></div></section>':'')+'<section class="aap-card"><h3>🤖 Automazioni</h3><p>Funzioni News e comunicazioni.</p><div class="aap-actions"><button type="button" class="aap-action" data-a="news">📰 Automazione News</button><button type="button" class="aap-action" data-a="whatsapp">📱 Flusso WhatsApp</button></div></section></div></div>';document.body.appendChild(o);
+o.addEventListener('click',e=>{if(e.target===o)close()});
+o.querySelector('#aapClose').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();close()});
+o.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const a=b.dataset.a;
+if(['news','locandine','sponsor','whatsapp'].includes(a)){close();const target=document.querySelector('[data-com-page="'+a+'"]');if(target)target.click();return}
+if(a==='config'){close();location.href='configurazione-app.html#dati-societa';return}
+if(a==='users'){close();location.href='utenti-societa.html';return}
+if(a==='privacy'){close();if(typeof window.openAdminPrivacy==='function')window.openAdminPrivacy();else location.href='configurazione-app.html#privacy';return}
+if(a==='mercatino'){close();location.href='admin-mercatino.html';return}
+if(a==='monitor'){close();if(typeof window.apriMonitorSistema==='function')window.apriMonitorSistema();return}
+if(a==='manual'){close();location.href='manuale.html';return}
+if(a==='superadmin'){close();const target=document.querySelector('#sideSuperadmin');if(target)target.click()}
+}));
+}
+o.style.display='flex';o.classList.add('open');document.body.classList.add('admin-advanced-open');
+};
+function install(){if($('advancedAdminButton'))return true;const s=document.querySelector('#areaAdmin .sidebar');if(!s)return false;const f=s.querySelector('.sidebar-footer');const b=document.createElement('button');b.id='advancedAdminButton';b.type='button';b.textContent='⚙️ Gestione avanzata';b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();open()});(f?f.parentNode:s).insertBefore(b,f||null);const m=document.querySelector('.mobile-nav');if(m&&!$('mobileAdvancedAdminButton')){const x=document.createElement('button');x.id='mobileAdvancedAdminButton';x.type='button';x.textContent='⚙️ Gestione avanzata';x.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();document.querySelector('#mobileOverlay')?.classList.remove('open');open()});m.prepend(x)}return true}
+function boot(){install()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()},true);
+window.openAdminAdvanced=open;
+})();
