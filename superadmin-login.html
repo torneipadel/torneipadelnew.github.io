@@ -29,6 +29,14 @@ button{width:100%;height:48px;margin-top:18px;border:0;border-radius:9px;backgro
 <button id="submit" type="submit">Accedi al Control Center</button>
 <div style="text-align:center;margin-top:12px"><button id="forgot" type="button" style="width:auto;height:auto;margin:0;padding:0;background:none;color:#0a4778;font-weight:700">Password dimenticata?</button></div>
 </form>
+<div id="recoveryBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5eaf0">
+<p style="margin:0 0 8px"><b>Imposta nuova password</b></p>
+<label for="newPassword">Nuova password</label>
+<input id="newPassword" type="password" autocomplete="new-password" minlength="8">
+<label for="confirmPassword">Conferma password</label>
+<input id="confirmPassword" type="password" autocomplete="new-password" minlength="8">
+<button id="savePassword" type="button">Salva nuova password</button>
+</div>
 <div id="resetBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5eaf0">
 <p style="margin:0 0 8px">Inserisci l'email del Superadmin. Riceverai il link per impostare una nuova password.</p>
 <button id="reset" type="button">Invia link di reset</button>
@@ -41,7 +49,41 @@ const SUPABASE_ANON_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const form=document.getElementById("form"),error=document.getElementById("error"),submit=document.getElementById("submit");
 const forgot=document.getElementById("forgot"),resetBox=document.getElementById("resetBox"),reset=document.getElementById("reset");
+const recoveryBox=document.getElementById("recoveryBox"),savePassword=document.getElementById("savePassword");
 forgot.addEventListener("click",()=>{resetBox.style.display="block";document.getElementById("email").focus();error.textContent=""});
+async function handleRecovery(){
+ const {data:{session}}=await sb.auth.getSession();
+ const hasRecovery=window.location.hash.includes("type=recovery")||new URLSearchParams(window.location.search).get("type")==="recovery";
+ if(hasRecovery||session?.user){
+   const {data:{user}}=await sb.auth.getUser();
+   if(hasRecovery && user){
+     recoveryBox.style.display="block";
+     resetBox.style.display="none";
+     form.style.display="none";
+     document.querySelector(".back").style.display="none";
+     error.style.color="#607286";
+     error.textContent="Inserisci la nuova password.";
+   }
+ }
+}
+savePassword.addEventListener("click",async()=>{
+ error.style.color="#b42318";error.textContent="";
+ const p=document.getElementById("newPassword").value;
+ const cp=document.getElementById("confirmPassword").value;
+ if(p.length<8){error.textContent="La nuova password deve contenere almeno 8 caratteri.";return}
+ if(p!==cp){error.textContent="Le password non coincidono.";return}
+ savePassword.disabled=true;savePassword.textContent="Salvataggio...";
+ const {error:err}=await sb.auth.updateUser({password:p});
+ if(err){error.textContent=err.message;savePassword.disabled=false;savePassword.textContent="Salva nuova password";return}
+ await sb.auth.signOut();
+ recoveryBox.style.display="none";form.style.display="";
+ document.querySelector(".back").style.display="";
+ error.style.color="#147a42";error.textContent="Password aggiornata correttamente. Ora puoi accedere.";
+ savePassword.disabled=false;savePassword.textContent="Salva nuova password";
+ history.replaceState({},document.title,window.location.pathname);
+});
+sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY") handleRecovery();});
+handleRecovery();
 reset.addEventListener("click",async()=>{
 error.textContent="";reset.disabled=true;reset.textContent="Invio...";
 try{
