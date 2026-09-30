@@ -79,7 +79,12 @@ async function load(){
   $('search').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none')};
  }catch(e){$('app').innerHTML='<div class="error">❌ '+esc(e.message||e)+'</div>'}
 }
+function startControlCenter(){
 window.addEventListener('error',e=>{try{$('app').innerHTML='<div class="error">❌ Errore Control Center: '+esc(e.message||e.error||'errore JavaScript')+'</div>'}catch(_){} });
 window.addEventListener('unhandledrejection',e=>{try{$('app').innerHTML='<div class="error">❌ Errore Control Center: '+esc(e.reason?.message||e.reason||'errore promessa')+'</div>'}catch(_){} });
 $('refreshBtn').onclick=load;$('backBtn').onclick=()=>location.href='admin.html';load();
+
+$('refreshBtn').onclick=load;$('backBtn').onclick=()=>location.href='admin.html';load();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startControlCenter,{once:true}); else startControlCenter();
 })();
