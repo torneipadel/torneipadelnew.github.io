@@ -51,19 +51,21 @@ const form=document.getElementById("form"),error=document.getElementById("error"
 const forgot=document.getElementById("forgot"),resetBox=document.getElementById("resetBox"),reset=document.getElementById("reset");
 const recoveryBox=document.getElementById("recoveryBox"),savePassword=document.getElementById("savePassword");
 forgot.addEventListener("click",()=>{resetBox.style.display="block";document.getElementById("email").focus();error.textContent=""});
+function showRecovery(){
+ recoveryBox.style.display="block";
+ resetBox.style.display="none";
+ form.style.display="none";
+ forgot.style.display="none";
+ document.querySelector(".back").style.display="none";
+ error.style.color="#607286";
+ error.textContent="Inserisci la nuova password.";
+}
 async function handleRecovery(){
- const {data:{session}}=await sb.auth.getSession();
- const hasRecovery=window.location.hash.includes("type=recovery")||new URLSearchParams(window.location.search).get("type")==="recovery";
- if(hasRecovery||session?.user){
-   const {data:{user}}=await sb.auth.getUser();
-   if(hasRecovery && user){
-     recoveryBox.style.display="block";
-     resetBox.style.display="none";
-     form.style.display="none";
-     document.querySelector(".back").style.display="none";
-     error.style.color="#607286";
-     error.textContent="Inserisci la nuova password.";
-   }
+ const hash=window.location.hash||"";
+ const hasRecovery=/type=recovery/i.test(hash)||new URLSearchParams(window.location.search).get("type")==="recovery";
+ if(hasRecovery){
+   showRecovery();
+   return;
  }
 }
 savePassword.addEventListener("click",async()=>{
@@ -82,7 +84,7 @@ savePassword.addEventListener("click",async()=>{
  savePassword.disabled=false;savePassword.textContent="Salva nuova password";
  history.replaceState({},document.title,window.location.pathname);
 });
-sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY") handleRecovery();});
+sb.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY") showRecovery();});
 handleRecovery();
 reset.addEventListener("click",async()=>{
 error.textContent="";reset.disabled=true;reset.textContent="Invio...";
