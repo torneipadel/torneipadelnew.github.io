@@ -84,7 +84,6 @@ window.addEventListener('error',e=>{try{$('app').innerHTML='<div class="error">‚
 window.addEventListener('unhandledrejection',e=>{try{$('app').innerHTML='<div class="error">‚ùå Errore Control Center: '+esc(e.reason?.message||e.reason||'errore promessa')+'</div>'}catch(_){} });
 $('refreshBtn').onclick=load;$('backBtn').onclick=()=>location.href='admin.html';load();
 
-$('refreshBtn').onclick=load;$('backBtn').onclick=()=>location.href='admin.html';load();
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startControlCenter,{once:true}); else startControlCenter();
 })();
