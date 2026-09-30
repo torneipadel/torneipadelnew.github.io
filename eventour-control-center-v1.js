@@ -1,7 +1,14 @@
 (function(){
 'use strict';
 const SUPA='https://dkeqicstprvvfebiaooc.supabase.co';
-const sb=window.sb||window.supabaseClient||window.supabase?.createClient?.(SUPA,'');
+const SUPA_KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
+let sb=window.sb||window.supabaseClient;
+if(!sb || typeof sb.from!=='function' || !sb.auth){
+  if(!window.supabase?.createClient) throw new Error('Libreria Supabase non caricata');
+  sb=window.supabase.createClient(SUPA,SUPA_KEY);
+  window.sb=sb;
+  window.supabaseClient=sb;
+}
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const money=v=>new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(v||0));
@@ -72,5 +79,7 @@ async function load(){
   $('search').oninput=e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none')};
  }catch(e){$('app').innerHTML='<div class="error">❌ '+esc(e.message||e)+'</div>'}
 }
+window.addEventListener('error',e=>{try{$('app').innerHTML='<div class="error">❌ Errore Control Center: '+esc(e.message||e.error||'errore JavaScript')+'</div>'}catch(_){} });
+window.addEventListener('unhandledrejection',e=>{try{$('app').innerHTML='<div class="error">❌ Errore Control Center: '+esc(e.reason?.message||e.reason||'errore promessa')+'</div>'}catch(_){} });
 $('refreshBtn').onclick=load;$('backBtn').onclick=()=>location.href='admin.html';load();
 })();
