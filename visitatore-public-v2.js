@@ -74,7 +74,8 @@ async function start(){
   // Risolvi prima il contesto tenant: URL, chiavi di sessione o azienda associata all'account.
   if(!publicSlug){
     try{
-      publicSlug=String(localStorage.getItem('nextpoint_public_azienda_slug')||sessionStorage.getItem('nextpoint_public_azienda_slug')||sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim();
+      // Prima la società dell'account attualmente autenticato: evita slug pubblici obsoleti di altri club.
+      publicSlug=String(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim();
       if(!publicSlug){
         const authClient=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient;
         if(authClient){
@@ -83,6 +84,8 @@ async function start(){
           if(!access.error&&row?.slug) publicSlug=String(row.slug).trim();
         }
       }
+      // Le chiavi pubbliche sono fallback solo se l'account non identifica una società.
+      if(!publicSlug) publicSlug=String(sessionStorage.getItem('nextpoint_public_azienda_slug')||localStorage.getItem('nextpoint_public_azienda_slug')||'').trim();
     }catch(e){console.warn('[CONTESTO SOCIETA]',e)}
   }
   publicCompany=await resolvePublicCompany();
