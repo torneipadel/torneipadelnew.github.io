@@ -44,7 +44,7 @@ function installSponsor(client){
  document.head.appendChild(style);
  target.appendChild(banner);
  (async()=>{
-   const {data,error}=await client.from('tornei').select('id,configurazione');
+   const {data,error}=await client.from('tornei_pubblici').select('id,configurazione');
    const track=banner.querySelector('.public-sponsor-track');
    if(error||!track){track.innerHTML='<div class="public-sponsor-empty">Sponsor non disponibili</div>';return;}
    const sponsors=[]; const seen=new Set();
@@ -69,7 +69,7 @@ async function run(){
  const client=supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  installSponsor(client);
  const box=document.getElementById('lista-tornei'); if(!box)return;
- const {data,error}=await client.from('tornei').select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione').order('data',{ascending:true});
+ const {data,error}=await client.from('tornei_pubblici').select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione').order('data',{ascending:true});
  if(error){console.error('[PUBLIC TOURNAMENTS]',error);box.innerHTML='<div class="torneo-item">❌ Errore caricamento tornei</div>';return;}
  const aperti=(data||[]).filter(aperto), chiusi=(data||[]).filter(chiuso);
  box.innerHTML=aperti.length?aperti.map(t=>card(t,false)).join(''):'<div class="torneo-item">Nessun torneo aperto al momento.</div>';
