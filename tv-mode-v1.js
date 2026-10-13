@@ -208,7 +208,8 @@
   async function load(){
     if(!sb||!currentId||loading) return;
     loading=true;
-    const {data,error}=await sb.from("tornei_pubblici").select("id,nome,data,stato,configurazione").eq("id",currentId).maybeSingle();
+    const {data:publicTournaments,error}=await sb.rpc("get_public_tornei",{p_torneo_id:Number(currentId),p_azienda_id:null});
+    const data=publicTournaments?.[0]||null;
     if(error){ console.error("[TV] load",error); $("#status").textContent="ERRORE"; loading=false; return; }
     if(!data){ $("#status").textContent="TORNEO NON TROVATO"; loading=false; return; }
     const playerMap=await loadPublicPlayerMap();
