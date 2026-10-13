@@ -56,7 +56,7 @@ async function news(){
   const box=document.getElementById('npNews');
   if(!box)return;
   if(!publicCompany?.id){box.innerHTML='<div class="np-empty">Seleziona una società per visualizzare le comunicazioni.</div>';return}
-  const {data,error}=await client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id').eq('azienda_id',publicCompany.id).eq('pubblicata',true).order('in_evidenza',{ascending:false}).order('ordine',{ascending:true}).order('created_at',{ascending:false}).limit(30);
+  const {data,error}=await client.rpc('get_public_company_news',{p_slug:publicCompany.slug||publicSlug});
   if(error){console.error('[NEWS GLOBALI]',error);box.innerHTML='<div class="np-empty">News non disponibili al momento.</div>';return}
   const all=(data||[]).map(n=>{const t=tournaments.find(x=>String(x.id)===String(n.torneo_id));return {...n,__torneo:t?.nome||''}}).sort((a,b)=>{if(Boolean(b.in_evidenza)!==Boolean(a.in_evidenza))return b.in_evidenza?1:-1;return new Date(b.created_at||0)-new Date(a.created_at||0)});
   if(!all.length){box.innerHTML='<div class="np-empty">Nessuna comunicazione pubblicata al momento.</div>';return}
