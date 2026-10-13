@@ -171,7 +171,7 @@
   async function load(){
     if(!sb||!currentId||loading) return;
     loading=true;
-    const {data,error}=await sb.from("tornei").select("id,nome,data,stato,configurazione").eq("id",currentId).maybeSingle();
+    const {data,error}=await sb.from("tornei_pubblici").select("id,nome,data,stato,configurazione").eq("id",currentId).maybeSingle();
     if(error){ console.error("[TV] load",error); $("#status").textContent="ERRORE"; loading=false; return; }
     if(!data){ $("#status").textContent="TORNEO NON TROVATO"; loading=false; return; }
     const st=Object.assign({},data.configurazione||{});
