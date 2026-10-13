@@ -9,6 +9,11 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+
+concurrency:
+  group: superadmin-code-backup-restore
+  cancel-in-progress: false
 
 jobs:
   backup-and-restore:
@@ -19,13 +24,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get short-lived GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('torneipadel-code-backup-bridge');
+            core.setSecret(token);
+            core.setOutput('token', token);
+
       - name: Check pending restore request
         id: request
         shell: bash
         run: |
           set -euo pipefail
           URL="https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge"
-          RESP="$(curl -fsS "$URL")"
+          RESP="$(curl -fsS -H "Authorization: Bearer $BRIDGE_TOKEN" "$URL")"
           echo "$RESP"
           PENDING="$(python -c 'import json,sys; print(str(json.load(sys.stdin).get("pending",False)).lower())' <<< "$RESP")"
           echo "pending=$PENDING" >> "$GITHUB_OUTPUT"
@@ -36,6 +50,8 @@ jobs:
             echo "file=$(sed -n '2p' /tmp/request.txt)"
             echo "sha=$(sed -n '3p' /tmp/request.txt)"
           } >> "$GITHUB_OUTPUT"
+        env:
+          BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
 
       - name: Validate restore request
         if: steps.request.outputs.pending == 'true'
@@ -72,8 +88,9 @@ jobs:
         run: |
           STATUS="${{ job.status == 'success' && 'DONE' || 'ERROR' }}"
           RESULT="${{ job.status == 'success' && 'Ripristino completato automaticamente da GitHub Actions.' || 'Ripristino non completato. Controllare i log della workflow.' }}"
-          curl -fsS -X POST "https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge" -H "Content-Type: application/json" --data "$(python -c 'import json,os; print(json.dumps({"id":int(os.environ["RID"]),"status":os.environ["STATUS"],"result":os.environ["RESULT"]}))')" || true
+          curl -fsS -X POST "https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge" -H "Authorization: Bearer $BRIDGE_TOKEN" -H "Content-Type: application/json" --data "$(python -c 'import json,os; print(json.dumps({"id":int(os.environ["RID"]),"status":os.environ["STATUS"],"result":os.environ["RESULT"]}))')" || true
         env:
           RID: "${{ steps.request.outputs.id }}"
           STATUS: "${{ job.status == 'success' && 'DONE' || 'ERROR' }}"
           RESULT: "${{ job.status == 'success' && 'Ripristino completato automaticamente da GitHub Actions.' || 'Ripristino non completato. Controllare i log della workflow.' }}"
+          BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
