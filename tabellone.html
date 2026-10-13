@@ -7082,11 +7082,10 @@ try{
             // gli amministratori autorizzati continuano a leggere la tabella originale.
             window.__BOVE_PUBLIC_VIEW__ = false;
             if(error || !Array.isArray(tornei) || tornei.length===0){
-                const pubblico = await sb
-                    .from("tornei_pubblici")
-                    .select("*")
-                    .eq("id", Number(idParam))
-                    .limit(1);
+                const pubblico = await sb.rpc("get_public_tornei", {
+                    p_torneo_id: Number(idParam),
+                    p_azienda_id: null
+                });
                 if(!pubblico.error && Array.isArray(pubblico.data) && pubblico.data.length){
                     tornei = pubblico.data;
                     error = null;
@@ -7210,9 +7209,7 @@ try{
         try{
 
             const queryIscritti = window.__BOVE_PUBLIC_VIEW__
-                ? sb.from("iscrizioni_pubbliche")
-                    .select("id,torneo_id,nome_giocatore,nome,cognome,categoria,stato,approvato,data_iscrizione")
-                    .eq("torneo_id", Number(idParam))
+                ? sb.rpc("get_public_iscrizioni", { p_torneo_id: Number(idParam) })
                 : sb.from("iscrizioni")
                     .select("*")
                     .eq("torneo_id", Number(idParam))
