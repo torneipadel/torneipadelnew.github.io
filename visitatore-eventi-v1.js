@@ -353,7 +353,7 @@ async function load(){
 
   publicCompany=await resolvePublicCompany();
   let q=sb
-   .from('tornei')
+   .from('tornei_pubblici')
    .select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione,azienda_id')
    .order('data',{ascending:true});
   if(publicSlug){
