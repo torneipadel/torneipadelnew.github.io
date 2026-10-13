@@ -7066,7 +7066,7 @@ try{
 
         try{
 
-            const {
+            let {
                 data:tornei,
                 error
             } = await sb
@@ -7077,6 +7077,22 @@ try{
                     Number(idParam)
                 )
                 .limit(1);
+
+            // Gli spettatori leggono la vista pubblica con configurazione sanificata;
+            // gli amministratori autorizzati continuano a leggere la tabella originale.
+            if(error || !Array.isArray(tornei) || tornei.length===0){
+                const pubblico = await sb
+                    .from("tornei_pubblici")
+                    .select("*")
+                    .eq("id", Number(idParam))
+                    .limit(1);
+                if(!pubblico.error && Array.isArray(pubblico.data) && pubblico.data.length){
+                    tornei = pubblico.data;
+                    error = null;
+                }else if(!error){
+                    error = pubblico.error;
+                }
+            }
 
             if(error){
 
@@ -7195,15 +7211,9 @@ try{
                 data:iscritti,
                 error:erroreIscritti
             } = await sb
-                .from("iscrizioni")
-                .select("*")
-                .eq(
-                    "torneo_id",
-                    Number(idParam)
-                )
-                .or(
-                    "stato.eq.approvato,approvato.eq.true"
-                );
+                .from("iscrizioni_pubbliche")
+                .select("id,torneo_id,nome_giocatore,nome,cognome,categoria,stato,approvato,data_iscrizione")
+                .eq("torneo_id", Number(idParam));
 
             if(erroreIscritti){
 
@@ -7224,16 +7234,13 @@ try{
                 /* Risoluzione iscrizioni approvate: mai mostrare l'email nel tabellone. */
                 if(Array.isArray(state.iscritti) && state.iscritti.length){
 
-                    const iscrittiByEmail = new Map();
+                    const iscrittiById = new Map();
 
                     state.iscritti.forEach(function(iscritto){
 
-                        const email =
-                            String(iscritto?.email || "")
-                                .trim()
-                                .toLowerCase();
+                        const key = "player:" + String(iscritto?.id ?? "").trim();
 
-                        if(!email)
+                        if(key === "player:")
                             return;
 
                         const nome =
@@ -7251,9 +7258,9 @@ try{
                                 .join(" ")
                                 .trim() ||
                             nomeGiocatore ||
-                            email;
+                            "Giocatore";
 
-                        iscrittiByEmail.set(email,display);
+                        iscrittiById.set(key,display);
                     });
 
                     function risolviEmailIscritto(valore){
@@ -7270,9 +7277,7 @@ try{
                             return valore;
 
                         const diretto =
-                            iscrittiByEmail.get(
-                                testo.toLowerCase()
-                            );
+                            iscrittiById.get(testo);
 
                         if(diretto)
                             return diretto;
@@ -7283,7 +7288,7 @@ try{
                                 .split(" / ")
                                 .map(function(parte){
                                     const p=parte.trim();
-                                    return iscrittiByEmail.get(p.toLowerCase()) || p;
+                                    return iscrittiById.get(p) || p;
                                 })
                                 .join(" / ");
                         }
