@@ -15,13 +15,14 @@ const publicSlug=new URLSearchParams(location.search).get('azienda')||'';
 async function resolvePublicCompany(){
  if(!publicSlug)return null;
  try{
-  const response=await fetch(SUPABASE_URL+'/functions/v1/login-piva',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:publicSlug})});
-  const result=await response.json().catch(()=>({}));
-  if(!response.ok||!result?.ok||!result?.azienda)return null;
-  return result.azienda;
+  const resolver=window.__NP_SUPABASE_CLIENT__||window.sb||supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data,error}=await resolver.rpc('get_public_company',{p_slug:publicSlug});
+  const company=Array.isArray(data)?data[0]:data;
+  if(error||!company?.id)return null;
+  return company;
  }catch(e){console.error('[EVENTI SOCIETA PUBBLICA]',e);return null}
-}
-let currentMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+ }
+ let currentMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const num=v=>Number(v)||0;
@@ -353,14 +354,15 @@ async function load(){
 
   publicCompany=await resolvePublicCompany();
   if(publicSlug&&!publicCompany?.id)throw new Error('Società pubblica non trovata');
+  if(!publicCompany?.id){allTournaments=[];render();return}
   const {data,error}=await sb.rpc('get_public_tornei',{
    p_torneo_id:null,
-   p_azienda_id:publicSlug?(publicCompany?.id||null):null
+   p_azienda_id:publicCompany.id
   });
 
   if(error)throw error;
 
-  allTournaments=data||[];
+  allTournaments=(data||[]).filter(t=>String(t.azienda_id||'')===String(publicCompany.id));
   render()
 
  }catch(err){
