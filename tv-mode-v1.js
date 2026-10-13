@@ -167,6 +167,43 @@
   }
 
   let loading=false;
+  let playerMapCache = new Map();
+  let playerMapCacheAt = 0;
+
+  function resolvePlayerTokens(value, map){
+    if(Array.isArray(value)) return value.map(v=>resolvePlayerTokens(v,map));
+    if(value && typeof value==="object"){
+      const out={};
+      Object.entries(value).forEach(([key,val])=>{
+        const safeKey=map.get(key)||key;
+        out[safeKey]=resolvePlayerTokens(val,map);
+      });
+      return out;
+    }
+    if(typeof value==="string"){
+      if(map.has(value)) return map.get(value);
+      if(value.includes(" / ")) return value.split(" / ").map(part=>map.get(part.trim())||part.trim()).join(" / ");
+    }
+    return value;
+  }
+
+  async function loadPublicPlayerMap(){
+    if(Date.now()-playerMapCacheAt<60000) return playerMapCache;
+    const {data:players,error}=await sb.from("iscrizioni_pubbliche")
+      .select("id,nome,cognome,nome_giocatore")
+      .eq("torneo_id",Number(currentId));
+    if(!error){
+      const next=new Map();
+      (players||[]).forEach(p=>{
+        const name=[String(p.nome||"").trim(),String(p.cognome||"").trim()].filter(Boolean).join(" ").trim()
+          || String(p.nome_giocatore||"").trim() || "Giocatore";
+        next.set("player:"+String(p.id),name);
+      });
+      playerMapCache=next;
+      playerMapCacheAt=Date.now();
+    }
+    return playerMapCache;
+  }
 
   async function load(){
     if(!sb||!currentId||loading) return;
@@ -174,9 +211,11 @@
     const {data,error}=await sb.from("tornei_pubblici").select("id,nome,data,stato,configurazione").eq("id",currentId).maybeSingle();
     if(error){ console.error("[TV] load",error); $("#status").textContent="ERRORE"; loading=false; return; }
     if(!data){ $("#status").textContent="TORNEO NON TROVATO"; loading=false; return; }
-    const st=Object.assign({},data.configurazione||{});
+    const playerMap=await loadPublicPlayerMap();
+    const publicConfig=resolvePlayerTokens(data.configurazione||{},playerMap);
+    const st=Object.assign({},publicConfig||{});
     st.idTorneo=data.id; st.nomeTorneo=data.nome||st.nomeTorneo; st.dataTorneo=data.data||st.dataTorneo;
-    const signature = JSON.stringify({nome:data.nome||"",data:data.data||"",stato:data.stato||"",configurazione:data.configurazione||{}});
+    const signature = JSON.stringify({nome:data.nome||"",data:data.data||"",stato:data.stato||"",configurazione:publicConfig||{}});
     const changed = signature !== lastStateSignature;
     lastStateSignature = signature;
     render(st);
