@@ -6,7 +6,7 @@
 const URL_SUPABASE='https://dkeqicstprvvfebiaooc.supabase.co';
 const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 let client=null, tournaments=[], counts={}, publicCompany=null;
-let publicSlug=(new URLSearchParams(location.search).get('azienda')||'').trim();
+const publicSlug=new URLSearchParams(location.search).get('azienda')||'';
 async function resolvePublicCompany(){
   if(!publicSlug) return null;
   try{
@@ -47,7 +47,7 @@ async function kingRanking(t){const r=t?.configurazione?.rotazione;if(!r||!Array
 async function apriClassificaKing(t){const ranking=await kingRanking(t);if(!ranking)return;const old=document.getElementById('npKingRankingOverlay');old?.remove();const top=ranking.slice(0,3);const currentName=(await client.auth.getUser()).data?.user?.email||'';const medal=['🥈','🥇','🥉'];const order=[top[1],top[0],top[2]].filter(Boolean);const podium=order.map((x,i)=>{const real=i===0?1:i===1?0:2;return `<div class="np-king-pod ${real===0?'first':''}"><div class="np-king-medal">${medal[real]}</div><div class="np-king-pod-name">${esc(x.nome)}</div><div class="np-king-pod-points">${x.punti}</div><div class="np-king-pod-label">punti · ${real+1}°</div></div>`}).join('');const rows=ranking.map((x,i)=>`<div class="np-king-row ${String(x.nome).toLowerCase().includes(String(currentName).toLowerCase())?'me':''}"><div class="np-king-row-pos">${i+1}</div><div class="np-king-row-name">${esc(x.nome)}</div><div class="np-king-row-meta">${x.partite} PG · ${x.vittorie} V</div><div class="np-king-row-points">${x.punti} PT</div></div>`).join('');const ov=document.createElement('div');ov.id='npKingRankingOverlay';ov.className='np-king-overlay';ov.innerHTML=`<div class="np-king-modal"><div class="np-king-modal-head"><div><h3>🏆 Classifica torneo</h3><p>${esc(t.nome||'Torneo')} · ${ranking.length} giocatori</p></div><button class="np-icon" onclick="document.getElementById('npKingRankingOverlay')?.remove()">×</button></div><div class="np-king-showcase"><div class="np-king-top"><div class="np-king-kicker">King of the Court · classifica live</div><div class="np-king-title">La sfida è iniziata.</div><div class="np-king-sub">Risultati registrati · classifica aggiornata</div></div><div class="np-king-podium">${podium}</div><div class="np-king-list"><div class="np-king-list-head"><span>Classifica</span><span>Punti</span></div>${rows}</div><button class="np-btn np-primary np-king-open" onclick="document.getElementById('npKingRankingOverlay')?.remove()">CHIUDI CLASSIFICA</button></div></div>`;ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});document.body.appendChild(ov)}
 window.apriClassificaKing=apriClassificaKing;
 
-async function myTournament(){const box=document.getElementById('npMyTournament');const {data}=await client.auth.getUser();const u=data?.user;if(!u){box.innerHTML='<div class="np-empty">Accedi per visualizzare il tuo torneo.</div>';return}const {data:rows,error}=await client.from('iscrizioni').select('id,torneo_id,stato').eq('user_id',u.id);if(error){console.warn(error);box.innerHTML='<div class="np-empty">Informazioni torneo non disponibili.</div>';return}const r=rows?.[0];if(!r){box.innerHTML='<div class="np-empty">Non risulti iscritto a nessun torneo.</div>';return}const {data:publicTournaments,error:tError}=await client.rpc('get_public_tornei',{p_torneo_id:Number(r.torneo_id),p_azienda_id:publicCompany?.id||null});const t=publicTournaments?.[0];if(tError||!t){box.innerHTML='<div class="np-empty">Informazioni torneo non disponibili.</div>';return}const isKing=String(formula(t)).toLowerCase()==='individualecoppievariabili'||String(formula(t)).toLowerCase()==='king';box.innerHTML=`<div class="np-tour-feature np-panel"><div class="np-tour-media">${poster(t)?`<img src="${esc(poster(t))}" alt="${esc(t.nome)}">`:'<div class="np-no-poster">🎾</div>'}</div><div class="np-tour-info"><span class="np-kicker">Il tuo torneo</span><h3>${esc(t.nome||'Torneo')}</h3><div class="np-meta"><span class="np-chip">📅 ${esc(dateLabel(t.data))}</span><span class="np-chip">🎾 ${esc(formula(t))}</span><span class="np-chip">📌 ${esc(r.stato||'richiesta')}</span></div><div class="np-hero-actions"><button class="np-btn np-primary" onclick="apriTorneoPubblico(${id(t.id)})">APRI IL TORNEO</button>${isKing?`<button class="np-btn np-ghost" onclick='apriClassificaKing(${JSON.stringify(t).replace(/'/g,"&#39;")})'>🏆 CLASSIFICA</button>`:''}</div></div></div>`}
+async function myTournament(){const box=document.getElementById('npMyTournament');const {data}=await client.auth.getUser();const u=data?.user;if(!u){box.innerHTML='<div class="np-empty">Accedi per visualizzare il tuo torneo.</div>';return}const {data:rows,error}=await client.from('iscrizioni').select('id,torneo_id,stato').eq('user_id',u.id);if(error){console.warn(error);box.innerHTML='<div class="np-empty">Informazioni torneo non disponibili.</div>';return}const r=rows?.[0];if(!r){box.innerHTML='<div class="np-empty">Non risulti iscritto a nessun torneo.</div>';return}const {data:publicTournaments,error:tError}=await client.rpc('get_public_tornei',{p_torneo_id:Number(r.torneo_id),p_azienda_id:null});const t=publicTournaments?.[0];if(tError||!t){box.innerHTML='<div class="np-empty">Informazioni torneo non disponibili.</div>';return}const isKing=String(formula(t)).toLowerCase()==='individualecoppievariabili'||String(formula(t)).toLowerCase()==='king';box.innerHTML=`<div class="np-tour-feature np-panel"><div class="np-tour-media">${poster(t)?`<img src="${esc(poster(t))}" alt="${esc(t.nome)}">`:'<div class="np-no-poster">🎾</div>'}</div><div class="np-tour-info"><span class="np-kicker">Il tuo torneo</span><h3>${esc(t.nome||'Torneo')}</h3><div class="np-meta"><span class="np-chip">📅 ${esc(dateLabel(t.data))}</span><span class="np-chip">🎾 ${esc(formula(t))}</span><span class="np-chip">📌 ${esc(r.stato||'richiesta')}</span></div><div class="np-hero-actions"><button class="np-btn np-primary" onclick="apriTorneoPubblico(${id(t.id)})">APRI IL TORNEO</button>${isKing?`<button class="np-btn np-ghost" onclick='apriClassificaKing(${JSON.stringify(t).replace(/'/g,"&#39;")})'>🏆 CLASSIFICA</button>`:''}</div></div></div>`}
 
 async function news(){
   const box=document.getElementById('npNews');
@@ -71,23 +71,6 @@ function renderHero(){const box=document.getElementById('npHeroPoster');if(!box)
 
 async function start(){
   styles();
-  // Risolvi prima il contesto tenant: URL, chiavi di sessione o azienda associata all'account.
-  if(!publicSlug){
-    try{
-      // Prima la società dell'account attualmente autenticato: evita slug pubblici obsoleti di altri club.
-      publicSlug=String(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim();
-      if(!publicSlug){
-        const authClient=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient;
-        if(authClient){
-          const access=await authClient.rpc('get_my_azienda_access');
-          const row=Array.isArray(access.data)?access.data[0]:access.data;
-          if(!access.error&&row?.slug) publicSlug=String(row.slug).trim();
-        }
-      }
-      // Le chiavi pubbliche sono fallback solo se l'account non identifica una società.
-      if(!publicSlug) publicSlug=String(sessionStorage.getItem('nextpoint_public_azienda_slug')||localStorage.getItem('nextpoint_public_azienda_slug')||'').trim();
-    }catch(e){console.warn('[CONTESTO SOCIETA]',e)}
-  }
   publicCompany=await resolvePublicCompany();
   if(publicSlug&&!publicCompany){
     document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:#fff;font-family:Arial;background:#06111f"><div style="max-width:520px;text-align:center"><h1>Società non trovata</h1><p>Il collegamento della società non è valido o la società non è disponibile.</p><a href="index.html" style="display:inline-block;margin-top:12px;padding:12px 18px;border-radius:10px;background:#fff;color:#073b72;text-decoration:none;font-weight:800">TORNA ALLA PAGINA INIZIALE</a></div></div>';
