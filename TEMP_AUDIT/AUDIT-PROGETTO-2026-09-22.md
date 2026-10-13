@@ -191,3 +191,46 @@ Analizzare TEMP_AUDIT per famiglie:
 6. vecchia architettura Admin.
 
 Solo dopo il confronto funzione-per-funzione si decide cosa eliminare definitivamente o recuperare.
+
+
+---
+
+## Remediatione sicurezza — 13/10/2026
+
+**Ambito:** repository `torneipadel/torneipadelnew.github.io` e i due progetti Supabase identificati nel codice. Nessuna modifica al repository precedente `torneipadel/torneipadel.github.io`.
+
+### Repository aggiornato
+- `.github/workflows/superadmin-code-backup.yml`: token GitHub OIDC a breve durata, audience dedicata, workflow serializzato.
+- `tabellone.html`, `visitatore-public-v2.js`, `visitatore-eventi-v1.js`, `tv-mode-v1.js`, `torneo-flow-public-fix-v1.js`, `iscrizione.html`: lettura pubblica spostata verso RPC con dati sanitizzati.
+
+### Supabase PadelApp — `dkeqicstprvvfebiaooc`
+Funzioni Edge aggiornate:
+- `login-piva` v11: verifica congiunta slug + CF/P.IVA; non restituisce più token di sessione e non tenta di autenticare usando l'identificativo come password.
+- `code-backup-bridge` v4: richiede token OIDC GitHub verificato per repository, branch e workflow autorizzati.
+- `news-ai` v4: verifica sessione e ruolo amministrativo; limita la dimensione dei dati inviati.
+- `sponsor-logo-from-site` v5: verifica ruolo admin/superadmin, valida URL e redirect, limita dimensioni e formati, usa il bucket esistente `azienda-assets`.
+- `public-company-legal` v5: restituisce solo i campi utilizzati dalle pagine legali pubbliche.
+- `studio-ricevi-pratica` v2: endpoint disabilitato in questo progetto; richiede JWT e risponde `410`.
+
+Migrazioni SQL applicate:
+- revoca di DML anonimo e privilegi `TRUNCATE`, `REFERENCES`, `TRIGGER` non necessari;
+- rimozione dei permessi di lettura autenticata sul bucket documenti dello Studio Legale e isolamento della tabella `studio_pratiche`;
+- revoca dell'esecuzione anonima delle RPC di gestione tenant;
+- RPC pubbliche sicure per tornei/iscrizioni e rimozione della lettura anonima delle tabelle grezze;
+- sanitizzazione dei riferimenti email nella configurazione pubblica dei tornei.
+
+**Verifiche SQL effettuate:** nessun privilegio DML anonimo sulle tabelle `public`; nessun privilegio `TRUNCATE` a ruoli API; nessun accesso anonimo diretto a `tornei` o `iscrizioni`; le RPC pubbliche restituiscono dati limitati e la configurazione pubblica non contiene stringhe con pattern email. La tabella e un oggetto Storage della vecchia funzione `studio_pratiche` sono rimasti conservati, ma senza permessi anonimi/autenticati e senza policy di lettura.
+
+### Supabase tabellone-torneo — `iybjvtmfaupgthqqsngd`
+Migrazioni applicate prima di riportare il progetto a `INACTIVE`:
+- revoca dei privilegi `TRUNCATE`, `REFERENCES`, `TRIGGER`;
+- scrittura su `news` e `sponsor` riservata agli amministratori;
+- esecuzione delle RPC amministrative limitata ai ruoli autenticati previsti;
+- indici mancanti sulle chiavi esterne rilevate.
+
+### Elementi ancora da completare
+- Il controllo Supabase segnala ancora **Leaked Password Protection** non attivato. Non è esposto dagli strumenti API disponibili in questa sessione e richiede l'attivazione nelle impostazioni Authentication/Security del progetto.
+- I warning GraphQL rimasti riguardano contenuti pubblici previsti e tabelle con policy RLS tenant-scoped; vanno riesaminati se si decide di disabilitare GraphQL.
+- La protezione OIDC è stata distribuita, ma non è stato possibile verificare una richiesta reale di ripristino end-to-end tramite i log Actions disponibili in questa sessione.
+
+**Stato finale previsto:** entrambi i progetti Padel tornano inattivi dopo le correzioni, per non occupare gli slot Free. Nessun dato applicativo è stato cancellato.
