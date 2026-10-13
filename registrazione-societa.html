@@ -81,7 +81,7 @@ $("exit").onclick=async()=>{try{await sb.auth.signOut()}catch(e){console.warn("U
 function hydrateFromUser(user){
  const m=user?.user_metadata||{};
  const map={email:m.email_aziendale||user?.email,ragione:m.ragione_sociale,nomeApp:m.nome_app,titolare:m.titolare,telefono:m.telefono,pec:m.pec,sede:m.sede,cf:m.cf_piva,nome:m.nome,cognome:m.cognome};
- Object.entries(map).forEach(([k,v])=>{if($(k)&&v!=null&&String(v).trim())$(k).value=String(v).trim()});
+ Object.entries(map).forEach(([k,v])=>{if($(k)&&!String($(k).value||"").trim()&&v!=null&&String(v).trim())$(k).value=String(v).trim()});
 }
 function fields(){
  return {
