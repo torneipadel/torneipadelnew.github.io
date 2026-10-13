@@ -189,9 +189,7 @@
 
   async function loadPublicPlayerMap(){
     if(Date.now()-playerMapCacheAt<60000) return playerMapCache;
-    const {data:players,error}=await sb.from("iscrizioni_pubbliche")
-      .select("id,nome,cognome,nome_giocatore")
-      .eq("torneo_id",Number(currentId));
+    const {data:players,error}=await sb.rpc("get_public_iscrizioni",{p_torneo_id:Number(currentId)});
     if(!error){
       const next=new Map();
       (players||[]).forEach(p=>{
