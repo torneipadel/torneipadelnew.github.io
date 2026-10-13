@@ -27,7 +27,7 @@ function openT(t){return (t.pubblicato===true||String(t.stato||'').toLowerCase()
 function closedT(t){return t.iscrizioni_chiuse===true||['chiuso','concluso','archiviato'].includes(String(t.stato||'').toLowerCase())}
 function capacity(t){const current=counts[t.id]||0;const max=(Number(t.posti)||Number(t.configurazione?.rules?.numeroSquadre)||8)*2;return{current,max,remaining:Math.max(0,max-current)}}
 function vaiIscrizione(v){if(!v){alert('Torneo non valido');return}const tenant=publicSlug?('&azienda='+encodeURIComponent(publicSlug)):'';location.href='iscrizione.html?torneo='+encodeURIComponent(v)+tenant}
-function apriTorneoPubblico(v){if(!v){alert('Torneo non valido');return}const tenant=publicCompany?.id?('&azienda_id='+encodeURIComponent(publicCompany.id)):'';location.href='tabellone.html?idTorneo='+encodeURIComponent(v)+tenant}
+function apriTorneoPubblico(v){if(!v){alert('Torneo non valido');return}const tenant=publicCompany?.id?('&azienda_id='+encodeURIComponent(publicCompany.id)):'';const slug=publicSlug?('&azienda='+encodeURIComponent(publicSlug)):'';location.href='tabellone.html?idTorneo='+encodeURIComponent(v)+tenant+slug}
 window.vaiIscrizione=vaiIscrizione;window.apriTorneoPubblico=apriTorneoPubblico;
 function menu(open){document.getElementById('npMenu')?.classList.toggle('open',open)}
 window.apriMenu=()=>menu(true);window.chiudiMenu=()=>menu(false);window.apriMercatino=()=>location.href='mercatino.html'+(publicSlug?'?azienda='+encodeURIComponent(publicSlug):'');window.apriContatti=()=>location.href='contatti.html';window.esciVisitatore=async()=>{try{await client?.auth.signOut()}finally{location.href='index.html'}};
@@ -71,6 +71,7 @@ function card(t){const c=capacity(t),img=poster(t);return `<article class="np-ca
 
 function renderHero(){const box=document.getElementById('npHeroPoster');if(!box)return;const f=tournaments.filter(openT)[0];const p=f&&poster(f);box.innerHTML=p?`<img src="${esc(p)}" alt="${esc(f.nome||'Torneo')}"><div class="np-poster-label">${esc(f.nome||'Prossimo torneo')}</div>`:'<div class="np-no-poster">🎾</div>'}
 
+function propagateCompanyLinks(){if(!publicSlug)return;const tenantPages=new Set(['dashboard.html','visitatore.html','news.html','mercatino.html','contatti.html','informazioni.html','sponsor-pubblico.html','privacy.html','cookie.html','termini.html']);document.querySelectorAll('a[href]').forEach(a=>{const raw=a.getAttribute('href')||'';if(!raw||raw.startsWith('#')||raw.startsWith('javascript:')||raw.startsWith('mailto:')||raw.startsWith('tel:'))return;try{const u=new URL(raw,location.href);const page=u.pathname.split('/').pop().toLowerCase();if(u.origin!==location.origin||!tenantPages.has(page))return;if(!u.searchParams.has('azienda'))u.searchParams.set('azienda',publicSlug);a.href=u.pathname.split('/').pop()+u.search+u.hash}catch(_){}})}
 async function start(){
   styles();
   publicCompany=await resolvePublicCompany();
@@ -79,6 +80,7 @@ async function start(){
     return;
   }
   if(publicCompany){
+    propagateCompanyLinks();
     // Applica subito il tema/logo/sfondo/colori della società alla pagina pubblica.
     // tenant-theme-v1.js può aver già eseguito il caricamento in parallelo: qui riallineiamo
     // il tema dopo aver risolto con certezza la società richiesta.
