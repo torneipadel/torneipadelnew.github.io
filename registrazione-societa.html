@@ -119,6 +119,11 @@ async function getSessionUser(){
    return data?.session?.user||null;
  }catch(e){return null}
 }
+async function isCurrentUserSuperadmin(){
+ const {data,error}=await sb.rpc("is_superadmin");
+ if(error)throw error;
+ return data===true;
+}
 async function createCompany(user){
  hydrateFromUser(user);
  const d=fields();
@@ -152,9 +157,9 @@ async function startRegistration(){
      user=null;
    }else{
      const currentAccountType=String(user?.user_metadata?.account_type||"").toLowerCase();
-     if(currentAccountType!=="societa"){
+     if(currentAccountType!=="societa" && !(await isCurrentUserSuperadmin())){
        submit.disabled=false;
-       status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+       status.textContent="Questo account esiste già ma non è autorizzato a creare una società. Accedi con un account Superadmin o con un account società.";
        return;
      }
      await createCompany(user);return;
@@ -169,9 +174,9 @@ async function startRegistration(){
  if(!signIn.error&&signIn.data?.user){
    const existingUser=signIn.data.user;
    const existingAccountType=String(existingUser?.user_metadata?.account_type||"").toLowerCase();
-   if(existingAccountType!=="societa"){
+   if(existingAccountType!=="societa" && !(await isCurrentUserSuperadmin())){
      submit.disabled=false;
-     status.textContent="Questa email appartiene già a un account amministrativo esistente. Per registrare una nuova società devi usare un'altra email amministratore.";
+     status.textContent="Questo account esiste già ma non è autorizzato a creare una società. Accedi con un account Superadmin o con un account società.";
      return;
    }
    await createCompany(existingUser);return;
@@ -185,7 +190,10 @@ async function startRegistration(){
  }}}); 
  if(signUp.error){
    submit.disabled=false;
-   status.textContent="Registrazione non completata: "+signUp.error.message+" Se l'account esiste già, accedi dal Login e torna qui per completare la registrazione.";
+   const alreadyRegistered=/already registered|user already registered|already exists/i.test(String(signUp.error.message||""));
+   status.textContent=alreadyRegistered
+     ? "Questa email è già registrata. Non creare un nuovo account: inserisci la password già associata al tuo account Superadmin e riprova. Se non la ricordi, usa il recupero password dal Login."
+     : "Registrazione non completata: "+signUp.error.message;
    return;
  }
  if(signUp.data?.session?.user){
@@ -219,6 +227,7 @@ async function completePendingRegistration(){
  const expectedEmail=String($("email").value||"").trim().toLowerCase();
  const currentEmail=String(user.email||"").trim().toLowerCase();
  if(!isCompanyRegistration && (!expectedEmail||expectedEmail!==currentEmail))return;
+ if(!isCompanyRegistration && !(await isCurrentUserSuperadmin()))return;
  completionStarted=true;
  setAuthenticatedMode(user);
  try{
