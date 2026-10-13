@@ -352,15 +352,11 @@ async function load(){
   window.sb=sb;
 
   publicCompany=await resolvePublicCompany();
-  let q=sb
-   .from('tornei_pubblici')
-   .select('id,nome,data,stato,pubblicato,iscrizioni_chiuse,formula,configurazione,azienda_id')
-   .order('data',{ascending:true});
-  if(publicSlug){
-   if(!publicCompany?.id)throw new Error('Società pubblica non trovata');
-   q=q.eq('azienda_id',publicCompany.id);
-  }
-  const {data,error}=await q;
+  if(publicSlug&&!publicCompany?.id)throw new Error('Società pubblica non trovata');
+  const {data,error}=await sb.rpc('get_public_tornei',{
+   p_torneo_id:null,
+   p_azienda_id:publicSlug?(publicCompany?.id||null):null
+  });
 
   if(error)throw error;
 
