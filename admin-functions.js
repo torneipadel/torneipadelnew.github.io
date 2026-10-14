@@ -69,10 +69,38 @@ async function wireDashboard(){
     window.isGlobalPlatformAdmin=isGlobalSuperadmin||isGlobalAdmin;
     let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
     let aziendaAccess=null;
+    const selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
+    const requestedSlug=String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
+
+    // Anche un amministratore globale deve restare nel tenant scelto quando apre
+    // il pannello da un accesso societario; non ereditare il contesto di un'altra società.
+    if(role && (selectedTenantId || requestedSlug)){
+      let companyQuery=sb.from("aziende").select("id,nome_app,ragione_sociale,slug,tipo_account,stato,demo_inizio,demo_scadenza");
+      companyQuery=selectedTenantId?companyQuery.eq("id",selectedTenantId):companyQuery.eq("slug",requestedSlug);
+      const companyResult=await companyQuery.maybeSingle();
+      if(companyResult.error || !companyResult.data){
+        throw new Error("Società selezionata non trovata: caricamento tornei bloccato.");
+      }
+      const company=companyResult.data;
+      aziendaAccess={
+        azienda_id:company.id,
+        nome_app:company.nome_app,
+        ragione_sociale:company.ragione_sociale,
+        slug:company.slug,
+        tipo_account:company.tipo_account,
+        stato:company.stato,
+        demo_inizio:company.demo_inizio,
+        demo_scadenza:company.demo_scadenza,
+        accesso_consentito:["attiva","configurazione"].includes(String(company.stato||"").toLowerCase()),
+        ruolo:role
+      };
+      if(aziendaAccess.accesso_consentito===false) throw new Error("La società selezionata non è attiva.");
+      sessionStorage.setItem("nextpoint_login_azienda_id",company.id);
+      sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");
+    }
 
     if(!role){
       let lastError=null;
-      const selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
       for(let i=0;i<3;i++){
         const result=await sb.rpc("get_my_azienda_access",selectedTenantId?{p_azienda_id:selectedTenantId}:{});
         lastError=result.error||null;
