@@ -68,14 +68,14 @@ jobs:
           else
             BACKUP_SHA="$EXISTING_SHA"
           fi
+          export BACKUP_BRANCH="$BRANCH"
+          export BACKUP_SHA
           python -c 'import json,os; print(json.dumps({"operation":"register_backup","branch_name":os.environ["BACKUP_BRANCH"],"commit_sha":os.environ["BACKUP_SHA"]}))' > /tmp/backup.json
           curl -fsS -X POST "https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge" \
             -H "Authorization: Bearer $BRIDGE_TOKEN" \
             -H "Content-Type: application/json" \
             --data-binary @/tmp/backup.json
         env:
-          BACKUP_BRANCH: backup-completo-${{ github.run_id }}
-          BACKUP_SHA: ${{ github.sha }}
           BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
 
       - name: Validate restore request
