@@ -134,6 +134,7 @@ async function go(){
    });
    if(m.error){
      statusBox.textContent=m.error.message;
+     busy=false;submitButton.disabled=false;
      return;
    }
 
