@@ -162,7 +162,7 @@
     box.querySelectorAll('[data-restore-data-backup]').forEach(b=>b.onclick=()=>restoreData(Number(b.dataset.restoreDataBackup)));
   }
 
-  const CODE_FILES=['tabellone.html','admin.html','admin-superadmin-v1.js','manuale.html','admin-system-monitor-v1.js','admin-torneo-rotazione-v1.js'];
+  const CODE_FILES=['tabellone.html','admin-tenant-isolation-v1.js','admin-approval-sync-v1.js','admin.html','admin-superadmin-v1.js','manuale.html','admin-system-monitor-v1.js','admin-torneo-rotazione-v1.js'];
   const GITHUB_REPO='torneipadel/torneipadelnew.github.io';
   const COMPLETE_PROJECT_BACKUP_FUNCTION='project-complete-backup';
 
