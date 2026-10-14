@@ -2,7 +2,7 @@
   'use strict';
   const getClient=()=>window.sb||window.supabaseClient||window.supabase;
   const isGlobalSuperadmin=()=>window.isGlobalSuperadmin===true||String(window.adminState?.adminEmail||'').trim().toLowerCase()==='giose.rizzi@gmail.com';
-  const tenantId=()=>isGlobalSuperadmin()?'':String(window.aziendaId||'').trim();
+  const tenantId=()=>String(window.aziendaId||'').trim();
   const isGlobal=()=>{
     if(window.isPlatformAdmin===true) return true;
     const email=String(window.adminState?.adminEmail||'').trim().toLowerCase();
@@ -29,7 +29,7 @@
     el.title=companyLabel();
   }
   async function loadTenantTornei(){
-    if(isGlobalSuperadmin()){
+    if(isGlobalSuperadmin()&&!tenantId()){
       const state=window.adminState||{};
       state.tornei=[];
       state.torneoSelezionato=null;
@@ -45,7 +45,8 @@
     const id=tenantId();
     // Il contesto aziendale prevale anche per il Superadmin globale: se è
     // stata selezionata una società, non caricare mai i tornei delle altre.
-    const result=id?await q.eq('azienda_id',id):await q;
+    if(!id)throw new Error('Contesto società mancante: caricamento tornei bloccato.');
+    const result=await q.eq('azienda_id',id);
     if(result.error)throw result.error;
     const state=window.adminState||{};
     state.tornei=Array.isArray(result.data)?result.data:[];
