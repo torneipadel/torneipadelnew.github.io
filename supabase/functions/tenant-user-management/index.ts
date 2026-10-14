@@ -8,6 +8,18 @@ const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const admin = createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
 const roles = ["owner","admin","superadmin"];
 
+async function findAuthUserByEmail(email: string) {
+  for (let page = 1; page <= 20; page++) {
+    const {data,error} = await admin.auth.admin.listUsers({page,perPage:1000});
+    if (error) throw error;
+    const users = data?.users || [];
+    const found = users.find((u:any) => String(u.email || "").trim().toLowerCase() === email);
+    if (found) return found;
+    if (users.length < 1000) return null;
+  }
+  throw new Error("Ricerca utenti troppo ampia: contatta il supporto.");
+}
+
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok",{headers:cors});
   if (req.method !== "POST") return json({error:"Metodo non supportato"},405);
@@ -60,6 +72,16 @@ Deno.serve(async req => {
       const cognome = String(body.cognome || "").trim();
       const ruolo = ["admin","superadmin"].includes(String(body.ruolo || "")) ? String(body.ruolo) : "user";
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({error:"Inserisci un indirizzo email valido."},400);
+      const existing = await findAuthUserByEmail(email);
+      if (existing) {
+        const {data:existingMembership,error:existingError} = await admin.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",aziendaId).eq("user_id",existing.id).maybeSingle();
+        if (existingError) throw existingError;
+        if (existingMembership?.attivo) return json({error:"Questo utente appartiene già alla società selezionata."},409);
+        if (existingMembership && existingMembership.attivo === false) return json({error:"L'utente ha già un'appartenenza disattivata. Riattivala dalla lista utenti."},409);
+        const {error:linkError} = await admin.from("azienda_utenti").insert({azienda_id:aziendaId,user_id:existing.id,ruolo,attivo:true});
+        if (linkError) throw linkError;
+        return json({ok:true,user_id:existing.id,email,ruolo,already_exists:true});
+      }
       const {data:invited,error:inviteError} = await admin.auth.admin.inviteUserByEmail(email,{data:{nome,cognome,tenant_invite:true,tenant_role:ruolo}});
       if (inviteError) throw inviteError;
       const created = invited?.user;
@@ -67,7 +89,7 @@ Deno.serve(async req => {
       const {error:insertError} = await admin.from("azienda_utenti").insert({azienda_id:aziendaId,user_id:created.id,ruolo,attivo:true});
       if (insertError) return json({error:"L'invito è stato creato, ma l'associazione alla società non è riuscita: "+insertError.message, user_id:created.id},500);
       await admin.from("profili").update({nome:nome || null,cognome:cognome || null,email}).eq("user_id",created.id);
-      return json({ok:true,user_id:created.id,email,ruolo});
+      return json({ok:true,user_id:created.id,email,ruolo,already_exists:false});
     }
 
     if (action === "role") {
