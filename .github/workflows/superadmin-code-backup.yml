@@ -53,6 +53,31 @@ jobs:
         env:
           BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
 
+      - name: Create and register daily complete repository backup
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(date -u +%Y%m%d)"
+          BRANCH="backup-completo-$DAY"
+          EXISTING_SHA="$(git ls-remote origin "refs/heads/$BRANCH" | awk 'NR==1 {print $1}')"
+          if [ -z "$EXISTING_SHA" ]; then
+            git branch "$BRANCH" "$GITHUB_SHA"
+            git push origin "$BRANCH"
+            BACKUP_SHA="$GITHUB_SHA"
+          else
+            BACKUP_SHA="$EXISTING_SHA"
+          fi
+          python -c 'import json,os; print(json.dumps({"operation":"register_backup","branch_name":os.environ["BACKUP_BRANCH"],"commit_sha":os.environ["BACKUP_SHA"]}))' > /tmp/backup.json
+          curl -fsS -X POST "https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge" \
+            -H "Authorization: Bearer $BRIDGE_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/backup.json
+        env:
+          BACKUP_BRANCH: backup-completo-${{ github.run_id }}
+          BACKUP_SHA: ${{ github.sha }}
+          BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
+
       - name: Validate restore request
         if: steps.request.outputs.pending == 'true'
         shell: bash
