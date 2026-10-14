@@ -87,7 +87,7 @@ async function start(){
     try{ window.tenantTheme?.apply?.(publicCompany); }catch(e){ console.warn('[TEMA SOCIETA]',e); }
     document.title=(publicCompany.nome_app||publicCompany.ragione_sociale||'Società')+' — Next Point Padel';
     document.querySelector('.np-brandline-name')?.replaceChildren(document.createTextNode(publicCompany.nome_app||publicCompany.ragione_sociale||''));
-    document.querySelector('.np-brandline-logo')?.setAttribute('src',publicCompany.logo_url||'/loghi/icona_app1.jpg');
+    document.querySelector('.np-brandline-logo')?.setAttribute('src',publicCompany.logo_url||'loghi/icona_app1.jpg');
     const homeLink=document.querySelector('#npMenu a[href="dashboard.html"]');
     if(homeLink) homeLink.href='visitatore.html?azienda='+encodeURIComponent(publicCompany.slug);
   }
