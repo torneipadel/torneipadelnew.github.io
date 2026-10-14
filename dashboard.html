@@ -200,7 +200,8 @@ function setupReserved(c){
    sessionStorage.setItem("nextpoint_login_azienda_id",c.id);
    sessionStorage.setItem("nextpoint_login_role",role);
    sessionStorage.setItem("nextpoint_login_azienda_slug",c.slug);
-   window.location.href="admin.html?v=20260927";
+   sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
+   window.location.href="admin.html?v=20261014";
   }catch(err){
    console.error(err);
    st.textContent="Errore di collegamento. Riprova.";
