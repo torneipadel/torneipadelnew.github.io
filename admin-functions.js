@@ -229,10 +229,10 @@ async function wireDashboard(){
     return true;
   }catch(e){
     console.error("Errore verifica sessione Admin:",e);
-    document.getElementById("areaAdmin")?.classList.remove("hidden");
-    document.getElementById("boxLoginAdmin")?.classList.add("hidden");
-    const status=document.getElementById("adminAccessStatus");
-    if(status)status.textContent="Errore controllo accesso: "+(e?.message||e);
+    // Fail closed: in caso di errore nel controllo autorizzazioni non mostrare l'area amministrativa.
+    document.getElementById("areaAdmin")?.classList.add("hidden");
+    document.getElementById("boxLoginAdmin")?.classList.remove("hidden");
+    mostraLoginMessaggio("Verifica dei permessi non riuscita. Riprova l'accesso. "+(e?.message||""),"#b42332");
     return false;
   }
 }
