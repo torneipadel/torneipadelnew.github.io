@@ -68,10 +68,12 @@ async function wireDashboard(){
     const isGlobalAdmin=email==="boverob@libero.it"||email==="cfalba@libero.it";
     window.isGlobalSuperadmin=isGlobalSuperadmin;
     window.isGlobalPlatformAdmin=isGlobalSuperadmin||isGlobalAdmin;
-    if(isGlobalSuperadmin){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
+    const explicitTenantContext=sessionStorage.getItem("nextpoint_login_tenant_explicit")==="1";
+    const explicitTenantId=explicitTenantContext?String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim():"";
+    if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
     let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
     let aziendaAccess=null;
-    let selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
+    let selectedTenantId=explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
     const requestedSlug=String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
 
     // Il superadmin globale può operare come admin soltanto nei tenant in cui
@@ -187,6 +189,7 @@ async function wireDashboard(){
     window.isAdmin=true;
     window.isTenantSuperadmin=!isGlobalSuperadmin&&superadmin;
     if(aziendaAccess?.azienda_id){
+      sessionStorage.removeItem("nextpoint_login_tenant_explicit");
       window.aziendaId=aziendaAccess.azienda_id;
       window.nomeAppAzienda=aziendaAccess.nome_app||"";
       window.nomeAzienda=aziendaAccess.ragione_sociale||aziendaAccess.nome_app||"";
