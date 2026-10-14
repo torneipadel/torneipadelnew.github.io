@@ -13,9 +13,13 @@ function showError(message) {
   if (app) app.innerHTML = '<div class="error">❌ ' + esc(message) + '</div>';
 }
 
+let bootInProgress = false;
+
 async function boot() {
   const app = document.getElementById('app');
-  if (!app) return;
+  if (!app || bootInProgress) return;
+  bootInProgress = true;
+  app.innerHTML = '<div class="loading">Caricamento Control Center…</div>';
 
   try {
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -31,47 +35,29 @@ async function boot() {
     if (role.error) throw role.error;
     if (role.data !== true) throw new Error('Accesso riservato al Superadmin');
 
-    const results = await Promise.all([
-      sb.from('aziende').select('id,ragione_sociale,nome_app,slug,stato,created_at,demo_scadenza').order('ragione_sociale'),
-      sb.from('eventour_plans').select('*').order('code'),
-      sb.from('eventour_company_plans').select('azienda_id,plan_code,starts_at,expires_at,status'),
-      sb.from('tornei').select('id,azienda_id,stato,nome'),
-      sb.from('azienda_utenti').select('azienda_id,user_id,ruolo,attivo'),
-      sb.from('news').select('id,azienda_id'),
-      sb.from('sponsor').select('id,azienda_id'),
-      sb.from('mercatino').select('id,azienda_id')
-    ]);
+    const overviewResult = await sb.rpc('eventour_superadmin_overview');
+    if (overviewResult.error) throw overviewResult.error;
+    const overview = overviewResult.data || {};
+    const companies = Array.isArray(overview.companies) ? overview.companies : [];
+    const plans = Array.isArray(overview.plans) ? overview.plans : [];
 
-    results.forEach(r => { if (r.error) throw r.error; });
-
-    const companies = results[0].data || [];
-    const plans = results[1].data || [];
-    const assignments = results[2].data || [];
-    const tournaments = results[3].data || [];
-    const users = results[4].data || [];
-    const news = results[5].data || [];
-    const sponsors = results[6].data || [];
-    const market = results[7].data || [];
-
-    const planMap = Object.fromEntries(plans.map(p => [p.code, p]));
-    const assignmentMap = Object.fromEntries(assignments.map(a => [a.azienda_id, a]));
-
-    const rows = companies.map(c => {
-      const a = assignmentMap[c.id] || {plan_code:'START',status:'active'};
-      const p = planMap[a.plan_code] || {};
-      const activeUsers = users.filter(u => u.azienda_id === c.id && u.attivo !== false);
-      const admins = activeUsers.filter(u => ['owner','admin','superadmin'].includes(String(u.ruolo || '').toLowerCase())).length;
-      const activeTournaments = tournaments.filter(t => t.azienda_id === c.id &&
-        !['chiuso','archiviato','annullato'].includes(String(t.stato || '').toLowerCase())).length;
-      const content = news.filter(n => n.azienda_id === c.id).length;
-      const photos = sponsors.filter(s => s.azienda_id === c.id).length +
-                     market.filter(m => m.azienda_id === c.id).length + content;
-      return {...c, plan:a.plan_code, status:a.status, expires:a.expires_at,
-              users:activeUsers.length, admins, activeTournaments, content, photos, p};
-    });
+    const rows = companies.map(c => ({
+      ...c,
+      plan: c.plan || 'NON ASSEGNATO',
+      status: c.status || c.stato || '—',
+      expires: c.expires || null,
+      users: Number(c.users || 0),
+      admins: Number(c.admins || 0),
+      activeTournaments: Number(c.activeTournaments || 0),
+      content: Number(c.content || 0),
+      photos: Number(c.photos || 0),
+      p: c.plan_config || {}
+    }));
 
     const countPlan = code => rows.filter(r => r.plan === code).length;
-    const totalUsers = users.filter(u => u.attivo !== false).length;
+    const totalUsers = rows.reduce((sum, r) => sum + r.users, 0);
+    const totalTournaments = rows.reduce((sum, r) => sum + r.activeTournaments, 0);
+    const totalNews = rows.reduce((sum, r) => sum + r.content, 0);
 
     app.innerHTML = `
       <section class="hero-grid">
@@ -80,8 +66,8 @@ async function boot() {
         <div class="hero-card"><span>PRO</span><b>${countPlan('PRO')}</b><small>piano</small></div>
         <div class="hero-card"><span>BUSINESS</span><b>${countPlan('BUSINESS')}</b><small>piano</small></div>
         <div class="hero-card"><span>Utenti</span><b>${totalUsers}</b><small>attivi</small></div>
-        <div class="hero-card"><span>Tornei</span><b>${tournaments.length}</b><small>totali</small></div>
-        <div class="hero-card"><span>News</span><b>${news.length}</b><small>contenuti</small></div>
+        <div class="hero-card"><span>Tornei</span><b>${totalTournaments}</b><small>attivi</small></div>
+        <div class="hero-card"><span>News</span><b>${totalNews}</b><small>contenuti</small></div>
         <div class="hero-card"><span>MRR</span><b>—</b><small>prezzi da configurare</small></div>
       </section>
 
@@ -120,7 +106,7 @@ async function boot() {
         </div>
         <div class="panel"><div class="panel-title"><div><h2>Risorse piattaforma</h2><p>Monitoraggio applicativo.</p></div></div>
           <div class="resource-list">
-            <div><b>Supabase</b><span>${companies.length} aziende · ${totalUsers} utenti · ${tournaments.length} tornei</span></div>
+            <div><b>Supabase</b><span>${companies.length} aziende · ${totalUsers} utenti · ${totalTournaments} tornei attivi</span></div>
             <div><b>GitHub</b><span>Repository unico EVENTOUR</span></div>
             <div><b>Aruba</b><span>Telemetry non collegata</span></div>
             <div><b>Storage</b><span>Telemetry per byte non ancora collegata</span></div>
@@ -137,10 +123,30 @@ async function boot() {
     };
   } catch (e) {
     showError(e && e.message ? e.message : String(e));
+  } finally {
+    bootInProgress = false;
   }
 }
 
 window.addEventListener('error', e => showError(e.message || 'Errore JavaScript'));
 window.addEventListener('unhandledrejection', e => showError(e.reason?.message || e.reason || 'Errore promessa'));
-window.addEventListener('DOMContentLoaded', boot, {once:true});
+window.addEventListener('DOMContentLoaded', () => {
+  const refreshBtn = document.getElementById('refreshBtn');
+  const backBtn = document.getElementById('backBtn');
+  if (refreshBtn) refreshBtn.addEventListener('click', async () => {
+    if (bootInProgress) return;
+    refreshBtn.disabled = true;
+    const originalLabel = refreshBtn.textContent;
+    refreshBtn.textContent = 'Aggiornamento…';
+    try { await boot(); }
+    finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = originalLabel;
+    }
+  });
+  if (backBtn) backBtn.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+  boot();
+}, {once:true});
 })();
