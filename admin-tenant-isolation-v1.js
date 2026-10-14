@@ -1,7 +1,8 @@
 (function(){
   'use strict';
   const getClient=()=>window.sb||window.supabaseClient||window.supabase;
-  const tenantId=()=>String(window.aziendaId||'').trim();
+  const isGlobalSuperadmin=()=>window.isGlobalSuperadmin===true||String(window.adminState?.adminEmail||'').trim().toLowerCase()==='giose.rizzi@gmail.com';
+  const tenantId=()=>isGlobalSuperadmin()?'':String(window.aziendaId||'').trim();
   const isGlobal=()=>{
     if(window.isPlatformAdmin===true) return true;
     const email=String(window.adminState?.adminEmail||'').trim().toLowerCase();
@@ -28,6 +29,16 @@
     el.title=companyLabel();
   }
   async function loadTenantTornei(){
+    if(isGlobalSuperadmin()){
+      const state=window.adminState||{};
+      state.tornei=[];
+      state.torneoSelezionato=null;
+      window.adminState=state;
+      if(typeof window.salvaAdminState==='function')window.salvaAdminState();
+      if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();
+      else if(typeof window.renderAdmin==='function')window.renderAdmin();
+      return [];
+    }
     const sb=getClient();
     if(!sb)throw new Error('Supabase client non disponibile');
     const q=sb.from('tornei').select('*').order('id',{ascending:false});
