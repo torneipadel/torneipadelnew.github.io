@@ -22,9 +22,9 @@ function salvaAdminState(){try{localStorage.setItem(adminStorageKey,JSON.stringi
 function caricaAdminState(){try{const raw=localStorage.getItem(adminStorageKey);if(!raw)return;const parsed=JSON.parse(raw);adminState={...adminState,...parsed};if(!Array.isArray(adminState.tornei))adminState.tornei=[];if(!Array.isArray(adminState.sponsor))adminState.sponsor=[];if(!Array.isArray(adminState.news))adminState.news=[];window.adminState=adminState}catch(e){console.error("Errore caricamento stato admin:",e)}}
 function getTorneoAdminCorrente(){if(!Array.isArray(adminState.tornei))return null;return adminState.tornei.find(t=>String(t.id)===String(adminState.torneoSelezionato))||null}
 function aggiornaGiocatoriAdmin(){const squadre=Number(document.getElementById("adminPosti")?.value)||8;const campo=document.getElementById("adminGiocatori");if(campo)campo.value=squadre*2}
-async function caricaTorneiSupabase(){try{if(window.isGlobalSuperadmin===true||(window.isSuperadmin===true&&String(window.adminState?.adminEmail||"").trim().toLowerCase()==="giose.rizzi@gmail.com")){adminState.tornei=[];adminState.torneoSelezionato=null;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==="function")window.renderCleanAdmin();else renderAdmin();return []}if(["owner","admin","superadmin"].includes(String(window.adminRuolo||"").toLowerCase())&&!window.aziendaId)throw new Error("Contesto società mancante: caricamento tornei bloccato per proteggere i dati degli altri tenant.");let q=sb.from("tornei").select("*").order("id",{ascending:false}).eq("azienda_id",window.aziendaId);const{data,error}=await q;if(error)throw error;if(Array.isArray(data))adminState.tornei=data;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==="function")window.renderCleanAdmin();else renderAdmin();return data||[]}catch(e){console.error("Errore caricamento tornei Supabase:",e);return []}}
+async function caricaTorneiSupabase(){try{if((window.isGlobalSuperadmin===true||(window.isSuperadmin===true&&String(window.adminState?.adminEmail||"").trim().toLowerCase()==="giose.rizzi@gmail.com"))&&!window.aziendaId){adminState.tornei=[];adminState.torneoSelezionato=null;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==="function")window.renderCleanAdmin();else renderAdmin();return []}if(["owner","admin","superadmin"].includes(String(window.adminRuolo||"").toLowerCase())&&!window.aziendaId)throw new Error("Contesto società mancante: caricamento tornei bloccato per proteggere i dati degli altri tenant.");let q=sb.from("tornei").select("*").order("id",{ascending:false}).eq("azienda_id",window.aziendaId);const{data,error}=await q;if(error)throw error;if(Array.isArray(data))adminState.tornei=data;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==="function")window.renderCleanAdmin();else renderAdmin();return data||[]}catch(e){console.error("Errore caricamento tornei Supabase:",e);return []}}
 window.caricaTorneiSupabase=caricaTorneiSupabase;
-async function loginAdmin(){try{const email=document.getElementById("adminEmail")?.value?.trim()||"",password=document.getElementById("adminPassword")?.value||"";const{data,error}=await sb.auth.getSession();if(error)throw error;let session=data?.session;if(email||password){if(!email||!password){mostraLoginMessaggio("Inserisci email e password.","#b42332");return}const result=await sb.auth.signInWithPassword({email,password});if(result.error)throw result.error;session=result.data?.session||null}else if(!session){mostraLoginMessaggio("Inserisci email e password.","#b42332");return}const session2=session||(await sb.auth.getSession()).data.session;adminState.adminLoggato=true;adminState.adminEmail=session2?.user?.email||"Admin";window.adminState=adminState;const loginEmail=String(session2?.user?.email||"").trim().toLowerCase();if(loginEmail==="giose.rizzi@gmail.com"){window.adminRuolo="superadmin";window.isSuperadmin=true;window.isGlobalSuperadmin=true;window.isGlobalPlatformAdmin=true;window.isAdmin=true;window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";document.documentElement.dataset.adminRole="superadmin"}salvaAdminState();document.getElementById("boxLoginAdmin")?.classList.add("hidden");document.getElementById("areaAdmin")?.classList.remove("hidden");await caricaTorneiSupabase();await caricaRichiesteIscrizione();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();if(loginEmail==="giose.rizzi@gmail.com"){window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:"superadmin",isSuperadmin:true,isAdmin:true}}));setTimeout(()=>window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:"superadmin",isSuperadmin:true,isAdmin:true}})),50)}}catch(e){console.error("Errore login:",e);mostraLoginMessaggio(e?.message||"Accesso non riuscito.","#b42332")}}
+async function loginAdmin(){try{const email=document.getElementById("adminEmail")?.value?.trim()||"",password=document.getElementById("adminPassword")?.value||"";const{data,error}=await sb.auth.getSession();if(error)throw error;let session=data?.session;if(email||password){if(!email||!password){mostraLoginMessaggio("Inserisci email e password.","#b42332");return}const result=await sb.auth.signInWithPassword({email,password});if(result.error)throw result.error;session=result.data?.session||null}else if(!session){mostraLoginMessaggio("Inserisci email e password.","#b42332");return}const session2=session||(await sb.auth.getSession()).data.session;adminState.adminLoggato=true;adminState.adminEmail=session2?.user?.email||"Admin";window.adminState=adminState;const loginEmail=String(session2?.user?.email||"").trim().toLowerCase();if(loginEmail==="giose.rizzi@gmail.com"){window.isGlobalSuperadmin=true;window.isGlobalPlatformAdmin=true;window.isAdmin=true;await wireDashboard();return}salvaAdminState();document.getElementById("boxLoginAdmin")?.classList.add("hidden");document.getElementById("areaAdmin")?.classList.remove("hidden");await caricaTorneiSupabase();await caricaRichiesteIscrizione();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();if(loginEmail==="giose.rizzi@gmail.com"){window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:"superadmin",isSuperadmin:true,isAdmin:true}}));setTimeout(()=>window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo:"superadmin",isSuperadmin:true,isAdmin:true}})),50)}}catch(e){console.error("Errore login:",e);mostraLoginMessaggio(e?.message||"Accesso non riuscito.","#b42332")}}
 window.loginAdmin=loginAdmin;
 function mostraLoginMessaggio(testo,colore){const box=document.getElementById("loginMessaggio");if(box){box.textContent=testo;box.style.color=colore||"inherit"}}
 function apriRegoleNuovoTorneo(){return creaNuovoTorneo()}
@@ -34,7 +34,7 @@ async function selezionaTorneoAdmin(id){const torneo=adminState.tornei.find(t=>S
 async function eliminaTorneoAdmin(id){if(!confirm("ATTENZIONE: eliminare definitivamente questo torneo e le relative iscrizioni?"))return false;const r1=await sb.from("iscrizioni").delete().eq("torneo_id",id);if(r1.error){alert("Eliminazione iscrizioni non riuscita: "+r1.error.message);return false}const r2=await sb.from("tornei").delete().eq("id",id);if(r2.error){alert("Eliminazione torneo non riuscita: "+r2.error.message);return false}adminState.tornei=adminState.tornei.filter(t=>String(t.id)!==String(id));if(String(adminState.torneoSelezionato)===String(id))adminState.torneoSelezionato=null;window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();return true}
 async function pubblicaTorneo(){const t=getTorneoAdminCorrente();if(!t){alert("Seleziona prima un torneo");return}const{error}=await sb.from("tornei").update({pubblicato:true,stato:t.iscrizioni_chiuse?"chiuso":"attivo"}).eq("id",t.id);if(error){alert("Errore pubblicazione torneo: "+error.message);return}t.pubblicato=true;if(!t.iscrizioni_chiuse)t.stato="attivo";window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();alert("Torneo pubblicato con successo!")}
 async function chiudiIscrizioniTorneo(){const t=getTorneoAdminCorrente();if(!t){alert("Seleziona prima un torneo");return}const{error}=await sb.from("tornei").update({iscrizioni_chiuse:true,stato:"chiuso"}).eq("id",t.id);if(error){alert("Errore chiusura iscrizioni: "+error.message);return}t.iscrizioni_chiuse=true;t.stato="chiuso";window.adminState=adminState;salvaAdminState();if(typeof window.renderCleanAdmin==='function')window.renderCleanAdmin();alert("Iscrizioni chiuse.")}
-async function caricaRichiesteIscrizione(){if(window.isGlobalSuperadmin===true||(window.isSuperadmin===true&&String(window.adminState?.adminEmail||"").trim().toLowerCase()==="giose.rizzi@gmail.com")){window.iscrizioniTorneo=[];return}const id=Number(adminState.torneoSelezionato);if(!Number.isFinite(id)||id<=0){window.iscrizioniTorneo=[];return}try{const{data,error}=await sb.from("iscrizioni").select("*").eq("torneo_id",id);if(error)throw error;window.iscrizioniTorneo=Array.isArray(data)?data:[]}catch(e){console.error("Errore caricamento iscrizioni:",e)}}
+async function caricaRichiesteIscrizione(){if((window.isGlobalSuperadmin===true||(window.isSuperadmin===true&&String(window.adminState?.adminEmail||"").trim().toLowerCase()==="giose.rizzi@gmail.com"))&&!window.aziendaId){window.iscrizioniTorneo=[];return}const id=Number(adminState.torneoSelezionato);if(!Number.isFinite(id)||id<=0){window.iscrizioniTorneo=[];return}try{const{data,error}=await sb.from("iscrizioni").select("*").eq("torneo_id",id);if(error)throw error;window.iscrizioniTorneo=Array.isArray(data)?data:[]}catch(e){console.error("Errore caricamento iscrizioni:",e)}}
 function generaLinkBove(){const t=getTorneoAdminCorrente();if(!t){alert("Seleziona prima un torneo");return}const input=document.getElementById("linkBoveGenerato");if(input)input.value=location.origin+"/tabellone.html?idTorneo="+encodeURIComponent(t.id)+(window.aziendaId?"&azienda_id="+encodeURIComponent(window.aziendaId):"")}
 function generaLinkPerId(id){adminState.torneoSelezionato=id;window.adminState=adminState;salvaAdminState();generaLinkBove()}
 function copiaLinkBove(){const input=document.getElementById("linkBoveGenerato");if(!input?.value)generaLinkBove();if(input?.value)navigator.clipboard?.writeText(input.value).then(()=>alert("Link copiato negli appunti!"))}
@@ -71,12 +71,20 @@ async function wireDashboard(){
     if(isGlobalSuperadmin){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
     let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
     let aziendaAccess=null;
-    const selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
+    let selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
     const requestedSlug=String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
 
-    // Anche un amministratore globale deve restare nel tenant scelto quando apre
-    // il pannello da un accesso societario; non ereditare il contesto di un'altra società.
-    if(role && !isGlobalSuperadmin && (selectedTenantId || requestedSlug)){
+    // Il superadmin globale può operare come admin soltanto nei tenant in cui
+    // possiede una membership esplicita; non riceve accesso implicito alle altre società.
+    if(isGlobalSuperadmin && !selectedTenantId && !requestedSlug){
+      const ownMemberships=await sb.from("azienda_utenti").select("azienda_id,ruolo,attivo").eq("user_id",session.user.id).eq("attivo",true);
+      if(ownMemberships.error) throw ownMemberships.error;
+      if(Array.isArray(ownMemberships.data) && ownMemberships.data.length===1){
+        selectedTenantId=String(ownMemberships.data[0].azienda_id||"").trim();
+        if(selectedTenantId) sessionStorage.setItem("nextpoint_login_azienda_id",selectedTenantId);
+      }
+    }
+    if(role && (selectedTenantId || requestedSlug)){
       let companyQuery=sb.from("aziende").select("id,nome_app,ragione_sociale,slug,tipo_account,stato,demo_inizio,demo_scadenza");
       companyQuery=selectedTenantId?companyQuery.eq("id",selectedTenantId):companyQuery.eq("slug",requestedSlug);
       const companyResult=await companyQuery.maybeSingle();
@@ -84,6 +92,13 @@ async function wireDashboard(){
         throw new Error("Società selezionata non trovata: caricamento tornei bloccato.");
       }
       const company=companyResult.data;
+      let tenantRole=role;
+      if(isGlobalSuperadmin){
+        const member=await sb.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",company.id).eq("user_id",session.user.id).eq("attivo",true).maybeSingle();
+        if(member.error || !member.data) throw new Error("Questo account non è autorizzato ad amministrare la società selezionata.");
+        tenantRole=String(member.data.ruolo||"").toLowerCase();
+        if(!["owner","admin","superadmin"].includes(tenantRole)) throw new Error("Il ruolo assegnato non consente l'amministrazione della società selezionata.");
+      }
       aziendaAccess={
         azienda_id:company.id,
         nome_app:company.nome_app,
@@ -94,9 +109,10 @@ async function wireDashboard(){
         demo_inizio:company.demo_inizio,
         demo_scadenza:company.demo_scadenza,
         accesso_consentito:["attiva","configurazione"].includes(String(company.stato||"").toLowerCase()),
-        ruolo:role
+        ruolo:tenantRole
       };
       if(aziendaAccess.accesso_consentito===false) throw new Error("La società selezionata non è attiva.");
+      role=tenantRole;
       sessionStorage.setItem("nextpoint_login_azienda_id",company.id);
       sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");
     }
