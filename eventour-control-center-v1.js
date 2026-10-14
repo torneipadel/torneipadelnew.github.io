@@ -92,7 +92,7 @@ function render(){
  document.getElementById('memberSearch').addEventListener('input',e=>filterRows('membersTable',e.target.value));
 }
 function filterRows(id,q){const needle=q.toLowerCase();document.querySelectorAll('#'+id+' tbody tr[data-search]').forEach(tr=>tr.hidden=!tr.dataset.search.includes(needle))}
-function modal(title,body){const host=document.getElementById('modalHost');host.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-head"><h2>${esc(title)}</h2><button type="button" data-action="close-modal" aria-label="Chiudi">✕</button></div><div class="modal-body">${body}</div></section></div>`;host.querySelector('.modal').addEventListener('click',e=>e.stopPropagation())}
+function modal(title,body){const host=document.getElementById('modalHost');host.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><section class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-head"><h2>${esc(title)}</h2><button type="button" data-action="close-modal" aria-label="Chiudi">✕</button></div><div class="modal-body">${body}</div></section></div>`;host.querySelector('.modal').addEventListener('click',e=>{if(e.target.closest('[data-action="close-modal"]')){host.innerHTML='';return}e.stopPropagation()})}
 function field(label,id,value='',type='text',extra=''){return `<label class="field"><span>${esc(label)}</span><input id="${id}" type="${type}" value="${esc(value)}" ${extra}></label>`}
 function limitField(label,id,value){return field(label,id,value??'','number','min="0" placeholder="Vuoto = senza limite"')}
 function companyById(id){return data.companies.find(c=>c.id===id)}
@@ -199,6 +199,7 @@ async function requestCodeRestore(file,sha){
 }
 
 async function action(fn,refresh=false){try{const message=await fn();document.getElementById('modalHost').innerHTML='';if(refresh)await load();note(message||'Operazione completata.')}catch(e){const message=e?.message||String(e);const body=document.querySelector('#modalHost .modal-body');if(body){let box=body.querySelector('.form-error');if(!box){box=document.createElement('div');box.className='form-error';body.prepend(box)}box.textContent=message}else note(message,'bad')}}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const host=document.getElementById('modalHost');if(host?.querySelector('.modal'))host.innerHTML=''}});
 document.addEventListener('click',async e=>{
  const btn=e.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
  if(a==='close-modal'){if(e.target.classList.contains('modal-backdrop')||e.target.closest('button'))document.getElementById('modalHost').innerHTML='';return}
