@@ -131,6 +131,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 
 <script>
 const sb=window.sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+function scopeDashboardLinks(slug){if(!slug)return;const q="?azienda="+encodeURIComponent(slug);[["visitatore.html","visitatore.html"+q],["news.html","news.html"+q],["sponsor-pubblico.html","sponsor-pubblico.html"+q]].forEach(([p,target])=>{document.querySelectorAll('a[href="'+p+'"]').forEach(el=>el.setAttribute("href",target));document.querySelectorAll("button[onclick]").forEach(el=>{const fn=el.getAttribute("onclick")||"";if(fn.includes("\'"+p+"\'"))el.setAttribute("onclick","location.href=\'"+target+"\'")})})}
 async function initPublicCompany(slug){
  const r=await sb.rpc("get_public_company",{p_slug:slug});
  const c=Array.isArray(r.data)?r.data[0]:r.data;
@@ -216,14 +217,16 @@ async function init(){const publicSlug=new URLSearchParams(location.search).get(
 if(accessError)console.error("Errore verifica accesso azienda:",accessError);
 const tenantAccess=Array.isArray(access)?access[0]:access;
 if(tenantAccess){
+ if(tenantAccess.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",tenantAccess.slug);scopeDashboardLinks(tenantAccess.slug)}
  if(!tenantAccess.accesso_consentito){
   document.querySelector("main.page").style.display="none";
   document.getElementById("companySetup").style.display="block";
   document.getElementById("companySetup").innerHTML='<div style="text-align:center"><h2>Demo scaduta</h2><p style="color:rgba(255,255,255,.75);line-height:1.6">Il periodo di prova è terminato. L’accesso alle funzioni della piattaforma è stato sospeso.</p><p style="color:#ffe76b">Per continuare, attiva la tua società.</p><button onclick="logout()" style="margin-top:10px;width:100%;height:46px;border:0;border-radius:10px;font-weight:800;cursor:pointer">ESCI</button></div>';
   return;
  }
- const {data:azienda,error:aziendaError}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url").eq("id",tenantAccess.azienda_id).maybeSingle();
+ const {data:azienda,error:aziendaError}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url,slug").eq("id",tenantAccess.azienda_id).maybeSingle();
  if(aziendaError||!azienda){console.error("Errore caricamento società:",aziendaError);document.getElementById("status").textContent="Società non trovata.";return}
+ if(azienda.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",azienda.slug);scopeDashboardLinks(azienda.slug)}
  document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
  document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
  document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
@@ -234,7 +237,7 @@ if(tenantAccess){
  document.getElementById("status").textContent=tenantAccess.giorni_residui!=null?"Demo attiva · "+tenantAccess.giorni_residui+" giorni residui":"";
  return;
 }
-const {data:azienda}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url").eq("owner_user_id",user.id).maybeSingle();
+const {data:azienda}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url,slug").eq("owner_user_id",user.id).maybeSingle();
 if(!azienda){
  document.querySelector("main.page").style.display="none";
  document.getElementById("companySetup").style.display="block";
@@ -269,12 +272,14 @@ async function initTenantSafe(){
  const rows=Array.isArray(members)?members:[];
  if(!rows.length){await init();return}
  const ids=[...new Set(rows.map(x=>x.azienda_id).filter(Boolean))];
- const {data:companies,error:companiesError}=await sb.from("aziende").select("id,nome_app,ragione_sociale").in("id",ids);
+ const {data:companies,error:companiesError}=await sb.from("aziende").select("id,nome_app,ragione_sociale,slug").in("id",ids);
  if(companiesError){console.error("Errore caricamento società:",companiesError);document.getElementById("status").textContent="Impossibile caricare la società.";return}
  if(ids.length===1){
    sessionStorage.setItem("nextpoint_login_azienda_id",ids[0]);
    const selected=rows.find(x=>x.azienda_id===ids[0]);
+   const company=(companies||[]).find(x=>x.id===ids[0]);
    if(selected)sessionStorage.setItem("nextpoint_login_role",selected.ruolo||"user");
+   if(selected&&String(selected.ruolo||"").toLowerCase()==="user"&&company?.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",company.slug);location.replace("visitatore.html?azienda="+encodeURIComponent(company.slug));return}
    await init();
    return;
  }
@@ -287,7 +292,7 @@ async function initTenantSafe(){
    const btn=document.createElement("button");
    btn.className="admin-btn";
    btn.textContent=(company.nome_app||company.ragione_sociale||"Società")+" · "+(row.ruolo||"user");
-   btn.onclick=async()=>{sessionStorage.setItem("nextpoint_login_azienda_id",row.azienda_id);sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");sessionStorage.setItem("nextpoint_login_role",row.ruolo||"user");await init()};
+   btn.onclick=async()=>{sessionStorage.setItem("nextpoint_login_azienda_id",row.azienda_id);sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");sessionStorage.setItem("nextpoint_login_role",row.ruolo||"user");if(String(row.ruolo||"").toLowerCase()==="user"&&company.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",company.slug);location.href="visitatore.html?azienda="+encodeURIComponent(company.slug);return}await init()};
    box.appendChild(btn);
  });
 }
