@@ -119,7 +119,7 @@ footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-siz
 
 <script>
 const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZlYmlhb29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const grid=document.getElementById("companyGrid"),statusEl=document.getElementById("companyStatus"),searchInput=document.getElementById("searchInput");
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
