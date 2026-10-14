@@ -7084,7 +7084,7 @@ try{
             if(error || !Array.isArray(tornei) || tornei.length===0){
                 const pubblico = await sb.rpc("get_public_tornei", {
                     p_torneo_id: Number(idParam),
-                    p_azienda_id: null
+                    p_azienda_id: window.__BOVE_TENANT_ID__ || new URLSearchParams(window.location.search).get("azienda_id")
                 });
                 if(!pubblico.error && Array.isArray(pubblico.data) && pubblico.data.length){
                     tornei = pubblico.data;
