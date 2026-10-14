@@ -226,7 +226,6 @@ if(tenantAccess){
  }
  const {data:azienda,error:aziendaError}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url,slug").eq("id",tenantAccess.azienda_id).maybeSingle();
  if(aziendaError||!azienda){console.error("Errore caricamento società:",aziendaError);document.getElementById("status").textContent="Società non trovata.";return}
- if(azienda.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",azienda.slug);scopeDashboardLinks(azienda.slug)}
  document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
  document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
  document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
@@ -245,7 +244,8 @@ if(!azienda){
  if(!document.getElementById("companySetupForm").dataset.bound){document.getElementById("companySetupForm").addEventListener("submit",saveCompany);document.getElementById("companySetupForm").dataset.bound="1"}
  return;
 }
-document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
+if(azienda.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",azienda.slug);scopeDashboardLinks(azienda.slug)}
+ document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
 document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
 document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
 document.getElementById("emailBox").textContent=azienda.cf_piva?"P.IVA: "+azienda.cf_piva:"";
