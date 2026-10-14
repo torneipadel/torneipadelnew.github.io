@@ -6,7 +6,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmtDate=v=>v?new Date(v).toLocaleDateString('it-IT'):'—';
 const fmtMoney=v=>Number(v||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const dtLocal=v=>{if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?'':new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};
-let sb,data={companies:[],plans:[],members:[],audit:[]},busy=false;
+let sb,data={companies:[],plans:[],members:[],audit:[],codeVersions:[],restoreRequests:[],projectBackups:[]},busy=false;
 const app=()=>document.getElementById('app');
 function fail(message){const a=app();if(a)a.innerHTML='<div class="error">❌ '+esc(message)+'</div>'}
 function note(message,type='ok'){const el=document.getElementById('notice');if(el){el.className='notice '+type;el.textContent=message;el.hidden=false;el.scrollIntoView({behavior:'smooth',block:'nearest'})}}
@@ -20,8 +20,8 @@ async function load(){
   const {data:role,error:roleError}=await sb.rpc('is_superadmin');
   if(roleError)throw roleError;if(role!==true)throw new Error('Accesso riservato al Superadmin globale.');
   const result=await rpc('eventour_superadmin_overview',{});
-  data={companies:Array.isArray(result?.companies)?result.companies:[],plans:Array.isArray(result?.plans)?result.plans:[],members:Array.isArray(result?.members)?result.members:[],audit:Array.isArray(result?.audit)?result.audit:[]};
-  render();
+  data={companies:Array.isArray(result?.companies)?result.companies:[],plans:Array.isArray(result?.plans)?result.plans:[],members:Array.isArray(result?.members)?result.members:[],audit:Array.isArray(result?.audit)?result.audit:[],codeVersions:Array.isArray(result?.code_versions)?result.code_versions:[],restoreRequests:Array.isArray(result?.restore_requests)?result.restore_requests:[],projectBackups:Array.isArray(result?.project_backups)?result.project_backups:[]};
+  render(); await Promise.all([loadCodeHistory(),loadProjectBackups()]);
  }catch(e){fail(e?.message||String(e))}
  finally{busy=false}
 }
@@ -71,6 +71,16 @@ function render(){
  <div class="table-wrap"><table><thead><tr><th>Data</th><th>Operatore</th><th>Azione</th><th>Oggetto</th><th>Dettaglio</th></tr></thead><tbody>
  ${audit.map(a=>`<tr><td>${new Date(a.created_at).toLocaleString('it-IT')}</td><td>${esc(a.email||'—')}</td><td><code>${esc(a.action)}</code></td><td>${esc(a.entity_type||'')} ${esc(a.entity_id||'')}</td><td>${esc(a.summary||'')}</td></tr>`).join('')||'<tr><td colspan="5">Nessuna operazione registrata finora.</td></tr>'}
  </tbody></table></div></section>
+ <section class="panel">
+  <div class="panel-title"><div><h2>Backup e ripristino globale</h2><p>Snapshot completo del repository, cronologia dei file del Superadmin e ripristino controllato da commit.</p></div><div class="toolbar"><button class="primary" data-action="create-project-backup">💾 Backup completo adesso</button><button data-action="refresh-code-backups">↻ Aggiorna backup</button></div></div>
+  <div id="projectBackupStatus" class="notice" hidden></div>
+  <h3>Backup completi del repository</h3><div id="projectBackupHistory" class="backup-history"><div class="loading">Lettura backup completi…</div></div>
+  <h3>Versioni codice Superadmin</h3><p class="section-help">Apri o confronta il commit prima di marcare una versione o richiedere un ripristino. Il ripristino crea un nuovo commit e conserva la cronologia.</p>
+  <div id="codeVersions" class="code-version-list"><div class="loading">Lettura cronologia GitHub…</div></div>
+  <h3>Richieste di ripristino codice</h3><div class="table-wrap"><table><thead><tr><th>Data richiesta</th><th>File</th><th>Commit</th><th>Stato</th><th>Risultato</th></tr></thead><tbody>
+  ${data.restoreRequests.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString('it-IT')}</td><td>${esc(r.file_path)}</td><td><a href="https://github.com/torneipadel/torneipadelnew.github.io/commit/${esc(r.commit_sha)}" target="_blank" rel="noopener">${esc(String(r.commit_sha||'').slice(0,10))}</a></td><td>${statusPill(r.status)}</td><td>${esc(r.result||'In attesa dell’elaborazione GitHub Actions')}</td></tr>`).join('')||'<tr><td colspan="5">Nessuna richiesta di ripristino registrata.</td></tr>'}
+  </tbody></table></div>
+ </section>
  <section class="grid2"><div class="panel"><div class="panel-title"><div><h2>Risorse piattaforma</h2><p>Stato reale delle integrazioni, senza inventare telemetria.</p></div></div><div class="resource-list">
  <div><b>Supabase</b><span>${companies.length} società · ${totalUsers} utenti · ${totalTournaments} tornei conteggiati</span></div>
  <div><b>GitHub Pages</b><span>Repository unico EVENTOUR · distribuzione statica</span></div>
@@ -130,10 +140,72 @@ function planForm(p){
  <div class="form-actions"><button type="button" data-action="close-modal">Annulla</button><button class="primary" type="submit">Salva piano</button></div></form>`);
  document.getElementById('planForm').addEventListener('submit',async e=>{e.preventDefault();await action(async()=>{await rpc('eventour_superadmin_save_plan',{p_code:document.getElementById('planCode').value.trim().toUpperCase(),p_name:document.getElementById('planName').value.trim(),p_monthly_price:Number(document.getElementById('planPrice').value),p_storage_mb:Number(document.getElementById('planStorage').value),p_max_photos:numOrNull(document.getElementById('planPhotos').value),p_max_news:numOrNull(document.getElementById('planNews').value),p_max_active_tournaments:numOrNull(document.getElementById('planTournaments').value),p_max_admins:numOrNull(document.getElementById('planAdmins').value),p_stats_advanced:document.getElementById('planStats').value==='true',p_automations_level:document.getElementById('planAutomations').value.trim()||'base',p_customization_level:document.getElementById('planCustomization').value.trim()||'base',p_reports_level:document.getElementById('planReports').value.trim()||'base',p_premium_level:document.getElementById('planPremium').value.trim()||'none'});return 'Piano salvato nel catalogo.'},true)});
 }
+
+const CODE_FILES=['eventour-control-center.html','eventour-control-center-v1.js','eventour-control-center-v1.css','superadmin-login.html','eventour-control-center-entry-v1.js','index.html'];
+const GITHUB_REPO='torneipadel/torneipadelnew.github.io';
+async function loadCodeHistory(){
+ const host=document.getElementById('codeVersions');if(!host)return;
+ host.innerHTML='<div class="loading">Lettura cronologia GitHub…</div>';
+ const registry=new Map(data.codeVersions.map(x=>[x.file_path+'@'+x.commit_sha,x]));
+ const groups=await Promise.all(CODE_FILES.map(async file=>{
+  try{const response=await fetch('https://api.github.com/repos/'+GITHUB_REPO+'/commits?path='+encodeURIComponent(file)+'&per_page=5',{headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('GitHub HTTP '+response.status);const commits=await response.json();return {file,commits,error:null}}
+  catch(e){return {file,commits:[],error:e.message||String(e)}}
+ }));
+ host.innerHTML=groups.map(group=>{
+  let html='<article class="code-file-card"><h4>'+esc(group.file)+'</h4>';
+  if(group.error)return html+'<p class="empty">Cronologia non disponibile: '+esc(group.error)+'</p></article>';
+  if(!group.commits.length)return html+'<p class="empty">Nessun commit trovato.</p></article>';
+  html+='<div class="code-commit-list">';
+  group.commits.forEach(cm=>{
+   const sha=String(cm.sha||'');if(!/^[0-9a-f]{40}$/i.test(sha))return;
+   const meta=registry.get(group.file+'@'+sha);const status=meta?.status||'TEST';
+   const badge=status==='STABILE'?'🟢 STABILE':status==='PROBLEMATICA'?'🔴 PROBLEMATICA':'🟡 TEST';
+   const date=cm.commit?.author?.date||cm.committer?.date;
+   const message=cm.commit?.message?.split('\n')[0]||'';
+   html+='<div class="code-commit"><div class="code-commit-meta"><b>'+badge+' · '+esc(sha.slice(0,10))+'</b><small>'+esc(date?new Date(date).toLocaleString('it-IT'):'')+' · '+esc(message)+'</small></div><div class="code-commit-actions"><a href="https://github.com/'+GITHUB_REPO+'/commit/'+sha+'" target="_blank" rel="noopener">Apri</a><a href="https://github.com/'+GITHUB_REPO+'/compare/'+sha+'...main" target="_blank" rel="noopener">Confronta</a><button data-action="mark-code-version" data-status="STABILE" data-file="'+esc(group.file)+'" data-sha="'+sha+'">⭐ Stabile</button><button data-action="mark-code-version" data-status="TEST" data-file="'+esc(group.file)+'" data-sha="'+sha+'">🟡 Test</button><button data-action="mark-code-version" data-status="PROBLEMATICA" data-file="'+esc(group.file)+'" data-sha="'+sha+'">🔴 Problematica</button><button class="danger" data-action="request-code-restore" data-file="'+esc(group.file)+'" data-sha="'+sha+'">↩ Ripristina</button></div></div>';
+  });
+  return html+'</div></article>';
+ }).join('');
+}
+async function loadProjectBackups(){
+ const host=document.getElementById('projectBackupHistory');if(!host)return;
+ host.innerHTML='<div class="loading">Lettura backup completi…</div>';
+ try{
+  const {data:result,error}=await sb.functions.invoke('project-complete-backup',{method:'GET'});
+  if(error)throw error;if(!result?.ok)throw new Error(result?.error||'Servizio backup non disponibile');
+  const rows=Array.isArray(result.backups)?result.backups:[];
+  host.innerHTML=rows.length?'<div class="backup-history-list">'+rows.map(b=>'<article class="backup-item"><div><b>'+esc(b.branch_name)+'</b><small>'+esc(b.created_by_email||'—')+' · '+esc(new Date(b.created_at).toLocaleString('it-IT'))+'</small><small>Commit '+esc(String(b.commit_sha||'').slice(0,12))+' · '+esc(b.status||'CREATED')+'</small></div><div><a href="https://github.com/'+GITHUB_REPO+'/tree/'+encodeURIComponent(b.branch_name)+'" target="_blank" rel="noopener">Apri backup</a> · <a href="https://github.com/'+GITHUB_REPO+'/commit/'+encodeURIComponent(b.commit_sha)+'" target="_blank" rel="noopener">Commit origine</a></div></article>').join('')+'</div>':'<p class="empty">Nessun backup completo registrato. Puoi crearne uno con il pulsante qui sopra.</p>';
+ }catch(e){host.innerHTML='<p class="empty">Impossibile leggere i backup completi: '+esc(e?.message||String(e))+'</p>'}
+}
+async function createProjectBackup(){
+ const button=document.querySelector('[data-action="create-project-backup"]'),status=document.getElementById('projectBackupStatus');
+ if(button){button.disabled=true;button.textContent='Creazione backup…'}if(status){status.hidden=false;status.className='notice';status.textContent='Creazione snapshot completo in corso…'}
+ try{
+  const {data:result,error}=await sb.functions.invoke('project-complete-backup',{method:'POST',body:{}});
+  if(error)throw error;if(!result?.ok)throw new Error(result?.error||'Backup non creato');
+  await load();note('Backup completo creato: '+(result.backup?.branch_name||'snapshot GitHub'));
+ }catch(e){if(status){status.hidden=false;status.className='notice bad';status.textContent='Backup non creato: '+(e?.message||String(e))}}
+ finally{if(button){button.disabled=false;button.textContent='💾 Backup completo adesso'}}
+}
+async function markCodeVersion(file,sha,status){
+ const notes=status==='STABILE'?'Versione approvata dal Superadmin':status==='PROBLEMATICA'?'Versione marcata come problematica':'Versione in test';
+ await rpc('eventour_superadmin_mark_code_version',{p_file_path:file,p_commit_sha:sha,p_status:status,p_note:notes});
+ await load();note('Versione '+sha.slice(0,10)+' marcata '+status+'.');
+}
+async function requestCodeRestore(file,sha){
+ if(!confirm('ATTENZIONE: il ripristino sostituirà il file con la versione selezionata e creerà un nuovo commit. Potresti annullare correzioni successive. Hai verificato Apri e Confronta? Confermi il ripristino di '+file+' al commit '+sha.slice(0,10)+'?'))return;
+ await rpc('superadmin_request_code_restore',{p_file_path:file,p_commit_sha:sha});
+ await load();note('Richiesta di ripristino registrata. GitHub Actions la elaborerà automaticamente.');
+}
+
 async function action(fn,refresh=false){try{const message=await fn();document.getElementById('modalHost').innerHTML='';if(refresh)await load();note(message||'Operazione completata.')}catch(e){const message=e?.message||String(e);const body=document.querySelector('#modalHost .modal-body');if(body){let box=body.querySelector('.form-error');if(!box){box=document.createElement('div');box.className='form-error';body.prepend(box)}box.textContent=message}else note(message,'bad')}}
 document.addEventListener('click',async e=>{
  const btn=e.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
  if(a==='close-modal'){if(e.target.classList.contains('modal-backdrop')||e.target.closest('button'))document.getElementById('modalHost').innerHTML='';return}
+ if(a==='create-project-backup'){await createProjectBackup();return}
+ if(a==='refresh-code-backups'){await load();return}
+ if(a==='mark-code-version'){btn.disabled=true;try{await markCodeVersion(btn.dataset.file,btn.dataset.sha,btn.dataset.status)}catch(err){note(err?.message||String(err),'bad')}finally{btn.disabled=false}return}
+ if(a==='request-code-restore'){await requestCodeRestore(btn.dataset.file,btn.dataset.sha).catch(err=>note(err?.message||String(err),'bad'));return}
  if(a==='new-company'){companyForm(null);return}
  if(a==='edit-company'){const c=companyById(btn.dataset.id);if(c)companyForm(c);return}
  if(a==='edit-company-plan'){const c=companyById(btn.dataset.id);if(c)companyPlanForm(c);return}
