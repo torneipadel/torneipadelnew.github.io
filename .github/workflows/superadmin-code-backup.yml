@@ -75,8 +75,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          FILE="${{ steps.request.outputs.file }}"
-          SHA="${{ steps.request.outputs.sha }}"
+          FILE="$RESTORE_FILE"
+          SHA="$RESTORE_SHA"
           git restore --source "$SHA" -- "$FILE"
           git diff --quiet -- "$FILE" && { echo "Il file è già identico alla versione richiesta."; exit 0; }
           git config user.name "Superadmin Code Backup"
