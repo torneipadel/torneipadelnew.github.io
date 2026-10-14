@@ -133,7 +133,8 @@ async function go(){
      p_telefono:telefono
    });
    if(m.error){
-     statusBox.textContent=m.error.message;
+     await sb.auth.signOut();
+     statusBox.textContent="Account creato, ma l'associazione alla società non è riuscita. Accedi con le stesse credenziali per completare la procedura. Dettaglio: "+m.error.message;
      busy=false;submitButton.disabled=false;
      return;
    }
@@ -144,7 +145,8 @@ async function go(){
      p_note:note
    });
    if(extra.error){
-     statusBox.textContent="Account creato, ma il profilo non è stato completato: "+extra.error.message;
+     await sb.auth.signOut();
+     statusBox.textContent="Account creato, ma il profilo non è stato completato. Accedi con le stesse credenziali per riprovare. Dettaglio: "+extra.error.message;
      busy=false;submitButton.disabled=false;
      return;
    }
