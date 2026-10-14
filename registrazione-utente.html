@@ -63,6 +63,7 @@ const params=new URLSearchParams(location.search);
 const azienda=params.get("azienda")||"";
 const q=encodeURIComponent(azienda);
 const statusBox=document.getElementById("status");
+let companyRecord=null,busy=false;
 
 document.getElementById("back").onclick=()=>{location.href="societa.html?slug="+q};
 document.getElementById("login").href="login-utente.html?azienda="+q;
@@ -75,7 +76,8 @@ function generaAlias(nome,cognome){
 async function init(){
  const r=await sb.rpc("get_public_company",{p_slug:azienda});
  const c=Array.isArray(r.data)?r.data[0]:r.data;
- if(!c){
+ companyRecord=c||null;
+ if(r.error||!c||!c.id){
    statusBox.textContent="Società non trovata o non disponibile.";
    document.getElementById("go").disabled=true;
    return;
@@ -84,6 +86,10 @@ async function init(){
 }
 
 async function go(){
+ if(busy)return;
+ busy=true;
+ const submitButton=document.getElementById("go");
+ submitButton.disabled=true;
  statusBox.textContent="Creazione account in corso…";
 
  const nome=document.getElementById("nome").value.trim();
@@ -95,8 +101,9 @@ async function go(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
 
- if(!azienda||!nome||!cognome||!email||password.length<6){
-   statusBox.textContent="Compila Nome, Cognome, Email e Password (minimo 6 caratteri).";
+ if(!azienda||!companyRecord?.id||!nome||!cognome||!email||password.length<6){
+   statusBox.textContent="Verifica la società e compila Nome, Cognome, Email e Password (minimo 6 caratteri).";
+   busy=false;submitButton.disabled=false;
    return;
  }
  if(!alias){
@@ -114,6 +121,7 @@ async function go(){
  });
  if(r.error){
    statusBox.textContent=r.error.message;
+   busy=false;submitButton.disabled=false;
    return;
  }
 
@@ -129,33 +137,32 @@ async function go(){
      return;
    }
 
-   const p=await sb.from("profili").upsert({
-     user_id:r.data.user.id,
-     email,
-     nome,
-     cognome,
-     telefono,
-     livello,
-     alias,
-     note,
-     ruolo:"user",
-     updated_at:new Date().toISOString()
-   },{onConflict:"user_id"});
-
-   if(p.error){
-     statusBox.textContent=p.error.message;
+   const extra=await sb.rpc("update_visitor_profile",{
+     p_livello:livello,
+     p_alias:alias,
+     p_note:note
+   });
+   if(extra.error){
+     statusBox.textContent="Account creato, ma il profilo non è stato completato: "+extra.error.message;
+     busy=false;submitButton.disabled=false;
      return;
    }
 
+   sessionStorage.setItem("nextpoint_login_azienda_id",companyRecord.id);
+   sessionStorage.setItem("nextpoint_login_azienda_slug",companyRecord.slug);
+   sessionStorage.setItem("nextpoint_login_role","user");
+   sessionStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
+   localStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
    statusBox.textContent="Registrazione avvenuta con successo.";
-   setTimeout(()=>{location.href="societa.html?slug="+q},900);
+   window.location.replace("visitatore.html?azienda="+encodeURIComponent(companyRecord.slug));
    return;
  }
 
  statusBox.textContent="Registrazione completata. Controlla la tua email per confermare l’account, poi accedi da questa società.";
+ busy=false;submitButton.disabled=false;
 }
 
-document.getElementById("go").onclick=go;
+document.getElementById("go").onclick=async()=>{try{await go()}catch(e){console.error("Errore registrazione visitatore:",e);statusBox.textContent="Errore di collegamento. Riprova.";busy=false;document.getElementById("go").disabled=false}};
 init();
 </script>
 </body>
