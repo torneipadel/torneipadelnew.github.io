@@ -44,8 +44,9 @@
         // per un errore transitorio RPC/RLS: altrimenti crea il loop dashboard -> admin -> dashboard.
         let access=null;
         let rpcError=null;
+        const selectedTenantId=String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
         for(let attempt=0;attempt<3;attempt++){
-          const result=await client.rpc("get_my_azienda_access");
+          const result=await client.rpc("get_my_azienda_access",selectedTenantId?{p_azienda_id:selectedTenantId}:{});
           access=result.data;
           rpcError=result.error||null;
           const candidate=Array.isArray(access)?access[0]:access;
@@ -54,7 +55,7 @@
         }
 
         const row=Array.isArray(access)?access[0]:access;
-        if(row?.azienda_id){
+        if(row?.azienda_id&&(!selectedTenantId||String(row.azienda_id)===selectedTenantId)){
           const ruolo=String(row.ruolo||"owner").toLowerCase();
           if(!["owner","admin","superadmin"].includes(ruolo)){
             window.location.href="dashboard.html?v=member";
