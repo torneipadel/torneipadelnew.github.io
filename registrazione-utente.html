@@ -132,9 +132,10 @@ async function go(){
      p_cognome:cognome,
      p_telefono:telefono
    });
-   if(m.error){
+   const member=Array.isArray(m.data)?m.data[0]:m.data;
+   if(m.error||!member?.ok||String(member.azienda_id)!==String(companyRecord.id)||String(member.ruolo||"").toLowerCase()!=="user"){
      await sb.auth.signOut();
-     statusBox.textContent="Account creato, ma l'associazione alla società non è riuscita. Accedi con le stesse credenziali per completare la procedura. Dettaglio: "+m.error.message;
+     statusBox.textContent="Account creato, ma l'associazione alla società non è riuscita o l'account non è un visitatore. Accedi con un account visitatore. "+(m.error?.message||"");
      busy=false;submitButton.disabled=false;
      return;
    }
