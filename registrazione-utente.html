@@ -9,7 +9,7 @@
 :root{--line:rgba(255,255,255,.22);--blue:#073b72}
 *{box-sizing:border-box}
 html,body{min-height:100%;margin:0}
-body{background:#06111f url('/sfondo2.jpg') center/cover fixed no-repeat;font-family:'Open Sans',Arial,sans-serif;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px 16px;overflow-x:hidden}
+body{background:#06111f url('sfondo2.jpg') center/cover fixed no-repeat;font-family:'Open Sans',Arial,sans-serif;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px 16px;overflow-x:hidden}
 body:before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,12,24,.30),rgba(3,12,24,.68));pointer-events:none;z-index:-1}
 .box{width:min(620px,100%);margin:0 auto;padding:24px 22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 35px rgba(0,0,0,.28);text-align:center}
 .logo{width:112px;height:auto;display:block;margin:0 auto 12px}
@@ -31,7 +31,7 @@ a{color:#fff;font-weight:700}
 </head>
 <body>
 <div class="box">
-<img src="/loghi/icona_app1.jpg" class="logo" alt="NEXT POINT PADEL">
+<img src="loghi/icona_app1.jpg" class="logo" alt="NEXT POINT PADEL">
 <h2>Registrazione visitatore</h2>
 <div class="info" id="company">Caricamento società...</div>
 
@@ -116,7 +116,7 @@ async function go(){
    password,
    options:{
      data:{nome,cognome,telefono,livello,alias,note},
-     emailRedirectTo:location.origin+"/registrazione-utente.html?azienda="+q
+     emailRedirectTo:location.origin+location.pathname+"?azienda="+q
    }
  });
  if(r.error){
