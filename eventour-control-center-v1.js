@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const URL='https://dkeqicstprvvfebiaooc.supabase.co';
-const KEY='sb_publishable_EBgrU25BpMp9x6a2n7_Pg_FTFa5JLu';
+const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate=v=>v?new Date(v).toLocaleDateString('it-IT'):'—';
 const fmtMoney=v=>Number(v||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
