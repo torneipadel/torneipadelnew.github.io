@@ -13,7 +13,7 @@
     return name?`Società: ${name}${email?` · ${email}`:''}`:email;
   }
   function renderCompanyBadge(){
-    if(isGlobal()) return;
+    if(!tenantId()) return;
     const top=document.querySelector('.topbar');
     if(!top)return;
     let el=document.getElementById('adminTenantBadge');
@@ -32,7 +32,9 @@
     if(!sb)throw new Error('Supabase client non disponibile');
     const q=sb.from('tornei').select('*').order('id',{ascending:false});
     const id=tenantId();
-    const result=id&&!isGlobal()?await q.eq('azienda_id',id):await q;
+    // Il contesto aziendale prevale anche per il Superadmin globale: se è
+    // stata selezionata una società, non caricare mai i tornei delle altre.
+    const result=id?await q.eq('azienda_id',id):await q;
     if(result.error)throw result.error;
     const state=window.adminState||{};
     state.tornei=Array.isArray(result.data)?result.data:[];
@@ -47,7 +49,7 @@
     window.__tenantIsolationInstalled=true;
     window.caricaTorneiSupabase=loadTenantTornei;
     renderCompanyBadge();
-    if(typeof window.caricaTorneiSupabase==='function' && tenantId() && !isGlobal()) loadTenantTornei().catch(e=>console.error('Errore caricamento dati società:',e));
+    if(typeof window.caricaTorneiSupabase==='function' && tenantId()) loadTenantTornei().catch(e=>console.error('Errore caricamento dati società:',e));
   }
   window.addEventListener('admin:role-ready',()=>setTimeout(install,0));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});else setTimeout(install,0);
