@@ -5647,6 +5647,16 @@ async function applyRules(){
         return;
     }
 
+    const regolePrima={
+        numeroSquadre:Number(state.rules.numeroSquadre),
+        numeroGironi:Number(state.rules.numeroGironi),
+        squadrePerGirone:Number(state.rules.squadrePerGirone),
+        turni:Number(state.rules.turni)||3,
+        campi:Number(state.rules.campi)||3,
+        start:String(state.rules.start||"20:00"),
+        duration:Number(state.rules.duration)||30
+    };
+
     state.rules.numeroSquadre=n;
     state.rules.tipoTorneo=tipo;
     state.rules.formatoTorneo=n;
@@ -5663,17 +5673,8 @@ async function applyRules(){
 
     const groupTypes=["italiana","gironiFinale","short"];
     const noKO=["svizzero","americano","mexicano","king"];
-    const strutturaPrecedente={
-        numeroSquadre:Number(state.rules.numeroSquadre),
-        numeroGironi:Number(state.rules.numeroGironi),
-        squadrePerGirone:Number(state.rules.squadrePerGirone)
-    };
-    const programmazionePrecedente={
-        turni:Number(state.rules.turni)||3,
-        campi:Number(state.rules.campi)||3,
-        start:String(state.rules.start||"20:00"),
-        duration:Number(state.rules.duration)||30
-    };
+    const strutturaPrecedente=regolePrima;
+    const programmazionePrecedente=regolePrima;
 
     if(groupTypes.includes(tipo) || tipo==="manuale"){
         const g=Number(document.getElementById("numeroGironi")?.value)||struttura.gironi;
