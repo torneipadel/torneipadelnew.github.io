@@ -120,8 +120,8 @@ function normalizeTeams(){
     s[key]=Array.from({length:3},(_,i)=>{
       const current=primary[i];
       const fallback=nested[i];
-      return validScore(current)?String(current).replace(/\\s/g,''):
-        (validScore(fallback)?String(fallback).replace(/\\s/g,''):'-');
+      return validScore(current)?String(current).replace(/\s/g,''):
+        (validScore(fallback)?String(fallback).replace(/\s/g,''):'-');
     });
   });
   if(!s.goldSilverBronze||typeof s.goldSilverBronze!=='object')s.goldSilverBronze={version:1,teamsPerGroup:3,groupCount:3,courts:3,matchDurationMinutes:20,groupMatchCount:9,finalMatchCount:9,finals:['gold','silver','bronze'],results:{}};
