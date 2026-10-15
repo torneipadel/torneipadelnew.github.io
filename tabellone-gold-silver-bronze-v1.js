@@ -157,7 +157,6 @@ function finalPlacementData(){
   const entries=[];
   const winners={};
   let complete=true;
-  html+='<div class="gsb-finals-grid">';
   stages.forEach(stage=>{
     const teams=finalTeams(stage);
     const scores=normalizedResults(s[stage.key+'Res']);
@@ -209,6 +208,7 @@ function renderCustomFinals(){
     '<p style="text-align:center">Le 3 prime classificate dei gironi disputano Gold; le 3 seconde Silver; le 3 terze Bronze. Ogni fascia è un girone all’italiana: 3 partite.</p>'+
     '<p style="text-align:center">Classifica: punti (vittoria '+Number(s.rules.w)+', pareggio '+Number(s.rules.d)+', sconfitta '+Number(s.rules.l)+') → '+esc(s.rules.crit1)+' → '+esc(s.rules.crit2)+' → '+esc(s.rules.crit3)+'.</p>'+
     (ready?'<p class="gsb-ready">Tutti i gironi iniziali sono completati: le finali sono abilitate.</p>':'<p class="gsb-wait">Le finali si sbloccano quando tutte le 9 partite dei gironi iniziali hanno un risultato valido.</p>');
+  html+='<div class="gsb-finals-grid">';
   stages.forEach(stage=>{
     const teams=finalTeams(stage);
     const labels=ready?teams:groups.map(g=>stage.position+'ª classificata Girone '+g+' — da definire');
