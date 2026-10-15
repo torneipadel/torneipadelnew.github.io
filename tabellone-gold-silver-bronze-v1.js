@@ -229,7 +229,7 @@ function setSpecialRuleFields(){
   setRuleField('crit1',r.crit1);setRuleField('crit2',r.crit2);setRuleField('crit3',r.crit3);
   setRuleField('startTime',r.start);setRuleField('duration',r.duration);setRuleField('noteRegole',r.note||'');
   setRuleField('qualificatePerGirone',3);setRuleField('numeroQualificateFinali',9);
-  ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
+  // I campi restano modificabili; applyRules verifica che la struttura resti 9 squadre in 3 gironi da 3.
 }
 window.openRules=function(){
   const special=isSpecial();
