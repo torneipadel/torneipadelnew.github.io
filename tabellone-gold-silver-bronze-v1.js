@@ -183,6 +183,7 @@ function syncFinalPlacements(){
   s.goldSilverBronze.finalPlacements=data?data.entries:[];
   s.goldSilverBronze.winners=data?.complete?data.winners:{};
 }
+window.syncGoldSilverBronzeDerivedData=syncFinalPlacements;
 function overallFinalStandingsHtml(){
   const data=finalPlacementData();
   if(!data)return '<h3>🏆 Classifica generale delle 9 squadre</h3><p class="gsb-muted">Le posizioni generali saranno calcolate dopo aver completato i risultati dei tre gironi iniziali.</p>';
