@@ -5798,14 +5798,26 @@ function applyRules(){
     state.rules.locked=false;
 
     if(strutturaModificata){
-        ["A","B","C","D","E","F","G"].forEach(tag=>{
+        const lettere=["A","B","C","D","E","F"];
+        const squadreSalvate=Array.isArray(state.coppie)&&state.coppie.some(x=>String(x??"").trim())
+            ? state.coppie.filter(x=>String(x??"").trim())
+            : lettere.flatMap(tag=>Array.isArray(state[tag])?state[tag]:[]).filter(x=>String(x??"").trim());
+        lettere.forEach((tag,indice)=>{
+            if(indice<Number(state.rules.numeroGironi)){
+                const inizio=indice*Number(state.rules.squadrePerGirone);
+                state[tag]=Array.from({length:Number(state.rules.squadrePerGirone)},(_,i)=>squadreSalvate[inizio+i]??"");
+            }else{
+                state[tag]=[];
+            }
             state[tag+"res"]=[];
             state[tag+"time"]=[];
             state[tag+"camp"]=[];
         });
         state.qRes=Array(4).fill("-");
+        state.qCamp=[];state.qTime=[];
         state.sTopRes=Array(2).fill("-");
-        state.fTopRes="-";
+        state.sTopCamp=[];state.sTopTime=[];
+        state.fTopRes="-";state.fTopCamp="";state.fTopTime="";
         state.finalTop=[];
         state.campioneTop=null;
     }else if(programmazioneModificata){
@@ -10997,14 +11009,9 @@ function renderTables(){
                 minutiBase+
                 (m.slot*durata);
 
-            let ora=
-                oraBase+
-                Math.floor(
-                    minuti/60
-                );
-
-            let min=
-                minuti%60;
+            let totaleMinuti=((oraBase*60+minutiBase+(m.slot*durata))%1440+1440)%1440;
+            let ora=Math.floor(totaleMinuti/60);
+            let min=totaleMinuti%60;
 
             let tempo=
                 String(ora).padStart(2,"0")+
