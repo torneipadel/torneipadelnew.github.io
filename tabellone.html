@@ -5656,7 +5656,10 @@ async function applyRules(){
         duration:Number(state.rules.duration)||30,
         formulaFinale:String(state.rules.formulaFinale||"eliminazioneDiretta"),
         numeroQualificateFinali:Number(state.rules.numeroQualificateFinali)||4,
-        numeroFinali:Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)))
+        numeroFinali:Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1))),
+        usaQuarti:state.rules.usaQuarti===true,
+        usaSemifinali:state.rules.usaSemifinali===true,
+        usaFinale:state.rules.usaFinale===true
     };
 
     state.rules.numeroSquadre=n;
@@ -5807,6 +5810,11 @@ async function applyRules(){
     if(turniEl) state.rules.turni=Math.max(1,Math.min(50,Math.floor(Number(turniEl.value)||3)));
     if(campiEl) state.rules.campi=Math.max(1,Math.min(50,Math.floor(Number(campiEl.value)||3)));
 
+    const fasiKOChanged=
+        regolePrima.usaQuarti!==(state.rules.usaQuarti===true) ||
+        regolePrima.usaSemifinali!==(state.rules.usaSemifinali===true) ||
+        regolePrima.usaFinale!==(state.rules.usaFinale===true);
+
     const strutturaModificata=
         strutturaPrecedente.numeroSquadre!==n ||
         strutturaPrecedente.numeroGironi!==Number(state.rules.numeroGironi) ||
@@ -5857,11 +5865,14 @@ async function applyRules(){
         state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
         state.finalTop=[];
         state.campioneTop=null;
-    }else if(faseFinaleModificata){
+    }else if(faseFinaleModificata||fasiKOChanged){
         state.qRes=Array(4).fill("-");
         state.sTopRes=Array(2).fill("-");
         state.fTopRes="-";
         state.finaliRes=[];state.finaliTop=[];
+        state.qTime=[];state.qCamp=[];
+        state.sTopTime=[];state.sTopCamp=[];
+        state.fTopTime=[];state.fTopCamp=[];
         state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
         state.finalTop=[];
         state.campioneTop=null;
