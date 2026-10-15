@@ -5629,7 +5629,8 @@ async function applyRules(){
         start:String(state.rules.start||"20:00"),
         duration:Number(state.rules.duration)||30,
         formulaFinale:String(state.rules.formulaFinale||"eliminazioneDiretta"),
-        numeroQualificateFinali:Number(state.rules.numeroQualificateFinali)||4
+        numeroQualificateFinali:Number(state.rules.numeroQualificateFinali)||4,
+        numeroFinali:Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)))
     };
 
     state.rules.numeroSquadre=n;
@@ -5780,7 +5781,8 @@ async function applyRules(){
         programmazionePrecedente.duration!==Number(state.rules.duration);
     const faseFinaleModificata=
         regolePrima.formulaFinale!==String(state.rules.formulaFinale) ||
-        regolePrima.numeroQualificateFinali!==Number(state.rules.numeroQualificateFinali);
+        regolePrima.numeroQualificateFinali!==Number(state.rules.numeroQualificateFinali) ||
+        regolePrima.numeroFinali!==Number(state.rules.numeroFinali);
 
     const extra=document.getElementById("criterioParitaExtra");
     if(extra) state.rules.criterioParitaExtra=extra.value;
