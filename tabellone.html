@@ -12962,10 +12962,23 @@ window.print();
             24:{numeroGironi:6,squadrePerGirone:4}
         };
 
+        const tipoStrutturaSalvata=String(state.rules?.tipoTorneo||"");
+        const gironiSalvati=Number(state.rules?.numeroGironi);
+        const squadrePerGironeSalvate=Number(state.rules?.squadrePerGirone);
+        const strutturaPersonalizzataSalvata=
+            ["manuale","gironiFinale","italiana","short"].includes(tipoStrutturaSalvata) &&
+            Number.isInteger(gironiSalvati) &&
+            Number.isInteger(squadrePerGironeSalvate) &&
+            gironiSalvati>0 &&
+            squadrePerGironeSalvate>0 &&
+            gironiSalvati*squadrePerGironeSalvate===numeroCoppie;
+
         if(strutture[numeroCoppie]){
             state.rules.numeroSquadre = numeroCoppie;
-            state.rules.numeroGironi = strutture[numeroCoppie].numeroGironi;
-            state.rules.squadrePerGirone = strutture[numeroCoppie].squadrePerGirone;
+            if(!strutturaPersonalizzataSalvata){
+                state.rules.numeroGironi = strutture[numeroCoppie].numeroGironi;
+                state.rules.squadrePerGirone = strutture[numeroCoppie].squadrePerGirone;
+            }
             state.formato = numeroCoppie;
             state.rules.formatoTorneo = String(numeroCoppie);
         }
