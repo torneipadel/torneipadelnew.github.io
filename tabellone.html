@@ -7118,6 +7118,9 @@ try{
 
         state.finalTop=[];
         state.campioneTop=null;
+        state.finalGroupRes=[];
+        state.finalGroupTime=[];
+        state.finalGroupCamp=[];
     }
 
     /* TORNEO PASSATO VIA URL */
@@ -7493,7 +7496,7 @@ try{
             "qRes","qCamp","qTime",
             "sTopRes","sTopCamp","sTopTime",
             "fTopRes","fTopCamp","fTopTime",
-            "finalTop"
+            "finalTop","finalGroupRes","finalGroupTime","finalGroupCamp"
         ];
 
         arrayDaRecuperare.forEach(k=>{
@@ -8089,6 +8092,9 @@ function reset(){
 
 
             finalTop:[],
+            finalGroupRes:[],
+            finalGroupTime:[],
+            finalGroupCamp:[],
 
 
 
@@ -12991,7 +12997,7 @@ window.print();
             "Gcamp","qRes","qCamp","qTime",
             "sTopRes","sTopCamp","sTopTime",
             "fTopRes","fTopCamp","fTopTime",
-            "finalTop"
+            "finalTop","finalGroupRes","finalGroupTime","finalGroupCamp"
         ];
 
         state.idTorneo = row.id != null ? row.id : Number(idTorneo);
