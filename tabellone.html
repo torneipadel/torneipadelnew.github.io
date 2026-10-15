@@ -5750,7 +5750,7 @@ async function applyRules(){
 
     const ar=document.getElementById("garaAndataRitorno");
     state.rules.garaAndataRitorno=
-        groupTypes.includes(tipo) && (ar?.checked===true || fg?.value==="andataRitorno" || state.rules.formulaGironi==="andataRitorno");
+        (groupTypes.includes(tipo)||tipo==="manuale") && (ar?.checked===true || fg?.value==="andataRitorno" || state.rules.formulaGironi==="andataRitorno");
 
     const start=document.getElementById("startTime");
     const dur=document.getElementById("duration");
