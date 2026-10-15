@@ -11299,7 +11299,7 @@ function getFinalQualified(){
     ensureRules();
     const qualificati=[];
     const ripescabili=[];
-    const lettereGironi=["A","B","C","D","E","F","G"];
+    const lettereGironi=["A","B","C","D","E","F","G"].slice(0,Math.max(0,Math.min(6,Math.floor(Number(state.rules.numeroGironi)||0))));
     lettereGironi.forEach(tag=>{
         const squadre=state[tag];
         if(!Array.isArray(squadre)||squadre.length===0) return;
@@ -11378,7 +11378,8 @@ function boveGroupEndOffset(){
     const duration=Math.max(1,Number(state.rules.duration)||30);
     const courts=Math.max(1,Math.floor(Number(state.rules.campi)||3));
     let found=false,maxOffset=0;
-    const count=Math.max(1,Math.min(6,Math.floor(Number(state.rules.numeroGironi)||0)));
+    const count=Math.max(0,Math.min(6,Math.floor(Number(state.rules.numeroGironi)||0)));
+    if(count===0)return 0;
     ["A","B","C","D","E","F"].slice(0,count).forEach(tag=>{
         (Array.isArray(state[tag+"time"])?state[tag+"time"]:[]).forEach(value=>{
             const mins=boveTimeToMinutes(value);
