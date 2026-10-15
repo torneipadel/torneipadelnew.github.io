@@ -7158,6 +7158,8 @@ try{
         state.fTopTime=[""];
 
         state.finalTop=[];
+        state.finaliRes=[];
+        state.finaliTop=[];
         state.campioneTop=null;
         state.finalGroupRes=[];
         state.finalGroupTime=[];
@@ -7537,7 +7539,7 @@ try{
             "qRes","qCamp","qTime",
             "sTopRes","sTopCamp","sTopTime",
             "fTopRes","fTopCamp","fTopTime",
-            "finalTop","finalGroupRes","finalGroupTime","finalGroupCamp"
+            "finalTop","finaliRes","finaliTop","finalGroupRes","finalGroupTime","finalGroupCamp"
         ];
 
         arrayDaRecuperare.forEach(k=>{
@@ -8139,6 +8141,8 @@ function reset(){
 
 
             finalTop:[],
+            finaliRes:[],
+            finaliTop:[],
             finalGroupRes:[],
             finalGroupTime:[],
             finalGroupCamp:[],
@@ -13131,7 +13135,7 @@ window.print();
             "Gcamp","qRes","qCamp","qTime",
             "sTopRes","sTopCamp","sTopTime",
             "fTopRes","fTopCamp","fTopTime",
-            "finalTop","finalGroupRes","finalGroupTime","finalGroupCamp"
+            "finalTop","finaliRes","finaliTop","finalGroupRes","finalGroupTime","finalGroupCamp"
         ];
 
         state.idTorneo = row.id != null ? row.id : Number(idTorneo);
