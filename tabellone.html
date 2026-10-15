@@ -10676,7 +10676,8 @@ function renderTables(){
         return rounds;
     }
 
-    let campiPerGirone=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament()
+    const torneoGoldSilverBronze=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament();
+    let campiPerGirone=torneoGoldSilverBronze
         ? {A:[1],B:[2],C:[3]}
         : {A:[2,3],B:[4,5],C:[6,7],D:[8,9],E:[10,11],F:[12,13]};
 
@@ -10768,9 +10769,9 @@ function renderTables(){
             campiPerGirone[
                 partita.girone
             ]||[2,3];
-        const torneoGoldSilverBronze=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament();
-        const idCasa=torneoGoldSilverBronze?partita.girone+':'+partita.casa:partita.casa;
-        const idOspite=torneoGoldSilverBronze?partita.girone+':'+partita.ospite:partita.ospite;
+        const torneoGoldSilverBronzeScheduling=torneoGoldSilverBronze;
+        const idCasa=torneoGoldSilverBronzeScheduling?partita.girone+':'+partita.casa:partita.casa;
+        const idOspite=torneoGoldSilverBronzeScheduling?partita.girone+':'+partita.ospite:partita.ospite;
 
         while(!assegnata){
 
@@ -10956,14 +10957,14 @@ function renderTables(){
 <tr>
 <td>
 <input
-value="${m.campo}"
+value="${torneoGoldSilverBronze?(state[tag+"camp"][i]||m.campo):m.campo}"
 oninput="updateCamp('${tag}',${i},this.value)"
 style="width:45px">
 </td>
 
 <td>
 <input
-value="${tempo}"
+value="${torneoGoldSilverBronze&&(state[tag+"time"][i]&&state[tag+"time"][i]!=="-")?state[tag+"time"][i]:tempo}"
 oninput="updateTime('${tag}',${i},0,this.value)">
 </td>
 
