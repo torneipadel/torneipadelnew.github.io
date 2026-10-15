@@ -6734,6 +6734,79 @@ async function updateAndSyncImpl(showSaveResult=false){
         ==========================================
         */
 
+        /*
+        ==========================================
+        GOLD/SILVER/BRONZE — PROTEZIONE DAI TAB OBSOLETI
+        ==========================================
+        Una scheda rimasta aperta può avere in memoria risultati vecchi o vuoti.
+        Prima di riscrivere lo snapshot remoto, rilegge i punteggi correnti e
+        mantiene quelli del database, salvo gli incontri esplicitamente modificati
+        nella scheda corrente. In caso di errore di lettura, non rischia di
+        sovrascrivere i risultati remoti con dati obsoleti.
+        */
+        const __gsbIsSpecial =
+            !!state.goldSilverBronze ||
+            [
+                state.formula,
+                state.formulaTorneo,
+                state.rules?.tipoTorneo,
+                state.rules?.formulaScelta,
+                state.rules?.formulaFinale,
+                state.rules?.formulaConfig?.formula
+            ].some(v => String(v || "") === "goldSilverBronze");
+
+        if(remoto && __gsbIsSpecial){
+            if(typeof sb === "undefined" || !sb){
+                console.error("GSB sync guard: client Supabase non disponibile; salvataggio interrotto.");
+                return false;
+            }
+
+            const __gsbRemoteRead = await sb
+                .from("tornei")
+                .select("id,configurazione")
+                .eq("id", Number(idTorneoUrl))
+                .maybeSingle();
+
+            if(__gsbRemoteRead.error || !__gsbRemoteRead.data){
+                console.error("GSB sync guard: impossibile leggere lo stato remoto; salvataggio interrotto.", __gsbRemoteRead.error);
+                return false;
+            }
+
+            const __gsbRemoteConfig = __gsbRemoteRead.data.configurazione || {};
+            const __gsbDirty = window.__GSB_DIRTY_SCORES__ instanceof Set
+                ? window.__GSB_DIRTY_SCORES__
+                : new Set();
+            const __gsbValidScore = value => /^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(value ?? ""));
+            const __gsbNormalized = value => String(value ?? "").replace(/\\s/g, "");
+            state.goldSilverBronze = state.goldSilverBronze || { version: 1, results: {} };
+            state.goldSilverBronze.results = state.goldSilverBronze.results || {};
+
+            ["gold","silver","bronze"].forEach(stage => {
+                const key = stage + "Res";
+                const localScores = Array.isArray(state[key]) ? state[key] : [];
+                const remoteScores = Array.isArray(__gsbRemoteConfig[key])
+                    ? __gsbRemoteConfig[key]
+                    : (__gsbRemoteConfig.goldSilverBronze?.results?.[stage] || []);
+
+                state[key] = Array.from({length:3}, (_, index) => {
+                    const local = __gsbNormalized(localScores[index] ?? "-");
+                    const remoteScore = __gsbNormalized(remoteScores[index] ?? "-");
+                    const dirty = __gsbDirty.has(stage + ":" + index);
+
+                    if(dirty && __gsbValidScore(local)) return local;
+                    if(__gsbValidScore(remoteScore)) return remoteScore;
+                    if(__gsbValidScore(local)) return local;
+                    return "-";
+                });
+
+                state.goldSilverBronze.results[stage] = [...state[key]];
+            });
+
+            if(typeof window.syncGoldSilverBronzeDerivedData === "function"){
+                window.syncGoldSilverBronzeDerivedData();
+            }
+        }
+
         const snapshot =
             JSON.parse(
                 JSON.stringify(state)
