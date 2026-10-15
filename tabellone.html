@@ -2432,7 +2432,7 @@ Seleziona formato torneo
 
     <button 
 
-      onclick="applyRules(); salvaTorneoSupabase()"
+      onclick="salvaRegoleConferma()"
 
       style="
 
@@ -5050,11 +5050,26 @@ function ensureRules(){
 
 
 
-    state.rules.numeroGironi =
-        strutturaCorretta.gironi;
+    /* Nei formati preimpostati la struttura è fissa. Nel torneo personalizzato,
+       conserva invece gironi e squadre per girone scelti se sono coerenti. */
+    const tipoStruttura = String(state.rules.tipoTorneo || "");
+    const gironiPersonalizzati = Number(state.rules.numeroGironi);
+    const squadrePersonalizzate = Number(state.rules.squadrePerGirone);
+    const strutturaPersonalizzataValida =
+        tipoStruttura === "manuale" &&
+        Number.isInteger(gironiPersonalizzati) &&
+        Number.isInteger(squadrePersonalizzate) &&
+        gironiPersonalizzati > 0 &&
+        squadrePersonalizzate > 0 &&
+        gironiPersonalizzati * squadrePersonalizzate === formato;
 
-    state.rules.squadrePerGirone =
-        strutturaCorretta.perGirone;
+    if(strutturaPersonalizzataValida){
+        state.rules.numeroGironi = gironiPersonalizzati;
+        state.rules.squadrePerGirone = squadrePersonalizzate;
+    }else{
+        state.rules.numeroGironi = strutturaCorretta.gironi;
+        state.rules.squadrePerGirone = strutturaCorretta.perGirone;
+    }
 
 
 
@@ -13074,7 +13089,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=4"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=5"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 </body>
 </html>
