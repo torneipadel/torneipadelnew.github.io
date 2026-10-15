@@ -6776,7 +6776,7 @@ async function updateAndSyncImpl(showSaveResult=false){
             const __gsbDirty = window.__GSB_DIRTY_SCORES__ instanceof Set
                 ? window.__GSB_DIRTY_SCORES__
                 : new Set();
-            const __gsbValidScore = value => /^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(value ?? ""));
+            const __gsbValidScore = value => /^\s*\d+\s*-\s*\d+\s*$/.test(String(value ?? ""));
             const __gsbNormalized = value => String(value ?? "").replace(/\\s/g, "");
             state.goldSilverBronze = state.goldSilverBronze || { version: 1, results: {} };
             state.goldSilverBronze.results = state.goldSilverBronze.results || {};
