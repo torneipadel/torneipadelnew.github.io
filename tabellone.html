@@ -5632,7 +5632,7 @@ function caricaRegolamentoTorneo(tipo){
         "Seleziona una formula per visualizzare la descrizione.";
 
 }
-function applyRules(){
+async function applyRules(){
 
     ensureRules();
 
@@ -5832,13 +5832,23 @@ function applyRules(){
     state.rules.__ultimoStartSalvato=state.rules.start;
     state.rules.__ultimaDurataSalvata=state.rules.duration;
 
-    if(typeof renderTables==="function") renderTables();
-    if(typeof renderClass==="function") renderClass();
-    if(typeof renderKO==="function") renderKO();
-    else if(typeof updateAndSync==="function") updateAndSync();
+    window.__BOVE_APPLYING_RULES__=true;
+    try{
+        if(typeof renderTables==="function") renderTables();
+        if(typeof renderClass==="function") renderClass();
+        if(typeof renderKO==="function") renderKO();
+    }finally{
+        window.__BOVE_APPLYING_RULES__=false;
+    }
 
+    const salvato=typeof updateAndSync==="function" ? await updateAndSync() : true;
+    if(salvato===false){
+        alert("Le regole sono state applicate al tabellone, ma il salvataggio non è stato confermato. Riprova prima di chiudere.");
+        return false;
+    }
     const modal=document.getElementById("rulesModal");
     if(modal) modal.style.display="none";
+    return true;
 }
 
 function loadSavedTeams(){
@@ -11131,7 +11141,7 @@ oninput="updateRes('${tag}',${i},1,this.value)">
 
     });
 
-    updateAndSync();
+    if(!window.__BOVE_APPLYING_RULES__) updateAndSync();
 }
 
    
