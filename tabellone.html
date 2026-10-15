@@ -5720,6 +5720,14 @@ async function applyRules(){
         alert("La formula Girone finale richiede una formula iniziale con gironi.");
         return false;
     }
+    if(state.rules.formulaFinale==="gironeFinale"){
+        const qualificabili=Number(state.rules.numeroGironi)*Number(state.rules.qualificatePerGirone);
+        const richieste=Number(state.rules.numeroQualificateFinali);
+        if(!Number.isInteger(richieste)||richieste<2||richieste>qualificabili){
+            alert("Il numero di squadre della fase finale deve essere almeno 2 e non può superare le squadre qualificate dai gironi.");
+            return false;
+        }
+    }
 
     state.rules.usaQuarti=document.getElementById("usaQuarti")?.checked===true;
     state.rules.usaSemifinali=document.getElementById("usaSemifinali")?.checked===true;
