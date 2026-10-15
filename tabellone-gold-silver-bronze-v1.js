@@ -252,6 +252,10 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
   s.goldSilverBronze.results[stageKey]=normalizedResults(s[key]);
+  if(validScore(s[key][index])){
+    window.__GSB_DIRTY_SCORES__=window.__GSB_DIRTY_SCORES__||new Set();
+    window.__GSB_DIRTY_SCORES__.add(stageKey+':'+index);
+  }
   syncFinalPlacements();
   updateFinalStandings(stageKey);
   if(validScore(s[key][index]))window.saveGoldSilverBronzeResults(true);
@@ -285,6 +289,7 @@ window.saveGoldSilverBronzeResults=async function(automatic=false){
       if(JSON.stringify(normalizedResults(remote[key]))!==JSON.stringify(normalizedResults(s[key]))||JSON.stringify(normalizedResults(remote.goldSilverBronze?.results?.[stageKey]))!==JSON.stringify(normalizedResults(s[key])))throw new Error('Verifica risultati fallita per la fascia '+stageKey.toUpperCase()+'.');
     }
     if(status)status.textContent='✓ Risultati salvati e riletti da Supabase.';
+    if(window.__GSB_DIRTY_SCORES__ instanceof Set)window.__GSB_DIRTY_SCORES__.clear();
     syncFinalPlacements();
     return true;
   }catch(error){
