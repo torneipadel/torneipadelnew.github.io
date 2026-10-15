@@ -113,7 +113,16 @@ function normalizeTeams(){
   const saved=s.goldSilverBronze?.results||{};
   ['gold','silver','bronze'].forEach(k=>{
     const key=k+'Res';
-    if(!Array.isArray(s[key])||s[key].length!==3)s[key]=normalizedResults(saved[k]);
+    const primary=Array.isArray(s[key])?s[key]:[];
+    const nested=Array.isArray(saved[k])?saved[k]:[];
+    // Se lo stato principale contiene celle vuote/obsolete, recupera il risultato
+    // valido già presente nella copia canonica goldSilverBronze.results.
+    s[key]=Array.from({length:3},(_,i)=>{
+      const current=primary[i];
+      const fallback=nested[i];
+      return validScore(current)?String(current).replace(/\\s/g,''):
+        (validScore(fallback)?String(fallback).replace(/\\s/g,''):'-');
+    });
   });
   if(!s.goldSilverBronze||typeof s.goldSilverBronze!=='object')s.goldSilverBronze={version:1,teamsPerGroup:3,groupCount:3,courts:3,matchDurationMinutes:20,groupMatchCount:9,finalMatchCount:9,finals:['gold','silver','bronze'],results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
@@ -261,7 +270,16 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   updateFinalStandings(stageKey);
   if(validScore(s[key][index]))window.saveGoldSilverBronzeResults(true);
 };
-window.saveGoldSilverBronzeResults=async function(automatic=false){
+let gsbSaveQueue=Promise.resolve();
+let gsbSaveRequested=0;
+window.saveGoldSilverBronzeResults=function(automatic=false){
+  const request=++gsbSaveRequested;
+  // Serializza le scritture: due autosalvataggi ravvicinati non possono
+  // terminare fuori ordine e sovrascrivere un punteggio più recente.
+  gsbSaveQueue=gsbSaveQueue.catch(()=>false).then(()=>saveGoldSilverBronzeResultsNow(automatic,request));
+  return gsbSaveQueue;
+};
+async function saveGoldSilverBronzeResultsNow(automatic=false,request=0){
   const s=activeState();if(!s||!isSpecial())return false;
   const status=document.getElementById('gsb-save-status');
   if(status)status.textContent='Salvataggio dei risultati in corso…';
@@ -290,7 +308,17 @@ window.saveGoldSilverBronzeResults=async function(automatic=false){
       if(JSON.stringify(normalizedResults(remote[key]))!==JSON.stringify(normalizedResults(s[key]))||JSON.stringify(normalizedResults(remote.goldSilverBronze?.results?.[stageKey]))!==JSON.stringify(normalizedResults(s[key])))throw new Error('Verifica risultati fallita per la fascia '+stageKey.toUpperCase()+'.');
     }
     if(status)status.textContent='✓ Risultati salvati e riletti da Supabase.';
-    if(window.__GSB_DIRTY_SCORES__ instanceof Set)window.__GSB_DIRTY_SCORES__.clear();
+    if(window.__GSB_DIRTY_SCORES__ instanceof Set){
+      // Rimuove solo le modifiche già incluse nella scrittura verificata.
+      for(const dirtyKey of Array.from(window.__GSB_DIRTY_SCORES__)){
+        const [stage,indexText]=dirtyKey.split(':');
+        const index=Number(indexText),key=stage+'Res';
+        if(validScore(s[key]?.[index]) &&
+           normalizedResults(remote[key])[index]===normalizedResults(s[key])[index]){
+          window.__GSB_DIRTY_SCORES__.delete(dirtyKey);
+        }
+      }
+    }
     syncFinalPlacements();
     return true;
   }catch(error){
