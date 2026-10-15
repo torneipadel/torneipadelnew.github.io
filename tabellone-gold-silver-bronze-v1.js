@@ -232,14 +232,23 @@ function prepareSpecialRuleOptions(){
 window.salvaRegoleConferma=async function(){
   const modal=document.getElementById('rulesModal');
   try{
-    const esito=window.applyRules();
+    const esito=await window.applyRules();
     if(esito===false)return false;
-    // Se la validazione blocca l'applicazione, il modal rimane aperto.
-    if(modal && modal.style.display!=='none')return false;
-    if(typeof window.salvaTorneoSupabase!=='function'){
-      alert('Salvataggio non disponibile: funzione Supabase mancante.');
-      return false;
+    if(typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament()){
+      if(typeof window.updateAndSync!=='function')throw new Error('Funzione di salvataggio del tabellone non disponibile.');
+      const salvato=await window.updateAndSync();
+      if(salvato===false){
+        if(modal)modal.style.display='block';
+        alert('Le regole non sono state confermate dal salvataggio remoto. Riprova.');
+        return false;
+      }
+      if(modal)modal.style.display='none';
+      return true;
     }
+    // applyRules ora attende e verifica il salvataggio: non eseguire una seconda scrittura concorrente.
+    if(esito===true)return true;
+    if(modal && modal.style.display!=='none')return false;
+    if(typeof window.salvaTorneoSupabase!=='function')throw new Error('Salvataggio non disponibile: funzione Supabase mancante.');
     return await window.salvaTorneoSupabase();
   }catch(e){
     console.error('Errore applicazione/salvataggio regole:',e);
@@ -302,11 +311,14 @@ window.applyRules=function(){
   r.tipoTorneo='goldSilverBronze';r.formulaScelta='goldSilverBronze';r.formulaGironi='tuttiControTutti';r.formulaFinale='goldSilverBronze';
   r.qualificatePerGirone=3;r.numeroQualificateFinali=9;r.usaQuarti=false;r.usaSemifinali=false;r.usaFinale=false;
   r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:r.duration,oraInizio:r.start,note:r.note,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
-  if(typeof window.renderTables==='function')window.renderTables();
-  if(typeof window.renderClass==='function')window.renderClass();
-  if(typeof window.renderKO==='function')window.renderKO();
-  if(typeof window.updateAndSync==='function')window.updateAndSync();
-  const modal=document.getElementById('rulesModal');if(modal)modal.style.display='none';
+  window.__BOVE_APPLYING_RULES__=true;
+  try{
+    if(typeof window.renderTables==='function')window.renderTables();
+    if(typeof window.renderClass==='function')window.renderClass();
+    if(typeof window.renderKO==='function')window.renderKO();
+  }finally{
+    window.__BOVE_APPLYING_RULES__=false;
+  }
   return true;
 };
 
