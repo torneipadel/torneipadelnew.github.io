@@ -5743,9 +5743,19 @@ async function applyRules(){
             Number(document.getElementById("numeroQualificateFinali")?.value)||0;
     }
 
+    if(state.rules.formulaFinale==="gironeFinale" && !(groupTypes.includes(tipo)||tipo==="manuale")){
+        alert("La formula Girone finale richiede una formula iniziale con gironi.");
+        return false;
+    }
+
     state.rules.usaQuarti=document.getElementById("usaQuarti")?.checked===true;
     state.rules.usaSemifinali=document.getElementById("usaSemifinali")?.checked===true;
     state.rules.usaFinale=document.getElementById("usaFinale")?.checked===true;
+    if(state.rules.formulaFinale==="gironeFinale"){
+        state.rules.usaQuarti=false;
+        state.rules.usaSemifinali=false;
+        state.rules.usaFinale=false;
+    }
 
     state.rules.ripescaggio=document.getElementById("ripescaggio")?.checked===true;
     state.rules.numeroRipescate=
@@ -11517,6 +11527,7 @@ function renderFinalGroupKO(){
         });
         slotBase+=Math.max(1,Math.ceil(round.length/numCourts));
     });
+    window.__BOVE_FINAL_GROUP_MATCH_COUNT__=matches.length;
     if(!Array.isArray(s.finalGroupRes))s.finalGroupRes=[];
     if(!Array.isArray(s.finalGroupTime))s.finalGroupTime=[];
     if(!Array.isArray(s.finalGroupCamp))s.finalGroupCamp=[];
@@ -11568,7 +11579,7 @@ window.updateFinalGroupResult=function(index,side,value){
     parts[side]=String(value??"").trim();
     state.finalGroupRes[index]=parts.every(x=>x==="")?"-":parts.slice(0,2).join("-");
     const teams=getFinalQualified();
-    const count=Array.isArray(state.finalGroupRes)?state.finalGroupRes.length:0;
+    const count=Number(window.__BOVE_FINAL_GROUP_MATCH_COUNT__)||0;
     const complete=finalGroupStageReady()&&teams.length>=Math.max(2,Number(state.rules.numeroQualificateFinali)||2);
     refreshFinalGroupStandings(teams,complete,count);
     if(typeof updateAndSync==="function")updateAndSync();
