@@ -5753,6 +5753,14 @@ async function applyRules(){
         state.rules.usaFinale=false;
     }
 
+    if(state.rules.usaFinale && !state.rules.usaQuarti && !state.rules.usaSemifinali && state.rules.numeroFinali>1 && state.rules.formulaFinale!=="gironeFinale" && (groupTypes.includes(tipo)||tipo==="manuale")){
+        const qualificabili=Math.max(0,Number(state.rules.numeroGironi)||0)*Math.max(0,Number(state.rules.qualificatePerGirone)||0);
+        if(qualificabili<state.rules.numeroFinali*2){
+            alert("Per "+state.rules.numeroFinali+" finali parallele servono almeno "+(state.rules.numeroFinali*2)+" squadre qualificate. Aumenta le qualificate per girone oppure riduci il numero di finali.");
+            return false;
+        }
+    }
+
     state.rules.ripescaggio=document.getElementById("ripescaggio")?.checked===true;
     state.rules.numeroRipescate=
         Number(document.getElementById("numeroRipescate")?.value)||0;
