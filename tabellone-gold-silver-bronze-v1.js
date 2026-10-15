@@ -14,9 +14,9 @@ const baseSetFormat=window.setFormat;
 const baseApplyModel=window.applicaModelloTorneo;
 const groups=['A','B','C'];
 const stages=[
-  {key:'gold',title:'🥇 GOLD — Classifica per i posti 1°–3°',position:1,court:1,firstOverall:1},
-  {key:'silver',title:'🥈 SILVER — Classifica per i posti 4°–6°',position:2,court:2,firstOverall:4},
-  {key:'bronze',title:'🥉 BRONZE — Classifica per i posti 7°–9°',position:3,court:3,firstOverall:7}
+  {key:'gold',title:'🥇 GOLD — Finale per il 1° posto',position:1,court:1,firstOverall:1},
+  {key:'silver',title:'🥈 SILVER — Finale per il 2° posto',position:2,court:2,firstOverall:4},
+  {key:'bronze',title:'🥉 BRONZE — Finale per il 3° posto',position:3,court:3,firstOverall:7}
 ];
 const pairs=[[0,1],[0,2],[1,2]];
 const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -214,31 +214,27 @@ function renderCustomFinals(){
     else document.querySelector('.container')?.appendChild(host);
   }
   const ready=groupsComplete();
-  let html='<h2 class="gsb-main-title">🥇🥈🥉 Fase finale — Gold / Silver / Bronze</h2>'+
-    '<p class="gsb-intro">Le prime classificate dei gironi disputano Gold, le seconde Silver e le terze Bronze. Ogni fascia prevede tre partite: il tabellone completo determina tutte le posizioni dalla 1ª alla 9ª.</p>'+
+  let html='<h2 style="text-align:center;margin-top:0">🥇🥈🥉 Fase finale — Gold / Silver / Bronze</h2>'+
+    '<p style="text-align:center">Le 3 prime classificate dei gironi disputano Gold; le 3 seconde Silver; le 3 terze Bronze. Ogni fascia è un girone all’italiana: 3 partite.</p>'+
     '<p style="text-align:center">Classifica: punti (vittoria '+Number(s.rules.w)+', pareggio '+Number(s.rules.d)+', sconfitta '+Number(s.rules.l)+') → '+esc(s.rules.crit1)+' → '+esc(s.rules.crit2)+' → '+esc(s.rules.crit3)+'.</p>'+
     (ready?'<p class="gsb-ready">Tutti i gironi iniziali sono completati: le finali sono abilitate.</p>':'<p class="gsb-wait">Le finali si sbloccano quando tutte le 9 partite dei gironi iniziali hanno un risultato valido.</p>');
-  html+='<div class="gsb-savebar"><button type="button" class="gsb-save-button" onclick="window.saveGoldSilverBronzeResults()">💾 Salva risultati finali</button><span id="gsb-save-status" role="status" aria-live="polite">Salvataggio automatico dopo ogni punteggio completo.</span></div>';
-  html+='<div class="gsb-finals-grid">';
   stages.forEach(stage=>{
     const teams=finalTeams(stage);
     const labels=ready?teams:groups.map(g=>stage.position+'ª classificata Girone '+g+' — da definire');
     const scores=normalizedResults(s[stage.key+'Res']);
     html+='<div class="gsb-final-card gsb-'+stage.key+'"><h3>'+stage.title+'</h3>'+
       '<p class="gsb-subtitle">Campo '+stage.court+' · Partite da '+Number(s.rules.duration||20)+' minuti · '+(ready?'Classifica determinata dai risultati dei gironi':'In attesa delle classifiche dei gironi')+'</p>'+
-      '<div class="gsb-matches-wrap"><table class="gsb-matches"><colgroup><col style="width:7%"><col style="width:12%"><col style="width:10%"><col style="width:45%"><col style="width:26%"></colgroup><thead><tr><th>Turno</th><th>Ora</th><th>Campo</th><th>Incontro</th><th>Risultato</th></tr></thead><tbody>';
+      '<table class="gsb-matches"><thead><tr><th>Turno</th><th>Ora</th><th>Campo</th><th>Incontro</th><th>Risultato</th></tr></thead><tbody>';
     pairs.forEach((pair,i)=>{
       const score=scores[i].split('-');
       const disabled=ready?'':' disabled';
       html+='<tr><td>'+(i+1)+'</td><td>'+timeAt((3+i)*Number(s.rules.duration||20))+'</td><td>'+stage.court+'</td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
-        '<input type="number" min="0" step="1" inputmode="numeric" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
-        '<span class="gsb-score-separator">–</span><input type="number" min="0" step="1" inputmode="numeric" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+(score[1]==='-'?'':esc(score[1]||''))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
+        '<input type="number" min="0" step="1" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
+        '<span>–</span><input type="number" min="0" step="1" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
         '</div></td></tr>';
     });
-    html+='</tbody></table></div><div id="gsb-standings-'+stage.key+'" class="gsb-stage-standings">'+finalStandingsHtml(stage,teams)+'</div></div>';
+    html+='</tbody></table><div id="gsb-standings-'+stage.key+'">'+finalStandingsHtml(stage,teams)+'</div></div>';
   });
-  html+='</div><div id="gsb-overall-standings">'+overallFinalStandingsHtml()+'</div>';
-  html+='<p class="gsb-note">Nota: se una classifica di girone resta pari in tutti i criteri configurati, il tabellone conserva l’ordine d’inserimento per rendere deterministica la classifica.</p>';
   html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Con 3 campi e turni da '+Number(s.rules.duration||20)+' minuti: 6 turni = '+(6*Number(s.rules.duration||20))+' minuti teorici, escluse pause e cambi.</p>';
   host.innerHTML=html;
 }
@@ -444,7 +440,7 @@ window.applyRules=function(){
 };
 
 const style=document.createElement('style');
-style.textContent='#goldSilverBronzeStage .gsb-finals-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}#goldSilverBronzeStage .gsb-final-card{min-width:0;margin:0 0 18px;padding:12px;border:1px solid #475569;border-radius:12px;background:rgba(30,41,59,.72)}#goldSilverBronzeStage .gsb-final-card h3{text-align:center;margin:0 0 8px}#goldSilverBronzeStage .gsb-subtitle,#goldSilverBronzeStage .gsb-muted{color:#cbd5e1;text-align:center}#goldSilverBronzeStage .gsb-ready{padding:10px;border-radius:8px;text-align:center;background:rgba(22,163,74,.16);color:#bbf7d0}#goldSilverBronzeStage .gsb-wait{padding:10px;border-radius:8px;text-align:center;background:rgba(217,119,6,.16);color:#fde68a}#goldSilverBronzeStage table{width:100%;border-collapse:collapse;margin:10px 0}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:7px 4px;border-bottom:1px solid #475569;text-align:center;overflow-wrap:anywhere}#goldSilverBronzeStage .gsb-score{display:flex;justify-content:center;align-items:center;gap:7px}#goldSilverBronzeStage .gsb-score input{width:54px;max-width:24%;text-align:center}#goldSilverBronzeStage .gsb-standing{max-width:680px;margin:12px auto}#goldSilverBronzeStage .gsb-winner{padding:12px;margin:12px 0;border:1px solid #ca8a04;border-radius:10px;text-align:center;background:rgba(234,179,8,.12);color:#fef3c7}#goldSilverBronzeStage .gsb-winner-pending{padding:10px;margin:12px 0;border-radius:8px;text-align:center;background:rgba(100,116,139,.18);color:#cbd5e1}#goldSilverBronzeStage #gsb-overall-standings{margin:22px 0;padding:14px;border:1px solid #64748b;border-radius:12px;background:rgba(15,23,42,.7)}#goldSilverBronzeStage .gsb-overall-wrap{overflow-x:auto}#goldSilverBronzeStage .gsb-overall{min-width:620px}#goldSilverBronzeStage .gsb-overall .gsb-first{background:rgba(234,179,8,.12)}#goldSilverBronzeStage .gsb-note{color:#cbd5e1;text-align:center;font-size:.9rem}#goldSilverBronzeStage .gsb-total{padding:12px;border-top:1px solid #475569;text-align:center}@media(max-width:1000px){#goldSilverBronzeStage .gsb-finals-grid{grid-template-columns:1fr}}@media(max-width:700px){#goldSilverBronzeStage{padding:10px!important}#goldSilverBronzeStage .gsb-final-card{padding:7px}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:5px 3px;font-size:12px}}';
+style.textContent='#goldSilverBronzeStage .gsb-final-card{margin:18px 0;padding:14px;border:1px solid #475569;border-radius:12px;background:rgba(30,41,59,.72)}#goldSilverBronzeStage .gsb-final-card h3{text-align:center;margin:0 0 8px}#goldSilverBronzeStage .gsb-subtitle,#goldSilverBronzeStage .gsb-muted{color:#cbd5e1;text-align:center}#goldSilverBronzeStage .gsb-ready{padding:10px;border-radius:8px;text-align:center;background:rgba(22,163,74,.16);color:#bbf7d0}#goldSilverBronzeStage .gsb-wait{padding:10px;border-radius:8px;text-align:center;background:rgba(217,119,6,.16);color:#fde68a}#goldSilverBronzeStage table{width:100%;border-collapse:collapse;margin:10px 0}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:8px;border-bottom:1px solid #475569;text-align:center}#goldSilverBronzeStage .gsb-score{display:flex;justify-content:center;align-items:center;gap:7px}#goldSilverBronzeStage .gsb-score input{width:54px;max-width:24%;text-align:center}#goldSilverBronzeStage .gsb-standing{max-width:680px;margin:12px auto}#goldSilverBronzeStage .gsb-total{padding:12px;border-top:1px solid #475569;text-align:center}@media(max-width:700px){#goldSilverBronzeStage{padding:10px!important}#goldSilverBronzeStage .gsb-final-card{padding:7px}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:5px 3px;font-size:12px}}';
 (document.head||document.documentElement).appendChild(style);
 window.ensureRules=window.ensureRules;
 window.renderKO=function(){
