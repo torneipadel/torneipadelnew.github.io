@@ -5,6 +5,9 @@
 (function(){
 'use strict';
 const baseEnsureRules=window.ensureRules;
+const baseOpenRules=window.openRules;
+const baseApplyRules=window.applyRules;
+const baseUpdateDescription=window.aggiornaDescrizioneTipoTorneo;
 const baseRender=window.render;
 const baseRenderKO=window.renderKO;
 const baseSetFormat=window.setFormat;
@@ -19,6 +22,8 @@ const pairs=[[0,1],[0,2],[1,2]];
 const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const specialValues=new Set(['goldSilverBronze','gironiGoldSilverBronze','gold_silver_bronze']);
 function isSpecial(){
+  const selector=document.getElementById('tipoTorneo');
+  if(selector&&selector.value&&selector.value!=='goldSilverBronze')return false;
   const r=window.state?.rules;
   const s=typeof state!=='undefined'?state:null;
   const rules=s?.rules||r||{};
@@ -56,6 +61,7 @@ function configureRules(){
     campi:3
   });
   r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];
+  r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:20,oraInizio:r.start,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};
   s.rules=r;
   s.formato=9;
 }
@@ -186,6 +192,75 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   updateFinalStandings(stageKey);
   if(typeof window.updateAndSync==='function')window.updateAndSync();
 };
+
+
+window.aggiornaDescrizioneTipoTorneo=function(){
+  const selector=document.getElementById('tipoTorneo');
+  const box=document.getElementById('descrizioneTipoTorneo');
+  if((isSpecial()||selector?.value==='goldSilverBronze')&&box){
+    box.innerHTML='🥇🥈🥉 <b>Gironi + Finali Gold/Silver/Bronze</b><br><br>9 squadre in 3 gironi da 3. Ogni girone all’italiana disputa 3 partite. Le prime classificate accedono alla Gold, le seconde alla Silver, le terze alla Bronze. Ogni fascia disputa 3 partite all’italiana. Totale 18 partite, 3 campi, 20 minuti a partita.<br><br><b>Punteggi:</b> vittoria 3, pareggio 1, sconfitta 0.<br><b>Spareggi:</b> scontro diretto, differenza giochi, giochi vinti.';
+    return;
+  }
+  if(typeof baseUpdateDescription==='function')return baseUpdateDescription.apply(this,arguments);
+};
+
+function addRuleOption(id,value,label){
+  const select=document.getElementById(id);if(!select)return;
+  if(!Array.from(select.options||[]).some(option=>option.value===String(value))){
+    const option=document.createElement('option');option.value=String(value);option.textContent=label;select.appendChild(option);
+  }
+}
+function prepareSpecialRuleOptions(){
+  addRuleOption('formatoTorneo',9,'9 squadre — Gold/Silver/Bronze');
+  addRuleOption('tipoTorneo','goldSilverBronze','🥇🥈🥉 Gironi + Finali Gold/Silver/Bronze');
+  addRuleOption('formulaFinale','goldSilverBronze','Gironi finali Gold/Silver/Bronze');
+}
+function setRuleField(id,value){
+  const el=document.getElementById(id);if(el)el.value=String(value??'');
+}
+function setSpecialRuleFields(){
+  configureRules();
+  const s=activeState(),r=s?.rules;if(!r)return;
+  setRuleField('formatoTorneo',9);setRuleField('tipoTorneo','goldSilverBronze');
+  setRuleField('numeroSquadre',9);setRuleField('numeroGironi',3);setRuleField('squadrePerGirone',3);
+  setRuleField('formulaGironi','tuttiControTutti');setRuleField('formulaFinale','goldSilverBronze');
+  setRuleField('wP',r.w);setRuleField('dP',r.d);setRuleField('lP',r.l);
+  setRuleField('crit1',r.crit1);setRuleField('crit2',r.crit2);setRuleField('crit3',r.crit3);
+  setRuleField('startTime',r.start);setRuleField('duration',20);
+  setRuleField('qualificatePerGirone',3);setRuleField('numeroQualificateFinali',9);
+  ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
+}
+window.openRules=function(){
+  const special=isSpecial();
+  if(special)prepareSpecialRuleOptions();
+  const result=typeof baseOpenRules==='function'?baseOpenRules.apply(this,arguments):undefined;
+  if(special)setSpecialRuleFields();
+  else ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+  return result;
+};
+window.applyRules=function(){
+  const selected=document.getElementById('tipoTorneo')?.value||'';
+  if(!isSpecial()&&selected!=='goldSilverBronze'){
+    return typeof baseApplyRules==='function'?baseApplyRules.apply(this,arguments):undefined;
+  }
+  const s=activeState();if(!s)return false;
+  configureRules();const r=s.rules;
+  const readNumber=(id,fallback)=>{const el=document.getElementById(id);return el&&el.value!==''?Number(el.value):fallback;};
+  r.w=readNumber('wP',r.w);r.d=readNumber('dP',r.d);r.l=readNumber('lP',r.l);
+  ['crit1','crit2','crit3'].forEach(id=>{const el=document.getElementById(id);if(el)r[id]=el.value||r[id];});
+  r.start=document.getElementById('startTime')?.value||r.start||'20:00';
+  r.duration=20;r.campi=3;r.numeroSquadre=9;r.formatoTorneo=9;r.numeroGironi=3;r.squadrePerGirone=3;
+  r.tipoTorneo='goldSilverBronze';r.formulaScelta='goldSilverBronze';r.formulaGironi='tuttiControTutti';r.formulaFinale='goldSilverBronze';
+  r.qualificatePerGirone=3;r.numeroQualificateFinali=9;r.usaQuarti=false;r.usaSemifinali=false;r.usaFinale=false;
+  r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:20,oraInizio:r.start,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
+  if(typeof window.renderTables==='function')window.renderTables();
+  if(typeof window.renderClass==='function')window.renderClass();
+  if(typeof window.renderKO==='function')window.renderKO();
+  if(typeof window.updateAndSync==='function')window.updateAndSync();
+  const modal=document.getElementById('rulesModal');if(modal)modal.style.display='none';
+  return true;
+};
+
 const style=document.createElement('style');
 style.textContent='#goldSilverBronzeStage .gsb-final-card{margin:18px 0;padding:14px;border:1px solid #475569;border-radius:12px;background:rgba(30,41,59,.72)}#goldSilverBronzeStage .gsb-final-card h3{text-align:center;margin:0 0 8px}#goldSilverBronzeStage .gsb-subtitle,#goldSilverBronzeStage .gsb-muted{color:#cbd5e1;text-align:center}#goldSilverBronzeStage .gsb-ready{padding:10px;border-radius:8px;text-align:center;background:rgba(22,163,74,.16);color:#bbf7d0}#goldSilverBronzeStage .gsb-wait{padding:10px;border-radius:8px;text-align:center;background:rgba(217,119,6,.16);color:#fde68a}#goldSilverBronzeStage table{width:100%;border-collapse:collapse;margin:10px 0}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:8px;border-bottom:1px solid #475569;text-align:center}#goldSilverBronzeStage .gsb-score{display:flex;justify-content:center;align-items:center;gap:7px}#goldSilverBronzeStage .gsb-score input{width:54px;max-width:24%;text-align:center}#goldSilverBronzeStage .gsb-standing{max-width:680px;margin:12px auto}#goldSilverBronzeStage .gsb-total{padding:12px;border-top:1px solid #475569;text-align:center}@media(max-width:700px){#goldSilverBronzeStage{padding:10px!important}#goldSilverBronzeStage .gsb-final-card{padding:7px}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:5px 3px;font-size:12px}}';
 (document.head||document.documentElement).appendChild(style);
@@ -208,9 +283,14 @@ window.setFormat=function(n){
   return typeof baseSetFormat==='function'?baseSetFormat.apply(this,arguments):undefined;
 };
 window.applicaModelloTorneo=function(){
-  if(isSpecial()){
-    alert('La formula Gold/Silver/Bronze mantiene la struttura concordata: 9 squadre, 3 gironi da 3 e finali Gold/Silver/Bronze.');
-    configureRules();renderCustomFinals();return false;
+  const selected=document.getElementById('tipoTorneo')?.value||'';
+  if(selected&&selected!=='goldSilverBronze'){
+    ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
+    const formato=document.getElementById('formatoTorneo');if(formato&&Number(formato.value)===9)formato.value='8';
+    return typeof baseApplyModel==='function'?baseApplyModel.apply(this,arguments):undefined;
+  }
+  if(isSpecial()||selected==='goldSilverBronze'){
+    prepareSpecialRuleOptions();setSpecialRuleFields();renderCustomFinals();return false;
   }
   return typeof baseApplyModel==='function'?baseApplyModel.apply(this,arguments):undefined;
 };
