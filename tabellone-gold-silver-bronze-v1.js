@@ -57,11 +57,12 @@ function configureRules(){
     crit2:r.crit2||'df',
     crit3:r.crit3||'gf',
     start:String(r.start||'20:00'),
-    duration:20,
+    duration:Number.isFinite(Number(r.duration))&&Number(r.duration)>0?Number(r.duration):20,
+    note:String(r.note||""),
     campi:3
   });
   r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];
-  r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:20,oraInizio:r.start,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};
+  r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:r.duration,oraInizio:r.start,note:r.note,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};
   s.rules=r;
   s.formato=9;
 }
@@ -158,19 +159,19 @@ function renderCustomFinals(){
     const labels=ready?teams:groups.map(g=>stage.position+'ª classificata Girone '+g+' — da definire');
     const scores=normalizedResults(s[stage.key+'Res']);
     html+='<div class="gsb-final-card gsb-'+stage.key+'"><h3>'+stage.title+'</h3>'+
-      '<p class="gsb-subtitle">Campo '+stage.court+' · Partite da 20 minuti · '+(ready?'Classifica determinata dai risultati dei gironi':'In attesa delle classifiche dei gironi')+'</p>'+
+      '<p class="gsb-subtitle">Campo '+stage.court+' · Partite da '+Number(s.rules.duration||20)+' minuti · '+(ready?'Classifica determinata dai risultati dei gironi':'In attesa delle classifiche dei gironi')+'</p>'+
       '<table class="gsb-matches"><thead><tr><th>Turno</th><th>Ora</th><th>Campo</th><th>Incontro</th><th>Risultato</th></tr></thead><tbody>';
     pairs.forEach((pair,i)=>{
       const score=scores[i].split('-');
       const disabled=ready?'':' disabled';
-      html+='<tr><td>'+(i+1)+'</td><td>'+timeAt((3+i)*20)+'</td><td>'+stage.court+'</td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
+      html+='<tr><td>'+(i+1)+'</td><td>'+timeAt((3+i)*Number(s.rules.duration||20))+'</td><td>'+stage.court+'</td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
         '<input type="number" min="0" step="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
         '<span>–</span><input type="number" min="0" step="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
         '</div></td></tr>';
     });
     html+='</tbody></table><div id="gsb-standings-'+stage.key+'">'+finalStandingsHtml(stage,teams)+'</div></div>';
   });
-  html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Con 3 campi e turni da 20 minuti: 6 turni da 20 minuti = 120 minuti teorici, escluse pause e cambi.</p>';
+  html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Con 3 campi e turni da '+Number(s.rules.duration||20)+' minuti: 6 turni = '+(6*Number(s.rules.duration||20))+' minuti teorici, escluse pause e cambi.</p>';
   host.innerHTML=html;
 }
 function updateFinalStandings(stageKey){
@@ -226,7 +227,7 @@ function setSpecialRuleFields(){
   setRuleField('formulaGironi','tuttiControTutti');setRuleField('formulaFinale','goldSilverBronze');
   setRuleField('wP',r.w);setRuleField('dP',r.d);setRuleField('lP',r.l);
   setRuleField('crit1',r.crit1);setRuleField('crit2',r.crit2);setRuleField('crit3',r.crit3);
-  setRuleField('startTime',r.start);setRuleField('duration',20);
+  setRuleField('startTime',r.start);setRuleField('duration',r.duration);setRuleField('noteRegole',r.note||'');
   setRuleField('qualificatePerGirone',3);setRuleField('numeroQualificateFinali',9);
   ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});
 }
@@ -245,15 +246,19 @@ window.applyRules=function(){
     return typeof baseApplyRules==='function'?baseApplyRules.apply(this,arguments):undefined;
   }
   const s=activeState();if(!s)return false;
-  configureRules();const r=s.rules;
   const readNumber=(id,fallback)=>{const el=document.getElementById(id);return el&&el.value!==''?Number(el.value):fallback;};
+  const n=readNumber('formatoTorneo',9),g=readNumber('numeroGironi',3),per=readNumber('squadrePerGirone',3);
+  if(n!==9||g!==3||per!==3){alert('La formula Gold/Silver/Bronze richiede 9 squadre in 3 gironi da 3. Ripristina questi valori per salvare le regole.');return false;}
+  configureRules();const r=s.rules;
   r.w=readNumber('wP',r.w);r.d=readNumber('dP',r.d);r.l=readNumber('lP',r.l);
   ['crit1','crit2','crit3'].forEach(id=>{const el=document.getElementById(id);if(el)r[id]=el.value||r[id];});
   r.start=document.getElementById('startTime')?.value||r.start||'20:00';
-  r.duration=20;r.campi=3;r.numeroSquadre=9;r.formatoTorneo=9;r.numeroGironi=3;r.squadrePerGirone=3;
+  r.duration=Math.max(1,readNumber('duration',r.duration||20));
+  r.note=document.getElementById('noteRegole')?.value||'';
+  r.campi=3;r.numeroSquadre=9;r.formatoTorneo=9;r.numeroGironi=3;r.squadrePerGirone=3;
   r.tipoTorneo='goldSilverBronze';r.formulaScelta='goldSilverBronze';r.formulaGironi='tuttiControTutti';r.formulaFinale='goldSilverBronze';
   r.qualificatePerGirone=3;r.numeroQualificateFinali=9;r.usaQuarti=false;r.usaSemifinali=false;r.usaFinale=false;
-  r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:20,oraInizio:r.start,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
+  r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:r.duration,oraInizio:r.start,note:r.note,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
   if(typeof window.renderTables==='function')window.renderTables();
   if(typeof window.renderClass==='function')window.renderClass();
   if(typeof window.renderKO==='function')window.renderKO();
