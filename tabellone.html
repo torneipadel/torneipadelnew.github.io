@@ -4372,6 +4372,10 @@ function setFormat(n){
         FORMATO MASTER
     */
 
+    const formatoPrecedente=Number(state.rules.formatoTorneo||state.formato)||8;
+    const squadreEsistenti=Array.isArray(state.coppie)&&state.coppie.some(x=>String(x??"").trim())
+        ? state.coppie.filter(x=>String(x??"").trim())
+        : ["A","B","C","D","E","F"].flatMap(tag=>Array.isArray(state[tag])?state[tag]:[]).filter(x=>String(x??"").trim());
 
     state.formato=n;
 
@@ -4420,49 +4424,14 @@ function setFormat(n){
 
 
 
+    const targetPerGirone=Number(state.rules.squadrePerGirone)||4;
     lettereGironi.forEach((g,index)=>{
-
-
-        if(index < state.rules.numeroGironi){
-
-
-            if(!Array.isArray(state[g]))
-
-                state[g]=[];
-
-
-
-            const targetPerGirone = Number(state.rules.squadrePerGirone) || 4;
-            while(
-                state[g].length < targetPerGirone
-            ){
-
-                state[g].push("");
-
-            }
-
-
-
-            if(
-                state[g].length > targetPerGirone
-            ){
-
-                state[g]=
-                    state[g].slice(0,targetPerGirone);
-
-            }
-
-
-        }
-        else{
-
-
+        if(index<state.rules.numeroGironi){
+            const inizio=index*targetPerGirone;
+            state[g]=Array.from({length:targetPerGirone},(_,i)=>squadreEsistenti[inizio+i]??"");
+        }else{
             state[g]=[];
-
-
         }
-
-
     });
 
 
@@ -4502,6 +4471,7 @@ function setFormat(n){
 
 
         if(
+            formatoPrecedente!==n ||
             !Array.isArray(state[nome+"res"]) ||
             state[nome+"res"].length!==totale
         )
@@ -4512,6 +4482,7 @@ function setFormat(n){
 
 
         if(
+            formatoPrecedente!==n ||
             !Array.isArray(state[nome+"time"]) ||
             state[nome+"time"].length!==totale
         )
@@ -4522,6 +4493,7 @@ function setFormat(n){
 
 
         if(
+            formatoPrecedente!==n ||
             !Array.isArray(state[nome+"camp"]) ||
             state[nome+"camp"].length!==totale
         )
@@ -4641,7 +4613,8 @@ function setFormat(n){
     */
 
 
-    updateAndSync();
+    const rulesModal=document.getElementById("rulesModal");
+    if(!rulesModal||rulesModal.style.display==="none") updateAndSync();
 
 
 
