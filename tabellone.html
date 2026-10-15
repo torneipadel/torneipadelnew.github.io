@@ -7529,6 +7529,9 @@ try{
             const cfg =
                 configurazione.configurazione;
 
+            if(typeof cfg.mostraQuarti==="boolean")
+                state.mostraQuarti=cfg.mostraQuarti;
+
             if(cfg.rules)
                 state.rules={
                     ...state.rules,
@@ -13012,6 +13015,7 @@ window.print();
         if(source.rules){
             state.rules = Object.assign({}, state.rules || {}, source.rules);
         }
+        if(typeof source.mostraQuarti==="boolean")state.mostraQuarti=source.mostraQuarti;
 
         if(Array.isArray(source.coppie)){
             state.coppie = source.coppie;
