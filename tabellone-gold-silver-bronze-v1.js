@@ -232,7 +232,8 @@ function setSpecialRuleFields(){
 }
 window.openRules=function(){
   const special=isSpecial();
-  if(special)prepareSpecialRuleOptions();
+  // La formula 9 squadre deve essere selezionabile anche partendo da un torneo standard.
+  prepareSpecialRuleOptions();
   const result=typeof baseOpenRules==='function'?baseOpenRules.apply(this,arguments):undefined;
   if(special)setSpecialRuleFields();
   else ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
