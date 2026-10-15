@@ -5668,6 +5668,12 @@ function applyRules(){
         numeroGironi:Number(state.rules.numeroGironi),
         squadrePerGirone:Number(state.rules.squadrePerGirone)
     };
+    const programmazionePrecedente={
+        turni:Number(state.rules.turni)||3,
+        campi:Number(state.rules.campi)||3,
+        start:String(state.rules.start||"20:00"),
+        duration:Number(state.rules.duration)||30
+    };
 
     if(groupTypes.includes(tipo) || tipo==="manuale"){
         const g=Number(document.getElementById("numeroGironi")?.value)||struttura.gironi;
@@ -5774,8 +5780,10 @@ function applyRules(){
         strutturaPrecedente.numeroGironi!==Number(state.rules.numeroGironi) ||
         strutturaPrecedente.squadrePerGirone!==Number(state.rules.squadrePerGirone);
     const programmazioneModificata=
-        Number(state.rules.__ultimoTurniSalvati||state.rules.turni)!==Number(state.rules.turni) ||
-        Number(state.rules.__ultimoCampiSalvati||state.rules.campi)!==Number(state.rules.campi);
+        programmazionePrecedente.turni!==Number(state.rules.turni) ||
+        programmazionePrecedente.campi!==Number(state.rules.campi) ||
+        programmazionePrecedente.start!==String(state.rules.start) ||
+        programmazionePrecedente.duration!==Number(state.rules.duration);
 
     const extra=document.getElementById("criterioParitaExtra");
     if(extra) state.rules.criterioParitaExtra=extra.value;
@@ -5800,7 +5808,7 @@ function applyRules(){
         state.fTopRes="-";
         state.finalTop=[];
         state.campioneTop=null;
-    }else if(programmazioneModificata || state.rules.start!==String(state.rules.__ultimoStartSalvato||state.rules.start) || state.rules.duration!==Number(state.rules.__ultimaDurataSalvata||state.rules.duration)){
+    }else if(programmazioneModificata){
         ["A","B","C","D","E","F","G"].forEach(tag=>{
             state[tag+"time"]=[];
             state[tag+"camp"]=[];
