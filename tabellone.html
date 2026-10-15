@@ -10233,7 +10233,7 @@ function generaPartiteGironi(){
 
         if(
             Array.isArray(state[tag]) &&
-            state[tag].length===4
+            (state[tag].length===4 || (typeof window.isGoldSilverBronzeTournament==='function' && window.isGoldSilverBronzeTournament() && state[tag].length===3))
         ){
             state.partiteGironi[tag] =
                 crea(state[tag]);
