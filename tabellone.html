@@ -11658,7 +11658,7 @@ function renderMatchCard(titolo, match, type, index, risultato) {
 </tr>`;
 }
 
-function applicaModelloTorneo(){
+async function applicaModelloTorneo(){
 
     ensureRules();
 
@@ -11667,6 +11667,10 @@ function applicaModelloTorneo(){
 
     const tipo=select.value;
     if(!tipo) return;
+
+    const squadreEsistentiModello=Array.isArray(state.coppie)&&state.coppie.some(x=>String(x??"").trim())
+        ? state.coppie.filter(x=>String(x??"").trim())
+        : ["A","B","C","D","E","F"].flatMap(tag=>Array.isArray(state[tag])?state[tag]:[]).filter(x=>String(x??"").trim());
 
     const formatoInput=document.getElementById("formatoTorneo");
 
@@ -11701,6 +11705,7 @@ function applicaModelloTorneo(){
     state.sTopRes=Array(2).fill("-");
     state.fTopRes="-";
     state.finalTop=[];
+    state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
     state.campioneTop=null;
 
     /* Valori comuni e neutri */
@@ -11884,7 +11889,36 @@ function applicaModelloTorneo(){
     aggiornaDescrizioneTipoTorneo();
 
     state.rules.locked=false;
-    localStorage.setItem("torneoState",JSON.stringify(state));
+
+    if(Number(state.rules.numeroGironi)>0&&Number(state.rules.squadrePerGirone)>0&&Number(state.rules.numeroGironi)*Number(state.rules.squadrePerGirone)===n){
+        const lettere=["A","B","C","D","E","F"];
+        const per=Number(state.rules.squadrePerGirone);
+        lettere.forEach((tag,index)=>{
+            if(index<Number(state.rules.numeroGironi)){
+                const inizio=index*per;
+                state[tag]=Array.from({length:per},(_,i)=>squadreEsistentiModello[inizio+i]??"");
+            }else state[tag]=[];
+            const incontri=state[tag].length*(state[tag].length-1)/2*(state.rules.garaAndataRitorno?2:1);
+            state[tag+"res"]=Array(Math.max(0,incontri)).fill("-");
+            state[tag+"time"]=Array(Math.max(0,incontri)).fill("");
+            state[tag+"camp"]=Array(Math.max(0,incontri)).fill("");
+        });
+    }
+
+    window.__BOVE_APPLYING_RULES__=true;
+    try{
+        if(typeof renderTables==="function")renderTables();
+        if(typeof renderClass==="function")renderClass();
+        if(typeof renderKO==="function")renderKO();
+    }finally{
+        window.__BOVE_APPLYING_RULES__=false;
+    }
+    const salvato=typeof updateAndSync==="function"?await updateAndSync():true;
+    if(salvato===false){
+        alert("Il modello è stato applicato al tabellone, ma il salvataggio non è stato confermato. Riprova.");
+        return false;
+    }
+    return true;
 }
 
 function aggiornaDescrizioneTipoTorneo(){
