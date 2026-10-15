@@ -11524,6 +11524,7 @@ function renderKO(){
             finali.push(match);
         }
         state.finaliTop=finali;
+        state.finalTop=finali.flat();
         f.innerHTML=finali.map((match,index)=>renderMatchCard("🏆 FINALE "+(index+1),match,"F",index,state.finaliRes[index]||"-")).join("");
         const vincitori=finali.map((match,index)=>{
             if(/qualificat|vincente|determinare/i.test(String(match[0]))||/qualificat|vincente|determinare/i.test(String(match[1])))return null;
