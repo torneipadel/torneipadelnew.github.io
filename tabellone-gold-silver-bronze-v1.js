@@ -233,8 +233,18 @@ function setRuleField(id,value){
   const el=document.getElementById(id);if(el)el.value=String(value??'');
 }
 function setSpecialRuleFields(){
-  configureRules();
   const s=activeState(),r=s?.rules;if(!r)return;
+  // Al primo passaggio dalla formula standard, applica i valori predefiniti propri
+  // di questa formula; se è già un torneo Gold/Silver/Bronze, conserva le scelte salvate.
+  const alreadySpecial=[s.formula,s.formulaTorneo,r.tipoTorneo,r.formulaScelta,r.formulaFinale,r.formulaConfig?.formula]
+    .some(v=>specialValues.has(String(v||'')));
+  if(!alreadySpecial){
+    r.duration=20;
+    r.crit1='scontroDiretto';
+    r.crit2='df';
+    r.crit3='gf';
+  }
+  configureRules();
   setRuleField('formatoTorneo',9);setRuleField('tipoTorneo','goldSilverBronze');
   setRuleField('numeroSquadre',9);setRuleField('numeroGironi',3);setRuleField('squadrePerGirone',3);
   setRuleField('formulaGironi','tuttiControTutti');setRuleField('formulaFinale','goldSilverBronze');
