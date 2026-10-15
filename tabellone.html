@@ -11178,6 +11178,7 @@ function getScheduledMatchCount(numeroSquadreGirone){
 function getFinalQualified(){
     ensureRules();
     const qualificati=[];
+    const ripescabili=[];
     const lettereGironi=["A","B","C","D","E","F","G"];
     lettereGironi.forEach(tag=>{
         const squadre=state[tag];
@@ -11191,9 +11192,15 @@ function getFinalQualified(){
         if(!Number.isFinite(q)||q<1) q=1;
         if(state.rules.usaQuarti===true&&squadre.length===4) q=4;
         classifica.slice(0,q).forEach((x,i)=>qualificati.push({nome:x.n,posizione:i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
+        classifica.slice(q).forEach((x,i)=>ripescabili.push({nome:x.n,posizione:q+i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
     });
     if(qualificati.length===0&&Array.isArray(state.coppie)&&state.coppie.length){
         state.coppie.forEach((x,i)=>qualificati.push({nome:x,posizione:i+1}));
+    }
+    if(state.rules.ripescaggio===true&&Number(state.rules.numeroRipescate)>0&&ripescabili.length){
+        const giaQualificate=new Set(qualificati.map(x=>String(x.nome)));
+        ripescabili.sort((a,b)=>(Number(b.pt)||0)-(Number(a.pt)||0)||(Number(b.df)||0)-(Number(a.df)||0)||(Number(b.gf)||0)-(Number(a.gf)||0));
+        ripescabili.filter(x=>!giaQualificate.has(String(x.nome))).slice(0,Math.max(0,Math.floor(Number(state.rules.numeroRipescate)||0))).forEach(x=>qualificati.push(x));
     }
     if(!qualificati.length) return [];
     if(state.rules.formulaFinale==="gironeFinale"){
