@@ -7521,6 +7521,9 @@ try{
 
         });
 
+        if(typeof configurazione.mostraQuarti==="boolean")
+            state.mostraQuarti=configurazione.mostraQuarti;
+
         if(configurazione.configurazione){
 
             const cfg =
@@ -11253,14 +11256,16 @@ function renderKO(){
     }
     const finalGroupHost=document.getElementById("finalGroupStage");
     if(finalGroupHost)finalGroupHost.style.display="none";
-    if(boxQ)boxQ.style.display="";
-    if(boxS)boxS.style.display="";
-    if(boxF)boxF.style.display="";
+    const tvModeQuarti=new URLSearchParams(window.location.search).get("tv")==="1";
+    const mostraQuartiInVista=!tvModeQuarti || state.mostraQuarti!==false;
     const usaQ=state.rules.usaQuarti===true;
     const usaS=state.rules.usaSemifinali===true;
     const usaF=state.rules.usaFinale===true;
 
-    q.style.display=usaQ ? "table-row-group" : "none";
+    if(boxQ)boxQ.style.display=(usaQ&&mostraQuartiInVista)?"":"none";
+    if(boxS)boxS.style.display=usaS?"":"none";
+    if(boxF)boxF.style.display=usaF?"":"none";
+    q.style.display=usaQ&&mostraQuartiInVista ? "table-row-group" : "none";
     s.style.display=usaS ? "table-row-group" : "none";
 
     /*
@@ -11694,7 +11699,7 @@ function applicaModelloTorneo(){
     state.rules.killerPoint=false;
     state.rules.rigori=true;
     state.rules.tempoSupplementare=true;
-    state.rules.mostraQuarti=true;
+    state.mostraQuarti=true;
 
     switch(tipo){
 
