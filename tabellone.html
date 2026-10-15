@@ -1645,6 +1645,7 @@ Seleziona formato torneo
 
 
       <option value="8">8 Squadre</option>
+      <option value="9">9 Squadre</option>
 
       <option value="12">12 Squadre</option>
 
@@ -2482,6 +2483,16 @@ onclick="setFormat(8)"
 style="width:100%;margin:5px 0;">
 
 8 Squadre
+
+</button>
+
+<button
+
+onclick="setFormat(9)"
+
+style="width:100%;margin:5px 0;">
+
+9 Squadre
 
 </button>
 
@@ -4334,7 +4345,7 @@ function setFormat(n){
 
 
     if(
-        ![8,12,16,20,24].includes(n)
+        ![8,9,12,16,20,24].includes(n)
     )
 
         n=8;
@@ -4355,7 +4366,9 @@ function setFormat(n){
     state.rules.squadrePerGirone=4;
 
     state.rules.numeroGironi =
-        n / 4;
+        n === 9 ? 3 : n / 4;
+
+    if(n === 9) state.rules.squadrePerGirone = 3;
 
     const numeroGironiInput =
         document.getElementById("numeroGironi");
@@ -4917,11 +4930,11 @@ function ensureRules(){
         Number(state.rules.formatoTorneo);
 
     let formato =
-        [8,12,16,20,24].includes(formatoSalvato)
+        [8,9,12,16,20,24].includes(formatoSalvato)
         ? formatoSalvato
         : Number(state.rules.numeroSquadre);
 
-    if(![8,12,16,20,24].includes(formato))
+    if(![8,9,12,16,20,24].includes(formato))
         formato=8;
 
     state.rules.formatoTorneo=formato;
@@ -4946,6 +4959,7 @@ function ensureRules(){
     if(
         ![
             8,
+            9,
             12,
             16,
             20,
@@ -4972,6 +4986,11 @@ function ensureRules(){
         8:{
             gironi:2,
             perGirone:4
+        },
+
+        9:{
+            gironi:3,
+            perGirone:3
         },
 
         12:{
@@ -5585,7 +5604,7 @@ function applyRules(){
     const tipo=document.getElementById("tipoTorneo")?.value || state.rules.tipoTorneo;
     const n=Number(document.getElementById("formatoTorneo")?.value)||Number(state.rules.numeroSquadre)||8;
 
-    if(![8,12,16,20,24].includes(n)){
+    if(![8,9,12,16,20,24].includes(n)){
         alert("Numero squadre non valido.");
         return;
     }
@@ -5597,6 +5616,7 @@ function applyRules(){
 
     const struttura={
         8:{gironi:2,perGirone:4},
+        9:{gironi:3,perGirone:3},
         12:{gironi:3,perGirone:4},
         16:{gironi:4,perGirone:4},
         20:{gironi:5,perGirone:4},
@@ -11399,7 +11419,7 @@ function applicaModelloTorneo(){
         : Number(state.rules.formatoTorneo);
 
     const n =
-        [8,12,16,20,24].includes(nSelezionato)
+        [8,9,12,16,20,24].includes(nSelezionato)
         ? nSelezionato
         : (Number(state.rules.numeroSquadre) || 8);
 
@@ -11409,6 +11429,7 @@ function applicaModelloTorneo(){
 
     const struttura={
         8:{gironi:2,perGirone:4},
+        9:{gironi:3,perGirone:3},
         12:{gironi:3,perGirone:4},
         16:{gironi:4,perGirone:4},
         20:{gironi:5,perGirone:4},
