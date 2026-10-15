@@ -176,12 +176,12 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   const s=activeState();if(!s||!stages.some(x=>x.key===stageKey))return;
   const key=stageKey+'Res';
   if(!Array.isArray(s[key])||s[key].length!==3)s[key]=Array(3).fill('-');
-  const parts=validScore(s[key][index])?String(s[key][index]).split('-'):['',''];
+  const raw=String(s[key][index]??'-');const parts=raw.includes('-')?raw.split('-'):['',''];if(parts.length!==2){parts[0]='';parts[1]=''}
   parts[side]=String(value??'').trim();
   s[key][index]=parts.every(x=>x==='')?'-':parts.join('-');
   s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
-  s.goldSilverBronze.results[stageKey]=normalizedResults(s[key]);
+  s.goldSilverBronze.results[stageKey]=[...s[key]];
   updateFinalStandings(stageKey);
   if(typeof window.updateAndSync==='function')window.updateAndSync();
 };
