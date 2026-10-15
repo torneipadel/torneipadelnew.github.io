@@ -7438,6 +7438,61 @@ try{
                         ? configurazione.partecipanti
                         : [];
 
+                /*
+                 * Ripristina lo snapshot del torneo remoto, inclusi i risultati.
+                 * Prima venivano caricati solo regole, coppie e partecipanti:
+                 * i risultati salvati su Supabase (in particolare goldRes,
+                 * silverRes, bronzeRes e goldSilverBronze.results) non entravano
+                 * nello stato della pagina dopo il caricamento/refresh.
+                 * Preferisce la configurazione esterna; usa quella annidata
+                 * soltanto quando una proprietà non è presente all'esterno.
+                 */
+                const __configAnnidata =
+                    configurazione.configurazione &&
+                    typeof configurazione.configurazione === "object"
+                        ? configurazione.configurazione
+                        : {};
+
+                const __campiSnapshot = [
+                    "A","B","C","D","E","F","G",
+                    "Ares","Bres","Cres","Dres","Eres","Fres","Gres",
+                    "Atime","Btime","Ctime","Dtime","Etime","Ftime","Gtime",
+                    "Acamp","Bcamp","Ccamp","Dcamp","Ecamp","Fcamp","Gcamp",
+                    "qRes","qCamp","qTime","sTopRes","sTopCamp","sTopTime",
+                    "fTopRes","fTopCamp","fTopTime","finalTop","finaliRes",
+                    "finaliTop","finalGroupRes","finalGroupTime","finalGroupCamp",
+                    "goldRes","silverRes","bronzeRes","goldSilverBronze",
+                    "partiteGironi","formula","formulaTorneo","formato","mostraQuarti"
+                ];
+
+                __campiSnapshot.forEach(function(__chiave){
+                    const __sorgente =
+                        Object.prototype.hasOwnProperty.call(configurazione, __chiave)
+                            ? configurazione
+                            : __configAnnidata;
+
+                    if(!Object.prototype.hasOwnProperty.call(__sorgente, __chiave))
+                        return;
+
+                    const __valore = __sorgente[__chiave];
+
+                    if(Array.isArray(__valore) || __chiave === "fTopRes"){
+                        state[__chiave] = Array.isArray(__valore)
+                            ? [...__valore]
+                            : __valore;
+                    }else if(
+                        __valore &&
+                        typeof __valore === "object" &&
+                        ["goldSilverBronze","partiteGironi"].includes(__chiave)
+                    ){
+                        state[__chiave] = JSON.parse(JSON.stringify(__valore));
+                    }else if(
+                        ["formula","formulaTorneo","formato","mostraQuarti"].includes(__chiave)
+                    ){
+                        state[__chiave] = __valore;
+                    }
+                });
+
             }
             else{
 
@@ -13705,7 +13760,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=10"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=11"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 </body>
 </html>
