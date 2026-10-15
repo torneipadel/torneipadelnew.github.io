@@ -8694,14 +8694,10 @@ function renderClass(){
 
 
         let classifica =
-
-    calc(
-
-        state[tag],
-
-        state[tag+"res"]
-
-    );
+            calc(
+                state[tag],
+                (Array.isArray(state[tag+"res"])?state[tag+"res"]:[]).slice(0,getScheduledMatchCount(state[tag].length))
+            );
 
 
 if(
@@ -11146,6 +11142,14 @@ oninput="updateRes('${tag}',${i},1,this.value)">
 }
 
    
+function getScheduledMatchCount(numeroSquadreGirone){
+    const n=Math.max(0,Math.floor(Number(numeroSquadreGirone)||0));
+    if(n<2)return 0;
+    const roundCount=(n%2===0?n-1:n)*(state.rules.garaAndataRitorno===true?2:1);
+    const configured=Math.max(1,Math.floor(Number(state.rules.turni)||roundCount));
+    return Math.min(roundCount,configured)*Math.floor(n/2);
+}
+
 function getFinalQualified(){
     ensureRules();
     const qualificati=[];
@@ -11154,9 +11158,9 @@ function getFinalQualified(){
         const squadre=state[tag];
         if(!Array.isArray(squadre)||squadre.length===0) return;
         const risultati=Array.isArray(state[tag+"res"])?state[tag+"res"]:[];
-        const numeroPartite=squadre.length*(squadre.length-1)/2;
+        const numeroPartite=getScheduledMatchCount(squadre.length);
         if(risultati.length<numeroPartite||risultati.slice(0,numeroPartite).some(r=>r==="-"||r===""||r==null)) return;
-        const classifica=calc(squadre,risultati);
+        const classifica=calc(squadre,risultati.slice(0,numeroPartite));
         if(!Array.isArray(classifica)||!classifica.length) return;
         let q=Number(state.rules.qualificatePerGirone);
         if(!Number.isFinite(q)||q<1) q=1;
@@ -11167,6 +11171,10 @@ function getFinalQualified(){
         state.coppie.forEach((x,i)=>qualificati.push({nome:x,posizione:i+1}));
     }
     if(!qualificati.length) return [];
+    if(state.rules.formulaFinale==="gironeFinale"){
+        const richiestiGirone=Math.max(2,Math.floor(Number(state.rules.numeroQualificateFinali)||Number(state.rules.qualificatePerGirone)*Number(state.rules.numeroGironi)||4));
+        return qualificati.slice(0,richiestiGirone).map(x=>x.nome);
+    }
     let richiesti=0;
     if(state.rules.usaQuarti===true) richiesti=8;
     else if(state.rules.usaSemifinali===true) richiesti=4;
@@ -11229,6 +11237,22 @@ function renderKO(){
     if(!Array.isArray(state.finalTop)) state.finalTop=[];
     if(state.campioneTop===undefined) state.campioneTop=null;
 
+    const boxQ=q.closest(".koBox");
+    const boxS=s.closest(".koBox");
+    const boxF=f.closest(".finalContainer")||f.closest(".koBox");
+    const formulaGironeFinale=state.rules.formulaFinale==="gironeFinale";
+    if(formulaGironeFinale){
+        if(boxQ)boxQ.style.display="none";
+        if(boxS)boxS.style.display="none";
+        if(boxF)boxF.style.display="none";
+        renderFinalGroupKO();
+        return;
+    }
+    const finalGroupHost=document.getElementById("finalGroupStage");
+    if(finalGroupHost)finalGroupHost.style.display="none";
+    if(boxQ)boxQ.style.display="";
+    if(boxS)boxS.style.display="";
+    if(boxF)boxF.style.display="";
     const usaQ=state.rules.usaQuarti===true;
     const usaS=state.rules.usaSemifinali===true;
     const usaF=state.rules.usaFinale===true;
@@ -11424,6 +11448,121 @@ function renderKO(){
     }
 }
                    
+function renderFinalGroupKO(){
+    const s=state;
+    let host=document.getElementById("finalGroupStage");
+    if(!host){
+        host=document.createElement("section");
+        host.id="finalGroupStage";
+        host.style.cssText="margin:18px 0;padding:14px;border:1px solid #64748b;border-radius:12px;background:rgba(15,23,42,.9);color:#f8fafc";
+        const container=document.querySelector(".container");
+        if(container)container.appendChild(host);
+    }
+    if(!host)return;
+    host.style.display="block";
+    const numeroGironi=Math.max(1,Math.floor(Number(s.rules.numeroGironi)||1));
+    const lettere=["A","B","C","D","E","F","G"].slice(0,numeroGironi);
+    const gironiCompleti=lettere.every(tag=>{
+        const teams=Array.isArray(s[tag])?s[tag]:[];
+        const count=getScheduledMatchCount(teams.length);
+        const results=Array.isArray(s[tag+"res"])?s[tag+"res"].slice(0,count):[];
+        return teams.length>=2&&results.length===count&&results.every(x=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(x??"")));
+    });
+    const qualificati=getFinalQualified();
+    const richiesti=Math.max(2,Math.floor(Number(s.rules.numeroQualificateFinali)||Number(s.rules.qualificatePerGirone)*numeroGironi||4));
+    const teams=gironiCompleti&&qualificati.length>=2
+        ?qualificati.slice(0,richiesti)
+        :Array.from({length:richiesti},(_,i)=>"Qualificata "+(i+1)+" — da determinare");
+    const reale=gironiCompleti&&teams.length>=2&&teams.every(x=>!String(x).includes("da determinare"));
+    const lista=teams.slice();
+    if(lista.length%2)lista.push(null);
+    let rotation=lista.slice(),rounds=[];
+    for(let r=0;r<rotation.length-1;r++){
+        const round=[];
+        for(let i=0;i<rotation.length/2;i++){
+            const a=rotation[i],b=rotation[rotation.length-1-i];
+            if(a!==null&&b!==null)round.push([a,b]);
+        }
+        rounds.push(round);
+        const fixed=rotation[0],rest=rotation.slice(1);
+        rest.unshift(rest.pop());
+        rotation=[fixed,...rest];
+    }
+    const maxRounds=Math.max(1,Math.floor(Number(s.rules.turni)||rounds.length));
+    rounds=rounds.slice(0,maxRounds);
+    const matches=[];
+    let slotBase=0;
+    const numCourts=Math.max(1,Math.floor(Number(s.rules.campi)||3));
+    rounds.forEach(round=>{
+        round.forEach((pair,index)=>{
+            matches.push({pair,slot:slotBase+Math.floor(index/numCourts),court:(index%numCourts)+1});
+        });
+        slotBase+=Math.max(1,Math.ceil(round.length/numCourts));
+    });
+    if(!Array.isArray(s.finalGroupRes))s.finalGroupRes=[];
+    if(!Array.isArray(s.finalGroupTime))s.finalGroupTime=[];
+    if(!Array.isArray(s.finalGroupCamp))s.finalGroupCamp=[];
+    while(s.finalGroupRes.length<matches.length)s.finalGroupRes.push("-");
+    while(s.finalGroupTime.length<matches.length)s.finalGroupTime.push("");
+    while(s.finalGroupCamp.length<matches.length)s.finalGroupCamp.push("");
+    const startParts=String(s.rules.start||"20:00").split(":");
+    const startMinutes=(Number(startParts[0])||0)*60+(Number(startParts[1])||0);
+    const duration=Math.max(1,Number(s.rules.duration)||30);
+    const escHtml=v=>String(v??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+    let html='<h2 style="text-align:center">🏆 Fase finale — Girone finale</h2>'+
+        '<p style="text-align:center">Le squadre qualificate disputano un girone all’italiana. Turni: '+rounds.length+' · Campi disponibili: '+numCourts+' · Durata partita: '+duration+' minuti.</p>'+
+        (reale?'<p style="text-align:center;color:#86efac">Qualificazioni completate: risultati della fase finale abilitati.</p>':'<p style="text-align:center;color:#fcd34d">La fase finale si abilita quando i risultati dei gironi sono completi.</p>')+
+        '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>Turno</th><th>Ora</th><th>Campo</th><th>Incontro</th><th>Risultato</th></tr></thead><tbody>';
+    matches.forEach((m,i)=>{
+        const total=((startMinutes+m.slot*duration)%1440+1440)%1440;
+        const generatedTime=String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
+        if(!s.finalGroupTime[i]||s.finalGroupTime[i]==="-")s.finalGroupTime[i]=generatedTime;
+        if(!s.finalGroupCamp[i])s.finalGroupCamp[i]=String(m.court);
+        const raw=String(s.finalGroupRes[i]||"-").split("-");
+        const home=escHtml(formatCoppiaDisplay(m.pair[0]));
+        const away=escHtml(formatCoppiaDisplay(m.pair[1]));
+        const disabled=reale?"":" disabled";
+        html+='<tr><td>'+(i+1)+'</td><td><input type="time" value="'+escHtml(s.finalGroupTime[i])+'" oninput="updateFinalGroupField('+i+',\'time\',this.value)"></td>'+
+            '<td><input type="number" min="1" max="50" value="'+escHtml(s.finalGroupCamp[i])+'" oninput="updateFinalGroupField('+i+',\'camp\',this.value)"></td>'+
+            '<td>'+home+' <b>VS</b> '+away+'</td><td><input type="number" min="0" step="1" value="'+(raw[0]==="-"?"":escHtml(raw[0]))+'"'+disabled+' oninput="updateFinalGroupResult('+i+',0,this.value)">'+
+            ' – <input type="number" min="0" step="1" value="'+escHtml(raw[1]||"")+'"'+disabled+' oninput="updateFinalGroupResult('+i+',1,this.value)"></td></tr>';
+    });
+    html+='</tbody></table></div><div id="finalGroupStandings" style="margin-top:14px"></div>';
+    host.innerHTML=html;
+    refreshFinalGroupStandings(teams,reale,matches.length);
+}
+function refreshFinalGroupStandings(teams,reale,matchCount){
+    const box=document.getElementById("finalGroupStandings");
+    if(!box)return;
+    if(!reale){box.innerHTML="<p>Classifica e vincitore saranno disponibili dopo il completamento dei gironi iniziali.</p>";return;}
+    const scores=(Array.isArray(state.finalGroupRes)?state.finalGroupRes:[]).slice(0,matchCount);
+    const classifica=typeof calc==="function"?calc(teams,scores):[];
+    const completa=scores.length===matchCount&&scores.every(x=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(x??"")));
+    box.innerHTML='<h3>Classifica finale</h3><table style="width:100%;border-collapse:collapse"><thead><tr><th>Pos.</th><th>Squadra</th><th>PT</th><th>GF</th><th>GS</th><th>DG</th></tr></thead><tbody>'+
+        classifica.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+formatCoppiaDisplay(x.n)+'</td><td>'+x.pt+'</td><td>'+x.gf+'</td><td>'+x.gs+'</td><td>'+x.df+'</td></tr>').join("")+
+        '</tbody></table>'+(completa&&classifica[0]?'<h3 style="text-align:center;color:#fbbf24">🏆 VINCITORE DEL TORNEO: '+formatCoppiaDisplay(classifica[0].n)+'</h3>':'<p>Inserisci tutti i risultati della fase finale per determinare il vincitore.</p>');
+}
+window.updateFinalGroupResult=function(index,side,value){
+    if(!Array.isArray(state.finalGroupRes))state.finalGroupRes=[];
+    const raw=String(state.finalGroupRes[index]??"-");
+    const parts=raw.includes("-")?raw.split("-"):["",""];
+    while(parts.length<2)parts.push("");
+    parts[side]=String(value??"").trim();
+    state.finalGroupRes[index]=parts.every(x=>x==="")?"-":parts.slice(0,2).join("-");
+    const teams=getFinalQualified();
+    const count=Array.isArray(state.finalGroupRes)?state.finalGroupRes.length:0;
+    const complete=teams.length>=2&&teams.every(x=>!String(x).includes("da determinare"));
+    refreshFinalGroupStandings(teams,complete,count);
+    if(typeof updateAndSync==="function")updateAndSync();
+};
+window.updateFinalGroupField=function(index,field,value){
+    const key=field==="time"?"finalGroupTime":field==="camp"?"finalGroupCamp":null;
+    if(!key)return;
+    if(!Array.isArray(state[key]))state[key]=[];
+    state[key][index]=String(value??"").trim();
+    if(typeof updateAndSync==="function")updateAndSync();
+}
+
 function renderMatchCard(titolo, match, type, index, risultato) {
     const res = String(risultato || "-").split("-");
     const risultato1 = res[0] === "-" ? "" : (res[0] || "");
