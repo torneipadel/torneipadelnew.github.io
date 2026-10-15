@@ -80,7 +80,7 @@ function normalizeTeams(){
   const current=groups.flatMap(g=>Array.isArray(s[g])?s[g].map(teamName):[]).filter(Boolean);
   const balanced=groups.every(g=>Array.isArray(s[g])&&s[g].length===3&&s[g].every(x=>String(teamName(x)||'').trim()));
   if(source.length===9 && (!balanced||current.length!==9)){
-    groups.forEach((g,i)=>{s[g]=source.slice(i*3,(i+1)*3)});
+    groups.forEach((g,i)=>{s[g]=source.slice(i*3,(i+1)*3);s[g+'res']=Array(3).fill('-');s[g+'time']=Array(3).fill('');s[g+'camp']=Array(3).fill('')});
   }else{
     groups.forEach(g=>{if(!Array.isArray(s[g]))s[g]=[]});
   }
