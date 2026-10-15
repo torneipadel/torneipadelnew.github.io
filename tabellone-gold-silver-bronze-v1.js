@@ -7,6 +7,7 @@
 const baseEnsureRules=window.ensureRules;
 const baseOpenRules=window.openRules;
 const baseApplyRules=window.applyRules;
+const baseUpdateDescription=window.aggiornaDescrizioneTipoTorneo;
 const baseRender=window.render;
 const baseRenderKO=window.renderKO;
 const baseSetFormat=window.setFormat;
@@ -190,6 +191,17 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   s.goldSilverBronze.results[stageKey]=[...s[key]];
   updateFinalStandings(stageKey);
   if(typeof window.updateAndSync==='function')window.updateAndSync();
+};
+
+
+window.aggiornaDescrizioneTipoTorneo=function(){
+  const selector=document.getElementById('tipoTorneo');
+  const box=document.getElementById('descrizioneTipoTorneo');
+  if((isSpecial()||selector?.value==='goldSilverBronze')&&box){
+    box.innerHTML='🥇🥈🥉 <b>Gironi + Finali Gold/Silver/Bronze</b><br><br>9 squadre in 3 gironi da 3. Ogni girone all’italiana disputa 3 partite. Le prime classificate accedono alla Gold, le seconde alla Silver, le terze alla Bronze. Ogni fascia disputa 3 partite all’italiana. Totale 18 partite, 3 campi, 20 minuti a partita.<br><br><b>Punteggi:</b> vittoria 3, pareggio 1, sconfitta 0.<br><b>Spareggi:</b> scontro diretto, differenza giochi, giochi vinti.';
+    return;
+  }
+  if(typeof baseUpdateDescription==='function')return baseUpdateDescription.apply(this,arguments);
 };
 
 function addRuleOption(id,value,label){
