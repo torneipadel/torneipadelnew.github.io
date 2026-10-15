@@ -11354,6 +11354,68 @@ function sincronizzaFaseFinale(){
         state.campioneTop=getWinner(state.finalTop.slice(0,2),state.rules.numeroFinali>1?state.finaliRes?.[0]:state.fTopRes)||null;
     }else state.campioneTop=null;
 }
+function boveTimeToMinutes(value){
+    const m=String(value||"").match(/^(\\d{1,2}):(\\d{2})$/);
+    return m?Number(m[1])*60+Number(m[2]):null;
+}
+function boveFormatTime(minutes){
+    const total=((Math.floor(minutes)%1440)+1440)%1440;
+    return String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
+}
+function boveGroupEndOffset(){
+    const start=boveTimeToMinutes(state.rules.start||"20:00")??1200;
+    const duration=Math.max(1,Number(state.rules.duration)||30);
+    const courts=Math.max(1,Math.floor(Number(state.rules.campi)||3));
+    let found=false,maxOffset=0;
+    const count=Math.max(1,Math.min(6,Math.floor(Number(state.rules.numeroGironi)||0)));
+    ["A","B","C","D","E","F"].slice(0,count).forEach(tag=>{
+        (Array.isArray(state[tag+"time"])?state[tag+"time"]:[]).forEach(value=>{
+            const mins=boveTimeToMinutes(value);
+            if(mins===null)return;
+            const offset=(mins-start+1440)%1440;
+            maxOffset=Math.max(maxOffset,offset);found=true;
+        });
+    });
+    if(found)return maxOffset+duration;
+    let maxSlots=0;
+    ["A","B","C","D","E","F"].slice(0,count).forEach(tag=>{
+        const n=Array.isArray(state[tag])?state[tag].length:0;
+        if(n<2)return;
+        const matchesPerRound=Math.floor(n/2);
+        const matches=getScheduledMatchCount(n);
+        const rounds=matchesPerRound?Math.ceil(matches/matchesPerRound):0;
+        maxSlots=Math.max(maxSlots,rounds*Math.max(1,Math.ceil(matchesPerRound/courts)));
+    });
+    return maxSlots*duration;
+}
+function boveEnsureKOStageSchedule(type,count,startOffset){
+    const timeKey=type==="Q"?"qTime":type==="S"?"sTopTime":"fTopTime";
+    const campKey=type==="Q"?"qCamp":type==="S"?"sTopCamp":"fTopCamp";
+    if(!Array.isArray(state[timeKey]))state[timeKey]=[];
+    if(!Array.isArray(state[campKey]))state[campKey]=[];
+    const start=boveTimeToMinutes(state.rules.start||"20:00")??1200;
+    const duration=Math.max(1,Number(state.rules.duration)||30);
+    const courts=Math.max(1,Math.floor(Number(state.rules.campi)||3));
+    for(let i=0;i<count;i++){
+        const slot=Math.floor(i/courts);
+        if(!state[timeKey][i]||state[timeKey][i]==="-")state[timeKey][i]=boveFormatTime(start+startOffset+slot*duration);
+        if(!state[campKey][i]||state[campKey][i]==="-")state[campKey][i]=String((i%courts)+1);
+    }
+}
+function boveKOStageEndOffset(type,count,fallbackOffset){
+    const timeKey=type==="Q"?"qTime":type==="S"?"sTopTime":"fTopTime";
+    const start=boveTimeToMinutes(state.rules.start||"20:00")??1200;
+    const duration=Math.max(1,Number(state.rules.duration)||30);
+    let found=false,maxOffset=0;
+    (Array.isArray(state[timeKey])?state[timeKey]:[]).slice(0,count).forEach(value=>{
+        const mins=boveTimeToMinutes(value);
+        if(mins===null)return;
+        maxOffset=Math.max(maxOffset,(mins-start+1440)%1440);found=true;
+    });
+    const courts=Math.max(1,Math.floor(Number(state.rules.campi)||3));
+    return found?maxOffset+duration:fallbackOffset+Math.max(1,Math.ceil(count/courts))*duration;
+}
+
 function renderKO(){
     ensureRules();
 
@@ -11399,6 +11461,15 @@ function renderKO(){
     const usaQ=state.rules.usaQuarti===true;
     const usaS=state.rules.usaSemifinali===true;
     const usaF=state.rules.usaFinale===true;
+    const groupEndOffset=boveGroupEndOffset();
+    if(usaQ)boveEnsureKOStageSchedule("Q",4,groupEndOffset);
+    const quarterEndOffset=usaQ?boveKOStageEndOffset("Q",4,groupEndOffset):groupEndOffset;
+    if(usaS)boveEnsureKOStageSchedule("S",2,usaQ?quarterEndOffset:groupEndOffset);
+    const semifinalEndOffset=usaS?boveKOStageEndOffset("S",2,usaQ?quarterEndOffset:groupEndOffset):(usaQ?quarterEndOffset:groupEndOffset);
+    if(usaF){
+        const count=(!usaQ&&!usaS)?Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1))):1;
+        boveEnsureKOStageSchedule("F",count,usaS?semifinalEndOffset:semifinalEndOffset);
+    }
 
     if(boxQ)boxQ.style.display=(usaQ&&mostraQuartiInVista)?"":"none";
     if(boxS)boxS.style.display=usaS?"":"none";
@@ -11692,6 +11763,7 @@ function renderFinalGroupKO(){
     while(s.finalGroupCamp.length<matches.length)s.finalGroupCamp.push("");
     const startParts=String(s.rules.start||"20:00").split(":");
     const startMinutes=(Number(startParts[0])||0)*60+(Number(startParts[1])||0);
+    const groupEndOffset=boveGroupEndOffset();
     const duration=Math.max(1,Number(s.rules.duration)||30);
     const escHtml=v=>String(v??"").replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
     let html='<h2 style="text-align:center">🏆 Fase finale — Girone finale</h2>'+
@@ -11699,7 +11771,7 @@ function renderFinalGroupKO(){
         (reale?'<p style="text-align:center;color:#86efac">Qualificazioni completate: risultati della fase finale abilitati.</p>':'<p style="text-align:center;color:#fcd34d">La fase finale si abilita quando i risultati dei gironi sono completi.</p>')+
         '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th>Turno</th><th>Ora</th><th>Campo</th><th>Incontro</th><th>Risultato</th></tr></thead><tbody>';
     matches.forEach((m,i)=>{
-        const total=((startMinutes+m.slot*duration)%1440+1440)%1440;
+        const total=((startMinutes+groupEndOffset+m.slot*duration)%1440+1440)%1440;
         const generatedTime=String(Math.floor(total/60)).padStart(2,"0")+":"+String(total%60).padStart(2,"0");
         if(!s.finalGroupTime[i]||s.finalGroupTime[i]==="-")s.finalGroupTime[i]=generatedTime;
         if(!s.finalGroupCamp[i])s.finalGroupCamp[i]=String(m.court);
