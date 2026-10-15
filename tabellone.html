@@ -2086,7 +2086,11 @@ Seleziona formato torneo
 
       </label>
 
-
+      <label style="display:block;margin-top:8px;">
+        Numero finali parallele (1–12):
+        <input id="numeroFinali" type="number" min="1" max="12" step="1" value="1" style="display:block;width:100%;margin-top:5px;">
+      </label>
+      <small style="display:block;margin-top:6px;color:#cbd5e1;">Per creare più finali parallele, disattiva quarti e semifinali. Servono due squadre qualificate per ogni finale.</small>
 
     </div>
 
@@ -3560,6 +3564,8 @@ function openRules(){
 
     });
 
+    const numeroFinaliEl=document.getElementById("numeroFinali");
+    if(numeroFinaliEl) numeroFinaliEl.value=String(Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1))));
 
     const nr =
         document.getElementById(
@@ -5205,6 +5211,9 @@ function ensureRules(){
 
         state.rules.usaFinale=true;
 
+    if(state.rules.numeroFinali===undefined) state.rules.numeroFinali=1;
+    state.rules.numeroFinali=Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)));
+
 
 
 
@@ -5393,6 +5402,8 @@ function ensureRules(){
     if(state.fTopRes===undefined)
 
         state.fTopRes="-";
+
+    if(!Array.isArray(state.finaliRes)) state.finaliRes=[];
 
 
 
@@ -5733,6 +5744,9 @@ async function applyRules(){
     state.rules.usaQuarti=document.getElementById("usaQuarti")?.checked===true;
     state.rules.usaSemifinali=document.getElementById("usaSemifinali")?.checked===true;
     state.rules.usaFinale=document.getElementById("usaFinale")?.checked===true;
+    const numeroFinaliInput=document.getElementById("numeroFinali");
+    state.rules.numeroFinali=Math.max(1,Math.min(12,Math.floor(Number(numeroFinaliInput?.value)||1)));
+    if(numeroFinaliInput) numeroFinaliInput.value=String(state.rules.numeroFinali);
     if(state.rules.formulaFinale==="gironeFinale"){
         state.rules.usaQuarti=false;
         state.rules.usaSemifinali=false;
@@ -9184,10 +9198,19 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
         if(!Array.isArray(state.sTopRes)) state.sTopRes = Array(2).fill("-");
         aggiorna(state.sTopRes,index);
     }else if(type === "F"){
-        let res = String(state.fTopRes || "-").split("-");
-        if(res.length !== 2) res = ["",""];
-        res[pos] = valore;
-        state.fTopRes = res.join("-");
+        const multiFinali=state.rules.usaQuarti!==true && state.rules.usaSemifinali!==true && Math.max(1,Number(state.rules.numeroFinali)||1)>1;
+        if(multiFinali){
+            if(!Array.isArray(state.finaliRes)) state.finaliRes=[];
+            let res=String(state.finaliRes[index]||"-").split("-");
+            if(res.length!==2)res=["",""];
+            res[pos]=valore;
+            state.finaliRes[index]=res.join("-");
+        }else{
+            let res = String(state.fTopRes || "-").split("-");
+            if(res.length !== 2) res = ["",""];
+            res[pos] = valore;
+            state.fTopRes = res.join("-");
+        }
     }else{
         return;
     }
@@ -9199,9 +9222,10 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
      * La fase finale viene invece ridisegnata quando il risultato è
      * completo oppure quando si usa il normale salvataggio.
      */
+    const multiFinali=type==="F" && state.rules.usaQuarti!==true && state.rules.usaSemifinali!==true && Math.max(1,Number(state.rules.numeroFinali)||1)>1;
     const risultatoCompleto =
         type === "F"
-            ? /^\d+\-\d+$/.test(String(state.fTopRes || ""))
+            ? (multiFinali ? /^\d+\-\d+$/.test(String(state.finaliRes?.[index]||"")) : /^\d+\-\d+$/.test(String(state.fTopRes || "")))
             : /^\d+\-\d+$/.test(
                 String(
                     type === "Q"
@@ -11212,7 +11236,7 @@ function getFinalQualified(){
     let richiesti=0;
     if(state.rules.usaQuarti===true) richiesti=8;
     else if(state.rules.usaSemifinali===true) richiesti=4;
-    else if(state.rules.usaFinale===true) richiesti=2;
+    else if(state.rules.usaFinale===true) richiesti=2*Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)));
     return richiesti>0?qualificati.slice(0,richiesti).map(x=>x.nome):[];
 }
 function sincronizzaFaseFinale(){
@@ -11236,13 +11260,16 @@ function sincronizzaFaseFinale(){
         if(qualificati.length<4) return;
         state.semiTop=[[qualificati[0],qualificati[3]],[qualificati[1],qualificati[2]]];
     }else if(state.rules.usaFinale===true){
-        state.finalTop=qualificati.slice(0,2);
+        const numeroFinali=Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)));
+        state.finalTop=qualificati.slice(0,2*numeroFinali);
     }else return;
     if(state.rules.usaSemifinali===true){
         const v=[]; state.semiTop.forEach((m,i)=>{const w=getWinner(m,Array.isArray(state.sTopRes)?state.sTopRes[i]:"-"); if(w)v.push(w);});
         if(v.length===2) state.finalTop=v; else if(state.rules.usaFinale===true) return;
     }
-    state.campioneTop=(state.rules.usaFinale===true&&Array.isArray(state.finalTop)&&state.finalTop.length===2)?(getWinner(state.finalTop,state.fTopRes)||null):null;
+    if(state.rules.usaFinale===true && Array.isArray(state.finalTop) && state.finalTop.length>=2){
+        state.campioneTop=getWinner(state.finalTop.slice(0,2),state.rules.numeroFinali>1?state.finaliRes?.[0]:state.fTopRes)||null;
+    }else state.campioneTop=null;
 }
 function renderKO(){
     ensureRules();
@@ -11481,6 +11508,36 @@ function renderKO(){
                 winnerCard.innerHTML="";
             }
         }
+    }
+
+    const numeroFinali=Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)));
+    if(usaF && !usaQ && !usaS && numeroFinali>1){
+        if(!Array.isArray(state.finaliRes)) state.finaliRes=[];
+        if(!Array.isArray(state.fTopCamp)) state.fTopCamp=[];
+        if(!Array.isArray(state.fTopTime)) state.fTopTime=[];
+        const finali=[];
+        for(let i=0;i<numeroFinali;i++){
+            const match=validTeams.length>=((i+1)*2)
+                ? [validTeams[i*2],validTeams[i*2+1]]
+                : ["Qualificata "+(i*2+1),"Qualificata "+(i*2+2)];
+            finali.push(match);
+        }
+        state.finaliTop=finali;
+        f.innerHTML=finali.map((match,index)=>renderMatchCard("🏆 FINALE "+(index+1),match,"F",index,state.finaliRes[index]||"-")).join("");
+        const vincitori=finali.map((match,index)=>{
+            if(/qualificat|vincente|determinare/i.test(String(match[0]))||/qualificat|vincente|determinare/i.test(String(match[1])))return null;
+            return getWinner(match,state.finaliRes[index]||"-");
+        });
+        const winnerCard=document.getElementById("winnerCardKO");
+        if(winnerCard){
+            const righe=vincitori.map((v,index)=>v?'<div style="margin:6px 0">🏆 Finale '+(index+1)+': <b>'+formatCoppiaDisplay(v)+'</b></div>':'').join("");
+            winnerCard.style.cssText=righe?'display:block!important;margin-top:15px;':'display:none!important;';
+            winnerCard.innerHTML=righe?'<div class="winner-box top-win">'+righe+'</div>':"";
+        }
+        state.campioneTop=vincitori[0]||null;
+    }else if(!usaF){
+        const winnerCard=document.getElementById("winnerCardKO");
+        if(winnerCard){winnerCard.style.cssText="display:none!important;";winnerCard.innerHTML="";}
     }
 }
                    
