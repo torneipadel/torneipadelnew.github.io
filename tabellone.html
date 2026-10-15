@@ -5750,7 +5750,7 @@ async function applyRules(){
 
     const ar=document.getElementById("garaAndataRitorno");
     state.rules.garaAndataRitorno=
-        groupTypes.includes(tipo) && ar?.checked===true;
+        groupTypes.includes(tipo) && (ar?.checked===true || fg?.value==="andataRitorno" || state.rules.formulaGironi==="andataRitorno");
 
     const start=document.getElementById("startTime");
     const dur=document.getElementById("duration");
@@ -11488,6 +11488,9 @@ function renderFinalGroupKO(){
         const fixed=rotation[0],rest=rotation.slice(1);
         rest.unshift(rest.pop());
         rotation=[fixed,...rest];
+    }
+    if(s.rules.garaAndataRitorno===true){
+        rounds=rounds.concat(rounds.map(round=>round.map(pair=>[pair[1],pair[0]])));
     }
     const maxRounds=Math.max(1,Math.floor(Number(s.rules.turni)||rounds.length));
     rounds=rounds.slice(0,maxRounds);
