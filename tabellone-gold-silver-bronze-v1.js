@@ -229,6 +229,25 @@ function prepareSpecialRuleOptions(){
   addRuleOption('tipoTorneo','goldSilverBronze','🥇🥈🥉 Gironi + Finali Gold/Silver/Bronze');
   addRuleOption('formulaFinale','goldSilverBronze','Gironi finali Gold/Silver/Bronze');
 }
+window.salvaRegoleConferma=async function(){
+  const modal=document.getElementById('rulesModal');
+  try{
+    const esito=window.applyRules();
+    if(esito===false)return false;
+    // Se la validazione blocca l'applicazione, il modal rimane aperto.
+    if(modal && modal.style.display!=='none')return false;
+    if(typeof window.salvaTorneoSupabase!=='function'){
+      alert('Salvataggio non disponibile: funzione Supabase mancante.');
+      return false;
+    }
+    return await window.salvaTorneoSupabase();
+  }catch(e){
+    console.error('Errore applicazione/salvataggio regole:',e);
+    alert('Errore durante l’applicazione delle regole. Le modifiche non sono state confermate.');
+    return false;
+  }
+};
+
 function setRuleField(id,value){
   const el=document.getElementById(id);if(el)el.value=String(value??'');
 }
