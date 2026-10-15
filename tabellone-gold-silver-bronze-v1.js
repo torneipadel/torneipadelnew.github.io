@@ -80,6 +80,18 @@ function teamName(v){
 }
 function validScore(v){return /^\s*\d+\s*-\s*\d+\s*$/.test(String(v??''))}
 function normalizedResults(v){return Array.from({length:3},(_,i)=>validScore(v?.[i])?String(v[i]).replace(/\s/g,''):'-')}
+function scheduleGroupMatches(force){
+  const s=activeState();if(!s||!isSpecial())return;
+  const duration=Math.max(1,Number(s.rules?.duration)||20);
+  groups.forEach((g,groupIndex)=>{
+    if(!Array.isArray(s[g+'time']))s[g+'time']=Array(3).fill('');
+    if(!Array.isArray(s[g+'camp']))s[g+'camp']=Array(3).fill('');
+    for(let i=0;i<3;i++){
+      if(force||!s[g+'time'][i]||s[g+'time'][i]==='-')s[g+'time'][i]=timeAt(i*duration);
+      if(force||!s[g+'camp'][i]||s[g+'camp'][i]==='-')s[g+'camp'][i]=String(groupIndex+1);
+    }
+  });
+}
 function normalizeTeams(){
   const s=activeState();if(!s||!isSpecial())return;
   configureRules();
@@ -97,6 +109,7 @@ function normalizeTeams(){
     if(!Array.isArray(s[g+'time'])||s[g+'time'].length!==3)s[g+'time']=Array(3).fill('');
     if(!Array.isArray(s[g+'camp'])||s[g+'camp'].length!==3)s[g+'camp']=Array(3).fill('');
   });
+  scheduleGroupMatches(false);
   const saved=s.goldSilverBronze?.results||{};
   ['gold','silver','bronze'].forEach(k=>{
     const key=k+'Res';
@@ -255,7 +268,8 @@ window.applyRules=function(){
   r.start=document.getElementById('startTime')?.value||r.start||'20:00';
   r.duration=Math.max(1,readNumber('duration',r.duration||20));
   r.note=document.getElementById('noteRegole')?.value||'';
-  r.campi=3;r.numeroSquadre=9;r.formatoTorneo=9;r.numeroGironi=3;r.squadrePerGirone=3;
+  r.campi=3;r.numeroSquadre=9;
+  scheduleGroupMatches(true);r.formatoTorneo=9;r.numeroGironi=3;r.squadrePerGirone=3;
   r.tipoTorneo='goldSilverBronze';r.formulaScelta='goldSilverBronze';r.formulaGironi='tuttiControTutti';r.formulaFinale='goldSilverBronze';
   r.qualificatePerGirone=3;r.numeroQualificateFinali=9;r.usaQuarti=false;r.usaSemifinali=false;r.usaFinale=false;
   r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:3,durata:r.duration,oraInizio:r.start,note:r.note,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
