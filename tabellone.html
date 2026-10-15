@@ -6382,7 +6382,15 @@ state.rules.locked=false;
 }
 
                     
+let __boveSyncQueue=Promise.resolve();
 async function updateAndSync(showSaveResult=false){
+    const execute=()=>updateAndSyncImpl(showSaveResult);
+    const next=__boveSyncQueue.then(execute,execute);
+    __boveSyncQueue=next.then(()=>undefined,()=>undefined);
+    return await next;
+}
+
+async function updateAndSyncImpl(showSaveResult=false){
 
     try{
 
