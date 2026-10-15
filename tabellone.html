@@ -1578,6 +1578,12 @@ Seleziona formato torneo
 
 </option>
 
+<option value="goldSilverBronze">
+
+🥇🥈🥉 9 squadre — Gironi + Finali Gold/Silver/Bronze
+
+</option>
+
 
 
 
@@ -4416,8 +4422,9 @@ function setFormat(n){
 
 
 
+            const targetPerGirone = Number(state.rules.squadrePerGirone) || 4;
             while(
-                state[g].length < 4
+                state[g].length < targetPerGirone
             ){
 
                 state[g].push("");
@@ -4427,11 +4434,11 @@ function setFormat(n){
 
 
             if(
-                state[g].length > 4
+                state[g].length > targetPerGirone
             ){
 
                 state[g]=
-                    state[g].slice(0,4);
+                    state[g].slice(0,targetPerGirone);
 
             }
 
@@ -13067,7 +13074,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=3"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=4"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 </body>
 </html>
