@@ -5654,7 +5654,9 @@ async function applyRules(){
         turni:Number(state.rules.turni)||3,
         campi:Number(state.rules.campi)||3,
         start:String(state.rules.start||"20:00"),
-        duration:Number(state.rules.duration)||30
+        duration:Number(state.rules.duration)||30,
+        formulaFinale:String(state.rules.formulaFinale||"eliminazioneDiretta"),
+        numeroQualificateFinali:Number(state.rules.numeroQualificateFinali)||4
     };
 
     state.rules.numeroSquadre=n;
@@ -5785,6 +5787,9 @@ async function applyRules(){
         programmazionePrecedente.campi!==Number(state.rules.campi) ||
         programmazionePrecedente.start!==String(state.rules.start) ||
         programmazionePrecedente.duration!==Number(state.rules.duration);
+    const faseFinaleModificata=
+        regolePrima.formulaFinale!==String(state.rules.formulaFinale) ||
+        regolePrima.numeroQualificateFinali!==Number(state.rules.numeroQualificateFinali);
 
     const extra=document.getElementById("criterioParitaExtra");
     if(extra) state.rules.criterioParitaExtra=extra.value;
@@ -5819,6 +5824,14 @@ async function applyRules(){
         state.sTopRes=Array(2).fill("-");
         state.sTopCamp=[];state.sTopTime=[];
         state.fTopRes="-";state.fTopCamp="";state.fTopTime="";
+        state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
+        state.finalTop=[];
+        state.campioneTop=null;
+    }else if(faseFinaleModificata){
+        state.qRes=Array(4).fill("-");
+        state.sTopRes=Array(2).fill("-");
+        state.fTopRes="-";
+        state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
         state.finalTop=[];
         state.campioneTop=null;
     }else if(programmazioneModificata){
@@ -5827,6 +5840,7 @@ async function applyRules(){
             state[tag+"camp"]=[];
         });
         state.qTime=[];state.qCamp=[];state.sTopTime=[];state.sTopCamp=[];state.fTopTime=[];state.fTopCamp=[];
+        state.finalGroupTime=[];state.finalGroupCamp=[];
     }
     state.rules.__ultimoTurniSalvati=state.rules.turni;
     state.rules.__ultimoCampiSalvati=state.rules.campi;
@@ -11448,6 +11462,15 @@ function renderKO(){
     }
 }
                    
+function finalGroupStageReady(){
+    const numeroGironi=Math.max(1,Math.floor(Number(state.rules.numeroGironi)||1));
+    return ["A","B","C","D","E","F","G"].slice(0,numeroGironi).every(tag=>{
+        const teams=Array.isArray(state[tag])?state[tag]:[];
+        const count=getScheduledMatchCount(teams.length);
+        const results=Array.isArray(state[tag+"res"])?state[tag+"res"].slice(0,count):[];
+        return teams.length>=2&&results.length===count&&results.every(x=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(x??"")));
+    });
+}
 function renderFinalGroupKO(){
     const s=state;
     let host=document.getElementById("finalGroupStage");
@@ -11462,18 +11485,13 @@ function renderFinalGroupKO(){
     host.style.display="block";
     const numeroGironi=Math.max(1,Math.floor(Number(s.rules.numeroGironi)||1));
     const lettere=["A","B","C","D","E","F","G"].slice(0,numeroGironi);
-    const gironiCompleti=lettere.every(tag=>{
-        const teams=Array.isArray(s[tag])?s[tag]:[];
-        const count=getScheduledMatchCount(teams.length);
-        const results=Array.isArray(s[tag+"res"])?s[tag+"res"].slice(0,count):[];
-        return teams.length>=2&&results.length===count&&results.every(x=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(x??"")));
-    });
+    const gironiCompleti=finalGroupStageReady();
     const qualificati=getFinalQualified();
     const richiesti=Math.max(2,Math.floor(Number(s.rules.numeroQualificateFinali)||Number(s.rules.qualificatePerGirone)*numeroGironi||4));
     const teams=gironiCompleti&&qualificati.length>=2
         ?qualificati.slice(0,richiesti)
         :Array.from({length:richiesti},(_,i)=>"Qualificata "+(i+1)+" — da determinare");
-    const reale=gironiCompleti&&teams.length>=2&&teams.every(x=>!String(x).includes("da determinare"));
+    const reale=gironiCompleti&&qualificati.length>=richiesti&&teams.length>=richiesti&&teams.every(x=>!String(x).includes("da determinare"));
     const lista=teams.slice();
     if(lista.length%2)lista.push(null);
     let rotation=lista.slice(),rounds=[];
@@ -11551,7 +11569,7 @@ window.updateFinalGroupResult=function(index,side,value){
     state.finalGroupRes[index]=parts.every(x=>x==="")?"-":parts.slice(0,2).join("-");
     const teams=getFinalQualified();
     const count=Array.isArray(state.finalGroupRes)?state.finalGroupRes.length:0;
-    const complete=teams.length>=2&&teams.every(x=>!String(x).includes("da determinare"));
+    const complete=finalGroupStageReady()&&teams.length>=Math.max(2,Number(state.rules.numeroQualificateFinali)||2);
     refreshFinalGroupStandings(teams,complete,count);
     if(typeof updateAndSync==="function")updateAndSync();
 };
