@@ -2362,7 +2362,11 @@ Seleziona formato torneo
 
     <h4>⏱️ Programmazione</h4>
 
+    <label style="display:block;margin-top:8px;">Numero turni:</label>
+    <input id="numeroTurni" type="number" min="1" max="50" step="1" value="3">
 
+    <label style="display:block;margin-top:8px;">Campi disponibili:</label>
+    <input id="numeroCampi" type="number" min="1" max="50" step="1" value="3">
 
     <label>
 
@@ -3931,6 +3935,12 @@ function openRules(){
         durata.value =
             state.rules.duration;
 
+    const turniInput=document.getElementById("numeroTurni");
+    if(turniInput) turniInput.value=Number(state.rules.turni)||3;
+
+    const campiInput=document.getElementById("numeroCampi");
+    if(campiInput) campiInput.value=Number(state.rules.campi)||3;
+
 
 
 
@@ -5056,7 +5066,7 @@ function ensureRules(){
     const gironiPersonalizzati = Number(state.rules.numeroGironi);
     const squadrePersonalizzate = Number(state.rules.squadrePerGirone);
     const strutturaPersonalizzataValida =
-        tipoStruttura === "manuale" &&
+        ["manuale","gironiFinale","italiana","short"].includes(tipoStruttura) &&
         Number.isInteger(gironiPersonalizzati) &&
         Number.isInteger(squadrePersonalizzate) &&
         gironiPersonalizzati > 0 &&
@@ -5338,6 +5348,12 @@ function ensureRules(){
     if(state.rules.duration===undefined)
 
         state.rules.duration=30;
+
+    if(state.rules.turni===undefined || !Number.isFinite(Number(state.rules.turni)) || Number(state.rules.turni)<1)
+        state.rules.turni=3;
+
+    if(state.rules.campi===undefined || !Number.isFinite(Number(state.rules.campi)) || Number(state.rules.campi)<1)
+        state.rules.campi=3;
 
 
 
@@ -5647,40 +5663,40 @@ function applyRules(){
 
     const groupTypes=["italiana","gironiFinale","short"];
     const noKO=["svizzero","americano","mexicano","king"];
+    const strutturaPrecedente={
+        numeroSquadre:Number(state.rules.numeroSquadre),
+        numeroGironi:Number(state.rules.numeroGironi),
+        squadrePerGirone:Number(state.rules.squadrePerGirone)
+    };
 
-    if(groupTypes.includes(tipo)){
-        state.rules.numeroGironi=struttura.gironi;
-        state.rules.squadrePerGirone=struttura.perGirone;
-    }else if(tipo==="eliminazione" || noKO.includes(tipo)){
-        state.rules.numeroGironi=0;
-        state.rules.squadrePerGirone=0;
-    }else{
+    if(groupTypes.includes(tipo) || tipo==="manuale"){
         const g=Number(document.getElementById("numeroGironi")?.value)||struttura.gironi;
         const p=Number(document.getElementById("squadrePerGirone")?.value)||struttura.perGirone;
         if(g*p!==n){
-            alert("Numero squadre e gironi non compatibili.");
-            return;
+            alert("Numero squadre, gironi e squadre per girone non compatibili. Correggi i valori prima di salvare.");
+            return false;
         }
         state.rules.numeroGironi=g;
         state.rules.squadrePerGirone=p;
+    }else if(tipo==="eliminazione" || noKO.includes(tipo)){
+        state.rules.numeroGironi=0;
+        state.rules.squadrePerGirone=0;
     }
 
     const fg=document.getElementById("formulaGironi");
     const ff=document.getElementById("formulaFinale");
 
-    if(groupTypes.includes(tipo)){
-        state.rules.formulaGironi=
-            tipo==="short" ? "shortFormat" : "tuttiControTutti";
-        state.rules.formulaFinale="eliminazioneDiretta";
+    if(groupTypes.includes(tipo) || tipo==="manuale"){
+        state.rules.formulaGironi=tipo==="short"
+            ? "shortFormat"
+            : (fg?.value || state.rules.formulaGironi || "tuttiControTutti");
+        state.rules.formulaFinale=ff?.value || state.rules.formulaFinale || "eliminazioneDiretta";
     }else if(tipo==="eliminazione"){
         state.rules.formulaGironi="";
-        state.rules.formulaFinale="eliminazioneDiretta";
+        state.rules.formulaFinale=ff?.value || "eliminazioneDiretta";
     }else if(noKO.includes(tipo)){
         state.rules.formulaGironi=tipo==="king" ? "kingOfTheCourt" : tipo;
         state.rules.formulaFinale="classifica";
-    }else{
-        state.rules.formulaGironi=fg?.value || "";
-        state.rules.formulaFinale=ff?.value || "";
     }
 
     [
@@ -5722,9 +5738,6 @@ function applyRules(){
     state.rules.usaSemifinali=document.getElementById("usaSemifinali")?.checked===true;
     state.rules.usaFinale=document.getElementById("usaFinale")?.checked===true;
 
-    if(state.rules.usaQuarti) state.rules.usaSemifinali=true;
-    if(state.rules.usaSemifinali) state.rules.usaFinale=true;
-
     state.rules.ripescaggio=document.getElementById("ripescaggio")?.checked===true;
     state.rules.numeroRipescate=
         Number(document.getElementById("numeroRipescate")?.value)||0;
@@ -5749,8 +5762,20 @@ function applyRules(){
 
     const start=document.getElementById("startTime");
     const dur=document.getElementById("duration");
+    const turniEl=document.getElementById("numeroTurni");
+    const campiEl=document.getElementById("numeroCampi");
     if(start) state.rules.start=start.value;
     if(dur) state.rules.duration=Number(dur.value)||30;
+    if(turniEl) state.rules.turni=Math.max(1,Math.min(50,Math.floor(Number(turniEl.value)||3)));
+    if(campiEl) state.rules.campi=Math.max(1,Math.min(50,Math.floor(Number(campiEl.value)||3)));
+
+    const strutturaModificata=
+        strutturaPrecedente.numeroSquadre!==n ||
+        strutturaPrecedente.numeroGironi!==Number(state.rules.numeroGironi) ||
+        strutturaPrecedente.squadrePerGirone!==Number(state.rules.squadrePerGirone);
+    const programmazioneModificata=
+        Number(state.rules.__ultimoTurniSalvati||state.rules.turni)!==Number(state.rules.turni) ||
+        Number(state.rules.__ultimoCampiSalvati||state.rules.campi)!==Number(state.rules.campi);
 
     const extra=document.getElementById("criterioParitaExtra");
     if(extra) state.rules.criterioParitaExtra=extra.value;
@@ -5764,10 +5789,33 @@ function applyRules(){
 
     state.rules.locked=false;
 
-    updateAndSync();
+    if(strutturaModificata){
+        ["A","B","C","D","E","F","G"].forEach(tag=>{
+            state[tag+"res"]=[];
+            state[tag+"time"]=[];
+            state[tag+"camp"]=[];
+        });
+        state.qRes=Array(4).fill("-");
+        state.sTopRes=Array(2).fill("-");
+        state.fTopRes="-";
+        state.finalTop=[];
+        state.campioneTop=null;
+    }else if(programmazioneModificata || state.rules.start!==String(state.rules.__ultimoStartSalvato||state.rules.start) || state.rules.duration!==Number(state.rules.__ultimaDurataSalvata||state.rules.duration)){
+        ["A","B","C","D","E","F","G"].forEach(tag=>{
+            state[tag+"time"]=[];
+            state[tag+"camp"]=[];
+        });
+        state.qTime=[];state.qCamp=[];state.sTopTime=[];state.sTopCamp=[];state.fTopTime=[];state.fTopCamp=[];
+    }
+    state.rules.__ultimoTurniSalvati=state.rules.turni;
+    state.rules.__ultimoCampiSalvati=state.rules.campi;
+    state.rules.__ultimoStartSalvato=state.rules.start;
+    state.rules.__ultimaDurataSalvata=state.rules.duration;
 
-    if(typeof renderKO==="function")
-        renderKO();
+    if(typeof renderTables==="function") renderTables();
+    if(typeof renderClass==="function") renderClass();
+    if(typeof renderKO==="function") renderKO();
+    else if(typeof updateAndSync==="function") updateAndSync();
 
     const modal=document.getElementById("rulesModal");
     if(modal) modal.style.display="none";
@@ -10723,9 +10771,9 @@ function renderTables(){
     }
 
     const torneoGoldSilverBronze=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament();
-    let campiPerGirone=torneoGoldSilverBronze
-        ? {A:[1],B:[2],C:[3]}
-        : {A:[2,3],B:[4,5],C:[6,7],D:[8,9],E:[10,11],F:[12,13]};
+    const numeroCampiDisponibili=torneoGoldSilverBronze?3:Math.max(1,Math.min(50,Math.floor(Number(state.rules.campi)||3)));
+    const elencoCampi=Array.from({length:numeroCampiDisponibili},(_,i)=>i+1);
+    let campiPerGirone={A:elencoCampi,B:elencoCampi,C:elencoCampi,D:elencoCampi,E:elencoCampi,F:elencoCampi,G:elencoCampi};
 
     let durata=Number(state.rules.duration||30);
 
@@ -10769,6 +10817,9 @@ function renderTables(){
                 generaRoundRobin(
                     squadre.length
                 );
+
+            const turniConfigurati=Math.max(1,Math.min(50,Math.floor(Number(state.rules.turni)||rounds.length)));
+            rounds=rounds.slice(0,turniConfigurati);
 
             rounds.forEach(round=>{
                 round.forEach(match=>{
@@ -10905,16 +10956,8 @@ function renderTables(){
             state[tag+"res"].push("-");
         }
 
-        if(
-            state[tag+"res"].length>
-            partite.length
-        ){
-            state[tag+"res"]=
-                state[tag+"res"].slice(
-                    0,
-                    partite.length
-                );
-        }
+        // Non troncare i risultati delle partite dei turni non visualizzati:
+        // se l'organizzatore aumenta nuovamente i turni, i risultati già inseriti restano recuperabili.
 
         if(!Array.isArray(state[tag+"time"])){
             state[tag+"time"]=[];
@@ -11003,14 +11046,14 @@ function renderTables(){
 <tr>
 <td>
 <input
-value="${torneoGoldSilverBronze?(state[tag+"camp"][i]||m.campo):m.campo}"
+value="${state[tag+"camp"][i]||m.campo}"
 oninput="updateCamp('${tag}',${i},this.value)"
 style="width:45px">
 </td>
 
 <td>
 <input
-value="${torneoGoldSilverBronze&&(state[tag+"time"][i]&&state[tag+"time"][i]!=="-")?state[tag+"time"][i]:tempo}"
+value="${state[tag+"time"][i]&&state[tag+"time"][i]!=="-"?state[tag+"time"][i]:tempo}"
 oninput="updateTime('${tag}',${i},0,this.value)">
 </td>
 
