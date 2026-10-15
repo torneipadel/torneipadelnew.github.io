@@ -7432,6 +7432,10 @@ try{
             numeroGironi:2,
             squadrePerGirone:4
         },
+        9:{
+            numeroGironi:3,
+            squadrePerGirone:3
+        },
         12:{
             numeroGironi:3,
             squadrePerGirone:4
@@ -12779,8 +12783,8 @@ window.print();
             (!Array.isArray(state.A) || state.A.length === 0)
         ){
             var numeroCoppieDB = state.coppie.length;
-            var perGironeDB = 4;
-            var lettereDB = ["A","B","C","D","E","F"];
+            var perGironeDB = Number(state.rules?.squadrePerGirone) || 4;
+            var lettereDB = ["A","B","C","D","E","F","G"];
 
             lettereDB.forEach(function(tag){
                 state[tag] = [];
@@ -12839,6 +12843,7 @@ window.print();
 
         var strutture = {
             8:{numeroGironi:2,squadrePerGirone:4},
+            9:{numeroGironi:3,squadrePerGirone:3},
             12:{numeroGironi:3,squadrePerGirone:4},
             16:{numeroGironi:4,squadrePerGirone:4},
             20:{numeroGironi:5,squadrePerGirone:4},
