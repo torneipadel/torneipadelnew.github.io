@@ -78,7 +78,8 @@ function normalizeTeams(){
   configureRules();
   const source=Array.isArray(s.coppie)?s.coppie.map(teamName).filter(Boolean):[];
   const current=groups.flatMap(g=>Array.isArray(s[g])?s[g].map(teamName):[]).filter(Boolean);
-  if(source.length===9 && current.length!==9){
+  const balanced=groups.every(g=>Array.isArray(s[g])&&s[g].length===3&&s[g].every(x=>String(teamName(x)||'').trim()));
+  if(source.length===9 && (!balanced||current.length!==9)){
     groups.forEach((g,i)=>{s[g]=source.slice(i*3,(i+1)*3)});
   }else{
     groups.forEach(g=>{if(!Array.isArray(s[g]))s[g]=[]});
