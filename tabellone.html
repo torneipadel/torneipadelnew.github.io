@@ -9198,10 +9198,11 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
     valore = String(valore ?? "").trim();
 
     const aggiorna = (arr, i) => {
-        let res = String(arr[i] || "-").split("-");
-        if(res.length !== 2) res = ["",""];
-        res[pos] = valore;
-        arr[i] = res.join("-");
+        const parti=String(arr[i]||"-").split("|");
+        let res=String(parti[0]||"-").split("-");
+        if(res.length!==2)res=["",""];
+        res[pos]=valore;
+        arr[i]=res.join("-")+(parti[1]?"|"+parti[1]:"");
     };
 
     if(type === "Q"){
@@ -9214,15 +9215,17 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
         const multiFinali=state.rules.usaQuarti!==true && state.rules.usaSemifinali!==true && Math.max(1,Number(state.rules.numeroFinali)||1)>1;
         if(multiFinali){
             if(!Array.isArray(state.finaliRes)) state.finaliRes=[];
-            let res=String(state.finaliRes[index]||"-").split("-");
+            const parti=String(state.finaliRes[index]||"-").split("|");
+            let res=String(parti[0]||"-").split("-");
             if(res.length!==2)res=["",""];
             res[pos]=valore;
-            state.finaliRes[index]=res.join("-");
+            state.finaliRes[index]=res.join("-")+(parti[1]?"|"+parti[1]:"");
         }else{
-            let res = String(state.fTopRes || "-").split("-");
-            if(res.length !== 2) res = ["",""];
-            res[pos] = valore;
-            state.fTopRes = res.join("-");
+            const parti=String(state.fTopRes||"-").split("|");
+            let res=String(parti[0]||"-").split("-");
+            if(res.length!==2)res=["",""];
+            res[pos]=valore;
+            state.fTopRes=res.join("-")+(parti[1]?"|"+parti[1]:"");
         }
     }else{
         return;
@@ -9238,13 +9241,9 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
     const multiFinali=type==="F" && state.rules.usaQuarti!==true && state.rules.usaSemifinali!==true && Math.max(1,Number(state.rules.numeroFinali)||1)>1;
     const risultatoCompleto =
         type === "F"
-            ? (multiFinali ? /^\d+\-\d+$/.test(String(state.finaliRes?.[index]||"")) : /^\d+\-\d+$/.test(String(state.fTopRes || "")))
+            ? (multiFinali ? /^\d+\-\d+$/.test(String(state.finaliRes?.[index]||"").split("|")[0]) : /^\d+\-\d+$/.test(String(state.fTopRes || "").split("|")[0]))
             : /^\d+\-\d+$/.test(
-                String(
-                    type === "Q"
-                        ? state.qRes[index]
-                        : state.sTopRes[index]
-                )
+                String(type==="Q"?state.qRes[index]:state.sTopRes[index]).split("|")[0]
               );
 
     if(risultatoCompleto){
@@ -9255,6 +9254,62 @@ document.querySelectorAll('#finaleBox input').forEach(input => {
     updateAndSync();
 }
                     
+function getKOResultValue(type,index){
+    const multiFinali=type==="F"&&state.rules.usaQuarti!==true&&state.rules.usaSemifinali!==true&&Math.max(1,Number(state.rules.numeroFinali)||1)>1;
+    if(type==="F")return String(multiFinali?(state.finaliRes?.[index]||"-"):(state.fTopRes||"-"));
+    const key=type==="Q"?"qRes":type==="S"?"sTopRes":null;
+    return key&&Array.isArray(state[key])?String(state[key][index]||"-"):"-";
+}
+function setKOResultValue(type,index,value){
+    const multiFinali=type==="F"&&state.rules.usaQuarti!==true&&state.rules.usaSemifinali!==true&&Math.max(1,Number(state.rules.numeroFinali)||1)>1;
+    if(type==="F"){
+        if(multiFinali){if(!Array.isArray(state.finaliRes))state.finaliRes=[];state.finaliRes[index]=value;}
+        else state.fTopRes=value;
+        return;
+    }
+    const key=type==="Q"?"qRes":type==="S"?"sTopRes":null;
+    if(!key)return;
+    if(!Array.isArray(state[key]))state[key]=[];
+    state[key][index]=value;
+}
+window.updateKOExtraType=function(type,index,value){
+    ensureRules();
+    const parts=getKOResultValue(type,index).split("|");
+    const base=parts[0]||"-";
+    let extra="";
+    if(value==="S")extra="0-0";
+    else if(value==="R")extra="R--";
+    else if(value==="KP-A"||value==="KP-B")extra=value;
+    setKOResultValue(type,index,base+(extra?"|"+extra:""));
+    sincronizzaFaseFinale();
+    renderKO();
+    updateAndSync();
+};
+window.updateKOExtraScore=function(type,index,side,value){
+    ensureRules();
+    const parts=getKOResultValue(type,index).split("|");
+    const base=parts[0]||"-";
+    const oldExtra=parts[1]||"";
+    const kind=oldExtra.startsWith("R-")?"R":(oldExtra.startsWith("KP-")?"KP":(/^\d+\-\d+$/.test(oldExtra)?"S":""));
+    if(kind!=="S"&&kind!=="R")return;
+    let extra;
+    if(kind==="S"){
+        const score=oldExtra.split("-");
+        while(score.length<2)score.push("");
+        score[side]=String(value??"").trim();
+        extra=score.slice(0,2).join("-");
+    }else{
+        const score=oldExtra.split("-");
+        while(score.length<3)score.push("");
+        score[side+1]=String(value??"").trim();
+        extra="R-"+score[1]+"-"+score[2];
+    }
+    setKOResultValue(type,index,base+"|"+extra);
+    const completo=/^\d+\-\d+$/.test(base)&&((kind==="S"&&/^\d+\-\d+$/.test(extra))||(kind==="R"&&/^R\-\d+\-\d+$/.test(extra)));
+    if(completo){sincronizzaFaseFinale();renderKO();}
+    updateAndSync();
+};
+
 function getWinner(match,res){
 
     ensureRules();
@@ -11679,7 +11734,13 @@ window.updateFinalGroupField=function(index,field,value){
 }
 
 function renderMatchCard(titolo, match, type, index, risultato) {
-    const res = String(risultato || "-").split("-");
+    const risultatoParts=String(risultato||"-").split("|");
+    const res=String(risultatoParts[0]||"-").split("-");
+    const extra=String(risultatoParts[1]||"");
+    const extraType=extra.startsWith("R-")?"R":extra.startsWith("KP-")?extra:(/^\d+\-\d+$/.test(extra)?"S":"");
+    const extraScores=extraType==="S"?extra.split("-"):extraType==="R"?extra.split("-").slice(1):[];
+    const extra1=extraScores[0]||"";
+    const extra2=extraScores[1]||"";
     const risultato1 = res[0] === "-" ? "" : (res[0] || "");
     const risultato2 = res[1] || "";
 
@@ -11724,6 +11785,18 @@ function renderMatchCard(titolo, match, type, index, risultato) {
         <div class="team-line">${displayTeam1}</div>
         <div class="vs-line"><b>VS</b></div>
         <div class="team-line">${displayTeam2}</div>
+        <div class="ko-extra-controls" style="display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px">
+            <select aria-label="Spareggio partita" onchange="updateKOExtraType('${type}',${index},this.value)" style="max-width:155px;font-size:11px">
+                <option value="" ${extraType===""?'selected':''}>Spareggio</option>
+                <option value="S" ${extraType==="S"?'selected':''} ${state.rules.tempoSupplementare!==true?'disabled':''}>Supplementari</option>
+                <option value="R" ${extraType==="R"?'selected':''} ${state.rules.rigori!==true?'disabled':''}>Rigori</option>
+                <option value="KP-A" ${extraType==="KP-A"?'selected':''} ${state.rules.killerPoint!==true?'disabled':''}>Killer point squadra 1</option>
+                <option value="KP-B" ${extraType==="KP-B"?'selected':''} ${state.rules.killerPoint!==true?'disabled':''}>Killer point squadra 2</option>
+            </select>
+            <input type="number" min="0" aria-label="Risultato spareggio squadra 1" placeholder="S/R 1" value="${extra1}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},0,this.value)" style="width:48px;font-size:11px">
+            <span>–</span>
+            <input type="number" min="0" aria-label="Risultato spareggio squadra 2" placeholder="S/R 2" value="${extra2}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},1,this.value)" style="width:48px;font-size:11px">
+        </div>
     </td>
 
     <td class="score-cell">
