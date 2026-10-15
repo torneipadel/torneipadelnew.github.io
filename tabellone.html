@@ -10177,8 +10177,12 @@ function generaPartiteGironi(){
 
         const partite = [];
 
-        if(!Array.isArray(girone) || girone.length !== 4)
+        if(!Array.isArray(girone)) return partite;
+        if(typeof window.isGoldSilverBronzeTournament==='function' && window.isGoldSilverBronzeTournament() && girone.length===3){
+            [[0,1],[0,2],[1,2]].forEach(x=>partite.push({casa:x[0],ospite:x[1]}));
             return partite;
+        }
+        if(girone.length !== 4) return partite;
 
         const coppie = [
             [0,1],
@@ -10764,6 +10768,9 @@ function renderTables(){
             campiPerGirone[
                 partita.girone
             ]||[2,3];
+        const torneoGoldSilverBronze=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament();
+        const idCasa=torneoGoldSilverBronze?partita.girone+':'+partita.casa:partita.casa;
+        const idOspite=torneoGoldSilverBronze?partita.girone+':'+partita.ospite:partita.ospite;
 
         while(!assegnata){
 
@@ -10784,12 +10791,8 @@ function renderTables(){
                         o.slot===slot &&
                         (
                             o.campo===campo ||
-                            o.squadre.includes(
-                                partita.casa
-                            ) ||
-                            o.squadre.includes(
-                                partita.ospite
-                            )
+                            o.squadre.includes(idCasa) ||
+                            o.squadre.includes(idOspite)
                         )
                     ){
                         conflitto=true;
@@ -10809,10 +10812,7 @@ function renderTables(){
 
                         campo:campo,
 
-                        squadre:[
-                            partita.casa,
-                            partita.ospite
-                        ]
+                        squadre:[idCasa,idOspite]
 
                     });
 
@@ -13040,7 +13040,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=1"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=2"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 </body>
 </html>
