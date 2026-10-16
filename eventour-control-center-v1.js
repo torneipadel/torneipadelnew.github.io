@@ -72,6 +72,11 @@ function render(){
  ${audit.map(a=>`<tr><td>${new Date(a.created_at).toLocaleString('it-IT')}</td><td>${esc(a.email||'—')}</td><td><code>${esc(a.action)}</code></td><td>${esc(a.entity_type||'')} ${esc(a.entity_id||'')}</td><td>${esc(a.summary||'')}</td></tr>`).join('')||'<tr><td colspan="5">Nessuna operazione registrata finora.</td></tr>'}
  </tbody></table></div></section>
  <section class="panel">
+  <div class="panel-title"><div><h2>🧪 Account giocatori di test</h2><p>Crea i 18 account Eventour di prova nel progetto Supabase collegato, usando la funzione protetta dedicata.</p></div><button class="primary" data-action="create-eventour-test-players">👥 Crea i 18 giocatori</button></div>
+  <p class="section-help">Operazione riservata al proprietario autorizzato. Prima dell'esecuzione verrà richiesta la password prevista dalla funzione e una conferma esplicita.</p>
+  <div id="eventourTestPlayersResult" class="notice" hidden></div>
+ </section>
+ <section class="panel">
   <div class="panel-title"><div><h2>Backup e ripristino globale</h2><p>Snapshot completo del repository, cronologia dei file del Superadmin e ripristino controllato da commit.</p></div><div class="toolbar"><button class="primary" data-action="create-project-backup">💾 Backup completo adesso</button><button data-action="refresh-code-backups">↻ Aggiorna backup</button></div></div>
   <div id="projectBackupStatus" class="notice" hidden></div>
   <h3>Backup completi del repository</h3><div id="projectBackupHistory" class="backup-history"><div class="loading">Lettura backup completi…</div></div>
@@ -177,6 +182,26 @@ async function loadProjectBackups(){
   host.innerHTML=rows.length?'<div class="backup-history-list">'+rows.map(b=>'<article class="backup-item"><div><b>'+esc(b.branch_name)+'</b><small>'+esc(b.created_by_email||'—')+' · '+esc(new Date(b.created_at).toLocaleString('it-IT'))+'</small><small>Commit '+esc(String(b.commit_sha||'').slice(0,12))+' · '+esc(b.status||'CREATED')+'</small></div><div><a href="https://github.com/'+GITHUB_REPO+'/tree/'+encodeURIComponent(b.branch_name)+'" target="_blank" rel="noopener">Apri backup</a> · <a href="https://github.com/'+GITHUB_REPO+'/commit/'+encodeURIComponent(b.commit_sha)+'" target="_blank" rel="noopener">Commit origine</a></div></article>').join('')+'</div>':'<p class="empty">Nessun backup completo registrato. Puoi crearne uno con il pulsante qui sopra.</p>';
  }catch(e){host.innerHTML='<p class="empty">Impossibile leggere i backup completi: '+esc(e?.message||String(e))+'</p>'}
 }
+async function createEventourTestPlayers(button){
+ const status=document.getElementById('eventourTestPlayersResult');
+ if(!confirm('Confermi la creazione dei 18 account giocatori di test Eventour?'))return;
+ const password=prompt('Inserisci la password richiesta dalla funzione per autorizzare la creazione:');
+ if(password===null)return;
+ if(!password.trim()){note('Operazione annullata: password non inserita.','bad');return}
+ button.disabled=true;button.textContent='Creazione account…';
+ if(status){status.hidden=false;status.className='notice';status.textContent='Richiesta inviata a Supabase. Attendi il risultato…'}
+ try{
+  const {data:result,error}=await sb.functions.invoke('crea-giocatori-eventour-test',{body:{password:password.trim()}});
+  if(error)throw error;
+  if(!result)throw new Error('Supabase non ha restituito un risultato verificabile.');
+  if(status){status.hidden=false;status.className='notice';status.textContent=JSON.stringify(result,null,2)}
+  note('La funzione ha risposto. Controlla il dettaglio degli account nella sezione Account giocatori di test.');
+ }catch(e){
+  const message=e?.message||String(e);
+  if(status){status.hidden=false;status.className='notice bad';status.textContent='Creazione non confermata: '+message}
+  note('Creazione account non confermata: '+message,'bad');
+ }finally{button.disabled=false;button.textContent='👥 Crea i 18 giocatori'}
+}
 async function createProjectBackup(){
  const button=document.querySelector('[data-action="create-project-backup"]'),status=document.getElementById('projectBackupStatus');
  if(button){button.disabled=true;button.textContent='Creazione backup…'}if(status){status.hidden=false;status.className='notice';status.textContent='Creazione snapshot completo in corso…'}
@@ -204,6 +229,7 @@ document.addEventListener('click',async e=>{
  const btn=e.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
  if(a==='close-modal'){if(e.target.classList.contains('modal-backdrop')||e.target.closest('button'))document.getElementById('modalHost').innerHTML='';return}
  if(a==='create-project-backup'){await createProjectBackup();return}
+ if(a==='create-eventour-test-players'){await createEventourTestPlayers(btn);return}
  if(a==='refresh-code-backups'){await load();return}
  if(a==='mark-code-version'){btn.disabled=true;try{await markCodeVersion(btn.dataset.file,btn.dataset.sha,btn.dataset.status)}catch(err){note(err?.message||String(err),'bad')}finally{btn.disabled=false}return}
  if(a==='request-code-restore'){await requestCodeRestore(btn.dataset.file,btn.dataset.sha).catch(err=>note(err?.message||String(err),'bad'));return}
