@@ -85,10 +85,7 @@
         ['News', 'news.html'],
         ['Mercatino', 'mercatino.html'],
         ['Sponsor', 'sponsor-pubblico.html'],
-        ['Contatti', 'contatti.html'],
-        ['Privacy', 'privacy.html'],
-        ['Cookie', 'cookie.html'],
-        ['Termini', 'termini.html']
+        ['Contatti', 'contatti.html']
       ];
       const query = new URLSearchParams(location.search);
       links.forEach(([label, href]) => {
