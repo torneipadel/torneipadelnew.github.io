@@ -11,7 +11,9 @@
     .site-dashboard-menu-panel{position:fixed;top:64px;right:16px;z-index:2147483001;display:none;min-width:190px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(7,25,45,.94);box-shadow:0 12px 30px rgba(0,0,0,.3);backdrop-filter:blur(16px)}
     .site-dashboard-menu-panel.open{display:grid;gap:4px}
     .site-dashboard-menu-panel a{display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font:600 12px/1.3 Arial,sans-serif}
-    .site-dashboard-menu-panel a:hover{background:rgba(255,255,255,.12)}
+    .site-dashboard-menu-panel a:hover,.site-dashboard-menu-exit:hover{background:rgba(255,255,255,.12)}
+    .site-dashboard-menu-exit{display:block;width:100%;padding:10px 12px;border:0;border-top:1px solid rgba(255,255,255,.18);border-radius:8px;background:transparent;color:#fff;text-align:left;font:700 12px/1.3 Arial,sans-serif;cursor:pointer}
+    .site-dashboard-menu-exit:disabled{opacity:.65;cursor:wait}
     @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:36px!important;height:36px!important}.site-dashboard-menu-button{top:12px;right:12px}.site-dashboard-menu-panel{top:60px;right:12px}}
   `;
   document.head.appendChild(style);
@@ -77,11 +79,16 @@
       panel.className = 'site-dashboard-menu-panel';
       panel.setAttribute('aria-label', 'Menu dashboard');
       const links = [
+        ['Dashboard', 'dashboard.html'],
         ['Home', 'index.html'],
         ['Tornei', 'visitatore.html'],
         ['News', 'news.html'],
+        ['Mercatino', 'mercatino.html'],
         ['Sponsor', 'sponsor-pubblico.html'],
-        ['Contatti', 'contatti.html']
+        ['Contatti', 'contatti.html'],
+        ['Privacy', 'privacy.html'],
+        ['Cookie', 'cookie.html'],
+        ['Termini', 'termini.html']
       ];
       const query = new URLSearchParams(location.search);
       links.forEach(([label, href]) => {
@@ -91,6 +98,29 @@
         else link.href = href;
         panel.appendChild(link);
       });
+      const exit = document.createElement('button');
+      exit.type = 'button';
+      exit.className = 'site-dashboard-menu-exit';
+      exit.textContent = 'Esci';
+      exit.setAttribute('aria-label', 'Esci dall’account');
+      exit.addEventListener('click', async () => {
+        exit.disabled = true;
+        exit.textContent = 'Uscita…';
+        try {
+          if (typeof window.logout === 'function') {
+            await window.logout();
+          } else {
+            exit.disabled = false;
+            exit.textContent = 'Esci';
+            window.location.href = 'index.html';
+          }
+        } catch (error) {
+          console.error('Errore durante la disconnessione:', error);
+          exit.disabled = false;
+          exit.textContent = 'Esci';
+        }
+      });
+      panel.appendChild(exit);
       button.addEventListener('click', () => {
         const open = panel.classList.toggle('open');
         button.setAttribute('aria-expanded', String(open));
@@ -99,6 +129,13 @@
         if (!button.contains(event.target) && !panel.contains(event.target)) {
           panel.classList.remove('open');
           button.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          panel.classList.remove('open');
+          button.setAttribute('aria-expanded', 'false');
+          button.focus();
         }
       });
       document.body.append(button, panel);
