@@ -24,14 +24,16 @@ body {
 .container{max-width:1000px;margin:0 auto;padding:10px}
 
 .header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:20px}
-.tabellone-index-brand{position:relative;display:block;flex:0 0 310px;width:310px;max-width:calc(100vw - 56px);color:#fff;text-decoration:none;z-index:1}
-.tabellone-index-brand:before{content:"";position:absolute;inset:-9px -18px;border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;opacity:1;pointer-events:none}
-.tabellone-index-brand-wrap{position:relative;z-index:1;display:block;text-align:center}
-.tabellone-index-brand img{position:relative;z-index:1;display:block;width:310px;max-width:100%;height:58px;object-fit:cover;object-position:center;border:0;border-radius:0;mix-blend-mode:normal;opacity:1;filter:none;box-shadow:none}
-.tabellone-index-brand-subtitle{position:relative;z-index:2;display:block;margin:-7px 0 0;color:#fff;font-family:Jost,Inter,"Open Sans",Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-align:center;text-transform:none;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap}
+.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:1.5px;position:relative}
+.brand-logo-wrap{display:block;position:relative;z-index:1;text-align:center}
+.brand:before{content:"";position:absolute;inset:-9px -18px;border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;opacity:1;pointer-events:none}
+.brand img{position:relative;z-index:1;width:310px;max-width:310px;height:58px;object-fit:cover;object-position:center;display:block;border:0;border-radius:0;mix-blend-mode:normal;opacity:1;filter:none;-webkit-mask-image:none;mask-image:none;box-shadow:none;transition:opacity .25s ease}
+.brand img:hover{opacity:1;transform:none}
+.brand img:hover{opacity:.82;transform:scale(1.015)}
+.brand-subtitle{position:relative;z-index:2;display:block;margin:-7px 0 0 0;color:#fff;font-family:Jost,Inter,"Open Sans",Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-align:center;text-transform:none;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap}
 .tournament-header-details{min-width:0;flex:1 1 auto;width:100%}
-@media(min-width:600px){.header-box{flex-direction:row;gap:30px}.tabellone-index-brand{max-width:310px;flex-basis:310px}.tournament-header-details{width:auto}}
-@media(max-width:599px){.tabellone-index-brand{flex-basis:auto;width:310px;max-width:calc(100vw - 56px)}}
+@media(min-width:600px){.header-box{flex-direction:row;gap:30px}.brand{max-width:310px;flex:0 0 310px}.tournament-header-details{width:auto}}
+@media(max-width:599px){.brand{flex-basis:auto;width:310px;max-width:calc(100vw - 56px)}}
 
 /* --- EFFETTO VETRO MOLTO CHIARO --- */
 .card, .koBox, .finalContainer {
@@ -2593,7 +2595,33 @@ Chiudi
 
 <div class="header-box">
 
-<a class="tabellone-index-brand" href="index.html" aria-label="Eventour — gestione eventi e tornei"><span class="tabellone-index-brand-wrap"><img src="eventour_logo.jpg" alt="EVENTOUR — gestione eventi &amp; tornei"><span class="tabellone-index-brand-subtitle">gestione eventi &amp; tornei</span></span></a>
+<a class="brand tabellone-index-brand" href="index.html"><span class="brand-logo-wrap tabellone-index-brand-wrap"><img src="eventour_logo.jpg" alt="EVENTOUR — gestione eventi &amp; tornei"><span class="brand-subtitle">gestione eventi &amp; tornei</span></span></a>
+<script>
+(function(){
+  const logo=document.querySelector('.tabellone-index-brand-wrap img');
+  if(!logo || logo.dataset.textIsolated==='1') return;
+  logo.dataset.textIsolated='1';
+  function isolateOriginalLetters(){
+    if(!logo.naturalWidth || !logo.naturalHeight) return;
+    try {
+      const canvas=document.createElement('canvas');
+      canvas.width=logo.naturalWidth; canvas.height=logo.naturalHeight;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(logo,0,0);
+      const frame=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const px=frame.data;
+      for(let i=0;i<px.length;i+=4){
+        const lum=0.2126*px[i]+0.7152*px[i+1]+0.0722*px[i+2];
+        const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));
+        px[i]=255; px[i+1]=255; px[i+2]=255; px[i+3]=Math.round(px[i+3]*alpha/255);
+      }
+      ctx.putImageData(frame,0,0);
+      logo.src=canvas.toDataURL('image/png');
+    } catch(e) { console.warn('Isolamento scritta EVENTOUR non riuscito:',e); }
+  }
+  if(logo.complete) isolateOriginalLetters(); else logo.addEventListener('load',isolateOriginalLetters,{once:true});
+})();
+</script>
 
 <div class="tournament-header-details" style="text-align:center;">
 
