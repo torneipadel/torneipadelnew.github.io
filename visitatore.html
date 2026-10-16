@@ -25,12 +25,13 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
 
 /* I pulsanti VEDI I TORNEI e IL MIO TORNEO riprendono lo sfondo del pulsante CALENDARIO. */
 .np-hero-actions .np-primary,#npUser .np-primary{background:rgba(255,255,255,.08)!important;color:#fff!important;border:1px solid rgba(255,255,255,.17)!important;box-shadow:none!important}
+.brand-back{width:40px;height:40px;margin:0 0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;font:400 20px 'Open Sans',Arial,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
 
 <div class="np-page" id="home">
-  <header class="np-top"><div class="np-topbar"><button class="np-icon" onclick="history.back()" aria-label="Torna indietro">←</button></div></header>
+  <button class="brand-back" type="button" onclick="if(history.length>1){history.back()}else{location.href='index.html'}" aria-label="Torna indietro">←</button>
 
   <section class="news-brand-banner" aria-label="EVENTOUR gestione eventi e tornei">
     <img src="eventour_logo.jpg" class="news-eventour-logo" alt="EVENTOUR">
