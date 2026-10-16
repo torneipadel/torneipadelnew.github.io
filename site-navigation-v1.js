@@ -12,7 +12,7 @@
     .site-dashboard-menu-panel.open{display:grid;gap:4px}
     .site-dashboard-menu-panel a{display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font:600 12px/1.3 Arial,sans-serif}
     .site-dashboard-menu-panel a:hover{background:rgba(255,255,255,.12)}
-    body:has(>.exit-public)>.exit-public{left:auto!important;right:16px!important}
+    body:has(>.exit-public)>.exit-public{top:auto!important;bottom:16px!important;left:auto!important;right:16px!important}
     @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:36px!important;height:36px!important}.site-dashboard-menu-button{top:12px;right:12px}.site-dashboard-menu-panel{top:60px;right:12px}}
   `;
   document.head.appendChild(style);
