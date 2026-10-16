@@ -24,10 +24,14 @@ body {
 .container{max-width:1000px;margin:0 auto;padding:10px}
 
 .header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:20px}
-.tournament-header-logo{display:block;width:132px;height:88px;max-width:34vw;object-fit:contain;object-position:center;flex:0 0 auto}
+.tabellone-index-brand{position:relative;display:block;flex:0 0 310px;width:310px;max-width:calc(100vw - 56px);color:#fff;text-decoration:none;z-index:1}
+.tabellone-index-brand:before{content:"";position:absolute;inset:-9px -18px;border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;opacity:1;pointer-events:none}
+.tabellone-index-brand-wrap{position:relative;z-index:1;display:block;text-align:center}
+.tabellone-index-brand img{position:relative;z-index:1;display:block;width:310px;max-width:100%;height:58px;object-fit:cover;object-position:center;border:0;border-radius:0;mix-blend-mode:normal;opacity:1;filter:none;box-shadow:none}
+.tabellone-index-brand-subtitle{position:relative;z-index:2;display:block;margin:-7px 0 0;color:#fff;font-family:Jost,Inter,"Open Sans",Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-align:center;text-transform:none;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap}
 .tournament-header-details{min-width:0;flex:1 1 auto;width:100%}
-@media(min-width:600px){.header-box{flex-direction:row;gap:22px}.tournament-header-logo{width:150px;height:100px;max-width:24vw}.tournament-header-details{width:auto}}
-@media(max-width:599px){.tournament-header-logo{width:112px;height:74px;max-width:40vw}}
+@media(min-width:600px){.header-box{flex-direction:row;gap:30px}.tabellone-index-brand{max-width:310px;flex-basis:310px}.tournament-header-details{width:auto}}
+@media(max-width:599px){.tabellone-index-brand{flex-basis:auto;width:310px;max-width:calc(100vw - 56px)}}
 
 /* --- EFFETTO VETRO MOLTO CHIARO --- */
 .card, .koBox, .finalContainer {
@@ -2589,7 +2593,7 @@ Chiudi
 
 <div class="header-box">
 
-<img class="tournament-header-logo" src="loghi/icona_app1.jpg" alt="Next Point Padel" loading="eager">
+<a class="tabellone-index-brand" href="index.html" aria-label="Eventour — gestione eventi e tornei"><span class="tabellone-index-brand-wrap"><img src="eventour_logo.jpg" alt="EVENTOUR — gestione eventi &amp; tornei"><span class="tabellone-index-brand-subtitle">gestione eventi &amp; tornei</span></span></a>
 
 <div class="tournament-header-details" style="text-align:center;">
 
