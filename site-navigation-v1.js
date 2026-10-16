@@ -6,7 +6,7 @@
   style.textContent = `
     .site-global-back{position:fixed!important;top:16px!important;left:16px!important;z-index:2147483000!important;width:38px!important;height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.72)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.22)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;text-decoration:none!important;cursor:pointer!important;padding:0!important}
     .site-global-back:hover{background:rgba(7,25,45,.9)!important;transform:translateY(-1px)}
-    html.site-no-dashboard-menu .menu-button:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .mobile-menu,html.site-no-dashboard-menu .hamburger,html.site-no-dashboard-menu [data-hamburger],html.site-no-dashboard-menu [aria-label="Apri menu"],html.site-no-dashboard-menu [aria-label="Apri il menu"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+    html.site-no-dashboard-menu .menu-button:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .mobile-menu,html.site-no-dashboard-menu .hamburger,html.site-no-dashboard-menu [data-hamburger],html.site-no-dashboard-menu [aria-label="Apri menu"]:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [aria-label="Apri il menu"]:not([data-site-keep-menu-control]){display:none!important;visibility:hidden!important;pointer-events:none!important}
     .site-dashboard-menu-button{position:fixed;top:16px;right:16px;z-index:2147483001;width:42px;height:42px;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(7,25,45,.72);color:#fff;font:700 23px/1 Arial,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
     .site-dashboard-menu-panel{position:fixed;top:64px;right:16px;z-index:2147483001;display:none;min-width:190px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(7,25,45,.94);box-shadow:0 12px 30px rgba(0,0,0,.3);backdrop-filter:blur(16px)}
     .site-dashboard-menu-panel.open{display:grid;gap:4px}
@@ -18,18 +18,23 @@
   document.head.appendChild(style);
   if (!isDashboard) document.documentElement.classList.add('site-no-dashboard-menu');
 
-  // Non-hamburger control for the tabellone: keep its tournament tools reachable.
-  if (page === 'tabellone.html') {
-    document.querySelectorAll('.menu-button').forEach(el => {
-      el.dataset.siteKeepMenuControl = '1';
+  // Keep existing navigation functions accessible without showing hamburger icons off-dashboard.
+  document.querySelectorAll('.menu-button,.mobile-menu,.hamburger,[aria-label="Apri menu"],[aria-label="Apri il menu"]').forEach(el => {
+    if (isDashboard) return;
+    el.dataset.siteKeepMenuControl = '1';
+    if (page === 'tabellone.html' && el.classList.contains('menu-button')) {
       el.textContent = '⚙️ Regole';
       el.setAttribute('aria-label', 'Apri regole e formato del tabellone');
-      el.style.width = 'auto';
-      el.style.minWidth = '96px';
-      el.style.padding = '0 12px';
-      el.style.fontSize = '13px';
-    });
-  }
+    } else {
+      const text = (el.innerText || el.textContent || '').trim();
+      if (!text || /^[☰≡\u2630\s]+$/.test(text)) el.textContent = 'Menu';
+      el.setAttribute('aria-label', 'Menu di navigazione');
+    }
+    el.style.width = 'auto';
+    el.style.minWidth = '72px';
+    el.style.padding = '0 12px';
+    el.style.fontSize = '13px';
+  });
 
   function hasNavigationBack() {
     const candidates = document.querySelectorAll('.brand-back,.btn-back,.back,[aria-label*="indietro" i]');
