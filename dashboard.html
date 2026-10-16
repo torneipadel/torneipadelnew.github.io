@@ -16,7 +16,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:'Open Sans',Arial,sans-serif;color:#fff}
 body{background:linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.62)),url('2pages.jpg') center/cover fixed no-repeat;min-height:100vh;padding:22px 16px 40px;overflow-x:hidden}
-.exit-public{position:fixed;top:18px;left:18px;width:auto;min-width:48px;height:30px;padding:0 9px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:16px/1 'Open Sans',Arial,sans-serif;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:1000;opacity:.78}.exit-public:hover{opacity:1;background:rgba(255,255,255,.14)}.page{width:min(760px,100%);margin:0 auto}
+.page{width:min(760px,100%);margin:0 auto}
 .dashboard-brand-banner{position:relative;isolation:isolate;width:100%;height:190px;margin:0 0 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}
 .dashboard-brand-banner:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}
 .dashboard-brand-banner .dashboard-eventour-logo{position:relative;z-index:1;display:block;width:min(560px,94%);height:130px;max-width:94%;max-height:none;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}
@@ -49,7 +49,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <script src="tenant-theme-v1.js?v=3"></script>
 </head>
 <body>
-<button class="exit-public" onclick="logout()" aria-label="Esci" title="Esci">Esci</button>
+
 <section id="companySetup" style="display:none;max-width:820px;margin:0 auto 30px;padding:28px;border:1px solid rgba(255,255,255,.22);border-radius:24px;background:rgba(7,20,38,.78);backdrop-filter:blur(18px);box-shadow:0 18px 50px rgba(0,0,0,.28)">
 <h2 style="margin:0 0 8px;text-align:center;font-size:27px">Configura la tua app</h2>
 <p style="margin:0 0 24px;text-align:center;color:rgba(255,255,255,.78);line-height:1.5">Completa questi dati una sola volta. Verranno utilizzati per identificare e personalizzare la tua app.</p>
@@ -323,4 +323,4 @@ window.addEventListener("load",initTenantSafe);
  if(logo.complete){if(logo.naturalWidth)isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true});
 })();
 </script>
-<script src="site-navigation-v1.js?v=2"></script>
+<script src="site-navigation-v1.js?v=3"></script>
