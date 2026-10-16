@@ -79,7 +79,6 @@
       panel.className = 'site-dashboard-menu-panel';
       panel.setAttribute('aria-label', 'Menu dashboard');
       const links = [
-        ['Dashboard', 'dashboard.html'],
         ['Home', 'index.html'],
         ['Tornei', 'visitatore.html'],
         ['News', 'news.html'],
