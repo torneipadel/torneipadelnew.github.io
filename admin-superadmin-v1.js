@@ -104,6 +104,7 @@
       '<div><h3 style="margin:0 0 6px">8. 🔄 Aggiorna</h3><p>I pulsanti <b>↻ Aggiorna</b> rileggono i dati della rispettiva sezione. Usali dopo una modifica, un ripristino o quando vuoi verificare che siano comparsi nuovi record.</p></div>'+
       '<div style="padding:12px;border-left:4px solid #9a6700;background:#fff8e6"><b>Regola operativa consigliata:</b> prima di una modifica delicata controlla il ruolo, poi verifica il registro e i backup disponibili. Dopo l’operazione premi <b>Aggiorna</b> e controlla il risultato. Per il codice, identifica prima il commit corretto e usa il ripristino solo dopo aver verificato la versione da recuperare.</div>'+
       '</div></div></details>'+
+      '<details class="card" style="margin-bottom:18px" id="testPlayersCard"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🧪 Account giocatori di test <span class="notice" style="font-weight:400;margin-left:8px">18 account Eventour</span></summary><div class="card-body"><p>Crea o verifica i 18 account di test della società Eventour. Gli account già collegati ad altre società vengono saltati e non modificati.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" id="createEventourTestPlayers">👥 Crea i 18 giocatori</button></div><div id="eventourTestPlayersStatus" style="margin-top:12px" aria-live="polite"></div><div id="eventourTestPlayersResults" style="margin-top:12px"></div></div></details>'+
       '<details class="card" open><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🔐 Ruolo e protezioni <span class="notice" style="font-weight:400;margin-left:8px">Accesso e autorizzazioni</span></summary><div class="card-body" id="superadminSummary"></div></details>'+
       '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🛡️ Cosa può fare il Superadmin <span class="notice" style="font-weight:400;margin-left:8px">Operazioni consentite</span></summary><div class="card-body" id="superadminCapabilities"></div></details>'+
       '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">📋 Registro modifiche <span class="notice" style="font-weight:400;margin-left:8px">Audit</span><button type="button" class="btn" id="refreshAudit" style="float:right">↻ Aggiorna</button></summary><div class="card-body"><div id="auditList"></div></div></details>'+
@@ -117,7 +118,57 @@
     $('refreshBackups').onclick=loadBackups;
     $('refreshDataBackups')?.addEventListener('click',loadDataBackups);
     $('refreshCodeBackups')?.addEventListener('click',loadCodeBackups);
+    $('createEventourTestPlayers')?.addEventListener('click',createEventourTestPlayers);
     return root;
+  }
+
+  async function createEventourTestPlayers(){
+    if(!isSuper())return;
+    const c=client();
+    const status=$('eventourTestPlayersStatus');
+    const resultsBox=$('eventourTestPlayersResults');
+    const button=$('createEventourTestPlayers');
+    if(!c?.functions?.invoke||!c?.auth?.getSession){
+      if(status)status.innerHTML='<span style="color:#b42318">Supabase o sessione non disponibili. Nessun account elaborato.</span>';
+      return;
+    }
+    const sessionResult=await c.auth.getSession();
+    if(sessionResult.error||!sessionResult.data?.session?.access_token){
+      if(status)status.innerHTML='<span style="color:#b42318">Sessione non valida. Accedi nuovamente con il proprietario Eventour.</span>';
+      return;
+    }
+    const password=window.prompt('Conferma l’operazione inserendo la password prevista per gli account di test:');
+    if(password===null)return;
+    if(!password){
+      if(status)status.innerHTML='<span style="color:#b42318">Operazione annullata: password non inserita.</span>';
+      return;
+    }
+    if(!window.confirm('Confermi la creazione/verifica dei 18 account di test nella società Eventour? Gli account già associati ad altre società non verranno modificati.'))return;
+    if(button)button.disabled=true;
+    if(status)status.textContent='Richiesta inviata a Supabase. Attendi il risultato…';
+    if(resultsBox)resultsBox.replaceChildren();
+    try{
+      const r=await c.functions.invoke('crea-giocatori-eventour-test',{body:{password}});
+      if(r.error){
+        let detail=r.error.message||String(r.error);
+        try{const body=await r.error.context?.json?.();if(body?.error)detail=body.error;}catch(_){}
+        throw new Error(detail);
+      }
+      const data=r.data||{};
+      if(!Array.isArray(data.results))throw new Error(data.error||'Risposta inattesa della funzione.');
+      const rows=data.results;
+      const ok=rows.filter(x=>x.status==='creato e associato'||x.status==='account esistente associato').length;
+      const errors=rows.filter(x=>x.status==='errore'||x.status==='saltato').length;
+      if(status)status.innerHTML='<b>Risultato Supabase:</b> '+esc(String(ok))+' account creati o già associati su '+esc(String(data.total??18))+'. Problemi o account saltati: '+esc(String(errors))+'.';
+      if(resultsBox)resultsBox.innerHTML='<div style="display:grid;gap:6px">'+rows.map(x=>'<div style="padding:9px;border:1px solid #ddd;border-radius:8px;overflow-wrap:anywhere"><b>'+esc(x.email)+'</b> — '+esc(x.status)+(x.detail?' <small style="display:block">'+esc(x.detail)+'</small>':'')+'</div>').join('')+'</div>';
+      if(errors>0)console.warn('Risultati account test Eventour:',data);
+    }catch(e){
+      const msg=e?.message||String(e);
+      if(status)status.innerHTML='<span style="color:#b42318"><b>Operazione non completata:</b> '+esc(msg)+'</span>';
+      console.error('Creazione giocatori test Eventour:',e);
+    }finally{
+      if(button)button.disabled=false;
+    }
   }
 
   function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
