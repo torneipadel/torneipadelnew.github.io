@@ -23,9 +23,11 @@ body {
 }
 .container{max-width:1000px;margin:0 auto;padding:10px}
 
-.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;margin-bottom:20px}
-
-@media(min-width:600px){.header-box{flex-direction:row;gap:30px;}}
+.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin-bottom:20px}
+.tournament-header-logo{display:block;width:132px;height:88px;max-width:34vw;object-fit:contain;object-position:center;flex:0 0 auto}
+.tournament-header-details{min-width:0;flex:1 1 auto;width:100%}
+@media(min-width:600px){.header-box{flex-direction:row;gap:22px}.tournament-header-logo{width:150px;height:100px;max-width:24vw}.tournament-header-details{width:auto}}
+@media(max-width:599px){.tournament-header-logo{width:112px;height:74px;max-width:40vw}}
 
 /* --- EFFETTO VETRO MOLTO CHIARO --- */
 .card, .koBox, .finalContainer {
@@ -2587,8 +2589,9 @@ Chiudi
 
 <div class="header-box">
 
+<img class="tournament-header-logo" src="loghi/icona_app1.jpg" alt="Next Point Padel" loading="eager">
 
-<div style="text-align:center;">
+<div class="tournament-header-details" style="text-align:center;">
 
 <div style="
 
