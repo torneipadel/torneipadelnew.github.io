@@ -8,4 +8,5 @@ async function changeRole(id,role){try{await call({action:"role",user_id:id,ruol
 async function toggleUser(id,attivo){try{await call({action:"active",user_id:id,attivo});statusEl.textContent=attivo?"Utente riattivato.":"Utente disattivato.";load()}catch(e){statusEl.textContent="Errore: "+e.message}}
 create.onclick=async()=>{try{statusEl.textContent="Associazione utente in corso…";const result=await call({action:"create",nome:nome.value,cognome:cognome.value,email:email.value,ruolo:ruolo.value});nome.value="";cognome.value="";email.value="";statusEl.textContent=result?.already_exists?"✅ Utente già registrato: associato alla società selezionata. Può accedere con il suo account esistente.":"✅ Invito inviato. L'utente dovrà completare l'accesso dall'email ricevuta.";load()}catch(e){statusEl.textContent="Errore: "+e.message}};
 load();
-</script></body></html>
+</script><script src="site-navigation-v1.js?v=1"></script>
+</body></html>
