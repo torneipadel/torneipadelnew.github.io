@@ -28,7 +28,7 @@
 
 .audience{background:var(--soft);padding:100px 0}.audience-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:50px}.audience-card{position:relative;min-height:300px;display:flex;align-items:flex-end;overflow:hidden;color:#fff;background:#123}.audience-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.audience-card:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 30%,rgba(3,17,31,.9))}.audience-text{position:relative;z-index:2;padding:28px}.audience-text h3{font-size:27px;margin:0 0 8px}.audience-text p{margin:0;color:rgba(255,255,255,.78);line-height:1.5;font-size:13px}
 
-.find{padding:100px 0}.find-head{text-align:center;max-width:700px;margin:0 auto 35px}.find-head p{color:var(--muted);line-height:1.65}.search-box{max-width:760px;margin:0 auto 35px;display:flex;gap:10px}.search-box input{flex:1;min-height:58px;border:1px solid var(--line);border-radius:8px;padding:0 18px;outline:none;background:#fff}.search-box input:focus{border-color:var(--blue2)}.search-box .btn{border:0;background:var(--blue);color:#fff;cursor:pointer}.status{text-align:center;color:var(--muted);padding:15px}.company-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.company-card{background:#fff;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(7,29,53,.06)}.company-brand{height:150px;background:#edf3f7;display:flex;align-items:center;justify-content:center;padding:20px}.company-brand img{max-width:180px;max-height:100px;object-fit:contain}.company-fallback{font-size:24px;font-weight:900;color:var(--blue);text-align:center}.company-body{padding:20px;display:flex;flex-direction:column;flex:1}.company-body h3{margin:0;color:var(--navy);font-size:19px}.company-body p{margin:7px 0 18px;color:var(--muted);font-size:13px;line-height:1.5}.company-body .btn{width:100%;background:var(--blue);color:#fff;min-height:48px}.empty{padding:35px;text-align:center;background:#fff;border:1px dashed var(--line);color:var(--muted);grid-column:1/-1}
+.find{padding:100px 0}.find-head{text-align:center;max-width:700px;margin:0 auto 35px}.find-head p{color:var(--muted);line-height:1.65}.search-box{max-width:760px;margin:0 auto 35px;display:flex;gap:10px}.search-box input{flex:1;min-height:58px;border:1px solid var(--line);border-radius:8px;padding:0 18px;outline:none;background:#fff}.search-box input:focus{border-color:var(--blue2)}.search-box .btn{border:0;background:var(--blue);color:#fff;cursor:pointer}.status{text-align:center;color:var(--muted);padding:15px}.company-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.company-card{background:#fff;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(7,29,53,.06)}.company-brand{height:150px;position:relative;display:block;padding:0;background:#fff;overflow:hidden}.company-brand-head{height:66px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;overflow:hidden}.company-brand-head:before{content:"";position:absolute;inset:0;background:rgba(3,17,31,.22);pointer-events:none}.company-eventour-logo{position:relative;z-index:1;display:block;width:155px;height:30px;max-width:80%;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}.company-brand-subtitle{position:relative;z-index:1;color:#fff;font-family:Jost,Arial,sans-serif;font-size:9px;font-style:italic;font-weight:600;letter-spacing:1px;line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.35)}.company-brand-content{height:84px;display:flex;align-items:center;justify-content:center;padding:8px 20px;background:#fff}.company-brand-content .company-specific-logo{max-width:180px;max-height:68px;width:auto;height:auto;object-fit:contain}.company-fallback{font-size:24px;font-weight:900;color:var(--blue);text-align:center}.company-body{padding:20px;display:flex;flex-direction:column;flex:1}.company-body h3{margin:0;color:var(--navy);font-size:19px}.company-body p{margin:7px 0 18px;color:var(--muted);font-size:13px;line-height:1.5}.company-body .btn{width:100%;background:var(--blue);color:#fff;min-height:48px}.empty{padding:35px;text-align:center;background:#fff;border:1px dashed var(--line);color:var(--muted);grid-column:1/-1}
 
 .cta{padding:105px 0;background:linear-gradient(120deg,#0a4778,#071d35);color:#fff;text-align:center}.cta h2{font-size:clamp(38px,5vw,64px);letter-spacing:-2px;line-height:1;margin:0 auto 18px}.cta p{color:rgba(255,255,255,.72);font-size:17px;line-height:1.6;max-width:620px;margin:0 auto 30px}.cta .actions{justify-content:center}
 footer{padding:30px 20px;background:#04111f;color:rgba(255,255,255,.55);font-size:12px;line-height:1.9;text-align:center}footer a{color:#fff}
@@ -156,9 +156,28 @@ if(!companies.length){grid.innerHTML='<div class="empty">Nessuna società trovat
 for(const company of companies){
 const name=company.nome_app||company.ragione_sociale||"Società",url=companyUrl(company),logo=company.logo_url||"";
 const card=document.createElement("article");card.className="company-card";
-card.innerHTML='<div class="company-brand">'+(logo?'<img src="'+escapeHtml(logo)+'" alt="'+escapeHtml(name)+'">':'<div class="company-fallback">'+escapeHtml(name)+'</div>')+'</div><div class="company-body"><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(company.sede||"Società attiva su Next Point Padel")+'</p><a class="btn" href="'+escapeHtml(url)+'">ENTRA NELLA SOCIETÀ</a></div>';
+card.innerHTML='<div class="company-brand"><div class="company-brand-head"><img class="company-eventour-logo" src="eventour_logo.jpg" alt="EVENTOUR"><span class="company-brand-subtitle">gestione eventi &amp; tornei</span></div><div class="company-brand-content">'+(logo?'<img class="company-specific-logo" src="'+escapeHtml(logo)+'" alt="'+escapeHtml(name)+'">' : '<div class="company-fallback">'+escapeHtml(name)+'</div>')+'</div></div><div class="company-body"><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(company.sede||"Società attiva su Next Point Padel")+'</p><a class="btn" href="'+escapeHtml(url)+'">ENTRA NELLA SOCIETÀ</a></div>';
 grid.appendChild(card)
-}}
+}
+  isolateCompanyEventourMarks();
+}
+function isolateCompanyEventourMarks(){
+  document.querySelectorAll(".company-eventour-logo").forEach(function(logo){
+    if(logo.dataset.textIsolated==="1") return;
+    logo.dataset.textIsolated="1";
+    function isolate(){
+      if(!logo.naturalWidth||!logo.naturalHeight) return;
+      try{
+        const canvas=document.createElement("canvas");canvas.width=logo.naturalWidth;canvas.height=logo.naturalHeight;
+        const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(logo,0,0);
+        const frame=ctx.getImageData(0,0,canvas.width,canvas.height),px=frame.data;
+        for(let i=0;i<px.length;i+=4){const lum=.2126*px[i]+.7152*px[i+1]+.0722*px[i+2];const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));px[i]=255;px[i+1]=255;px[i+2]=255;px[i+3]=Math.round(px[i+3]*alpha/255)}
+        ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png");
+      }catch(e){console.warn("Isolamento logo EVENTOUR nella scheda società non riuscito:",e)}
+    }
+    if(logo.complete){if(logo.naturalWidth) isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true});
+  });
+}
 async function loadCompanies(search){
 statusEl.textContent="Caricamento delle società...";grid.innerHTML="";
 const result=await sb.rpc("get_public_companies",{search_text:search||null});
