@@ -52,7 +52,7 @@
 
   // Dashboard must not receive the generic back arrow; its existing exit button
   // is a logout control and must remain bound to logout().
-  if (!isDashboard && !hasNavigationBack()) {
+  if (!isDashboard && page !== 'index.html' && !hasNavigationBack()) {
     const back = document.createElement('button');
     back.type = 'button';
     back.className = 'site-global-back';
