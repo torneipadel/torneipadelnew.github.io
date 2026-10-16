@@ -161,5 +161,6 @@ loginBtn.addEventListener("click",loginUser);registerBtn.addEventListener("click
 sb.auth.onAuthStateChange(function(event,session){});
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(function(error){console.error("Service Worker PWA:",error)})})}
 </script>
+<script src="site-navigation-v1.js?v=1"></script>
 </body>
 </html>
