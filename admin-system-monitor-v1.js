@@ -66,6 +66,7 @@
     const gitPct = (gitBytes / GIT_TARGET) * 100;
     const alerts = [];
     if (git.__monitorFallback) alerts.push('<div class="asm-alert asm-alert-info">🔵 <b>GitHub:</b> utilizzo live temporaneamente non disponibile; è attivo il dato locale di sicurezza.</div>');
+    else if (git.__monitorStale) alerts.push('<div class="asm-alert asm-alert-warning">🟠 <b>GitHub:</b> API non raggiungibile; vengono mostrati dati in cache aggiornati il ' + esc(dateIt(git.__monitorStaleAt)) + '. La dimensione del repository potrebbe non essere attuale.</div>');
     else if (gitPct >= 100) alerts.push('<div class="asm-alert asm-alert-critical">🔴 <b>Repository:</b> raggiunta/superata la soglia prudenziale di 1 GB.</div>');
     else if (gitPct >= 90) alerts.push('<div class="asm-alert asm-alert-critical">🔴 <b>Repository:</b> livello critico — ' + gitPct.toFixed(1) + '% della soglia prudenziale.</div>');
     else if (gitPct >= 75) alerts.push('<div class="asm-alert asm-alert-warning">🟠 <b>Repository:</b> attenzione — ' + gitPct.toFixed(1) + '% della soglia prudenziale.</div>');
