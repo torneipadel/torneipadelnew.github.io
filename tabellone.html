@@ -12139,6 +12139,24 @@ async function applicaModelloTorneo(){
     const tipo=select.value;
     if(!tipo) return;
 
+    const regolePrecedentiModello={
+        tipo:String(state.rules.tipoTorneo||""),
+        formulaGironi:String(state.rules.formulaGironi||""),
+        formulaFinale:String(state.rules.formulaFinale||""),
+        numeroGironi:Number(state.rules.numeroGironi)||0,
+        squadrePerGirone:Number(state.rules.squadrePerGirone)||0,
+        usaQuarti:state.rules.usaQuarti===true,
+        usaSemifinali:state.rules.usaSemifinali===true,
+        usaFinale:state.rules.usaFinale===true,
+        numeroFinali:Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1))),
+        gruppi:Object.fromEntries(["A","B","C","D","E","F"].map(g=>[g,{
+            squadre:Array.isArray(state[g])?state[g].map(x=>String(x??"")):[],
+            risultati:Array.isArray(state[g+"res"])?state[g+"res"].slice():[],
+            orari:Array.isArray(state[g+"time"])?state[g+"time"].slice():[],
+            campi:Array.isArray(state[g+"camp"])?state[g+"camp"].slice():[]
+        }]))
+    };
+
     const squadreEsistentiModello=Array.isArray(state.coppie)&&state.coppie.some(x=>String(x??"").trim())
         ? state.coppie.filter(x=>String(x??"").trim())
         : ["A","B","C","D","E","F"].flatMap(tag=>Array.isArray(state[tag])?state[tag]:[]).filter(x=>String(x??"").trim());
@@ -12171,13 +12189,6 @@ async function applicaModelloTorneo(){
     state.rules.tipoTorneo=tipo;
     state.rules.formatoTorneo=n;
     state.rules.numeroSquadre=n;
-
-    state.qRes=Array(4).fill("-");
-    state.sTopRes=Array(2).fill("-");
-    state.fTopRes="-";
-    state.finalTop=[];
-    state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
-    state.campioneTop=null;
 
     /* Valori comuni e neutri */
     state.rules.garaAndataRitorno=false;
@@ -12341,6 +12352,32 @@ async function applicaModelloTorneo(){
         break;
     }
 
+    const faseFinaleModificataModello =
+        regolePrecedentiModello.formulaFinale!==String(state.rules.formulaFinale||"") ||
+        regolePrecedentiModello.usaQuarti!==(state.rules.usaQuarti===true) ||
+        regolePrecedentiModello.usaSemifinali!==(state.rules.usaSemifinali===true) ||
+        regolePrecedentiModello.usaFinale!==(state.rules.usaFinale===true) ||
+        regolePrecedentiModello.numeroFinali!==Math.max(1,Math.min(12,Math.floor(Number(state.rules.numeroFinali)||1)));
+
+    if(faseFinaleModificataModello){
+        state.qRes=Array(4).fill("-");
+        state.sTopRes=Array(2).fill("-");
+        state.fTopRes="-";
+        state.finaliRes=[];
+        state.finaliTop=[];
+        state.qCamp=[];state.qTime=[];state.qCamp=[];
+        state.qTime=[];
+        state.sTopCamp=[];state.sTopTime=[];
+        state.fTopCamp=[];state.fTopTime=[];
+        state.finalTop=[];
+        state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
+        state.campioneTop=null;
+    }
+
+    if(String(state.rules.formulaFinale||"")!==regolePrecedentiModello.formulaFinale){
+        state.finalGroupRes=[];state.finalGroupTime=[];state.finalGroupCamp=[];
+    }
+
     if(formatoInput) formatoInput.value=String(n);
 
     const numeroGironiInput=document.getElementById("numeroGironi");
@@ -12370,9 +12407,24 @@ async function applicaModelloTorneo(){
                 state[tag]=Array.from({length:per},(_,i)=>squadreEsistentiModello[inizio+i]??"");
             }else state[tag]=[];
             const incontri=state[tag].length*(state[tag].length-1)/2*(state.rules.garaAndataRitorno?2:1);
-            state[tag+"res"]=Array(Math.max(0,incontri)).fill("-");
-            state[tag+"time"]=Array(Math.max(0,incontri)).fill("");
-            state[tag+"camp"]=Array(Math.max(0,incontri)).fill("");
+            const precedente=regolePrecedentiModello.gruppi[tag];
+            const squadreInvariate=precedente &&
+                JSON.stringify(precedente.squadre)===JSON.stringify(state[tag].map(x=>String(x??"")));
+            const formulaGironiInvariata =
+                regolePrecedentiModello.formulaGironi===String(state.rules.formulaGironi||"");
+            const risultatiValidi =
+                squadreInvariate && formulaGironiInvariata &&
+                precedente.risultati.length===incontri;
+
+            state[tag+"res"]=risultatiValidi
+                ? precedente.risultati
+                : Array(Math.max(0,incontri)).fill("-");
+            state[tag+"time"]=risultatiValidi && precedente.orari.length===incontri
+                ? precedente.orari
+                : Array(Math.max(0,incontri)).fill("");
+            state[tag+"camp"]=risultatiValidi && precedente.campi.length===incontri
+                ? precedente.campi
+                : Array(Math.max(0,incontri)).fill("");
         });
     }
 
