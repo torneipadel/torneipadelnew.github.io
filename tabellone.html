@@ -11341,9 +11341,11 @@ function renderTables(){
             campiPerGirone[
                 partita.girone
             ]||[2,3];
-        const torneoGoldSilverBronzeScheduling=torneoGoldSilverBronze;
-        const idCasa=torneoGoldSilverBronzeScheduling?partita.girone+':'+partita.casa:partita.casa;
-        const idOspite=torneoGoldSilverBronzeScheduling?partita.girone+':'+partita.ospite:partita.ospite;
+        // Gli indici delle squadre ripartono da zero in ogni girone:
+        // identificare la squadra anche con il girone evita falsi conflitti
+        // tra squadre diverse che occupano la stessa posizione in gironi distinti.
+        const idCasa=partita.girone+':'+partita.casa;
+        const idOspite=partita.girone+':'+partita.ospite;
 
         while(!assegnata){
 
