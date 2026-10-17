@@ -42,6 +42,17 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }
 
+/* I contenitori di quarti, semifinali e finale devono lasciare visibile
+   integralmente la foto di sfondo: niente pannello scuro né effetto sfocatura. */
+.koBox,
+.finalContainer {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 .subtitle{font-size:0.7rem;color:#94a3b8;line-height:1.1;text-align:center;margin-top:5px}
 .date-input-field{background:#0b1220; border:1px solid #334155; color:#fff; padding:2px 5px; border-radius:4px; font-family:system-ui; font-size:0.9rem; cursor:pointer; width:110px; text-align:center;}
 
