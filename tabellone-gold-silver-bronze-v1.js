@@ -250,11 +250,11 @@ function renderCustomFinals(){
   if(!isSpecial())return;
   normalizeTeams();
   const s=activeState();if(!s)return;
-  const legacy=document.querySelector('.finalContainer');if(legacy)legacy.style.display='none';
+  const legacy=document.querySelector('.finalContainer:not(#goldSilverBronzeStage)');if(legacy)legacy.style.display='none';
   const formulaBox=document.getElementById('formulaTorneoBox');if(formulaBox)formulaBox.style.display='none';
   let host=document.getElementById('goldSilverBronzeStage');
   if(!host){
-    host=document.createElement('section');host.id='goldSilverBronzeStage';host.className='card gold-silver-bronze-stage';
+    host=document.createElement('section');host.id='goldSilverBronzeStage';host.className='finalContainer gold-silver-bronze-stage';
     if(legacy?.parentNode)legacy.parentNode.insertBefore(host,legacy);
     else document.querySelector('.container')?.appendChild(host);
   }
@@ -265,6 +265,7 @@ function renderCustomFinals(){
     '<p style="text-align:center">Le 3 prime classificate dei gironi disputano Gold; le 3 seconde Silver; le 3 terze Bronze. Ogni fascia è un girone all’italiana: 3 partite.</p>'+
     '<p style="text-align:center">Classifica: punti (vittoria '+Number(s.rules.w)+', pareggio '+Number(s.rules.d)+', sconfitta '+Number(s.rules.l)+') → '+esc(s.rules.crit1)+' → '+esc(s.rules.crit2)+' → '+esc(s.rules.crit3)+'.</p>'+
     (ready?'<p class="gsb-ready">Tutti i gironi iniziali sono completati: le finali sono abilitate.</p>':'<p class="gsb-wait">Le finali si sbloccano quando tutte le 9 partite dei gironi iniziali hanno un risultato valido.</p>');
+  html+='<div class="groups gsb-finals-grid">';
   stages.forEach(stage=>{
     const teams=finalTeams(stage);
     const labels=ready?teams:groups.map(g=>stage.position+'ª classificata Girone '+g+' — da definire');
@@ -283,6 +284,7 @@ function renderCustomFinals(){
     });
     html+='</tbody></table><div id="gsb-standings-'+stage.key+'">'+finalStandingsHtml(stage,teams)+'</div></div>';
   });
+  html+='</div>';
   html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Orari e campi vengono assegnati automaticamente in base a '+courts+' campo/i e alla durata di '+Number(s.rules.duration||20)+' minuti, senza sovrapporre due incontri della stessa squadra.</p>';
   host.innerHTML=html;
 }
