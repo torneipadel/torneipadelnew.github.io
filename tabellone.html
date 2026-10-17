@@ -5846,14 +5846,6 @@ async function applyRules(){
     state.rules.usaSemifinali=document.getElementById("usaSemifinali")?.checked===true;
     state.rules.usaFinale=document.getElementById("usaFinale")?.checked===true;
 
-    // Una finale diretta dopo i quarti senza semifinali scarterebbe due
-    // vincitrici dei quarti. Blocca questa combinazione invece di produrre
-    // un tabellone con qualificazioni errate.
-    if(state.rules.usaQuarti && !state.rules.usaSemifinali && state.rules.usaFinale){
-        alert("Configurazione non valida: con i quarti attivi devi attivare anche le semifinali prima della finale. In alternativa disattiva i quarti per usare finali parallele.");
-        return false;
-    }
-
     const numeroFinaliInput=document.getElementById("numeroFinali");
     state.rules.numeroFinali=Math.max(1,Math.min(12,Math.floor(Number(numeroFinaliInput?.value)||1)));
     if(numeroFinaliInput) numeroFinaliInput.value=String(state.rules.numeroFinali);
@@ -5861,6 +5853,14 @@ async function applyRules(){
         state.rules.usaQuarti=false;
         state.rules.usaSemifinali=false;
         state.rules.usaFinale=false;
+    }
+
+    // Una finale diretta dopo i quarti senza semifinali scarterebbe due
+    // vincitrici dei quarti. Blocca questa combinazione invece di produrre
+    // un tabellone con qualificazioni errate.
+    if(state.rules.usaQuarti && !state.rules.usaSemifinali && state.rules.usaFinale){
+        alert("Configurazione non valida: con i quarti attivi devi attivare anche le semifinali prima della finale. In alternativa disattiva i quarti per usare finali parallele.");
+        return false;
     }
 
     if(state.rules.usaFinale && !state.rules.usaQuarti && !state.rules.usaSemifinali && state.rules.numeroFinali>1 && state.rules.formulaFinale!=="gironeFinale" && (groupTypes.includes(tipo)||tipo==="manuale")){
