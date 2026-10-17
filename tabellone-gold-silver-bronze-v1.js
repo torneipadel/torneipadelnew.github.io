@@ -99,7 +99,20 @@ function normalizeTeams(){
   const current=groups.flatMap(g=>Array.isArray(s[g])?s[g].map(teamName):[]).filter(Boolean);
   const balanced=groups.every(g=>Array.isArray(s[g])&&s[g].length===3&&s[g].every(x=>String(teamName(x)||'').trim()));
   if(source.length===9 && (!balanced||current.length!==9)){
-    groups.forEach((g,i)=>{s[g]=source.slice(i*3,(i+1)*3);s[g+'res']=Array(3).fill('-');s[g+'time']=Array(3).fill('');s[g+'camp']=Array(3).fill('')});
+    // Ricostruisce la distribuzione delle squadre senza azzerare i dati già inseriti.
+    // I risultati, gli orari e i campi esistenti vengono mantenuti per indice di partita.
+    const previous={};
+    groups.forEach(g=>{
+      previous[g+'res']=Array.isArray(s[g+'res'])?s[g+'res'].slice():[];
+      previous[g+'time']=Array.isArray(s[g+'time'])?s[g+'time'].slice():[];
+      previous[g+'camp']=Array.isArray(s[g+'camp'])?s[g+'camp'].slice():[];
+    });
+    groups.forEach((g,i)=>{
+      s[g]=source.slice(i*3,(i+1)*3);
+      s[g+'res']=previous[g+'res'].length===3?previous[g+'res']:Array(3).fill('-');
+      s[g+'time']=previous[g+'time'].length===3?previous[g+'time']:Array(3).fill('');
+      s[g+'camp']=previous[g+'camp'].length===3?previous[g+'camp']:Array(3).fill('');
+    });
   }else{
     groups.forEach(g=>{if(!Array.isArray(s[g]))s[g]=[]});
   }
