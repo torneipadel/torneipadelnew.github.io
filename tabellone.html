@@ -24,15 +24,15 @@ body {
 .container{max-width:1000px;margin:0 auto;padding:10px}
 
 .header-box{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px;min-height:0}
-.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:1.5px;position:relative;left:auto;top:auto;transform:none;z-index:2;flex:0 0 auto;max-width:100%}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;font-weight:900;letter-spacing:1.5px;position:relative;left:auto;top:auto;transform:none;z-index:2;flex:0 0 auto;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
 .brand-logo-wrap{display:block;position:relative;z-index:1;text-align:center}
-.brand:before{content:"";position:absolute;inset:-9px -18px;border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;opacity:1;pointer-events:none}
+.brand:before{content:"";position:absolute;inset:-9px 0;border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;opacity:1;pointer-events:none}
 .brand img{position:relative;z-index:1;width:310px;max-width:310px;height:58px;object-fit:cover;object-position:center;display:block;border:0;border-radius:0;mix-blend-mode:normal;opacity:1;filter:none;-webkit-mask-image:none;mask-image:none;box-shadow:none;transition:opacity .25s ease}
 .brand img:hover{opacity:1;transform:none}
 .brand img:hover{opacity:.82;transform:scale(1.015)}
 .brand-subtitle{position:relative;z-index:2;display:block;margin:-7px 0 0 0;color:#fff;font-family:Jost,Inter,"Open Sans",Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-align:center;text-transform:none;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap}
 .tournament-header-details{min-width:0;width:100%;margin:0 auto;text-align:center}
-@media(max-width:599px){.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:55px}.brand{position:relative;left:auto;top:auto;transform:none;flex:0 0 auto;width:310px;max-width:calc(100vw - 56px)}.tournament-header-details{width:100%}}
+@media(max-width:599px){.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:55px}.brand{position:relative;left:auto;top:auto;transform:none;flex:0 0 auto;width:100%;max-width:100%;min-width:0}.brand:before{inset:-9px 0}.tournament-header-details{width:100%}}
 
 /* --- EFFETTO VETRO MOLTO CHIARO --- */
 .card, .koBox, .finalContainer {
