@@ -341,10 +341,9 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
   s.goldSilverBronze.results[stageKey]=normalizedResults(s[key]);
-  if(validScore(s[key][index])){
-    window.__GSB_DIRTY_SCORES__=window.__GSB_DIRTY_SCORES__||new Set();
-    window.__GSB_DIRTY_SCORES__.add(stageKey+':'+index);
-  }
+  // Anche cancellazioni e risultati incompleti devono prevalere sul valore remoto.
+  window.__GSB_DIRTY_SCORES__=window.__GSB_DIRTY_SCORES__||new Set();
+  window.__GSB_DIRTY_SCORES__.add(stageKey+':'+index);
   syncFinalPlacements();
   updateFinalStandings(stageKey);
   // Persisti anche la cancellazione o il risultato incompleto: altrimenti
