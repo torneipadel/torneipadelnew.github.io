@@ -91,38 +91,37 @@ input{width:100%;padding:5px;border-radius:4px;background:#0b1220;border:1px sol
 
 .top-win{background:rgba(251,191,36,.2);color:#fbbf24;font-size:1.3em;}
 
-/* Correzione mirata: il riquadro del vincitore della finale deve mostrare
-   tutto il contenuto, anche con nomi lunghi o su schermi stretti. */
-#winnerCardKO.winner-card-ko{
+/* Il vincitore occupa tutta la larghezza disponibile della griglia,
+   senza allargamenti artificiali che possono tagliare o far scorrere la card. */
+.groups > #winnerCardKO.winner-card-ko{
+    grid-column:1 / -1;
     display:block;
     box-sizing:border-box;
-    width:calc(200% + 12px);
-    max-width:none;
+    width:100%;
+    min-width:0;
+    max-width:100%;
     height:auto !important;
     min-height:0 !important;
     max-height:none !important;
     overflow:visible !important;
     white-space:normal;
-    position:relative;
-    z-index:2;
 }
 #winnerCardKO.winner-card-ko .winner-box{
     display:block;
     box-sizing:border-box;
     width:100%;
-    max-width:none;
+    min-width:0;
+    max-width:100%;
     height:auto !important;
     min-height:0 !important;
     max-height:none !important;
     overflow:visible !important;
     white-space:normal !important;
-    overflow-wrap:break-word;
     line-height:1.4;
 }
 #winnerCardKO.winner-card-ko .winner-box span{
     display:block;
     white-space:normal;
-    overflow-wrap:break-word;
     line-height:1.4;
 }
 
@@ -11830,14 +11829,17 @@ function renderKO(){
         }
 
         let winnerCard=document.getElementById("winnerCardKO");
+        const winnerHost=f.closest(".groups") || f.parentElement;
 
-        if(!winnerCard && f.parentNode){
+        if(!winnerCard){
             winnerCard=document.createElement("div");
             winnerCard.id="winnerCardKO";
             winnerCard.className="card winner-card-ko";
-            f.parentNode.insertBefore(winnerCard,f.nextSibling);
-        }else if(winnerCard && f.parentNode && winnerCard.previousElementSibling!==f){
-            f.parentNode.insertBefore(winnerCard,f.nextSibling);
+        }
+        /* La card del vincitore deve essere una cella diretta della griglia:
+           così grid-column la estende fino ai due margini del contenitore. */
+        if(winnerCard && winnerHost && winnerCard.parentElement!==winnerHost){
+            winnerHost.appendChild(winnerCard);
         }
 
         if(campione){
