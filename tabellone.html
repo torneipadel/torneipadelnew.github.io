@@ -9139,6 +9139,9 @@ async function aggiornaOraInizioTorneo(valore){
     const inputRegole=document.getElementById("startTime");
     if(inputRegole) inputRegole.value=valorePulito;
 
+    // Ridisegna il calendario per mostrare subito gli orari aggiornati.
+    if(typeof render==="function") render();
+
     // Aggiorna subito lo stato locale e salva la configurazione del torneo
     // su Supabase tramite il flusso di persistenza già esistente.
     localStorage.setItem("torneoState",JSON.stringify(state));
