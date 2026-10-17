@@ -6764,7 +6764,8 @@ async function updateAndSyncImpl(showSaveResult=false){
         sovrascrivere i risultati remoti con dati obsoleti.
         */
         const __gsbIsSpecial =
-            !!state.goldSilverBronze ||
+            (typeof window.isGoldSilverBronzeTournament === "function" &&
+                window.isGoldSilverBronzeTournament()) ||
             [
                 state.formula,
                 state.formulaTorneo,
@@ -11983,14 +11984,6 @@ function renderMatchCard(titolo, match, type, index, risultato) {
     const risultatoParts=String(risultato||"-").split("|");
     const res=String(risultatoParts[0]||"-").split("-");
     const extra=String(risultatoParts[1]||"");
-    const extraType=extra.startsWith("R-")?"R":extra.startsWith("KP-")?extra:(/^\d+\-\d+$/.test(extra)?"S":"");
-    const extraScores=extraType==="S"?extra.split("-"):extraType==="R"?extra.split("-").slice(1):[];
-    const extra1=extraScores[0]||"";
-    const extra2=extraScores[1]||"";
-    const mostraControlliSpareggio =
-        state.rules.tempoSupplementare===true ||
-        state.rules.rigori===true ||
-        state.rules.killerPoint===true;
     const risultato1 = res[0] === "-" ? "" : (res[0] || "");
     const risultato2 = res[1] || "";
 
@@ -12035,18 +12028,6 @@ function renderMatchCard(titolo, match, type, index, risultato) {
         <div class="team-line">${displayTeam1}</div>
         <div class="vs-line"><b>VS</b></div>
         <div class="team-line">${displayTeam2}</div>
-        ${mostraControlliSpareggio ? `<div class="ko-extra-controls" style="display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px">
-            <select aria-label="Spareggio partita" onchange="updateKOExtraType('${type}',${index},this.value)" style="max-width:155px;font-size:11px">
-                <option value="" ${extraType===""?'selected':''}>Spareggio</option>
-                <option value="S" ${extraType==="S"?'selected':''} ${state.rules.tempoSupplementare!==true?'disabled':''}>Supplementari</option>
-                <option value="R" ${extraType==="R"?'selected':''} ${state.rules.rigori!==true?'disabled':''}>Rigori</option>
-                <option value="KP-A" ${extraType==="KP-A"?'selected':''} ${state.rules.killerPoint!==true?'disabled':''}>Killer point squadra 1</option>
-                <option value="KP-B" ${extraType==="KP-B"?'selected':''} ${state.rules.killerPoint!==true?'disabled':''}>Killer point squadra 2</option>
-            </select>
-            <input type="number" min="0" aria-label="Risultato spareggio squadra 1" placeholder="S/R 1" value="${extra1}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},0,this.value)" style="width:48px;font-size:11px">
-            <span>–</span>
-            <input type="number" min="0" aria-label="Risultato spareggio squadra 2" placeholder="S/R 2" value="${extra2}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},1,this.value)" style="width:48px;font-size:11px">
-        </div>` : ""}
     </td>
 
     <td class="score-cell">
