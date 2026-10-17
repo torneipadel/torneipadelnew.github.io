@@ -9126,7 +9126,7 @@ function updateTime(g,i,pos,val){
 
 async function aggiornaOraInizioTorneo(valore){
     const valorePulito=String(valore||"").trim();
-    if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(valorePulito)) return false;
+    if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(valorePulito)) return false;
 
     ensureRules();
     state.rules.start=valorePulito;
