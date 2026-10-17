@@ -376,14 +376,19 @@ table.standing .trend-up, table.standing .trend-down,
    MENU HAMBURGER E BOTTONI (FLUIDO E SOVRAPPOSTO)
    ======================================================== */
 
+.header-box { position:relative; }
 .tournament-control-row {
-    position: relative;
+    position: absolute;
+    top: 8px;
+    left: 0;
+    right: 0;
+    z-index: 30;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    width: min(100%, 1200px);
-    margin: 5px auto 12px;
+    width: 100%;
+    margin: 0 auto;
     padding: 0 10px;
     box-sizing: border-box;
 }
@@ -550,15 +555,20 @@ body.user-mode textarea {
         display: none;
     }
 
+    .header-box { padding-top: 0; }
     .tournament-control-row {
-        align-items: center;
-        flex-wrap: wrap;
+        top: 6px;
+        align-items: flex-start;
+        flex-wrap: nowrap;
         justify-content: space-between;
-        gap: 10px;
+        gap: 6px;
+        padding: 0 6px;
     }
     .tournament-date-time {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        gap: 6px;
     }
+    .tournament-date-time input { max-width: 132px; }
     .menu-container {
         width: auto;
         max-width: 100%;
@@ -2863,8 +2873,16 @@ style="width:80px">
 </div>
 <div class="menu-container">
 <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
-<button type="button" class="admin-rules-button" onclick="openRules()">Regole</button>
-<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> 
+<button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
+<div id="menuComandi" class="menu-dropdown">
+<button type="button" onclick="document.getElementById('teamModal').style.display='block'">📝 Squadre</button>
+<button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">⚙️ Formato / Regole torneo</button>
+<button type="button" onclick="stampaTabelloneGrafico(event)">🖨️ Stampa</button>
+<button type="button" onclick="updateAndSync()">💾 Salva</button>
+<button type="button" onclick="reset()">🗑️ Reset completo</button>
+<button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
+</div>
+</div> 
 </div>
 
 </div>
