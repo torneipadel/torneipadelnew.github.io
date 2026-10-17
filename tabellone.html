@@ -92,80 +92,74 @@ input{width:100%;padding:5px;border-radius:4px;background:#0b1220;border:1px sol
 .top-win{background:rgba(251,191,36,.2);color:#fbbf24;font-size:1.3em;}
 
 /* ========================================================
-   LAYOUT FASI FINALI KO — STRUTTURA TABELLA ORIGINALE
+   LAYOUT FASE FINALE KO — FLEXBOX ALLINEATO E CENTRATO
    ======================================================== */
 
-/* Le fasi KO sono tabelle HTML: non trasformare righe e celle
-   in flexbox, perché questo rompe l'allineamento delle colonne. */
-.koBox table,
-.finalContainer table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-}
-
 tbody#Q, tbody#S, tbody#finaleBox {
-    display: table-row-group !important;
-    width: auto !important;
+    display: block !important;
+    width: 100% !important;
 }
 
 tbody#Q tr, tbody#S tr, tbody#finaleBox tr,
 .koBox table tr, .finalContainer table tr {
-    display: table-row !important;
-    width: auto !important;
-    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid #1f2a3c !important;
+    padding: 8px 4px !important;
 }
 
+/* Titoli delle fasi finali */
+tbody#Q tr th[colspan="5"], 
+tbody#S tr th[colspan="5"], 
+tbody#finaleBox tr th[colspan="5"],
+.koBox table th[colspan="5"],
+.finalContainer table th[colspan="5"] {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 10px 0 !important;
+    background: #1e293b !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    border-bottom: 2px solid #243041 !important;
+    box-sizing: border-box !important;
+}
+
+/* Struttura base celle KO */
 tbody#Q tr th, tbody#Q tr td,
 tbody#S tr th, tbody#S tr td,
 tbody#finaleBox tr th, tbody#finaleBox tr td,
 .koBox table th, .koBox table td,
 .finalContainer table th, .finalContainer table td {
-    display: table-cell !important;
-    vertical-align: middle !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     box-sizing: border-box !important;
-    text-align: center !important;
-    padding: 8px 4px !important;
-    overflow-wrap: anywhere !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    padding: 4px 2px !important;
 }
 
-/* Colonne: campo, ora, incontro, risultato 1, risultato 2. */
-tbody#Q tr td:nth-child(1), tbody#S tr td:nth-child(1),
-tbody#finaleBox tr td:nth-child(1),
+/* 1. CAMPO — 16% */
+tbody#Q tr td:nth-child(1), tbody#S tr td:nth-child(1), tbody#finaleBox tr td:nth-child(1),
 .koBox table td:nth-child(1), .finalContainer table td:nth-child(1) {
-    width: 12% !important;
+    flex: 0 0 16% !important;
+    width: 16% !important;
 }
 
-tbody#Q tr td:nth-child(2), tbody#S tr td:nth-child(2),
-tbody#finaleBox tr td:nth-child(2),
+/* 2. ORA — FISSA A esattamente 70px */
+tbody#Q tr td:nth-child(2), tbody#S tr td:nth-child(2), tbody#finaleBox tr td:nth-child(2),
 .koBox table td:nth-child(2), .finalContainer table td:nth-child(2) {
+    flex: 0 0 70px !important;
     width: 70px !important;
-}
-
-tbody#Q tr td:nth-child(3), tbody#S tr td:nth-child(3),
-tbody#finaleBox tr td:nth-child(3),
-.koBox table td:nth-child(3), .finalContainer table td:nth-child(3) {
-    width: auto !important;
-    text-align: center !important;
-}
-
-tbody#Q tr td:nth-child(4), tbody#S tr td:nth-child(4),
-tbody#finaleBox tr td:nth-child(4),
-tbody#Q tr td:nth-child(5), tbody#S tr td:nth-child(5),
-tbody#finaleBox tr td:nth-child(5),
-.koBox table td:nth-child(4), .koBox table td:nth-child(5),
-.finalContainer table td:nth-child(4), .finalContainer table td:nth-child(5) {
-    width: 13% !important;
-}
-
-tbody#Q tr th[colspan], tbody#S tr th[colspan],
-tbody#finaleBox tr th[colspan],
-.koBox table th[colspan], .finalContainer table th[colspan] {
-    text-align: center !important;
-    background: #1e293b !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    padding: 10px 4px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
 }
 
 .orario-cell input[type="time"],
@@ -173,7 +167,6 @@ tbody#Q tr td:nth-child(2) input[type="time"],
 tbody#S tr td:nth-child(2) input[type="time"],
 tbody#finaleBox tr td:nth-child(2) input[type="time"] {
     width: 100% !important;
-    min-width: 0 !important;
     height: 30px !important;
     font-size: 11px !important;
     padding: 2px !important;
@@ -183,6 +176,16 @@ tbody#finaleBox tr td:nth-child(2) input[type="time"] {
     color: #fff !important;
     border-radius: 4px !important;
     box-sizing: border-box !important;
+}
+
+/* 3. MATCH — OCCUPA LO SPAZIO CENTRALE FLESSIBILE */
+tbody#Q tr td:nth-child(3), tbody#S tr td:nth-child(3), tbody#finaleBox tr td:nth-child(3),
+.koBox table td:nth-child(3), .finalContainer table td:nth-child(3) {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 0 8px !important;
+    flex-direction: column !important;
+    text-align: center !important;
 }
 
 .match-cell {
@@ -215,10 +218,18 @@ tbody#finaleBox tr td:nth-child(2) input[type="time"] {
     display: none !important;
 }
 
+/* 4 & 5. RISULTATI — 14% ciascuno */
+tbody#Q tr td:nth-child(4), tbody#S tr td:nth-child(4), tbody#finaleBox tr td:nth-child(4),
+tbody#Q tr td:nth-child(5), tbody#S tr td:nth-child(5), tbody#finaleBox tr td:nth-child(5),
+.koBox table td:nth-child(4), .koBox table td:nth-child(5),
+.finalContainer table td:nth-child(4), .finalContainer table td:nth-child(5) {
+    flex: 0 0 14% !important;
+    width: 14% !important;
+}
+
 .score-cell input,
 .campo-cell input {
     width: 100% !important;
-    min-width: 0 !important;
     height: 30px !important;
     text-align: center !important;
     background: #0b1220 !important;
