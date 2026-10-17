@@ -12002,6 +12002,10 @@ function renderMatchCard(titolo, match, type, index, risultato) {
     const extraScores=extraType==="S"?extra.split("-"):extraType==="R"?extra.split("-").slice(1):[];
     const extra1=extraScores[0]||"";
     const extra2=extraScores[1]||"";
+    const mostraControlliSpareggio =
+        state.rules.tempoSupplementare===true ||
+        state.rules.rigori===true ||
+        state.rules.killerPoint===true;
     const risultato1 = res[0] === "-" ? "" : (res[0] || "");
     const risultato2 = res[1] || "";
 
@@ -12046,7 +12050,7 @@ function renderMatchCard(titolo, match, type, index, risultato) {
         <div class="team-line">${displayTeam1}</div>
         <div class="vs-line"><b>VS</b></div>
         <div class="team-line">${displayTeam2}</div>
-        <div class="ko-extra-controls" style="display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px">
+        ${mostraControlliSpareggio ? `<div class="ko-extra-controls" style="display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px">
             <select aria-label="Spareggio partita" onchange="updateKOExtraType('${type}',${index},this.value)" style="max-width:155px;font-size:11px">
                 <option value="" ${extraType===""?'selected':''}>Spareggio</option>
                 <option value="S" ${extraType==="S"?'selected':''} ${state.rules.tempoSupplementare!==true?'disabled':''}>Supplementari</option>
@@ -12057,7 +12061,7 @@ function renderMatchCard(titolo, match, type, index, risultato) {
             <input type="number" min="0" aria-label="Risultato spareggio squadra 1" placeholder="S/R 1" value="${extra1}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},0,this.value)" style="width:48px;font-size:11px">
             <span>–</span>
             <input type="number" min="0" aria-label="Risultato spareggio squadra 2" placeholder="S/R 2" value="${extra2}" ${(extraType==="S"||extraType==="R")?'':'disabled'} oninput="updateKOExtraScore('${type}',${index},1,this.value)" style="width:48px;font-size:11px">
-        </div>
+        </div>` : ""}
     </td>
 
     <td class="score-cell">
