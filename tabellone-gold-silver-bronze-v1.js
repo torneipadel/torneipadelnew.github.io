@@ -278,8 +278,8 @@ function renderCustomFinals(){
       const disabled=ready?'':' disabled';
       const scheduled=finalSchedule[stage.key][i];
       html+='<tr><td>'+(i+1)+'</td><td>'+timeAt(scheduled.offset)+'</td><td>'+scheduled.court+'</td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
-        '<input type="number" min="0" step="1" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
-        '<span>–</span><input type="number" min="0" step="1" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
+        '<input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
+        '<span>–</span><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
         '</div></td></tr>';
     });
     html+='</tbody></table><div id="gsb-standings-'+stage.key+'">'+finalStandingsHtml(stage,teams)+'</div></div>';
