@@ -11227,7 +11227,7 @@ function renderTables(){
     }
 
     const torneoGoldSilverBronze=typeof window.isGoldSilverBronzeTournament==='function'&&window.isGoldSilverBronzeTournament();
-    const numeroCampiDisponibili=torneoGoldSilverBronze?3:Math.max(1,Math.min(50,Math.floor(Number(state.rules.campi)||3)));
+    const numeroCampiDisponibili=Math.max(1,Math.min(50,Math.floor(Number(state.rules.campi)||3)));
     const elencoCampi=Array.from({length:numeroCampiDisponibili},(_,i)=>i+1);
     let campiPerGirone={A:elencoCampi,B:elencoCampi,C:elencoCampi,D:elencoCampi,E:elencoCampi,F:elencoCampi,G:elencoCampi};
 
@@ -13998,7 +13998,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=15"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=16"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 <script src="site-navigation-v1.js?v=1"></script>
 </body>
