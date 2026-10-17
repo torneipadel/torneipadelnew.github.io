@@ -11382,26 +11382,24 @@ ${squadraOspite}
 <td class="db-cell">
 
 <input
-type="number"
+type="text"
 inputmode="numeric"
-min="0"
-step="1"
+pattern="[0-9]*"
 value="${risultato[0]==='-'?'':risultato[0]}"
 onclick="event.stopPropagation()"
 onpointerdown="event.stopPropagation()"
 onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
-oninput="updateRes('${tag}',${i},0,this.value)">
+oninput="this.value=this.value.replace(/[^0-9]/g,'');updateRes('${tag}',${i},0,this.value)">
 
 <input
-type="number"
+type="text"
 inputmode="numeric"
-min="0"
-step="1"
+pattern="[0-9]*"
 value="${risultato[1]||''}"
 onclick="event.stopPropagation()"
 onpointerdown="event.stopPropagation()"
 onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
-oninput="updateRes('${tag}',${i},1,this.value)">
+oninput="this.value=this.value.replace(/[^0-9]/g,'');updateRes('${tag}',${i},1,this.value)">
 
 </td>
 
@@ -11946,8 +11944,8 @@ function renderFinalGroupKO(){
         const disabled=reale?"":" disabled";
         html+='<tr><td>'+(i+1)+'</td><td><input type="time" value="'+escHtml(s.finalGroupTime[i])+'" oninput="updateFinalGroupField('+i+',\'time\',this.value)"></td>'+
             '<td><input type="number" min="1" max="50" value="'+escHtml(s.finalGroupCamp[i])+'" oninput="updateFinalGroupField('+i+',\'camp\',this.value)"></td>'+
-            '<td>'+home+' <b>VS</b> '+away+'</td><td><input type="number" min="0" step="1" value="'+(raw[0]==="-"?"":escHtml(raw[0]))+'"'+disabled+' oninput="updateFinalGroupResult('+i+',0,this.value)">'+
-            ' – <input type="number" min="0" step="1" value="'+escHtml(raw[1]||"")+'"'+disabled+' oninput="updateFinalGroupResult('+i+',1,this.value)"></td></tr>';
+            '<td>'+home+' <b>VS</b> '+away+'</td><td><input type="text" inputmode="numeric" pattern="[0-9]*" value="'+(raw[0]==="-"?"":escHtml(raw[0]))+'"'+disabled+' oninput="this.value=this.value.replace(/[^0-9]/g,\'\');updateFinalGroupResult('+i+',0,this.value)">'+
+            ' – <input type="text" inputmode="numeric" pattern="[0-9]*" value="'+escHtml(raw[1]||"")+'"'+disabled+' oninput="this.value=this.value.replace(/[^0-9]/g,\'\');updateFinalGroupResult('+i+',1,this.value)"></td></tr>';
     });
     html+='</tbody></table></div><div id="finalGroupStandings" style="margin-top:14px"></div>';
     host.innerHTML=html;
