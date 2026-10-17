@@ -308,9 +308,10 @@ table.standing .trend-up, table.standing .trend-down,
    ======================================================== */
 
 .menu-container {
-    position: absolute;
-    top: 75px;
-    right: max(8px, calc((100vw - 1000px) / 2 + 10px));
+    /* Il menu resta nell’area superiore e non copre le caselle del girone B. */
+    position: fixed;
+    top: 10px;
+    right: 10px;
     left: auto;
     z-index: 9999;
     display: flex;
@@ -862,8 +863,9 @@ table:has(> tbody#finaleBox) th:nth-child(3), table:has(> tbody#finaleBox) td:nt
 </style>
 <style id="bove-user-menu-stable">
 body.user-mode .menu-container {
+    /* In sola lettura il menu non deve sovrapporsi ai campi del calendario. */
     position: fixed !important;
-    top: 75px !important;
+    top: 10px !important;
     right: 20px !important;
     left: auto !important;
     z-index: 99999 !important;
@@ -2736,7 +2738,7 @@ style="width:80px">
 
 <div class="menu-container">
 <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
-<button class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button onclick="document.getElementById('formatModal').style.display='block'"> ⚙️ Formato </button> <button onclick="openRules()"> 📖 Regole </button> <button onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico()"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> <div class="groups"> <div class="card" id="cardA">
+<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('formatModal').style.display='block'"> ⚙️ Formato </button> <button type="button" onclick="openRules()"> 📖 Regole </button> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> <div class="groups"> <div class="card" id="cardA">
    
 
       <table id="A"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Arows"></tbody></table>
@@ -11385,6 +11387,8 @@ inputmode="numeric"
 min="0"
 step="1"
 value="${risultato[0]==='-'?'':risultato[0]}"
+onclick="event.stopPropagation()"
+onpointerdown="event.stopPropagation()"
 onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
 oninput="updateRes('${tag}',${i},0,this.value)">
 
@@ -11394,6 +11398,8 @@ inputmode="numeric"
 min="0"
 step="1"
 value="${risultato[1]||''}"
+onclick="event.stopPropagation()"
+onpointerdown="event.stopPropagation()"
 onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
 oninput="updateRes('${tag}',${i},1,this.value)">
 
@@ -13285,7 +13291,12 @@ window.addEventListener("load", async()=>{
     
 <script src="bove-admin-flow-fix.js?v=20260906-flow4"></script>
 \n<script id="bove-print-bracket-script">
-function stampaTabelloneGrafico(){
+function stampaTabelloneGrafico(event){
+/* La stampa può partire esclusivamente dal pulsante Stampa del menu. */
+const trigger=event&&event.currentTarget;
+if(!trigger||!trigger.matches("#menuComandi button")||!/stampa/i.test(trigger.textContent||""))return false;
+event.preventDefault();
+event.stopPropagation();
 let root=document.getElementById("bovePrintLayout");
 if(!root){root=document.createElement("div");root.id="bovePrintLayout";document.body.appendChild(root)}
 const esc=v=>String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
