@@ -11534,10 +11534,25 @@ function getFinalQualified(){
         if(!Array.isArray(classifica)||!classifica.length) return;
         let q=Number(state.rules.qualificatePerGirone);
         if(!Number.isFinite(q)||q<1) q=1;
-        if(state.rules.usaQuarti===true&&squadre.length===4) q=4;
+
+        // I quarti richiedono 8 qualificate complessive. Includiamo tutti
+        // i piazzamenti disponibili e li ordiniamo per posizione e rendimento
+        // tra gironi, evitando che i primi gironi riempiano da soli il tabellone.
+        if(state.rules.usaQuarti===true) q=classifica.length;
+
         classifica.slice(0,q).forEach((x,i)=>qualificati.push({nome:x.n,posizione:i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
         classifica.slice(q).forEach((x,i)=>ripescabili.push({nome:x.n,posizione:q+i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
     });
+    if(state.rules.usaQuarti===true){
+        qualificati.sort((a,b)=>
+            (Number(a.posizione)||99)-(Number(b.posizione)||99) ||
+            (Number(b.pt)||0)-(Number(a.pt)||0) ||
+            (Number(b.df)||0)-(Number(a.df)||0) ||
+            (Number(b.gf)||0)-(Number(a.gf)||0) ||
+            (Number(a.gs)||0)-(Number(b.gs)||0) ||
+            String(a.girone||"").localeCompare(String(b.girone||""))
+        );
+    }
     if(qualificati.length===0&&Array.isArray(state.coppie)&&state.coppie.length){
         state.coppie.forEach((x,i)=>qualificati.push({nome:x,posizione:i+1}));
     }
