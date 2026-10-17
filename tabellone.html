@@ -2763,7 +2763,9 @@ Chiudi
   <div style="position:relative;width:100%;">
     <h1 id="titoloTorneo" style="margin:0;font-size:1.4rem;">⏳ Caricamento torneo…</h1>
   </div>
-  <div class="tournament-date-time" style="justify-content:center;margin:8px auto 0;">
+</div>
+<div class="tournament-control-row">
+  <div class="tournament-date-time">
     <div style="text-align:center;">
       <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Data prevista:</div>
       <input type="date" id="dataTorneoHeader" class="date-input-field" onchange="aggiornaDataTorneo(this.value)">
@@ -2773,8 +2775,6 @@ Chiudi
       <input type="time" id="startTimeHeader" class="date-input-field" value="20:00" onchange="aggiornaOraInizioTorneo(this.value)" style="width:80px">
     </div>
   </div>
-</div>
-<div class="tournament-control-row">
   <div class="menu-container">
     <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
     <button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
