@@ -575,6 +575,8 @@ window.applyRules=function(){
   r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];r.garaAndataRitorno=false;r.locked=false;r.formulaConfig={...(r.formulaConfig||{}),formula:'goldSilverBronze',numeroGironi:3,squadrePerGirone:3,campi:r.campi,durata:r.duration,oraInizio:r.start,note:r.note,puntiVittoria:r.w,puntiPareggio:r.d,puntiSconfitta:r.l,crit1:r.crit1,crit2:r.crit2,crit3:r.crit3,qualificatePerGirone:3,numeroQualificateFinali:9,usaQuarti:false,usaSemifinali:false,usaFinale:false};s.rules=r;s.formato=9;
   window.__BOVE_APPLYING_RULES__=true;
   try{
+    normalizeTeams();
+    if(typeof window.generaPartiteGironi==='function')window.generaPartiteGironi();
     if(typeof window.renderTables==='function')window.renderTables();
     if(typeof window.renderClass==='function')window.renderClass();
     if(typeof window.renderKO==='function')window.renderKO();
