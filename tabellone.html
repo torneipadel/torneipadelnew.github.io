@@ -1184,6 +1184,21 @@ linear-gradient(0deg,transparent 49.6%,rgba(255,255,255,.72) 49.6%,rgba(255,255,
 .bpl-match,.bpl-winner{z-index:20!important}
 .bpl-note{text-align:center;font-size:7px;color:#94a3b8;margin-top:2mm}
 }
+/* Stampa adattiva per numero di gironi e fasi finali configurate. */
+.bpl-group-print-page{height:180mm;min-height:180mm;overflow:hidden;page-break-after:always}
+.bpl-groups-print{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4mm;width:100%;height:145mm;align-items:stretch}
+.bpl-groups-print .bpl-group{height:100%;overflow:hidden;padding:2.5mm}
+.bpl-groups-print .bpl-group h3{font-size:11px;margin-bottom:1.5mm}
+.bpl-groups-print .bpl-group table{font-size:7px}
+.bpl-groups-print .bpl-group th,.bpl-groups-print .bpl-group td{padding:.7mm .5mm}
+.bpl-bracket.bpl-adaptive{display:flex;gap:4mm;align-items:stretch;min-height:142mm;padding:10mm 2mm 3mm;overflow:hidden}
+.bpl-bracket.bpl-adaptive .bpl-stage{display:flex;flex:1 1 0;min-width:0;position:relative;flex-direction:column;gap:3mm}
+.bpl-bracket.bpl-adaptive .bpl-stage-title{position:static;display:block;width:100%;min-height:7mm;box-sizing:border-box}
+.bpl-bracket.bpl-adaptive .bpl-stage-body{display:flex;flex-direction:column;gap:3mm;min-width:0;flex:1}
+.bpl-bracket.bpl-adaptive .bpl-match{position:relative;display:flex;grid-column:auto!important;grid-row:auto!important;align-self:stretch;justify-self:stretch;min-height:18mm;flex:1 1 auto}
+.bpl-bracket.bpl-adaptive .bpl-bracket-connector{display:none!important}
+.bpl-bracket.bpl-adaptive .bpl-match-name{font-size:9px;padding-right:6mm}
+.bpl-bracket.bpl-adaptive .bpl-score{font-size:14px}
 @media screen{#bovePrintLayout{display:none!important}}
 </style>
 <script src="tenant-theme-v1.js?v=3"></script>
@@ -13536,14 +13551,14 @@ el.replaceWith(span);
 clone.querySelectorAll("[style]").forEach(el=>el.removeAttribute("style"));
 return clone.outerHTML;
 }
-const gironiContainer=[...document.querySelectorAll(".groups")].find(g=>g.querySelector("#cardA,#cardB,#cardC,#cardD,#cardE,#cardF"))||null;
-const groupCards=gironiContainer?[...gironiContainer.children].filter(card=>card.matches(".card")&&/^card[A-F]$/i.test(card.id||"")&&getComputedStyle(card).display!=="none"):[];
-let groupsHtml="";
+const numeroGironiStampa=Math.max(0,Math.min(6,Math.floor(Number(state?.rules?.numeroGironi)||0)));
+const groupCards=["A","B","C","D","E","F"].slice(0,numeroGironiStampa).map(letter=>document.getElementById("card"+letter)).filter(Boolean);
+const groupsHtml=[];
 groupCards.forEach((card,index)=>{
 const letter=(card.id||"card"+String.fromCharCode(65+index)).replace(/^card/i,"").toUpperCase();
 const matchTable=card.querySelector(`table#${letter}`);
 const classTable=card.querySelector(`table tbody#${letter}class`)?.closest("table");
-groupsHtml+=`<section class="bpl-group"><h3>GIRONE ${esc(letter||String.fromCharCode(65+index))}</h3>${printableTable(classTable||matchTable)}${classTable&&matchTable?`<div class="bpl-calendar-title">CALENDARIO</div>${printableTable(matchTable)}`:""}</section>`;
+groupsHtml.push(`<section class="bpl-group"><h3>GIRONE ${esc(letter||String.fromCharCode(65+index))}</h3>${printableTable(classTable||matchTable)}${classTable&&matchTable?`<div class="bpl-calendar-title">CALENDARIO</div>${printableTable(matchTable)}`:""}</section>`);
 });
 function matchCard(row){
 if(!row)return '<div class="bpl-match"><div class="bpl-match-name">Da determinare</div></div>';
@@ -13559,6 +13574,9 @@ const body=document.getElementById(id);
 return body?[...body.querySelectorAll(":scope > tr")].filter(r=>getComputedStyle(r).display!=="none"&&!r.querySelector("th")):[];
 }
 function stage(id,title,mode){
+if(mode==="q"&&state?.rules?.usaQuarti!==true)return "";
+if(mode==="s"&&state?.rules?.usaSemifinali!==true)return "";
+if(mode==="f"&&state?.rules?.usaFinale!==true)return "";
 const rows=rowsFor(id);
 return `<section class="bpl-stage" data-stage="${esc(mode)}"><div class="bpl-stage-title">${esc(title)}</div><div class="bpl-stage-body">${rows.length?rows.map((r,i)=>matchCard(r).replace("bpl-match",`bpl-match bpl-${mode}-match bpl-index-${i+1}`)).join(""):'<div class="bpl-match"><div class="bpl-match-name">Fase non attiva</div></div>'}</div></section>`;
 }
@@ -13576,7 +13594,12 @@ if(formatted&&formatted!=="Da determinare"&&formatted!=="Da verificare")return f
 }
 return "";
 })();
-root.innerHTML=`<section class="bpl-page bpl-bracket-page"><div class="bpl-watermark" aria-hidden="true"><img src="loghi/logo_con_scritta.jpg" alt=""></div><div class="bpl-organization">NEXT POINT PADEL</div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">QUARTI DI FINALE → SEMIFINALI → FINALE → CAMPIONE</div><div class="bpl-bracket">${stage("Q","QUARTI DI FINALE","q")}<div class="bpl-bracket-connector bpl-conn-q1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div><div class="bpl-bracket-connector bpl-conn-q2" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("S","SEMIFINALI","s")}<div class="bpl-bracket-connector bpl-conn-s1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("finaleBox","FINALE","f")}<div class="bpl-bracket-connector bpl-conn-f1" aria-hidden="true"><span class="h-right-mid"></span></div><section class="bpl-stage" data-stage="w"><div class="bpl-stage-title">CAMPIONE</div><div class="bpl-stage-body"><div class="bpl-winner"><div class="bpl-winner-label">🏆 CAMPIONE TORNEO</div><div class="bpl-winner-name">${esc(winner||"Da determinare")}</div></div></div></section></div><div class="bpl-note">Stampa delle sole fasi finali del torneo.</div></section>`
+const groupPages=[];
+for(let offset=0;offset<groupsHtml.length;offset+=2){
+ const cards=groupsHtml.slice(offset,offset+2).join("");
+ groupPages.push(`<section class="bpl-page bpl-group-print-page"><div class="bpl-watermark" aria-hidden="true"><img src="loghi/logo_senza_scritte.jpg" alt=""></div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">GIRONI — CLASSIFICHE E CALENDARIO</div><div class="bpl-groups bpl-groups-print">${cards}</div><div class="bpl-note">Gironi ${offset+1}–${Math.min(offset+2,groupsHtml.length)} di ${groupsHtml.length}</div></section>`);
+}
+root.innerHTML=`${groupPages.join("")}<section class="bpl-page bpl-bracket-page"><div class="bpl-watermark" aria-hidden="true"><img src="loghi/logo_con_scritta.jpg" alt=""></div><div class="bpl-organization">NEXT POINT PADEL</div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">QUARTI DI FINALE → SEMIFINALI → FINALE → CAMPIONE</div><div class="bpl-bracket ${state?.rules?.usaQuarti!==true||state?.rules?.usaSemifinali!==true||Number(state?.rules?.numeroFinali)>1?"bpl-adaptive":""}">${stage("Q","QUARTI DI FINALE","q")}<div class="bpl-bracket-connector bpl-conn-q1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div><div class="bpl-bracket-connector bpl-conn-q2" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("S","SEMIFINALI","s")}<div class="bpl-bracket-connector bpl-conn-s1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("finaleBox","FINALE","f")}<div class="bpl-bracket-connector bpl-conn-f1" aria-hidden="true"><span class="h-right-mid"></span></div><section class="bpl-stage" data-stage="w"><div class="bpl-stage-title">CAMPIONE</div><div class="bpl-stage-body"><div class="bpl-winner"><div class="bpl-winner-label">🏆 CAMPIONE TORNEO</div><div class="bpl-winner-name">${esc(winner||"Da determinare")}</div></div></div></section></div><div class="bpl-note">Stampa delle sole fasi finali del torneo.</div></section>`
 window.print();
 }
 </script>
