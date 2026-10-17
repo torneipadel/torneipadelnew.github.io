@@ -11557,13 +11557,20 @@ function getFinalQualified(){
     ensureRules();
     const qualificati=[];
     const ripescabili=[];
+    let gironeIncompleto=false;
     const lettereGironi=["A","B","C","D","E","F","G"].slice(0,Math.max(0,Math.min(6,Math.floor(Number(state.rules.numeroGironi)||0))));
     lettereGironi.forEach(tag=>{
         const squadre=state[tag];
-        if(!Array.isArray(squadre)||squadre.length===0) return;
+        if(!Array.isArray(squadre)||squadre.length===0){
+            gironeIncompleto=true;
+            return;
+        }
         const risultati=Array.isArray(state[tag+"res"])?state[tag+"res"]:[];
         const numeroPartite=getScheduledMatchCount(squadre.length);
-        if(risultati.length<numeroPartite||risultati.slice(0,numeroPartite).some(r=>r==="-"||r===""||r==null)) return;
+        if(risultati.length<numeroPartite||risultati.slice(0,numeroPartite).some(r=>r==="-"||r===""||r==null)){
+            gironeIncompleto=true;
+            return;
+        }
         const classifica=calc(squadre,risultati.slice(0,numeroPartite));
         if(!Array.isArray(classifica)||!classifica.length) return;
         let q=Number(state.rules.qualificatePerGirone);
@@ -11577,6 +11584,10 @@ function getFinalQualified(){
         classifica.slice(0,q).forEach((x,i)=>qualificati.push({nome:x.n,posizione:i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
         classifica.slice(q).forEach((x,i)=>ripescabili.push({nome:x.n,posizione:q+i+1,girone:tag,pt:x.pt,gf:x.gf,gs:x.gs,df:x.df}));
     });
+    // Non qualificare squadre provenienti solo dai gironi già completati:
+    // la fase finale si sblocca quando tutti i gironi attivi hanno risultati validi.
+    if(gironeIncompleto) return [];
+
     if(state.rules.usaQuarti===true){
         qualificati.sort((a,b)=>
             (Number(a.posizione)||99)-(Number(b.posizione)||99) ||
