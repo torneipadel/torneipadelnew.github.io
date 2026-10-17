@@ -9130,6 +9130,9 @@ async function aggiornaOraInizioTorneo(valore){
     if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(valorePulito)) return false;
 
     ensureRules();
+    if(state.rules.start && state.rules.start!==valorePulito && typeof window.boveShiftTournamentTimes==="function"){
+        window.boveShiftTournamentTimes(state.rules.start,valorePulito);
+    }
     state.rules.start=valorePulito;
 
     // Anche il campo "Start ore" dentro Regole usa lo stesso valore.
@@ -13992,7 +13995,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=14"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=15"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 <script src="site-navigation-v1.js?v=1"></script>
 </body>
