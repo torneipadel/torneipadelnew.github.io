@@ -377,16 +377,38 @@ table.standing .trend-up, table.standing .trend-down,
    ======================================================== */
 
 .menu-container {
-    /* Il menu resta nell’area superiore e non copre le caselle del girone B. */
-    position: fixed;
-    top: 10px;
-    right: 10px;
+    /* Barra comandi allineata al contenitore dei gironi, non fissata al bordo destro. */
+    position: relative;
+    top: auto;
+    right: auto;
     left: auto;
     z-index: 9999;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 6px;
+    width: min(100%, 1000px);
+    margin: 0 auto 12px;
+    padding: 0 10px;
 }
+
+.admin-rules-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #2563eb;
+    color: #fff;
+    font-size: 14px;
+    font-family: system-ui;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+.admin-rules-button:hover { background: #1d4ed8; }
 
 .admin-save-result-button {
     display: none;
@@ -2815,7 +2837,8 @@ style="width:80px">
 
 <div class="menu-container">
 <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
-<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('formatModal').style.display='block'"> ⚙️ Formato </button> <button type="button" onclick="openRules()"> 📖 Regole </button> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> <div class="groups"> <div class="card" id="cardA">
+<button type="button" class="admin-rules-button" onclick="openRules()">Regole</button>
+<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('formatModal').style.display='block'"> ⚙️ Formato </button> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> <div class="groups"> <div class="card" id="cardA">
    
 
       <table id="A"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Arows"></tbody></table>
