@@ -277,7 +277,13 @@ function renderCustomFinals(){
       const score=scores[i].split('-');
       const disabled=ready?'':' disabled';
       const scheduled=finalSchedule[stage.key][i];
-      html+='<tr><td>'+(i+1)+'</td><td>'+timeAt(scheduled.offset)+'</td><td>'+scheduled.court+'</td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
+      const turnValues=Array.isArray(s[stage.key+'Turn'])?s[stage.key+'Turn']:[];
+      const timeValues=Array.isArray(s[stage.key+'time'])?s[stage.key+'time']:[];
+      const courtValues=Array.isArray(s[stage.key+'camp'])?s[stage.key+'camp']:[];
+      const turnValue=turnValues[i]!==undefined&&String(turnValues[i]).trim()!==''?turnValues[i]:scheduled.slot+1;
+      const timeValue=timeValues[i]!==undefined&&String(timeValues[i]).trim()!==''?timeValues[i]:timeAt(scheduled.offset);
+      const courtValue=courtValues[i]!==undefined&&String(courtValues[i]).trim()!==''?courtValues[i]:scheduled.court;
+      html+='<tr><td><input class="gsb-schedule-input gsb-turn-input" type="number" min="1" step="1" aria-label="Turno '+stage.key+' partita '+(i+1)+'" value="'+esc(turnValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'Turn\',this.value)"></td><td><input class="gsb-schedule-input gsb-time-input" type="time" aria-label="Ora '+stage.key+' partita '+(i+1)+'" value="'+esc(timeValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'time\',this.value)"></td><td><input class="gsb-schedule-input gsb-court-input" type="number" min="1" step="1" aria-label="Campo '+stage.key+' partita '+(i+1)+'" value="'+esc(courtValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'camp\',this.value)"></td><td>'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
         '<input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
         '<span>–</span><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
         '</div></td></tr>';
@@ -296,6 +302,33 @@ function updateFinalStandings(stageKey){
   const overall=document.getElementById('gsb-overall-standings');
   if(overall)overall.innerHTML=overallFinalStandingsHtml();
 }
+window.updateGoldSilverBronzeSchedule=async function(stageKey,index,field,value){
+  if(!isSpecial())return false;
+  const s=activeState();
+  if(!s||!stages.some(x=>x.key===stageKey)||!Number.isInteger(index)||index<0||index>2||!['Turn','time','camp'].includes(field))return false;
+  const raw=String(value??'').trim();
+  if(field==='Turn'||field==='camp'){
+    if(!/^\d+$/.test(raw)||Number(raw)<1){alert(field==='Turn'?'Inserisci un numero di turno valido.':'Inserisci un numero di campo valido.');return false;}
+  }
+  if(field==='time'&&raw!==''&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(raw)){alert('Inserisci un orario valido.');return false;}
+  const key=stageKey+field;
+  if(!Array.isArray(s[key]))s[key]=Array(3).fill('');
+  s[key][index]=raw;
+  try{
+    if(typeof window.updateAndSync!=='function')throw new Error('Funzione di salvataggio non disponibile.');
+    const saved=await window.updateAndSync();
+    if(saved===false)throw new Error('Salvataggio non confermato.');
+    const status=document.getElementById('gsb-save-status');
+    if(status)status.textContent='✓ Turno, ora o campo salvati.';
+    return true;
+  }catch(error){
+    console.error('Errore salvataggio programmazione manuale Gold/Silver/Bronze:',error);
+    const status=document.getElementById('gsb-save-status');
+    if(status)status.textContent='Errore: modifica non confermata sul server.';
+    alert('La modifica di turno, ora o campo non è stata confermata. Riprova.');
+    return false;
+  }
+};
 window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   if(!isSpecial())return;
   const s=activeState();if(!s||!stages.some(x=>x.key===stageKey)||index<0||index>2||![0,1].includes(side))return;
@@ -588,7 +621,7 @@ window.applyRules=function(){
 };
 
 const style=document.createElement('style');
-style.textContent='#goldSilverBronzeStage.gold-silver-bronze-stage{display:block;width:100%;box-sizing:border-box}#goldSilverBronzeStage .gsb-final-card{margin:12px 0}#goldSilverBronzeStage .gsb-final-card h3{text-align:center;margin:0 0 8px}#goldSilverBronzeStage .gsb-subtitle,#goldSilverBronzeStage .gsb-muted{color:#cbd5e1;text-align:center}#goldSilverBronzeStage .gsb-ready{padding:10px;border-radius:8px;text-align:center;background:rgba(22,163,74,.16);color:#bbf7d0}#goldSilverBronzeStage .gsb-wait{padding:10px;border-radius:8px;text-align:center;background:rgba(217,119,6,.16);color:#fde68a}#goldSilverBronzeStage table{width:100%;border-collapse:collapse;margin:10px 0}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:8px;border-bottom:1px solid #475569;text-align:center}#goldSilverBronzeStage .gsb-matches{table-layout:fixed}#goldSilverBronzeStage .gsb-matches th:nth-child(1),#goldSilverBronzeStage .gsb-matches td:nth-child(1){width:11%!important;min-width:52px;white-space:nowrap}#goldSilverBronzeStage .gsb-matches th:nth-child(2),#goldSilverBronzeStage .gsb-matches td:nth-child(2){width:13%!important}#goldSilverBronzeStage .gsb-matches th:nth-child(3),#goldSilverBronzeStage .gsb-matches td:nth-child(3){width:14%!important;min-width:60px;white-space:nowrap}#goldSilverBronzeStage .gsb-matches th:nth-child(4),#goldSilverBronzeStage .gsb-matches td:nth-child(4){width:37%!important}#goldSilverBronzeStage .gsb-matches th:nth-child(5),#goldSilverBronzeStage .gsb-matches td:nth-child(5){width:25%!important}#goldSilverBronzeStage .gsb-score{display:flex;justify-content:center;align-items:center;gap:7px}#goldSilverBronzeStage .gsb-score input{width:54px;max-width:24%;text-align:center}#goldSilverBronzeStage .gsb-standing{max-width:680px;margin:12px auto}#goldSilverBronzeStage .gsb-total{padding:12px;border-top:1px solid #475569;text-align:center}@media(max-width:700px){#goldSilverBronzeStage{padding:10px!important}#goldSilverBronzeStage .gsb-final-card{padding:7px}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:5px 3px;font-size:12px}}';
+style.textContent='#goldSilverBronzeStage.gold-silver-bronze-stage{display:block;width:100%;box-sizing:border-box}#goldSilverBronzeStage .gsb-final-card{margin:12px 0}#goldSilverBronzeStage .gsb-final-card h3{text-align:center;margin:0 0 8px}#goldSilverBronzeStage .gsb-subtitle,#goldSilverBronzeStage .gsb-muted{color:#cbd5e1;text-align:center}#goldSilverBronzeStage .gsb-ready{padding:10px;border-radius:8px;text-align:center;background:rgba(22,163,74,.16);color:#bbf7d0}#goldSilverBronzeStage .gsb-wait{padding:10px;border-radius:8px;text-align:center;background:rgba(217,119,6,.16);color:#fde68a}#goldSilverBronzeStage table{width:100%;border-collapse:collapse;margin:10px 0}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:8px;border-bottom:1px solid #475569;text-align:center}#goldSilverBronzeStage .gsb-matches{table-layout:fixed}#goldSilverBronzeStage .gsb-matches th:nth-child(1),#goldSilverBronzeStage .gsb-matches td:nth-child(1){width:11%!important;min-width:52px;white-space:nowrap}#goldSilverBronzeStage .gsb-matches th:nth-child(2),#goldSilverBronzeStage .gsb-matches td:nth-child(2){width:13%!important}#goldSilverBronzeStage .gsb-matches th:nth-child(3),#goldSilverBronzeStage .gsb-matches td:nth-child(3){width:14%!important;min-width:60px;white-space:nowrap}#goldSilverBronzeStage .gsb-matches th:nth-child(4),#goldSilverBronzeStage .gsb-matches td:nth-child(4){width:37%!important}#goldSilverBronzeStage .gsb-matches th:nth-child(5),#goldSilverBronzeStage .gsb-matches td:nth-child(5){width:25%!important}#goldSilverBronzeStage .gsb-schedule-input{box-sizing:border-box;display:block;margin:0 auto;height:32px;min-width:0;padding:3px 2px;text-align:center;border:1px solid #64748b;border-radius:5px;background:#fff;color:#111827;font:inherit}#goldSilverBronzeStage .gsb-turn-input{width:48px;max-width:100%}#goldSilverBronzeStage .gsb-time-input{width:82px;max-width:100%}#goldSilverBronzeStage .gsb-court-input{width:54px;max-width:100%}#goldSilverBronzeStage .gsb-score{display:flex;justify-content:center;align-items:center;gap:7px}#goldSilverBronzeStage .gsb-score input{width:54px;max-width:24%;text-align:center}#goldSilverBronzeStage .gsb-standing{max-width:680px;margin:12px auto}#goldSilverBronzeStage .gsb-total{padding:12px;border-top:1px solid #475569;text-align:center}@media(max-width:700px){#goldSilverBronzeStage{padding:10px!important}#goldSilverBronzeStage .gsb-final-card{padding:7px}#goldSilverBronzeStage th,#goldSilverBronzeStage td{padding:5px 3px;font-size:12px}}';
 (document.head||document.documentElement).appendChild(style);
 window.ensureRules=window.ensureRules;
 window.renderKO=function(){
