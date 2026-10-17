@@ -376,19 +376,14 @@ table.standing .trend-up, table.standing .trend-down,
    MENU HAMBURGER E BOTTONI (FLUIDO E SOVRAPPOSTO)
    ======================================================== */
 
-.header-box { position:relative; }
 .tournament-control-row {
-    position: absolute;
-    top: 8px;
-    left: 0;
-    right: 0;
-    z-index: 30;
+    position: relative;
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 18px;
-    width: 100%;
-    margin: 0 auto;
+    width: min(100%, 1200px);
+    margin: 5px auto 12px;
     padding: 0 10px;
     box-sizing: border-box;
 }
@@ -431,7 +426,17 @@ table.standing .trend-up, table.standing .trend-down,
     white-space: nowrap;
     box-sizing: border-box;
 }
-.admin-rules-button:hover { background: #1d4ed8; }
+ .admin-rules-button:hover { background: #1d4ed8; }
+.admin-rules-button.menu-button {
+    width: auto;
+    min-width: 88px;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 14px;
+    white-space: nowrap;
+    background: #2563eb !important;
+    border-color: #334155 !important;
+}
 
 .admin-save-result-button {
     display: none;
@@ -555,20 +560,15 @@ body.user-mode textarea {
         display: none;
     }
 
-    .header-box { padding-top: 0; }
     .tournament-control-row {
-        top: 6px;
-        align-items: flex-start;
-        flex-wrap: nowrap;
+        align-items: center;
+        flex-wrap: wrap;
         justify-content: space-between;
-        gap: 6px;
-        padding: 0 6px;
+        gap: 10px;
     }
     .tournament-date-time {
-        flex-wrap: nowrap;
-        gap: 6px;
+        flex-wrap: wrap;
     }
-    .tournament-date-time input { max-width: 132px; }
     .menu-container {
         width: auto;
         max-width: 100%;
