@@ -376,20 +376,38 @@ table.standing .trend-up, table.standing .trend-down,
    MENU HAMBURGER E BOTTONI (FLUIDO E SOVRAPPOSTO)
    ======================================================== */
 
-.menu-container {
-    /* Barra comandi allineata al contenitore dei gironi, non fissata al bordo destro. */
+.tournament-control-row {
     position: relative;
-    top: auto;
-    right: auto;
-    left: auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(100%, 1200px);
+    margin: 5px auto 12px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+.tournament-date-time {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 15px;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+.menu-container {
+    position: relative;
+    inset: auto;
     z-index: 9999;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: 6px;
-    width: min(100%, 1000px);
-    margin: 0 auto 12px;
-    padding: 0 10px;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 auto;
 }
 
 .admin-rules-button {
@@ -532,14 +550,20 @@ body.user-mode textarea {
         display: none;
     }
 
+    .tournament-control-row {
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    .tournament-date-time {
+        flex-wrap: wrap;
+    }
     .menu-container {
-        position: relative;
-        top: auto;
-        right: auto;
-        left: auto;
-        width: 100%;
-        margin: 0 auto 12px;
-        padding: 0 10px;
+        width: auto;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
     }
 
     .menu-dropdown {
@@ -2774,20 +2798,8 @@ display:block;
 
 ">
 
-<div 
-
-style="
-
-display:flex;
-
-justify-content:center;
-
-gap:15px;
-
-margin-top:5px;
-
-">
-
+<div class="tournament-control-row">
+<div class="tournament-date-time">
 <div style="text-align:center;">
 
 <div 
@@ -2853,11 +2865,13 @@ style="width:80px">
 </div>
 
 </div>
-
 <div class="menu-container">
 <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
 <button type="button" class="admin-rules-button" onclick="openRules()">Regole</button>
-<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('formatModal').style.display='block'"> ⚙️ Formato </button> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> <div class="groups"> <div class="card" id="cardA">
+<button type="button" class="menu-button" onclick="toggleMenu()"> ☰ </button> <div id="menuComandi" class="menu-dropdown"> <button type="button" onclick="document.getElementById('formatModal').style.display='block'"> Formato </button> <button type="button" onclick="document.getElementById('teamModal').style.display='block'"> 📝 Squadre </button> <button type="button" onclick="stampaTabelloneGrafico(event)"> 🖨️ Stampa </button> <!-- SALVA TORNEO --> <button type="button" onclick="updateAndSync()"> 💾 Salva </button> <!-- RESET COMPLETO --> <button type="button" onclick="reset()"> 🗑️ Reset completo </button> <button onclick="window.location.href='admin.html'"> ⬅️ Torna ad Admin </button> </div> </div> 
+</div>
+
+<div class="groups"> <div class="card" id="cardA">
    
 
       <table id="A"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Arows"></tbody></table>
