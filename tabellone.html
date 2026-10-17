@@ -32,7 +32,7 @@ body {
 .brand img:hover{opacity:.82;transform:scale(1.015)}
 .brand-subtitle{position:relative;z-index:2;display:block;margin:-7px 0 0 0;color:#fff;font-family:Jost,Inter,"Open Sans",Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-align:center;text-transform:none;text-shadow:0 1px 3px rgba(0,0,0,.35);white-space:nowrap}
 .tournament-header-details{min-width:0;width:100%;margin:0 auto;text-align:center}
-@media(max-width:599px){.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:0}.brand{position:relative;left:auto;top:auto;transform:none;flex:0 0 auto;width:310px;max-width:calc(100vw - 56px)}.tournament-header-details{width:100%}}
+@media(max-width:599px){.header-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-top:55px}.brand{position:relative;left:auto;top:auto;transform:none;flex:0 0 auto;width:310px;max-width:calc(100vw - 56px)}.tournament-header-details{width:100%}}
 
 /* --- EFFETTO VETRO MOLTO CHIARO --- */
 .card, .koBox, .finalContainer {
@@ -2747,137 +2747,36 @@ Chiudi
 </script>
 
 <div class="tournament-header-details" style="text-align:center;">
-
-<div style="
-
-position:relative;
-
-width:100%;
-
-">
-
-<h1 id="titoloTorneo" style="margin:0;font-size:1.4rem;">
-
-⏳ Caricamento torneo…
-
-</h1>
-
-<div class="tournament-date-time" style="justify-content:center; margin-top:6px;">
-<div style="text-align:center;">
-
-<div 
-
-style="
-
-font-size:0.7rem;
-
-color:#94a3b8;
-
-margin-bottom:2px;
-
-">
-
-Data prevista:
-
+  <div style="position:relative;width:100%;">
+    <h1 id="titoloTorneo" style="margin:0;font-size:1.4rem;">⏳ Caricamento torneo…</h1>
+  </div>
 </div>
-
-<input 
-
-type="date"
-
-id="dataTorneoHeader"
-
-class="date-input-field"
-
-onchange="aggiornaDataTorneo(this.value)">
-
-</div>
-
-<div style="text-align:center;">
-
-<div 
-
-style="
-
-font-size:0.7rem;
-
-color:#94a3b8;
-
-margin-bottom:2px;
-
-">
-
-Start ore:
-
-</div>
-
-<input 
-
-type="time"
-
-id="startTimeHeader"
-
-class="date-input-field"
-
-value="20:00"
-
-onchange="aggiornaOraInizioTorneo(this.value)"
-
-style="width:80px">
-
-</div>
-
-</div>
-
-
-
-
-</div>
-
-</div>
-
-<input 
-
-type="text"
-
-id="nomeTorneoInput"
-
-placeholder="Nome Torneo"
-
-onblur="state.nomeTorneo=this.value"
-
-class="date-input-field"
-
-style="
-
-width:200px;
-
-margin:10px auto 0;
-
-display:block;
-
-">
-
 <div class="tournament-control-row">
-<div class="menu-container">
-<button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
-<button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
-<div id="menuComandi" class="menu-dropdown">
-<button type="button" onclick="document.getElementById('teamModal').style.display='block'">📝 Squadre</button>
-<button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📐 Formato torneo</button>
-<button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">Regole torneo</button>
-<button type="button" onclick="stampaTabelloneGrafico(event)">🖨️ Stampa</button>
-<button type="button" onclick="updateAndSync()">💾 Salva</button>
-<button type="button" onclick="reset()">🗑️ Reset completo</button>
-<button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
+  <div class="tournament-date-time">
+    <div style="text-align:center;">
+      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Data prevista:</div>
+      <input type="date" id="dataTorneoHeader" class="date-input-field" onchange="aggiornaDataTorneo(this.value)">
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Start ore:</div>
+      <input type="time" id="startTimeHeader" class="date-input-field" value="20:00" onchange="aggiornaOraInizioTorneo(this.value)" style="width:80px">
+    </div>
+  </div>
+  <div class="menu-container">
+    <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
+    <button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
+    <div id="menuComandi" class="menu-dropdown">
+      <button type="button" onclick="document.getElementById('teamModal').style.display='block'">📝 Squadre</button>
+      <button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📐 Formato torneo</button>
+      <button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">Regole torneo</button>
+      <button type="button" onclick="stampaTabelloneGrafico(event)">🖨️ Stampa</button>
+      <button type="button" onclick="updateAndSync()">💾 Salva</button>
+      <button type="button" onclick="reset()">🗑️ Reset completo</button>
+      <button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
+    </div>
+  </div>
 </div>
-</div> 
-</div>
-
-</div>
-
-</div>
-
+<input type="text" id="nomeTorneoInput" placeholder="Nome Torneo" onblur="state.nomeTorneo=this.value" class="date-input-field" style="width:200px;margin:10px auto 0;display:block;">
 <div class="groups"> <div class="card" id="cardA">
    
 
@@ -2888,10 +2787,9 @@ display:block;
     </div>
 
     
+     <div id="nomeFormulaTorneo" style="display:block;position:static;width:100%;margin:8px 0 4px;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:auto;"></div>
      <div class="card" id="cardB">
-       <div id="nomeFormulaTorneo" style="display:block;position:static;width:100%;margin:8px 0 4px;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:auto;"></div>
-
-      <table id="B"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Brows"></tbody></table>
+<table id="B"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Brows"></tbody></table>
 
       
 
@@ -13560,11 +13458,7 @@ window.addEventListener("load", async()=>{
 
         idBox.textContent =
             "ID torneo: " + idTorneo;
-        /* Mantiene Data prevista e Start ore subito sotto titolo e ID torneo. */
-        const dateTimeFields = document.querySelector(".tournament-date-time");
-        if (dateTimeFields && idBox.nextElementSibling !== dateTimeFields) {
-            idBox.insertAdjacentElement("afterend", dateTimeFields);
-        }
+        /* Data e ora restano nella riga comandi, subito sotto titolo e ID. */
     }
 
 
