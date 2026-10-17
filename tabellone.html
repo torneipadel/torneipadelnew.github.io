@@ -13625,12 +13625,12 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
    };
    cards.forEach(card=>{
     const clone=printableClone(card);
-    specialPrintPages+=\`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">\${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — \${esc(textOf(card.querySelector("h3")).toUpperCase())}</div><div class="bpl-special-content">\${clone.outerHTML}</div></section>\`;
+    specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — ${esc(textOf(card.querySelector("h3")).toUpperCase())}</div><div class="bpl-special-content">${clone.outerHTML}</div></section>`;
    });
    const overall=source.querySelector("#gsb-overall-standings");
    if(overall){
     const clone=printableClone(overall);
-    specialPrintPages+=\`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">\${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">CLASSIFICA GENERALE FINALE</div><div class="bpl-special-content">\${clone.innerHTML}</div></section>\`;
+    specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">CLASSIFICA GENERALE FINALE</div><div class="bpl-special-content">${clone.innerHTML}</div></section>`;
    }
   }
 }else if(["americano","mexicano","king","short","svizzero"].includes(tipoStampa)){
