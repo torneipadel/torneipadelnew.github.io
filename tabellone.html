@@ -6764,16 +6764,16 @@ async function updateAndSyncImpl(showSaveResult=false){
         sovrascrivere i risultati remoti con dati obsoleti.
         */
         const __gsbIsSpecial =
-            (typeof window.isGoldSilverBronzeTournament === "function" &&
-                window.isGoldSilverBronzeTournament()) ||
-            [
-                state.formula,
-                state.formulaTorneo,
-                state.rules?.tipoTorneo,
-                state.rules?.formulaScelta,
-                state.rules?.formulaFinale,
-                state.rules?.formulaConfig?.formula
-            ].some(v => String(v || "") === "goldSilverBronze");
+            typeof window.isGoldSilverBronzeTournament === "function"
+                ? window.isGoldSilverBronzeTournament()
+                : [
+                    state.formula,
+                    state.formulaTorneo,
+                    state.rules?.tipoTorneo,
+                    state.rules?.formulaScelta,
+                    state.rules?.formulaFinale,
+                    state.rules?.formulaConfig?.formula
+                ].some(v => String(v || "") === "goldSilverBronze");
 
         if(remoto && __gsbIsSpecial){
             if(typeof sb === "undefined" || !sb){
