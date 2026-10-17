@@ -13613,6 +13613,26 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
   clone.querySelectorAll("[style]").forEach(el=>el.removeAttribute("style"));
   specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — GIRONE FINALE</div><div class="bpl-special-content">${clone.innerHTML}</div></section>`;
  }
+}else if(typeof window.isGoldSilverBronzeTournament==="function"&&window.isGoldSilverBronzeTournament()){
+  const source=document.getElementById("goldSilverBronzeStage");
+  if(source){
+   const cards=[...source.querySelectorAll(".gsb-final-card")];
+   const printableClone=node=>{
+    const clone=node.cloneNode(true);
+    clone.querySelectorAll("input,select,textarea,button").forEach(el=>{const span=document.createElement("span");span.textContent=el.value!=null&&el.value!==""?el.value:(el.textContent||"");el.replaceWith(span);});
+    clone.querySelectorAll("[style]").forEach(el=>el.removeAttribute("style"));
+    return clone;
+   };
+   cards.forEach(card=>{
+    const clone=printableClone(card);
+    specialPrintPages+=\`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">\${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — \${esc(textOf(card.querySelector("h3")).toUpperCase())}</div><div class="bpl-special-content">\${clone.outerHTML}</div></section>\`;
+   });
+   const overall=source.querySelector("#gsb-overall-standings");
+   if(overall){
+    const clone=printableClone(overall);
+    specialPrintPages+=\`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">\${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">CLASSIFICA GENERALE FINALE</div><div class="bpl-special-content">\${clone.innerHTML}</div></section>\`;
+   }
+  }
 }else if(["americano","mexicano","king","short","svizzero"].includes(tipoStampa)){
  const boxId={americano:"americanoBox",mexicano:"mexicanoBox",king:"kingBox",short:"shortBox",svizzero:"svizzeroBox"}[tipoStampa];
  const source=boxId?document.getElementById(boxId):null;
