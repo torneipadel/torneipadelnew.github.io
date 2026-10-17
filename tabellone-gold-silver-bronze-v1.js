@@ -421,10 +421,100 @@ window.openRules=function(){
   else ['formatoTorneo','numeroGironi','squadrePerGirone'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});
   return result;
 };
+
+function shiftStoredTournamentTimes(fromValue,toValue){
+  const toMinutes=value=>{
+    const match=String(value??'').match(/^([01]\\d|2[0-3]):([0-5]\\d)$/);
+    return match?Number(match[1])*60+Number(match[2]):null;
+  };
+  const from=toMinutes(fromValue),to=toMinutes(toValue);
+  if(from===null||to===null||from===to)return;
+  const delta=to-from;
+  const s=activeState();if(!s)return;
+  Object.keys(s).forEach(key=>{
+    if(!/time$/i.test(key)||!Array.isArray(s[key]))return;
+    s[key]=s[key].map(value=>{
+      const mins=toMinutes(value);
+      if(mins===null)return value;
+      const shifted=(mins+delta+1440)%1440;
+      return String(Math.floor(shifted/60)).padStart(2,'0')+':'+String(shifted%60).padStart(2,'0');
+    });
+  });
+}
+window.boveShiftTournamentTimes=shiftStoredTournamentTimes;
+
+async function applyStandardRulesFallback(){
+  const s=activeState();if(!s)return false;
+  s.rules=s.rules&&typeof s.rules==='object'?s.rules:{};
+  const r=s.rules;
+  const el=id=>document.getElementById(id);
+  const value=id=>el(id)?.value;
+  const number=(id,fallback)=>{
+    const raw=value(id);
+    if(raw===undefined||raw===null||String(raw).trim()==='')return fallback;
+    const n=Number(raw);return Number.isFinite(n)?n:fallback;
+  };
+  const checked=id=>el(id)?.checked===true;
+  const oldStart=String(r.start||'20:00');
+  const newStart=String(value('startTime')||oldStart);
+  if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(newStart)){
+    alert('Ora di inizio non valida. Le regole non sono state salvate.');
+    return false;
+  }
+  const format=number('formatoTorneo',Number(r.formatoTorneo)||8);
+  if(![8,9,12,16,20,24].includes(format)){
+    alert('Numero squadre non valido. Le regole non sono state salvate.');
+    return false;
+  }
+  const duration=Math.max(1,Math.min(600,Math.floor(number('duration',Number(r.duration)||30))));
+  const turns=Math.max(1,Math.min(50,Math.floor(number('numeroTurni',Number(r.turni)||3))));
+  const courts=Math.max(1,Math.min(50,Math.floor(number('numeroCampi',Number(r.campi)||3))));
+  r.tipoTorneo=String(value('tipoTorneo')||r.tipoTorneo||'italiana');
+  r.formatoTorneo=format;r.numeroSquadre=format;s.formato=format;
+  r.numeroGironi=Math.max(1,Math.min(6,Math.floor(number('numeroGironi',Number(r.numeroGironi)||2))));
+  r.squadrePerGirone=Math.max(1,Math.min(24,Math.floor(number('squadrePerGirone',Number(r.squadrePerGirone)||4))));
+  r.formulaGironi=String(value('formulaGironi')||r.formulaGironi||'tuttiControTutti');
+  r.formulaFinale=String(value('formulaFinale')||r.formulaFinale||'eliminazioneDiretta');
+  r.w=number('wP',Number(r.w)||3);r.d=number('dP',Number(r.d)||1);r.l=number('lP',Number(r.l)||0);
+  ['crit1','crit2','crit3'].forEach(id=>{if(value(id)!==undefined)r[id]=String(value(id));});
+  r.qualificatePerGirone=Math.max(1,Math.floor(number('qualificatePerGirone',Number(r.qualificatePerGirone)||2)));
+  r.numeroQualificateFinali=Math.max(1,Math.floor(number('numeroQualificateFinali',Number(r.numeroQualificateFinali)||4)));
+  r.usaQuarti=checked('usaQuarti');r.usaSemifinali=checked('usaSemifinali');r.usaFinale=checked('usaFinale');
+  r.numeroFinali=Math.max(1,Math.min(12,Math.floor(number('numeroFinali',Number(r.numeroFinali)||1))));
+  r.ripescaggio=checked('ripescaggio');r.numeroRipescate=Math.max(0,Math.floor(number('numeroRipescate',Number(r.numeroRipescate)||0)));
+  r.killerPoint=String(value('killerPointSelect')??r.killerPoint??'false')==='true';
+  r.rigori=String(value('rigoriSelect')??r.rigori??'true')==='true';
+  r.tempoSupplementare=String(value('supplementariSelect')??r.tempoSupplementare??'true')==='true';
+  r.garaAndataRitorno=checked('garaAndataRitorno');
+  r.criterioParitaExtra=String(value('criterioParitaExtra')||r.criterioParitaExtra||'sorteggio');
+  r.turni=turns;r.campi=courts;r.start=newStart;r.duration=duration;
+  r.note=String(value('noteRegole')??r.note??'');
+  const mostra=value('mostraQuartiSelect');
+  if(mostra!==undefined)s.mostraQuarti=mostra==='true';
+  r.criteriClassifica=['pt',r.crit1,r.crit2,r.crit3];
+  if(oldStart!==newStart)shiftStoredTournamentTimes(oldStart,newStart);
+  try{localStorage.setItem('torneoState',JSON.stringify(s));}catch(e){console.warn('Salvataggio locale regole non riuscito:',e);}
+  if(typeof window.renderTables==='function')window.renderTables();
+  if(typeof window.renderClass==='function')window.renderClass();
+  if(typeof window.renderKO==='function')window.renderKO();
+  if(typeof window.render==='function')window.render();
+  if(typeof window.updateAndSync!=='function'){
+    alert('Funzione di salvataggio non disponibile. Le regole sono state mantenute localmente, ma non confermate su Supabase.');
+    return false;
+  }
+  const saved=await window.updateAndSync();
+  if(saved===false){
+    alert('Salvataggio remoto non confermato. Le regole restano nella pagina; riprova senza chiudere il pannello.');
+    return false;
+  }
+  const modal=el('rulesModal');if(modal)modal.style.display='none';
+  return true;
+}
+
 window.applyRules=function(){
   const selected=document.getElementById('tipoTorneo')?.value||'';
   if(!isSpecial()&&selected!=='goldSilverBronze'){
-    return typeof baseApplyRules==='function'?baseApplyRules.apply(this,arguments):undefined;
+    return applyStandardRulesFallback();
   }
   const s=activeState();if(!s)return false;
   const readNumber=(id,fallback)=>{const el=document.getElementById(id);return el&&el.value!==''?Number(el.value):fallback;};
