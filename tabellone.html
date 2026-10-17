@@ -2832,7 +2832,11 @@ Data prevista:
 
 type="date"
 
-class="date-input-field">
+id="dataTorneoHeader"
+
+class="date-input-field"
+
+onchange="aggiornaDataTorneo(this.value)">
 
 </div>
 
@@ -2876,7 +2880,8 @@ style="width:80px">
 <button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
 <div id="menuComandi" class="menu-dropdown">
 <button type="button" onclick="document.getElementById('teamModal').style.display='block'">📝 Squadre</button>
-<button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">⚙️ Formato / Regole torneo</button>
+<button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📐 Formato torneo</button>
+<button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">⚙️ Regole torneo</button>
 <button type="button" onclick="stampaTabelloneGrafico(event)">🖨️ Stampa</button>
 <button type="button" onclick="updateAndSync()">💾 Salva</button>
 <button type="button" onclick="reset()">🗑️ Reset completo</button>
@@ -4466,9 +4471,12 @@ async function caricaTorneoArchivio(id){
     if(campiDate.length > 0){
 
         campiDate[0].value =
-            data.data;
+            data.data || state.dataTorneo || "";
 
     }
+
+    const dataHeader = document.getElementById("dataTorneoHeader");
+    if (dataHeader) dataHeader.value = data.data || state.dataTorneo || "";
 
 
 
@@ -9196,6 +9204,20 @@ function updateTime(g,i,pos,val){
     if(!Array.isArray(state[key])) state[key]=[];
     state[key][i]=String(val ?? "").trim();
     updateAndSync();
+}
+
+async function aggiornaDataTorneo(valore){
+    const dataPulita = String(valore || "").trim();
+    if (dataPulita && !/^\d{4}-\d{2}-\d{2}$/.test(dataPulita)) return false;
+    if (typeof state === "undefined" || !state) return false;
+
+    state.dataTorneo = dataPulita;
+    try { localStorage.setItem("torneoState", JSON.stringify(state)); } catch (e) {
+        console.warn("Salvataggio locale della data non riuscito:", e);
+    }
+    const salvato = await updateAndSync();
+    if (!salvato) console.error("Data del torneo non confermata dal salvataggio remoto.");
+    return salvato;
 }
 
 async function aggiornaOraInizioTorneo(valore){
