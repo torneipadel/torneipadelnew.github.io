@@ -8915,7 +8915,32 @@ function calc(squadre, risultati){
             }
         }
 
-        if(B.x.df!==A.x.df) return B.x.df-A.x.df;
+        // Il criterio extra scelto dall'organizzatore viene applicato
+        // soltanto dopo i criteri principali, prima degli spareggi automatici.
+        const criterioExtra=String(state.rules?.criterioParitaExtra||"sorteggio");
+        if(criterioExtra==="scontroDiretto"){
+            const ah=h2h(A.index,tied), bh=h2h(B.index,tied);
+            if(bh.pt!==ah.pt) return bh.pt-ah.pt;
+            if(bh.df!==ah.df) return bh.df-ah.df;
+            if(bh.gf!==ah.gf) return bh.gf-ah.gf;
+        }else if(criterioExtra==="differenzaGiochi"){
+            if(B.x.df!==A.x.df) return B.x.df-A.x.df;
+        }else if(criterioExtra==="sorteggio"){
+            // Sorteggio riproducibile per il torneo: non cambia a ogni render.
+            const hashSorteggio=valore=>{
+                let hash=2166136261;
+                for(let i=0;i<valore.length;i++){
+                    hash^=valore.charCodeAt(i);
+                    hash=Math.imul(hash,16777619);
+                }
+                return hash>>>0;
+            };
+            const seed=String(state.idTorneo||state.nomeTorneo||"torneo");
+            const hashA=hashSorteggio(seed+"|"+String(A.x.n));
+            const hashB=hashSorteggio(seed+"|"+String(B.x.n));
+            if(hashA!==hashB) return hashA-hashB;
+        }
+
         if(B.x.gf!==A.x.gf) return B.x.gf-A.x.gf;
         if(A.x.gs!==B.x.gs) return A.x.gs-B.x.gs;
         return A.index-B.index;
