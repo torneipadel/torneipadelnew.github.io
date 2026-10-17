@@ -134,6 +134,8 @@ function normalizeTeams(){
   });
   if(!s.goldSilverBronze||typeof s.goldSilverBronze!=='object')s.goldSilverBronze={version:1,teamsPerGroup:3,groupCount:3,courts:Math.max(1,Number(s.rules?.campi)||3),matchDurationMinutes:Math.max(1,Number(s.rules?.duration)||20),groupMatchCount:9,finalMatchCount:9,finals:['gold','silver','bronze'],results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
+  s.goldSilverBronze.courts=Math.max(1,Math.min(50,Math.floor(Number(s.rules?.campi)||3)));
+  s.goldSilverBronze.matchDurationMinutes=Math.max(1,Number(s.rules?.duration)||20);
   ['gold','silver','bronze'].forEach(k=>s.goldSilverBronze.results[k]=normalizedResults(s[k+'Res']));
   syncFinalPlacements();
 }
