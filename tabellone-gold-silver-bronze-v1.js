@@ -424,7 +424,7 @@ window.openRules=function(){
 
 function shiftStoredTournamentTimes(fromValue,toValue){
   const toMinutes=value=>{
-    const match=String(value??'').match(/^([01]\\d|2[0-3]):([0-5]\\d)$/);
+    const match=String(value??'').match(/^([01]\d|2[0-3]):([0-5]\d)$/);
     return match?Number(match[1])*60+Number(match[2]):null;
   };
   const from=toMinutes(fromValue),to=toMinutes(toValue);
@@ -457,7 +457,7 @@ async function applyStandardRulesFallback(){
   const checked=id=>el(id)?.checked===true;
   const oldStart=String(r.start||'20:00');
   const newStart=String(value('startTime')||oldStart);
-  if(!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(newStart)){
+  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(newStart)){
     alert('Ora di inizio non valida. Le regole non sono state salvate.');
     return false;
   }
