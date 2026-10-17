@@ -96,29 +96,33 @@ input{width:100%;padding:5px;border-radius:4px;background:#0b1220;border:1px sol
 #winnerCardKO.winner-card-ko{
     display:block;
     box-sizing:border-box;
-    width:100%;
+    width:calc(200% + 12px);
+    max-width:none;
     height:auto !important;
     min-height:0 !important;
     max-height:none !important;
     overflow:visible !important;
     white-space:normal;
+    position:relative;
+    z-index:2;
 }
 #winnerCardKO.winner-card-ko .winner-box{
     display:block;
     box-sizing:border-box;
     width:100%;
+    max-width:none;
     height:auto !important;
     min-height:0 !important;
     max-height:none !important;
     overflow:visible !important;
     white-space:normal !important;
-    overflow-wrap:anywhere;
+    overflow-wrap:break-word;
     line-height:1.4;
 }
 #winnerCardKO.winner-card-ko .winner-box span{
     display:block;
     white-space:normal;
-    overflow-wrap:anywhere;
+    overflow-wrap:break-word;
     line-height:1.4;
 }
 
