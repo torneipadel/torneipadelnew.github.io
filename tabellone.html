@@ -381,11 +381,24 @@ table.standing .trend-up, table.standing .trend-down,
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 18px;
+    flex-wrap: wrap;
+    gap: 10px 18px;
     width: min(100%, 1200px);
-    margin: 5px auto 12px;
+    margin: 8px auto 12px;
     padding: 0 10px;
     box-sizing: border-box;
+    min-height: 42px;
+}
+.tournament-control-row .tournament-date-time {
+    display: flex !important;
+    align-items: flex-end;
+    gap: 15px;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.tournament-control-row .tournament-date-time > div > div {
+    color: #cbd5e1 !important;
+    font-size: 12px !important;
 }
 .tournament-date-time {
     display: flex;
@@ -2789,8 +2802,8 @@ Chiudi
     </div>
 
     
-     <div class="girone-b-wrap" style="min-width:0;">
-<div id="nomeFormulaTorneo" style="display:block;position:static;width:100%;margin:8px 0 4px;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:auto;"></div>
+     <div class="girone-b-wrap" style="position:relative;min-width:0;">
+<div id="nomeFormulaTorneo" style="display:block;position:absolute;left:0;right:0;top:-20px;width:100%;margin:0;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:2;pointer-events:none;"></div>
      <div class="card" id="cardB">
 <table id="B"><thead><tr><th>Campo</th><th>Ora</th><th>Match</th><th>Ris</th></tr></thead><tbody id="Brows"></tbody></table>
 
