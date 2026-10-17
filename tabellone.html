@@ -98,6 +98,22 @@ input{width:100%;padding:5px;border-radius:4px;background:#0b1220;border:1px sol
 
 .finalContainer{border:2px solid #eab308;padding:15px;margin-top:20px;border-radius:15px;}
 
+/* Allineamento dei contenitori KO come le card dei gironi A/B: niente larghezza
+   minima implicita, margini interni aggiuntivi o spazio residuo laterale. */
+.koBox,
+.finalContainer,
+.finalContainer > .groups,
+.finalContainer > .groups > .card {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+.finalContainer > .groups > .card {
+    width: 100% !important;
+    margin: 0 0 12px !important;
+    overflow-x: hidden !important;
+}
+
 .winner-box{margin-top:10px;padding:15px;border-radius:8px;text-align:center;font-weight:bold;}
 
 .top-win{background:rgba(251,191,36,.2);color:#fbbf24;font-size:1.3em;}
@@ -142,11 +158,17 @@ input{width:100%;padding:5px;border-radius:4px;background:#0b1220;border:1px sol
 
 /* Le fasi KO sono tabelle HTML: non trasformare righe e celle
    in flexbox, perché questo rompe l'allineamento delle colonne. */
+/* Le tabelle KO seguono il comportamento dei gironi A/B:
+   occupano esattamente lo spazio interno disponibile, senza colonne vuote a destra. */
 .koBox table,
-.finalContainer table {
+.finalContainer table,
+.finalContainer .groups > .card table {
     width: 100% !important;
-    table-layout: fixed !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
     border-collapse: collapse !important;
+    box-sizing: border-box !important;
 }
 
 tbody#Q, tbody#S, tbody#finaleBox {
@@ -902,11 +924,15 @@ table:has(> tbody#finaleBox) th:nth-child(2), table:has(> tbody#finaleBox) td:nt
 .koBox table th:nth-child(2), .koBox table td:nth-child(2),
 .finalContainer table th:nth-child(2), .finalContainer table td:nth-child(2) { width:50.5px !important; }
 
+/* La colonna Match deve adattarsi allo spazio residuo, non essere bloccata a 50,5px. */
 table:has(> tbody#Q) th:nth-child(3), table:has(> tbody#Q) td:nth-child(3),
 table:has(> tbody#S) th:nth-child(3), table:has(> tbody#S) td:nth-child(3),
 table:has(> tbody#finaleBox) th:nth-child(3), table:has(> tbody#finaleBox) td:nth-child(3),
 .koBox table th:nth-child(3), .koBox table td:nth-child(3),
-.finalContainer table th:nth-child(3), .finalContainer table td:nth-child(3) { width:50.5px !important; }
+.finalContainer table th:nth-child(3), .finalContainer table td:nth-child(3) {
+    width: auto !important;
+    min-width: 0 !important;
+}
 </style>
 <style id="bove-user-menu-stable">
 body.user-mode .menu-container {
