@@ -281,7 +281,7 @@ function renderCustomFinals(){
       const timeValues=Array.isArray(s[stage.key+'time'])?s[stage.key+'time']:[];
       const courtValues=Array.isArray(s[stage.key+'camp'])?s[stage.key+'camp']:[];
       const turnValue=turnValues[i]!==undefined&&String(turnValues[i]).trim()!==''?turnValues[i]:scheduled.slot+1;
-      const timeValue=timeValues[i]!==undefined&&String(timeValues[i]).trim()!==''?timeValues[i]:'';
+      const timeValue=timeValues[i]!==undefined&&String(timeValues[i]).trim()!==''?timeValues[i]:timeAt(scheduled.offset);
       const courtValue=courtValues[i]!==undefined&&String(courtValues[i]).trim()!==''?courtValues[i]:scheduled.court;
       html+='<tr><td><input class="gsb-schedule-input gsb-court-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Campo '+stage.key+' partita '+(i+1)+'" value="'+esc(courtValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'camp\',this.value)"></td><td><input class="gsb-schedule-input gsb-time-input" type="text" inputmode="numeric" maxlength="5" autocomplete="off" aria-label="Ora '+stage.key+' partita '+(i+1)+'" value="'+esc(timeValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'time\',this.value)"></td><td class="gsb-match-name">'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
         '<input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
@@ -501,14 +501,18 @@ function shiftStoredTournamentTimes(fromValue,toValue){
   if(from===null||to===null||from===to)return;
   const delta=to-from;
   const s=activeState();if(!s)return;
+  const shiftValue=value=>{
+    const mins=toMinutes(value);
+    if(mins===null)return value;
+    const shifted=(mins+delta+1440)%1440;
+    return String(Math.floor(shifted/60)).padStart(2,'0')+':'+String(shifted%60).padStart(2,'0');
+  };
   Object.keys(s).forEach(key=>{
-    if(!/time$/i.test(key)||!Array.isArray(s[key]))return;
-    s[key]=s[key].map(value=>{
-      const mins=toMinutes(value);
-      if(mins===null)return value;
-      const shifted=(mins+delta+1440)%1440;
-      return String(Math.floor(shifted/60)).padStart(2,'0')+':'+String(shifted%60).padStart(2,'0');
-    });
+    if(!/time$/i.test(key))return;
+    // Le chiavi legacy della finale possono contenere una stringa singola,
+    // mentre gli altri orari sono array. Aggiorna entrambi i formati.
+    if(Array.isArray(s[key]))s[key]=s[key].map(shiftValue);
+    else if(typeof s[key]==='string')s[key]=shiftValue(s[key]);
   });
 }
 window.boveShiftTournamentTimes=shiftStoredTournamentTimes;
