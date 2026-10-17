@@ -347,7 +347,10 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   }
   syncFinalPlacements();
   updateFinalStandings(stageKey);
-  if(validScore(s[key][index]))window.saveGoldSilverBronzeResults(true);
+  // Persisti anche la cancellazione o il risultato incompleto: altrimenti
+  // Supabase può conservare un punteggio precedente dopo che l'utente lo svuota.
+  // La coda serializzata mantiene l'ordine degli aggiornamenti durante la digitazione.
+  window.saveGoldSilverBronzeResults(true);
 };
 let gsbSaveQueue=Promise.resolve();
 let gsbSaveRequested=0;
