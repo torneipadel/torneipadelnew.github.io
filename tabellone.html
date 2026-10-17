@@ -6896,7 +6896,8 @@ async function updateAndSyncImpl(showSaveResult=false){
                     const remoteScore = __gsbNormalized(remoteScores[index] ?? "-");
                     const dirty = __gsbDirty.has(stage + ":" + index);
 
-                    if(dirty && __gsbValidScore(local)) return local;
+                    // Rispetta le modifiche locali anche se il punteggio è stato cancellato.
+                    if(dirty) return __gsbValidScore(local) ? local : "-";
                     if(__gsbValidScore(remoteScore)) return remoteScore;
                     if(__gsbValidScore(local)) return local;
                     return "-";
@@ -14067,7 +14068,7 @@ window.print();
 
 })();
 </script>
-  <script src="tabellone-gold-silver-bronze-v1.js?v=27"></script>
+  <script src="tabellone-gold-silver-bronze-v1.js?v=28"></script>
   <script src="sponsor-public-v2.js?v=10"></script>
 <script src="site-navigation-v1.js?v=1"></script>
 </body>
