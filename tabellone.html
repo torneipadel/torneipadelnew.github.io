@@ -10741,7 +10741,7 @@ function generaPartiteGironi(){
         const partite = [];
 
         if(!Array.isArray(girone)) return partite;
-        if(typeof window.isGoldSilverBronzeTournament==='function' && window.isGoldSilverBronzeTournament() && girone.length===3){
+        if(girone.length===3){
             [[0,1],[0,2],[1,2]].forEach(x=>partite.push({casa:x[0],ospite:x[1]}));
             return partite;
         }
@@ -10796,7 +10796,7 @@ function generaPartiteGironi(){
 
         if(
             Array.isArray(state[tag]) &&
-            (state[tag].length===4 || (typeof window.isGoldSilverBronzeTournament==='function' && window.isGoldSilverBronzeTournament() && state[tag].length===3))
+            (state[tag].length===4 || state[tag].length===3)
         ){
             state.partiteGironi[tag] =
                 crea(state[tag]);
