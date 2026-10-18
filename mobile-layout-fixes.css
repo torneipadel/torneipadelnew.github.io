@@ -1,0 +1,53 @@
+/* Mobile-only layout corrections. Desktop rules are intentionally untouched. */
+@media screen and (max-width: 767px) {
+  html { width: 100%; max-width: 100%; overflow-x: clip; }
+  body { width: 100%; max-width: 100%; margin-left: 0; margin-right: 0; overflow-x: clip; }
+  body, body * { min-width: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  img, video, iframe, canvas, svg { max-width: 100%; }
+  img, video { height: auto; }
+  h1, h2, h3, h4, p, label, a, button, small, strong, span {
+    overflow-wrap: anywhere;
+  }
+  input, select, textarea { max-width: 100%; min-width: 0; }
+  input, select, textarea { font-size: 16px; }
+  main, .container, .wrap, .page, .content, .main, .shell, .app,
+  .page-content, .content-wrap, .dashboard-content, .panel-content {
+    max-width: 100%;
+  }
+  .container, .wrap, .page, .content, .main, .shell, .page-content, .content-wrap {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .grid, .cards, .company-grid, .companies-grid, .features-grid,
+  .news-grid, .market-grid, .sponsor-grid, .card-grid, .content-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .row, .actions, .button-row, .company-card-actions, .toolbar,
+  .header-actions, .form-actions, .buttons, .menu-actions, .nav-links,
+  .topbar, .header-row, .news-brand-banner {
+    flex-wrap: wrap;
+  }
+  .actions > *, .button-row > *, .company-card-actions > *,
+  .form-actions > *, .buttons > * { max-width: 100%; }
+  .news-brand-banner { height: auto; min-height: 0; }
+  .brand-subtitle, .brand-sub, .company-brand-subtitle {
+    white-space: normal;
+    max-width: 100%;
+    text-align: center;
+  }
+  .table-wrap, .table-responsive, .table-container, .overflow-x-auto {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table { max-width: 100%; }
+  pre, code { overflow-wrap: anywhere; white-space: pre-wrap; }
+  .modal, .dialog, .popup, .detail {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+  .language-selector { max-width: calc(100vw - 24px); }
+  button, .btn, a.button { white-space: normal; }
+}
