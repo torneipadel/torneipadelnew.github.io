@@ -12,7 +12,7 @@ html,body{min-height:100%;margin:0}
 body{background:#06111f var(--bg-image) center/cover fixed no-repeat;font-family:'Open Sans',Arial,sans-serif;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:24px 16px;overflow-x:hidden}
 body:before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,12,24,.30),rgba(3,12,24,.68));pointer-events:none;z-index:-1}
 .box{width:min(620px,100%);margin:0 auto;padding:24px 22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 35px rgba(0,0,0,.28);text-align:center}
-.logo{width:112px;height:auto;display:block;margin:0 auto 12px}
+.logo{width:min(300px,94%);height:78px;object-fit:contain;display:block;margin:0 auto 4px}.brand-subtitle{display:block;margin:0 auto 16px;color:#fff;font-size:14px;font-style:italic;font-weight:700;letter-spacing:1.2px;text-shadow:0 2px 6px rgba(0,0,0,.7)}
 h2{margin:0 0 12px;font-size:22px;line-height:1.2;font-weight:800;letter-spacing:-.02em}
 .info{font-size:13px;line-height:1.45;color:rgba(255,255,255,.68);margin:0 0 12px}
 input,textarea{display:block;width:100%;box-sizing:border-box;padding:0 13px;margin:7px 0;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:rgba(255,255,255,.94);color:#333;font:600 14px 'Open Sans',Arial,sans-serif;height:46px;outline:none}
@@ -23,14 +23,14 @@ input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2
 .btn{background:#fff;color:var(--blue)}
 .btn-back{background:rgba(0,0,0,.32);color:#fff}
 #status{margin-top:12px;min-height:20px;color:#ffeb3b;font-size:13px;line-height:1.4}
-@media(max-width:767px){body{align-items:flex-start;padding:18px 12px 28px}.box{width:min(620px,100%);padding:20px 16px;border-radius:16px}.logo{width:100px;margin-bottom:10px}h2{font-size:20px}.info{font-size:13px}input,textarea{font-size:14px}.btn,.btn-back{font-size:13px}}
-@media(max-width:380px){.box{padding:18px 13px}.logo{width:92px}h2{font-size:19px}input,textarea{height:44px}.btn,.btn-back{min-height:44px}}
+@media(max-width:767px){body{align-items:flex-start;padding:18px 12px 28px}.box{width:min(620px,100%);padding:20px 16px;border-radius:16px}.logo{width:92%;height:70px;margin-bottom:4px}.brand-subtitle{font-size:13px;margin-bottom:14px}h2{font-size:20px}.info{font-size:13px}input,textarea{font-size:14px}.btn,.btn-back{font-size:13px}}
+@media(max-width:380px){.box{padding:18px 13px}.logo{width:92%;height:64px}.brand-subtitle{font-size:12px;letter-spacing:1px}h2{font-size:19px}input,textarea{height:44px}.btn,.btn-back{min-height:44px}}
 </style>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head>
 <body>
 <div class="box">
-<img src="eventour_logo.jpg" class="logo" alt="EVENTOUR">
+<img src="eventour_logo.jpg" class="logo" alt="EVENTOUR"><span class="brand-subtitle">gestione &amp; eventi</span>
 <h2>Profilo giocatore</h2>
 <div class="info" id="emailBox">Caricamento...</div>
 <input id="nome" placeholder="Nome">
