@@ -14,7 +14,7 @@
 html,body{margin:0;min-height:100%;font-family:"Open Sans",Arial,sans-serif}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;color:#fff;background:linear-gradient(rgba(7,18,25,.28),rgba(7,18,25,.44)),var(--bg-image) center/cover fixed no-repeat;overflow-x:hidden}
 .card{width:min(570px,100%);min-height:640px;margin:0 auto;padding:38px 42px 32px;border:1px solid rgba(255,255,255,.22);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.055));box-shadow:0 18px 50px rgba(0,0,0,.30);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);text-align:center;display:flex;flex-direction:column;justify-content:center}
-.eventour-brand-banner{position:relative;isolation:isolate;width:100%;height:125px;margin:0 0 20px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url('FOTO_PADEL1.jpg') center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}.eventour-brand-banner:before{content:'';position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}.eventour-logo{position:relative;z-index:1;display:block;width:min(560px,94%);height:78px;max-width:94%;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}.eventour-brand-subtitle{position:relative;z-index:1;color:#fff;font-family:'Open Sans',Arial,sans-serif;font-size:15px;font-style:italic;font-weight:700;letter-spacing:1.6px;line-height:1.15;text-shadow:0 2px 6px rgba(0,0,0,.7);text-align:center}
+.news-brand-banner{position:relative;isolation:isolate;width:100%;height:125px;margin:0 0 20px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url('FOTO_PADEL1.jpg') center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}.news-brand-banner:before{content:'';position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}.news-eventour-logo{position:relative;z-index:1;display:block;width:min(560px,94%);height:78px;max-width:94%;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}.news-brand-subtitle{position:relative;z-index:1;color:#fff;font-family:'Open Sans',Arial,sans-serif;font-size:15px;font-style:italic;font-weight:700;letter-spacing:1.6px;line-height:1.15;text-shadow:0 2px 6px rgba(0,0,0,.7);text-align:center}
 h2{margin:0 0 19px;font-size:20px;line-height:1.3;font-weight:600;letter-spacing:0;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.20)}
 .info{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);padding:14px 15px;border-radius:10px;margin:0 0 16px;font-size:13px;font-weight:400;color:rgba(255,255,255,.92);box-shadow:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);line-height:1.5;text-align:left}
 .info b{font-weight:800}
@@ -24,15 +24,15 @@ button+button{margin-top:11px}
 button:hover{background:#fff;transform:translateY(-1px);box-shadow:0 9px 22px rgba(0,0,0,.15)}button:disabled{opacity:.55;cursor:not-allowed;transform:none}
 .successo{color:#86efac;font-size:13px;font-weight:700;line-height:1.45;margin-top:14px}.errore{color:#fecaca;font-size:13px;font-weight:700;line-height:1.45;margin-top:14px}
 #messaggio p{margin:0}
-@media(max-width:767px){body{padding:18px 12px;align-items:center;background-attachment:scroll}.card{width:min(570px,100%);min-height:calc(100dvh - 36px);padding:30px 22px 25px;border-radius:18px}.eventour-brand-banner{height:112px;margin-bottom:18px;border-radius:19px}.eventour-logo{height:70px;width:92%;max-width:92%}.eventour-brand-subtitle{font-size:13px;letter-spacing:1.2px}h2{font-size:18px;margin-bottom:19px}.info{font-size:13px;padding:14px 14px;margin-bottom:16px;line-height:1.5}button{height:46px;font-size:13px}}
-@media(max-width:380px){body{padding:14px 10px;align-items:center}.card{min-height:calc(100dvh - 28px);padding:25px 18px 22px;border-radius:16px}.eventour-brand-banner{height:104px;margin-bottom:16px}.eventour-logo{height:64px;width:92%;max-width:92%}.eventour-brand-subtitle{font-size:12px;letter-spacing:1px}h2{font-size:17px;margin-bottom:19px}.info{font-size:12px;padding:13px 13px;margin-bottom:16px;line-height:1.5}}
+@media(max-width:767px){body{padding:18px 12px;align-items:center;background-attachment:scroll}.card{width:min(570px,100%);min-height:calc(100dvh - 36px);padding:30px 22px 25px;border-radius:18px}.news-brand-banner{height:112px;margin-bottom:18px;border-radius:19px}.news-eventour-logo{height:70px;width:92%;max-width:92%}.news-brand-subtitle{font-size:13px;letter-spacing:1.2px}h2{font-size:18px;margin-bottom:19px}.info{font-size:13px;padding:14px 14px;margin-bottom:16px;line-height:1.5}button{height:46px;font-size:13px}}
+@media(max-width:380px){body{padding:14px 10px;align-items:center}.card{min-height:calc(100dvh - 28px);padding:25px 18px 22px;border-radius:16px}.news-brand-banner{height:104px;margin-bottom:16px}.news-eventour-logo{height:64px;width:92%;max-width:92%}.news-brand-subtitle{font-size:12px;letter-spacing:1px}h2{font-size:17px;margin-bottom:19px}.info{font-size:12px;padding:13px 13px;margin-bottom:16px;line-height:1.5}}
  .privacy-note{font-size:11px;line-height:1.55;color:rgba(255,255,255,.68);margin:0 0 14px}.privacy-note a{color:#fff;font-weight:700} </style>
 <script src="tenant-theme-v1.js?v=3"></script>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head>
 <body>
 <div class="card">
-<section class="eventour-brand-banner" aria-label="EVENTOUR gestione & eventi"><img src="eventour_logo.jpg" class="eventour-logo" alt="EVENTOUR"><span class="eventour-brand-subtitle">gestione &amp; eventi</span></section>
+<section class="news-brand-banner" aria-label="EVENTOUR gestione & eventi"><img src="eventour_logo.jpg" class="news-eventour-logo" alt="EVENTOUR"><span class="news-brand-subtitle">gestione &amp; eventi</span></section>
 <h2>🏆 Iscrizione torneo</h2>
 <div id="datiTorneo">Caricamento torneo...</div>
 <div id="datiUtente"></div>
@@ -74,7 +74,7 @@ window.addEventListener("load",avviaIscrizione);
 <script src="sponsor-public-v2.js?v=12"></script>
 <script>
 (function isolateNewsEventourLogo(){
- const logo=document.querySelector(".eventour-logo");
+ const logo=document.querySelector(".news-eventour-logo");
  if(!logo)return;
  function isolate(){
   if(!logo.naturalWidth||!logo.naturalHeight||logo.dataset.textIsolated==="1")return;
