@@ -35,7 +35,7 @@ function openLocandine(){
  const back=$('evPosterBack');
  if(back)back.onclick=()=>window.openAdminPage?.('torneo');
  const p=$('naiManualPosterPanel');
- if(p){p.style.setProperty('display','block','important');p.style.setProperty('visibility','visible','important');p.style.setProperty('opacity','1','important');p.scrollIntoView({behavior:'smooth',block:'start'})}
+ if(p){p.style.setProperty('display','block','important');p.style.setProperty('visibility','visible','important');p.style.setProperty('opacity','1','important');if(typeof window.mountEventourPosterEditor==='function')window.mountEventourPosterEditor(p);else console.error('Editor locandine: script editor non caricato');p.scrollIntoView({behavior:'smooth',block:'start'})}
 }
 function hook(){const old=window.openAdminComPage;window.openAdminComPage=(page,...args)=>{if(page==='locandine'){openLocandine();return}if(page==='news'||page==='news-ai'){build();return}return old?.(page,...args)};window.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="locandine"]');if(b){e.preventDefault();e.stopImmediatePropagation();openLocandine();return}const n=e.target?.closest?.('[data-com-page="news"]');if(!n)return;e.preventDefault();e.stopImmediatePropagation();build()},true)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook,{once:true});else hook();
