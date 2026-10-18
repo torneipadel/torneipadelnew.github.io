@@ -37,6 +37,23 @@ function openLocandine(){
  const p=$('naiManualPosterPanel');
  if(p){p.style.setProperty('display','block','important');p.style.setProperty('visibility','visible','important');p.style.setProperty('opacity','1','important');if(typeof window.mountEventourPosterEditor==='function')window.mountEventourPosterEditor(p);else console.error('Editor locandine: script editor non caricato');p.scrollIntoView({behavior:'smooth',block:'start'})}
 }
-function hook(){const old=window.openAdminComPage;window.openAdminComPage=(page,...args)=>{if(page==='locandine'){openLocandine();return}if(page==='news'||page==='news-ai'){build();return}return old?.(page,...args)};window.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="locandine"]');if(b){e.preventDefault();e.stopImmediatePropagation();openLocandine();return}const n=e.target?.closest?.('[data-com-page="news"]');if(!n)return;e.preventDefault();e.stopImmediatePropagation();build()},true)}
+function hook(){
+ if(window.__EVENTOUR_POSTER_NAV_FIX__)return;
+ window.__EVENTOUR_POSTER_NAV_FIX__=true;
+ const old=window.openAdminComPage;
+ window.openAdminComPage=(page,...args)=>{
+  if(page==='locandine'){openLocandine();return}
+  if(page==='news'||page==='news-ai'){build();return}
+  return old?.(page,...args)
+ };
+ // Intercetta la navigazione prima dei listener della pagina amministrativa.
+ window.addEventListener('click',e=>{
+  const b=e.target?.closest?.('[data-com-page="locandine"]');
+  if(b){e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();openLocandine();return}
+  const n=e.target?.closest?.('[data-com-page="news"]');
+  if(!n)return;
+  e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();build();
+ },true);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hook,{once:true});else hook();
 })();
