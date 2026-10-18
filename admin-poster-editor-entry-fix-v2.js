@@ -10,7 +10,7 @@ function openPosterEditor(){
 }
 window.openEventourPosterEditor=openPosterEditor;
 function capture(e){const b=e.target?.closest?.('[data-com-page="locandine"]');if(!b)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');openPosterEditor()}
-window.addEventListener('click',capture,true);document.addEventListener('click',capture,true);
+document.addEventListener('click',capture,true);
 const oldRouter=window.openAdminComPage;window.openAdminComPage=function(page,...args){if(page==='locandine'){openPosterEditor();return}return oldRouter?.(page,...args)};
 function bind(){document.querySelectorAll('[data-com-page="locandine"]').forEach(b=>{if(b.dataset.posterEntryBound)return;b.dataset.posterEntryBound='1';b.addEventListener('click',capture,true)})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
