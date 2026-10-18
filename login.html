@@ -45,6 +45,14 @@ button:hover{background:#fff;transform:translateY(-1px);box-shadow:0 11px 25px r
 .language-selector{position:fixed;top:18px;right:18px;z-index:1000;font-size:13px}.language-button{height:38px;min-width:76px;padding:0 12px;border:1px solid rgba(255,255,255,.28);border-radius:11px;background:rgba(7,18,25,.40);color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.20);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font:700 13px/1 "Open Sans",Arial,sans-serif;letter-spacing:.2px;cursor:pointer}.language-button:hover{background:rgba(7,18,25,.54);transform:none}.language-menu{position:absolute;right:0;top:44px;width:164px;padding:6px;border:1px solid rgba(255,255,255,.22);border-radius:13px;background:rgba(10,24,32,.90);box-shadow:0 14px 34px rgba(0,0,0,.34);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;visibility:hidden;transform:translateY(-5px);transition:.18s ease}.language-selector.open .language-menu{opacity:1;visibility:visible;transform:translateY(0)}.language-option{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#fff;text-align:left;font:600 13px/1.2 "Open Sans",Arial,sans-serif;cursor:pointer}.language-option:hover,.language-option.active{background:rgba(255,255,255,.12)}
 @media(max-width:767px){body{padding:16px 11px;align-items:center}.glass{width:min(570px,100%);min-height:calc(100dvh - 32px);padding:29px 21px 23px;border-radius:20px}.brand{margin-bottom:23px;padding-bottom:18px}.brand:before{top:-5px;width:min(340px,88vw);height:175px}.brand img{max-width:250px;max-height:130px}.brand h1{font-size:20px;letter-spacing:2px}.brand p{font-size:12.5px}.section-title{font-size:18px}label{font-size:13px}input[type=text],input[type=email],input[type=password]{height:47px;font-size:15px}.options{font-size:12.5px}button{height:47px;font-size:13px}.register{font-size:12.5px}.status{font-size:13px}.login-footer{margin-top:16px;padding-top:12px;line-height:1.8}.language-selector{top:12px;right:12px}.language-button{height:36px;min-width:72px}.language-menu{top:42px}}
 @media(max-width:380px){body{padding:12px 9px;align-items:center}.glass{min-height:calc(100dvh - 24px);padding:23px 17px 19px;border-radius:18px}.brand{margin-bottom:19px;padding-bottom:16px}.brand:before{top:-3px;width:300px;height:155px}.brand img{max-width:215px;max-height:112px;margin-bottom:10px}.brand h1{font-size:19px;letter-spacing:1.7px}.brand p{font-size:12px}.section-title{font-size:17px}.options{align-items:flex-start;flex-direction:column;gap:8px;margin-bottom:18px}.login-footer{font-size:10.5px;margin-top:14px}.login-footer a{margin:0 5px}.language-selector{top:10px;right:10px}.language-menu{width:154px}}
+
+/* Marchio Eventour uniforme, identico al riferimento news.html */
+.news-brand-banner{position:relative;isolation:isolate;width:100%;height:125px;margin:0 0 16px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}
+.news-brand-banner:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}
+.news-eventour-logo{position:relative;z-index:1;display:block;width:min(560px,94%);height:78px;max-width:94%;max-height:none;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}
+.news-brand-subtitle{position:relative;z-index:1;color:#fff;font-family:'Open Sans',Arial,sans-serif;font-size:15px;font-style:italic;font-weight:700;letter-spacing:1.6px;line-height:1.15;text-shadow:0 2px 6px rgba(0,0,0,.7);text-align:center}
+@media(max-width:600px){.news-brand-banner{height:112px;margin-bottom:13px;border-radius:19px}.news-eventour-logo{height:70px;width:92%;max-width:92%}.news-brand-subtitle{font-size:13px;letter-spacing:1.2px}}
+@media(max-width:390px){.news-brand-banner{height:104px}.news-eventour-logo{height:64px;width:92%;max-width:92%}.news-brand-subtitle{font-size:12px;letter-spacing:1px}}
 </style>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head>
@@ -60,7 +68,7 @@ button:hover{background:#fff;transform:translateY(-1px);box-shadow:0 11px 25px r
 </div>
 </div>
 <main class="glass">
-<div class="brand"><img src="eventour_logo.jpg" alt="EVENTOUR"><h1>eventour</h1><p data-i18n="brandSub">gestione &amp; eventi</p></div>
+<section class="news-brand-banner" aria-label="EVENTOUR gestione &amp; eventi"><img src="eventour_logo.jpg" class="news-eventour-logo" alt="EVENTOUR"><span class="news-brand-subtitle">gestione &amp; eventi</span></section>
 <h2 class="section-title" data-i18n="access">Accesso utenti</h2>
 <form id="loginForm" onsubmit="return false">
 <div class="field"><label for="email" data-i18n="emailLabel">Email</label><input id="email" type="email" autocomplete="email" placeholder="Inserisci la tua email" data-i18n-placeholder="emailPlaceholder"></div>
@@ -163,5 +171,8 @@ sb.auth.onAuthStateChange(function(event,session){});
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(function(error){console.error("Service Worker PWA:",error)})})}
 </script>
 <script src="site-navigation-v1.js?v=1"></script>
+<script>
+(function isolateNewsEventourLogo(){const logo=document.querySelector(".news-eventour-logo");if(!logo)return;function isolate(){if(!logo.naturalWidth||!logo.naturalHeight||logo.dataset.textIsolated==="1")return;logo.dataset.textIsolated="1";try{const canvas=document.createElement("canvas");canvas.width=logo.naturalWidth;canvas.height=logo.naturalHeight;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(logo,0,0);const frame=ctx.getImageData(0,0,canvas.width,canvas.height),px=frame.data;for(let i=0;i<px.length;i+=4){const lum=.2126*px[i]+.7152*px[i+1]+.0722*px[i+2];const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));px[i]=255;px[i+1]=255;px[i+2]=255;px[i+3]=Math.round(px[i+3]*alpha/255)}ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png")}catch(e){console.warn("Trattamento logo Eventour non riuscito:",e)}}if(logo.complete){if(logo.naturalWidth)isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true})})();
+</script>
 </body>
 </html>
