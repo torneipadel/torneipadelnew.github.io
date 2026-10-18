@@ -102,7 +102,7 @@ async function publishUniversal(){
   }
   const c=universalCfg(t),items=Array.isArray(c.news)?c.news:[];
   const old=universalEditingId?items.find(n=>String(n.id)===String(universalEditingId)):null;
-  const item={...(old||{}),id:old?.id||'news-'+Date.now(),tipo:type,titolo:title,testo:text,immagine:image||old?.immagine||'',link:'',inEvidenza:old?.inEvidenza??(items.length===0),data:old?.data||new Date().toISOString(),ordine:old?.ordine??items.length,pubblicata:true,stato:'pubblicata'};
+  const item={...(old||{}),id:old?.id||'news-'+Date.now(),tipo:type,titolo:title,testo:text,immagine:image||old?.immagine||'',link:'Bove.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),inEvidenza:old?.inEvidenza??(items.length===0),data:old?.data||new Date().toISOString(),ordine:old?.ordine??items.length,pubblicata:true,stato:'pubblicata'};
   const next=old?items.map(n=>String(n.id)===String(old.id)?item:n):[...items,item];
   const {data,error}=await sb.from('tornei').update({configurazione:{...c,news:next}}).eq('id',t.id).select('id,configurazione').maybeSingle();
   if(error||!data){console.error(error);alert('Errore salvataggio News: '+(error?.message||'configurazione non aggiornata'));return}
