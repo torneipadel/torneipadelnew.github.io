@@ -13,15 +13,32 @@ function removeDuplicates(){
   document.getElementById('newTournament')?.remove();
   document.getElementById('refreshTournaments')?.remove();
 }
-/* Sposta i due pulsanti globali accanto ai comandi del torneo,
-   mantenendo gli stessi elementi e quindi gli handler già associati. */
+/* Posiziona i pulsanti ACCANTO e FUORI dal contenitore dei comandi.
+   Gli elementi originali vengono riutilizzati per conservare gli handler. */
 function moveGlobalButtons(){
   const target=document.getElementById('adminTournamentControls');
   if(!target)return;
+  let row=target.closest('[data-admin-controls-row]');
+  if(!row){
+    row=document.createElement('div');
+    row.dataset.adminControlsRow='true';
+    row.style.cssText='display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;width:100%;max-width:100%;margin:0 0 14px;';
+    target.parentNode.insertBefore(row,target);
+    row.appendChild(target);
+  }
+  target.style.setProperty('margin-bottom','0','important');
+  let actions=row.querySelector('[data-admin-side-actions]');
+  if(!actions){
+    actions=document.createElement('div');
+    actions.dataset.adminSideActions='true';
+    actions.className='topbar-actions';
+    actions.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:0 0 auto;';
+    row.appendChild(actions);
+  }
   const refresh=document.getElementById('topRefresh');
   const create=document.getElementById('topNew');
-  if(refresh&&refresh.parentElement!==target)target.appendChild(refresh);
-  if(create&&create.parentElement!==target)target.appendChild(create);
+  if(refresh&&refresh.parentElement!==actions)actions.appendChild(refresh);
+  if(create&&create.parentElement!==actions)actions.appendChild(create);
 }
 function bindParticipantsRefresh(){
   const original=window.openAdminPage;
