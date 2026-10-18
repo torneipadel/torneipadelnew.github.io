@@ -28,7 +28,7 @@ function styles(){if(document.getElementById('sponsor-public-v2-style'))return;c
 @media(max-width:599px){#sponsor-public-wrap{margin:16px 0 0!important}#sponsor-public-title{font-size:8px;letter-spacing:1.4px}#sponsor-public-window{height:76px;border-radius:12px}.sponsor-public-item{top:5px;width:88px;height:64px}.sponsor-public-logo-box{width:70px;height:42px;flex-basis:42px}.sponsor-public-logo{width:70px;height:42px}.sponsor-public-name{width:80px;font-size:7px}}
 `;
 document.head.appendChild(s)}
-function target(){const p=location.pathname.toLowerCase();if(p.endsWith('iscrizione.html'))return document.querySelector('.card');if(p.endsWith('bove.html'))return document.querySelector('.container')||document.querySelector('main');if(p.endsWith('2page.html'))return document.querySelector('.box')||document.querySelector('main');if(p.endsWith('visitatore.html'))return document.querySelector('.np-sponsor-slot')||document.querySelector('main')||document.body;return document.querySelector('main')||document.querySelector('.container')||document.body}
+function target(){const p=location.pathname.toLowerCase();if(p.endsWith('visitatore.html'))return document.querySelector('.np-sponsor-slot')||document.querySelector('main')||document.querySelector('.np-page')||document.body;return document.querySelector('main')||document.querySelector('.container')||document.querySelector('.np-page')||document.body}
 function ensure(){let w=document.getElementById('sponsor-public-wrap');if(!w){w=document.createElement('section');w.id='sponsor-public-wrap';w.setAttribute('aria-label','Sponsor');w.innerHTML='<div id="sponsor-public-title">Sponsorizzato da</div><div id="sponsor-public-window"><div id="sponsor-public-track"><div class="sponsor-public-empty">Caricamento sponsor...</div></div></div>'}const t=target();if(t&&w.parentElement!==t)t.appendChild(w);return w}
 function stop(){running=false;last=0;if(frame)cancelAnimationFrame(frame);frame=0}
 function width(c){return c?.getBoundingClientRect().width||96}
@@ -38,7 +38,39 @@ function start(){stop();const tr=document.getElementById('sponsor-public-track')
 function bind(){const w=document.getElementById('sponsor-public-window');if(!w||w.dataset.bound)return;w.dataset.bound='1';w.addEventListener('mouseenter',()=>paused=true);w.addEventListener('mouseleave',()=>{paused=false;last=0});w.addEventListener('touchstart',()=>paused=true,{passive:true});w.addEventListener('touchend',()=>{paused=false;last=0},{passive:true})}
 function render(list){const wrap=document.getElementById('sponsor-public-wrap'),tr=document.getElementById('sponsor-public-track');if(!tr)return;stop();if(!list.length){if(wrap)wrap.remove();return}tr.innerHTML=list.map(s=>{const logo=s.immagine?`<span class="sponsor-public-logo-box"><img class="sponsor-public-logo" src="${esc(s.immagine)}" alt="${esc(s.nome)}" loading="lazy"></span>`:'';const name=`<span class="sponsor-public-name">${esc(s.nome)}</span>`;const html=logo+name;return s.link?`<a class="sponsor-public-item" href="${esc(s.link)}" target="_blank" rel="noopener noreferrer">${html}</a>`:`<div class="sponsor-public-item">${html}</div>`}).join('');bind();requestAnimationFrame(start)}
 function localSponsors(){try{const raw=localStorage.getItem('padel_sponsor_standalone');const a=raw?JSON.parse(raw):[];return Array.isArray(a)?a.filter(s=>s&&s.nome).map(s=>({id:s.id,nome:s.nome,immagine:s.immagine||'',video:s.video||'',link:s.link||''})):[]}catch(e){return[]}}
-async function load(){let list=[];const params=new URLSearchParams(location.search);const slug=(params.get('azienda')||'').trim();const tournamentId=(params.get('torneo')||params.get('idTorneo')||'').trim();const c=client();if(c?.rpc&&c?.from){try{let company=null;if(slug){const result=await c.rpc('get_public_company',{p_slug:slug});company=Array.isArray(result.data)?result.data[0]:result.data;if(result.error)company=null}else if(/^\d+$/.test(tournamentId)){const result=await c.rpc('get_public_tornei',{p_torneo_id:Number(tournamentId),p_azienda_id:params.get('azienda_id')||null});const tournament=(result.data||[]).find(t=>String(t.id)===tournamentId);if(tournament?.azienda_id)company={id:tournament.azienda_id}}if(company?.id){const r=await c.rpc('get_public_company_sponsors',{p_slug:slug});if(!r.error)list=(r.data||[]).filter(s=>s&&s.nome)}}catch(e){console.error('Errore caricamento sponsor pubblici',e)}}window.__PUBLIC_SPONSORS__=list;render(list)}
+async function load(){
+ let list=[];
+ const params=new URLSearchParams(location.search);
+ let slug=(params.get('azienda')||'').trim();
+ if(!slug){try{slug=(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim()}catch(e){}}
+ const tournamentId=(params.get('torneo')||params.get('idTorneo')||'').trim();
+ const c=client();
+ if(c?.rpc){
+  try{
+   let company=null;
+   if(slug){
+    const result=await c.rpc('get_public_company',{p_slug:slug});
+    company=Array.isArray(result.data)?result.data[0]:result.data;
+    if(result.error)console.warn('Società sponsor non risolta dal parametro azienda',result.error);
+   }
+   if(!company?.id&&/^\d+$/.test(tournamentId)){
+    const result=await c.rpc('get_public_tornei',{p_torneo_id:Number(tournamentId),p_azienda_id:params.get('azienda_id')||null});
+    const rows=Array.isArray(result.data)?result.data:[];
+    const tournament=rows.find(t=>String(t.id)===tournamentId);
+    if(tournament?.azienda_id)company={id:tournament.azienda_id};
+   }
+   if(company?.id){
+    const r=slug
+     ?await c.rpc('get_public_company_sponsors',{p_slug:slug})
+     :await c.rpc('get_public_company_sponsors',{p_azienda_id:company.id});
+    if(!r.error)list=(r.data||[]).filter(s=>s&&s.nome);
+    else console.error('Errore recupero sponsor società',r.error);
+   }
+  }catch(e){console.error('Errore caricamento sponsor pubblici',e)}
+ }
+ window.__PUBLIC_SPONSORS__=list;
+ render(list)
+}
 function startPage(){styles();ensure();load()}
 window.addEventListener('resize',()=>{if(running)layout()});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startPage,{once:true});else startPage();
 })();
