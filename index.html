@@ -141,6 +141,16 @@ img,video,svg{max-width:100%}
  .hero-content{padding-top:265px}
 }
 
+
+/* Il banner occupa la stessa larghezza dei contenitori della pagina. */
+.nav .nav-inner{width:min(1180px,calc(100% - 40px))}
+.nav .brand{width:100%;max-width:100%;flex:0 0 100%}
+.nav .brand:before{inset:0;border-radius:22px}
+@media(max-width:600px){
+ .nav .nav-inner{width:calc(100% - 28px)}
+ .nav .brand{width:100%;max-width:100%;flex:0 0 100%}
+}
+
 </style>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head>
