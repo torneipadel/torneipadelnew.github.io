@@ -15,6 +15,9 @@ function cleanAI(){
 }
 function installMenus(){
   const root=document.getElementById('appContent');
+  /* La pagina dedicata all'editor manuale non deve essere riposizionata o nascosta dal selettore modalità News. */
+  const pageTitle=root?.querySelector('.page-head h1')?.textContent||'';
+  if(/Creazione locandine/i.test(pageTitle))return;
   const automatic=document.getElementById('naiAutoPosterPanel');
   const manual=document.getElementById('naiManualPosterPanel');
   if(!root||!automatic||!manual)return;
