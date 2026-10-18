@@ -255,34 +255,20 @@ function inject(){
   const selector=document.getElementById('torneoSelector');
   const t=corrente();
   const root=document.querySelector('.content')||document.getElementById('appContent');
-  const contentRoot=document.getElementById('appContent');
   if(!root)return;
-  let row=document.getElementById('adminTournamentControlsRow');
   let bar=document.getElementById('adminTournamentControls');
   if(!selector || !t){
     if(bar)bar.remove();
-    if(row)row.remove();
     return;
-  }
-  if(!row){
-    row=document.createElement('div');
-    row.id='adminTournamentControlsRow';
-    row.style.cssText='display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;width:100%;margin:0 0 14px';
   }
   if(!bar){
     bar=document.createElement('div');
     bar.id='adminTournamentControls';
-    bar.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;flex:1 1 620px;min-width:0;margin:0';
+    bar.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;margin:0 0 14px';
+    root.prepend(bar);
+  }else if(bar.parentElement!==root){
+    root.prepend(bar);
   }
-  if(bar.parentElement!==row)row.appendChild(bar);
-  const actions=contentRoot?.querySelector('.page-head-actions');
-  const previousActions=row.querySelector('.page-head-actions');
-  if(previousActions && previousActions!==actions)previousActions.remove();
-  if(actions && actions.parentElement!==row){
-    actions.style.cssText='display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;flex:0 1 auto;margin:0';
-    row.appendChild(actions);
-  }
-  if(row.parentElement!==root)root.prepend(row);
   bar.style.display='flex';
   if(bar.dataset.bound==='1'){contatore();return}
   bar.dataset.bound='1';
