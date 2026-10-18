@@ -254,7 +254,7 @@ function renderArchivio(){const b=archivio(),arr=(stato().tornei||[]).filter(t=>
 function inject(){
   const selector=document.getElementById('torneoSelector');
   const t=corrente();
-  const root=document.querySelector('.content')||document.getElementById('appContent');
+  const root=document.getElementById('appContent')||document.querySelector('.content');
   if(!root)return;
   let bar=document.getElementById('adminTournamentControls');
   if(!selector || !t){
@@ -265,7 +265,10 @@ function inject(){
     bar=document.createElement('div');
     bar.id='adminTournamentControls';
     bar.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;margin:0 0 14px';
-    root.prepend(bar);
+  }
+  const pageHead=root.querySelector('.page-head');
+  if(pageHead){
+    if(pageHead.nextElementSibling!==bar)pageHead.insertAdjacentElement('afterend',bar);
   }else if(bar.parentElement!==root){
     root.prepend(bar);
   }
