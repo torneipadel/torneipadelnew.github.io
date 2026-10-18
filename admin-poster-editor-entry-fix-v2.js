@@ -1,13 +1,15 @@
 (()=>{'use strict';
 function forceVisible(panel){
  if(!panel||!panel.isConnected)return;
- panel.style.setProperty('display','block','important');
- panel.style.setProperty('visibility','visible','important');
- panel.style.setProperty('opacity','1','important');
- panel.style.setProperty('position','relative','important');
- panel.style.setProperty('z-index','9999','important');
- panel.style.setProperty('width','100%','important');
- panel.style.setProperty('box-sizing','border-box','important');
+ const props=[['display','block'],['visibility','visible'],['opacity','1'],['position','relative'],['z-index','9999'],['width','100%'],['box-sizing','border-box']];
+ for(const [name,value] of props){
+  if(panel.style.getPropertyValue(name)!==value||panel.style.getPropertyPriority(name)!=='important')panel.style.setProperty(name,value,'important');
+ }
+}
+function keepEditorVisible(){
+ const title=document.querySelector('#appContent .page-head h1')?.textContent||'';
+ const panel=document.getElementById('naiManualPosterPanel');
+ if(/Creazione locandine/i.test(title)&&panel)forceVisible(panel);
 }
 function openPosterEditor(){
  const root=document.getElementById('appContent');if(!root)return;
@@ -22,6 +24,7 @@ function openPosterEditor(){
  } else panel.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">Il file dell’editor non è stato caricato. Verificare admin-news-poster-editor-v2.js.</p>';
  forceVisible(panel);
  panel.scrollIntoView({behavior:'smooth',block:'start'});
+ [0,80,250,700].forEach(ms=>setTimeout(keepEditorVisible,ms));
 }
 window.openEventourPosterEditor=openPosterEditor;
 function capture(e){const b=e.target?.closest?.('[data-com-page="locandine"]');if(!b)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');openPosterEditor()}
@@ -32,13 +35,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 new MutationObserver(bind).observe(document.body,{childList:true,subtree:true});
 /* Alcuni script legacy impostano manual.style.display='none' dopo aver montato l'editor.
    In questa pagina dedicata la modalità manuale deve restare sempre visibile. */
-const visibilityGuard=new MutationObserver(()=>{
- const p=document.getElementById('naiManualPosterPanel');
- if(p&&document.querySelector('#appContent .page-head h1')?.textContent.includes('Creazione locandine'))forceVisible(p);
-});
-visibilityGuard.observe(document.getElementById('appContent')||document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['style']});
-window.addEventListener('admin:render',()=>{
- const p=document.getElementById('naiManualPosterPanel');
- if(p&&document.querySelector('#appContent .page-head h1')?.textContent.includes('Creazione locandine'))forceVisible(p);
-});
+const visibilityGuard=new MutationObserver(keepEditorVisible);
+visibilityGuard.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class','hidden']});
+window.addEventListener('admin:render',keepEditorVisible);
+window.addEventListener('admin:rendered',keepEditorVisible);
 })();
