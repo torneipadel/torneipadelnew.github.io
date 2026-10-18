@@ -85,7 +85,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <span class="news-brand-subtitle">gestione &amp; eventi</span>
 </section>
 <section class="hero">
-<div class="eyebrow">NEXT POINT PADEL</div>
+<div class="eyebrow">eventour gestione & eventi</div>
 <h1>Benvenuto</h1>
 <div class="welcome-name" id="welcomeName">Caricamento...</div>
 <div class="email" id="emailBox"></div>
@@ -234,7 +234,7 @@ if(tenantAccess){
  }
  const {data:azienda,error:aziendaError}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url,slug").eq("id",tenantAccess.azienda_id).maybeSingle();
  if(aziendaError||!azienda){console.error("Errore caricamento società:",aziendaError);document.getElementById("status").textContent="Società non trovata.";return}
- document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
+ document.querySelector(".eyebrow").textContent=azienda.nome_app||"eventour gestione & eventi";
  document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
  document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
  document.getElementById("emailBox").textContent=azienda.cf_piva?"P.IVA: "+azienda.cf_piva:"";
@@ -253,7 +253,7 @@ if(!azienda){
  return;
 }
 if(azienda.slug){sessionStorage.setItem("nextpoint_login_azienda_slug",azienda.slug);scopeDashboardLinks(azienda.slug)}
- document.querySelector(".eyebrow").textContent=azienda.nome_app||"NEXT POINT PADEL";
+ document.querySelector(".eyebrow").textContent=azienda.nome_app||"eventour gestione & eventi";
 document.querySelector("h1").textContent=azienda.ragione_sociale||azienda.nome_app||"Benvenuto";
 document.getElementById("welcomeName").textContent=profilo?.nome?"Amministratore: "+profilo.nome+" "+(profilo.cognome||""):"Area riservata della società";
 document.getElementById("emailBox").textContent=azienda.cf_piva?"P.IVA: "+azienda.cf_piva:"";
@@ -292,7 +292,7 @@ async function initTenantSafe(){
    return;
  }
  const byId=new Map((companies||[]).map(x=>[x.id,x]));
- document.querySelector(".page").innerHTML='<section class="hero"><div class="eyebrow">NEXT POINT PADEL</div><h1>Seleziona la società</h1><div class="welcome-name">Il tuo account è associato a più società.</div><p class="subtitle">Scegli l’area alla quale vuoi accedere.</p><div id="companyChoices" style="display:grid;gap:10px;margin-top:22px"></div><button class="admin-btn" style="margin-top:12px" onclick="logout()">🚪 Esci</button></section>';
+ document.querySelector(".page").innerHTML='<section class="hero"><div class="eyebrow">eventour gestione & eventi</div><h1>Seleziona la società</h1><div class="welcome-name">Il tuo account è associato a più società.</div><p class="subtitle">Scegli l’area alla quale vuoi accedere.</p><div id="companyChoices" style="display:grid;gap:10px;margin-top:22px"></div><button class="admin-btn" style="margin-top:12px" onclick="logout()">🚪 Esci</button></section>';
  const box=document.getElementById("companyChoices");
  rows.forEach(row=>{
    const company=byId.get(row.azienda_id);
