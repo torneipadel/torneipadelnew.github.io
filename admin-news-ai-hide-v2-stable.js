@@ -132,4 +132,7 @@ function runUniversal(){
 function run(){runUniversal()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
 window.addEventListener('admin:render',run);
+/* I pannelli vengono montati dinamicamente nell'editor AI: crea il selettore modalità appena entrambi esistono. */
+const posterModeObserver=new MutationObserver(()=>{if(document.getElementById('naiAutoPosterPanel')&&document.getElementById('naiManualPosterPanel')&&!document.getElementById('naiPosterModes'))installMenus()});
+if(document.body)posterModeObserver.observe(document.body,{childList:true,subtree:true});
 })();
