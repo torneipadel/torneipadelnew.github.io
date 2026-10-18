@@ -1,8 +1,8 @@
 {
-  "name": "NEXT POINT PADEL",
-  "short_name": "NEXT POINT PADEL",
+  "name": "Eventour",
+  "short_name": "Eventour",
   "id": "./",
-  "description": "NEXT POINT PADEL - Tornei, eventi e competizioni di padel.",
+  "description": "Eventour — gestione & eventi.",
   "start_url": "./login.html",
   "scope": "./",
   "display": "standalone",
@@ -11,7 +11,7 @@
   "theme_color": "#071219",
   "icons": [
     {
-      "src": "loghi/icona_app1.jpg",
+      "src": "eventour_logo.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any"
