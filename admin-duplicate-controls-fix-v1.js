@@ -13,6 +13,16 @@ function removeDuplicates(){
   document.getElementById('newTournament')?.remove();
   document.getElementById('refreshTournaments')?.remove();
 }
+/* Sposta i due pulsanti globali accanto ai comandi del torneo,
+   mantenendo gli stessi elementi e quindi gli handler già associati. */
+function moveGlobalButtons(){
+  const target=document.getElementById('adminTournamentControls');
+  if(!target)return;
+  const refresh=document.getElementById('topRefresh');
+  const create=document.getElementById('topNew');
+  if(refresh&&refresh.parentElement!==target)target.appendChild(refresh);
+  if(create&&create.parentElement!==target)target.appendChild(create);
+}
 function bindParticipantsRefresh(){
   const original=window.openAdminPage;
   if(typeof original!=='function'||original.__participantsFixBound)return;
@@ -29,8 +39,9 @@ function init(){
   const root=document.getElementById('appContent');
   if(!root)return;
   removeDuplicates();
+  moveGlobalButtons();
   bindParticipantsRefresh();
-  new MutationObserver(removeDuplicates).observe(root,{childList:true,subtree:true});
+  new MutationObserver(()=>{removeDuplicates();moveGlobalButtons()}).observe(document.body,{childList:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
 else init();
