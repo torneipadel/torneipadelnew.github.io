@@ -83,7 +83,8 @@ async function publishUniversal(){
   const sb=window.supabaseClient||window.sb;
   if(!sb){alert('Connessione Supabase non disponibile.');return}
   const title=document.getElementById('naiTitle')?.value.trim()||'Senza titolo';
-  const type=document.getElementById('naiType')?.value||'Comunicazione';
+  const type=document.getElementById('naiType')?.value||'';
+  if(!type){alert('Seleziona il tipo di contenuto prima di pubblicare: Torneo, Comunicazione o un’altra categoria.');document.getElementById('naiType')?.focus();return}
   const free=document.getElementById('naiUniversalText')?.value||'';
   const text=buildUniversalText(type,free);
   if(!text.trim()){alert('Inserisci il contenuto della pubblicazione.');return}
