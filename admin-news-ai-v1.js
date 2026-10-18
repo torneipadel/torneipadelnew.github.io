@@ -49,7 +49,7 @@ function hook(){
  // Intercetta la navigazione prima dei listener della pagina amministrativa.
  window.addEventListener('click',e=>{
   const b=e.target?.closest?.('[data-com-page="locandine"]');
-  if(b){e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();openLocandine();return}
+  if(b){e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();if(typeof window.openEventourPosterEditor==='function')window.openEventourPosterEditor();else openLocandine();return}
   const n=e.target?.closest?.('[data-com-page="news"]');
   if(!n)return;
   e.preventDefault();e.stopPropagation();if(typeof e.stopImmediatePropagation==='function')e.stopImmediatePropagation();build();
