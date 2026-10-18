@@ -10,8 +10,7 @@
 (()=>{
 'use strict';
 function removeDuplicates(){
-  document.getElementById('newTournament')?.remove();
-  document.getElementById('refreshTournaments')?.remove();
+  /* I controlli sono ora collocati accanto a "Gestione torneo": non rimuoverli. */
 }
 function bindParticipantsRefresh(){
   const original=window.openAdminPage;
