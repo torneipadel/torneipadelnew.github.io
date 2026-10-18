@@ -9,7 +9,7 @@
   };
   const TEXT={
   "it": {
-    "brandSub": "Tornei • Eventi • Competizioni di padel",
+    "brandSub": "gestione & eventi",
     "access": "Accesso utenti",
     "emailLabel": "Email",
     "emailPlaceholder": "Inserisci la tua email",
@@ -31,7 +31,7 @@
     "language": "Lingua"
   },
   "en": {
-    "brandSub": "Tournaments • Events • Padel competitions",
+    "brandSub": "Events & management",
     "access": "User login",
     "emailLabel": "Email",
     "emailPlaceholder": "Enter your email",
@@ -53,7 +53,7 @@
     "language": "Language"
   },
   "fr": {
-    "brandSub": "Tournois • Événements • Compétitions de padel",
+    "brandSub": "Gestion & événements",
     "access": "Accès utilisateurs",
     "emailLabel": "E-mail",
     "emailPlaceholder": "Saisissez votre e-mail",
@@ -75,7 +75,7 @@
     "language": "Langue"
   },
   "es": {
-    "brandSub": "Torneos • Eventos • Competiciones de pádel",
+    "brandSub": "Gestión y eventos",
     "access": "Acceso de usuarios",
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "Introduce tu correo electrónico",
