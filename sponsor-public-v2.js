@@ -42,7 +42,7 @@ async function load(){
  let list=[];
  const params=new URLSearchParams(location.search);
  let slug=(params.get('azienda')||'').trim();
- if(!slug){try{slug=(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim()}catch(e){}}
+ const explicitSlug=!!slug;
  const tournamentId=(params.get('torneo')||params.get('idTorneo')||'').trim();
  const c=client();
  if(c?.rpc){
@@ -57,12 +57,21 @@ async function load(){
     const result=await c.rpc('get_public_tornei',{p_torneo_id:Number(tournamentId),p_azienda_id:params.get('azienda_id')||null});
     const rows=Array.isArray(result.data)?result.data:[];
     const tournament=rows.find(t=>String(t.id)===tournamentId);
-    if(tournament?.azienda_id)company={id:tournament.azienda_id};
+    if(tournament?.azienda_id){company={id:tournament.azienda_id};slug='';}
+   }
+   if(!company?.id&&!explicitSlug&&!tournamentId){
+    try{slug=(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim()}catch(e){}
+    if(slug){
+     const result=await c.rpc('get_public_company',{p_slug:slug});
+     company=Array.isArray(result.data)?result.data[0]:result.data;
+    }
    }
    if(company?.id){
-    const r=slug
-     ?await c.rpc('get_public_company_sponsors',{p_slug:slug})
-     :await c.rpc('get_public_company_sponsors',{p_azienda_id:company.id});
+    const r=company.slug
+     ?await c.rpc('get_public_company_sponsors',{p_slug:company.slug})
+     :slug
+      ?await c.rpc('get_public_company_sponsors',{p_slug:slug})
+      :await c.rpc('get_public_company_sponsors',{p_azienda_id:company.id});
     if(!r.error)list=(r.data||[]).filter(s=>s&&s.nome);
     else console.error('Errore recupero sponsor società',r.error);
    }
