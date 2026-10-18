@@ -17,11 +17,25 @@ function openPosterEditor(){
  const panel=document.getElementById('naiManualPosterPanel');
  document.getElementById('evPosterBack')?.addEventListener('click',()=>window.openAdminPage?.('torneo'));
  forceVisible(panel);
- if(typeof window.mountEventourPosterEditor==='function'){
-  window.mountEventourPosterEditor(panel);
-  forceVisible(panel);
-  if(!panel.querySelector('#evPosterCanvas'))panel.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">Il modulo è stato richiamato ma non ha creato l’anteprima. Ricarica la pagina amministrativa e riprova.</p>';
- } else panel.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">Il file dell’editor non è stato caricato. Verificare admin-news-poster-editor-v2.js.</p>';
+ function mountOrReport(){
+  const target=document.getElementById('naiManualPosterPanel');
+  if(!target)return;
+  forceVisible(target);
+  try{
+   if(typeof window.mountEventourPosterEditor!=='function'){
+    target.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">Il modulo editor non risulta caricato. Controllare admin-news-poster-editor-v2.js.</p>';
+    return;
+   }
+   window.mountEventourPosterEditor(target);
+   forceVisible(target);
+   if(!target.querySelector('#evPosterCanvas'))target.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">L’editor non ha creato l’anteprima. Riprovo il montaggio…</p>';
+  }catch(err){
+   console.error('Eventour poster editor mount failed:',err);
+   target.innerHTML='<h3>Editor locandine Eventour</h3><p style="color:#fff">Errore apertura editor: '+String(err?.message||err).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))+'</p>';
+  }
+ }
+ mountOrReport();
+ [100,350,800,1500].forEach(ms=>setTimeout(()=>{const target=document.getElementById('naiManualPosterPanel');if(target&&!target.querySelector('#evPosterCanvas'))mountOrReport();},ms));
  forceVisible(panel);
  panel.scrollIntoView({behavior:'smooth',block:'start'});
  [0,80,250,700].forEach(ms=>setTimeout(keepEditorVisible,ms));
