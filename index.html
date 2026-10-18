@@ -186,7 +186,7 @@ grid.innerHTML="";
 if(!companies.length){grid.innerHTML='<div class="empty">Nessuna società trovata. Prova con un altro nome.</div>';return}
 for(const company of companies){
 const name=company.nome_app||company.ragione_sociale||"Società",url=companyUrl(company),slug=String(company.slug||"").trim();
-const visitorUrl=slug?"visitatore.html?azienda="+encodeURIComponent(slug):"visitatore.html";
+const visitorUrl=slug?"login-utente.html?azienda="+encodeURIComponent(slug):"login-utente.html";
 const card=document.createElement("article");card.className="company-card";
 card.innerHTML='<div class="company-brand"><div class="company-brand-head"><img class="company-eventour-logo" src="eventour_logo.jpg" alt="EVENTOUR"><span class="company-brand-subtitle">gestione eventi &amp; tornei</span></div></div><div class="company-body"><h3>'+escapeHtml(name)+'</h3><p>'+escapeHtml(company.sede||"Società attiva su Next Point Padel")+'</p><div class="company-card-actions"><a class="btn" href="'+escapeHtml(url)+'">ENTRA NELLA SOCIETÀ</a><a class="btn visitor-btn" href="'+escapeHtml(visitorUrl)+'">ACCESSO VISITATORE</a></div></div>';
 grid.appendChild(card)
