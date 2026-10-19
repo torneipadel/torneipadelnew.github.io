@@ -294,7 +294,7 @@ async function renderContentFields() {
  const t=kind==='torneo'?currentTournament():null;
  const title=(row.titolo||t?.nome||'');
  const body=(row.testo||row.descrizione||t?.descrizione||'');
- const extra=(row.testoExtra||row.luogo||t?.luogo||t?.indirizzo||'');
+ const extra=(row.testoExtra||[t?.data_torneo||t?.data||'',t?.luogo||t?.indirizzo||''].filter(Boolean).join(' · '));
  let html=makeField('Titolo del contenuto','epsTitle',title,'text');
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
  html+=makeField('3. Data e luogo','epsExtra',extra,'text');
