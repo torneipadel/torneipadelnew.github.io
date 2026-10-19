@@ -20,6 +20,14 @@ bindStatic('mobileClose',()=>document.getElementById('mobileOverlay')?.classList
 /* Delegazione: la sidebar può essere ricreata dai moduli UI dopo il login.
    Gestire il click a livello document evita che i nuovi pulsanti restino senza handler. */
 document.addEventListener('click',e=>{
+ const contentButton=e.target?.closest?.('#sideLocandineArticles, #mobileLocandineArticles');
+ if(contentButton){
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  document.getElementById('mobileOverlay')?.classList.remove('open');
+  if(typeof window.openEventourContentStudio==='function')window.openEventourContentStudio();
+  else {console.error('Editor Locandine & Articoli non caricato: verificare admin-creazione-locandine-articoli-v1.js');alert('Editor Locandine & Articoli non caricato. Ricarica la pagina; se il problema persiste, controllare il caricamento dello script.');}
+  return;
+ }
  const b=e.target?.closest?.('#areaAdmin .sidebar .nav button[data-page], .mobile-nav [data-page]');
  if(!b)return;
  e.preventDefault();
