@@ -318,7 +318,7 @@ async function savePoster() {
     const cat=$('epsMarketCategory')?.value||'altro';
     const price=$('epsMarketPrice')?.value?.trim()||'';
     const condition=$('epsMarketCondition')?.value?.trim()||'';
-    const payload={titolo,descrizione:body,anteprima:body.slice(0,180),categoria:cat,categoria_label:({racchette:'Racchette',abbigliamento:'Abbigliamento',accessori:'Accessori',altro:'Altro'})[cat]||'Altro',prezzo:price,condizioni:condition,immagine:'',locandina:image,stato:'disponibile',pubblicato:true,created_by:user?.id||null,contatto:user?.email||''};
+    const payload={titolo,descrizione:body,anteprima:body.slice(0,180),categoria:cat,categoria_label:({racchette:'Racchette',abbigliamento:'Abbigliamento',accessori:'Accessori',altro:'Altro'})[cat]||'Altro',prezzo:price,condizioni:condition,immagine:'',locandina:image,stato:'disponibile',pubblicato:true,created_by:user?.id||null,contatto:''};
     const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
