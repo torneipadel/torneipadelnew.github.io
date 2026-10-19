@@ -294,7 +294,7 @@ async function renderContentFields() {
  const t=kind==='torneo'?currentTournament():null;
  const title=(row.titolo||t?.nome||'');
  const body=(row.testo||row.descrizione||t?.descrizione||'');
- const extra=(row.testoExtra||[t?.data_torneo||t?.data||'',t?.luogo||t?.indirizzo||''].filter(Boolean).join(' · '));
+ const extra=(row.testoExtra||[t?.data_torneo||t?.data||'',t?.luogo||t?.indirizzo||''].filter(Boolean).join(' · ')||'Data e luogo da inserire');
  let html=makeField('Titolo del contenuto','epsTitle',title,'text');
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
  html+=makeField('3. Data e luogo','epsExtra',extra,'text');
@@ -356,14 +356,14 @@ function seedLayers() {
  if(existingPosterLoaded)return;
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
- const extra=$('epsExtra')?.value?.trim()||'';
+ const extra=$('epsExtra')?.value?.trim()||'Data e luogo da inserire';
  /* Rebuild only when there are no layers. */
  if(layers.length) return;
  const saved=Array.isArray(editingRow?.livelli)?editingRow.livelli:null;
  if(saved&&saved.length){layers=saved.map(l=>Object.assign({},l,{id:layerSeq++}));return;}
  if(title) layers.push({id:layerSeq++,text:title,x:W/2,y:400,size:44,color:'#ffffff',align:'center',bold:true});
  if(body) layers.push({id:layerSeq++,text:body,x:W/2,y:555,size:25,color:'#ffffff',align:'center',bold:true});
- if(extra) layers.push({id:layerSeq++,text:extra,x:W/2,y:690,size:23,color:'#f5cf59',align:'center',bold:true});
+ layers.push({id:layerSeq++,text:extra,x:W/2,y:690,size:23,color:'#f5cf59',align:'center',bold:true});
  renderLayers();
 }
 function canvasDataUrl() {
