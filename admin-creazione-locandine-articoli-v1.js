@@ -230,6 +230,15 @@ function renderStudio() {
 function fileToDataUrl(file) {
  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('Lettura file non riuscita.'));r.readAsDataURL(file);});
 }
+function compactBackgroundDataUrl(image) {
+ const out=document.createElement('canvas');out.width=W;out.height=H;
+ const ctx=out.getContext('2d');ctx.fillStyle='#071b2b';ctx.fillRect(0,0,W,H);fitImage(ctx,image);
+ let data=out.toDataURL('image/jpeg',0.72);
+ if(data.length>650000)data=out.toDataURL('image/jpeg',0.55);
+ if(data.length>850000)data=out.toDataURL('image/jpeg',0.4);
+ if(data.length>1000000)throw new Error('Lo sfondo è troppo pesante anche dopo la riduzione. Scegli un’immagine più leggera.');
+ return data;
+}
 async function loadTargets() {
  const target=$('epsTarget'); if(!target)return;
  target.innerHTML='<option value="">Caricamento…</option>';
