@@ -254,15 +254,18 @@ async function renderContentFields() {
   if(linked)linked.value=row.torneo_id?String(row.torneo_id):'';
  }
  $('epsTitle')?.addEventListener('input',()=>{
-  if(!layers[0]) layers.unshift({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
-  layers[0].text=$('epsTitle').value;renderLayers();draw();
+  if(!layers[0]) {
+   layers.unshift({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
+   renderLayers();
+  }
+  layers[0].text=$('epsTitle').value;draw();
  });
  $('epsBody')?.addEventListener('input',()=>{
-  if(!layers[1]) {
-   if(!layers[0]) layers.push({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
-   layers.push({id:layerSeq++,text:'',x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});
-  }
-  layers[1].text=$('epsBody').value;renderLayers();draw();
+  let created=false;
+  if(!layers[0]) { layers.push({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[1]) { layers.push({id:layerSeq++,text:'',x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(created)renderLayers();
+  layers[1].text=$('epsBody').value;draw();
  });
  if(kind==='torneo'&&!t) setStatus('Seleziona un torneo attivo e pubblicato.',true);
  if(kind==='torneo'&&t) setStatus('Torneo selezionato: la locandina sarà salvata direttamente nella sua configurazione.');
