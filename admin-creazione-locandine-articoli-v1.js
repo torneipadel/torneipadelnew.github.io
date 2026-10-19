@@ -294,8 +294,10 @@ async function renderContentFields() {
  const t=kind==='torneo'?currentTournament():null;
  const title=(row.titolo||t?.nome||'');
  const body=(row.testo||row.descrizione||t?.descrizione||'');
+ const extra=(row.testoExtra||row.luogo||t?.luogo||t?.indirizzo||'');
  let html=makeField('Titolo del contenuto','epsTitle',title,'text');
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
+ html+=makeField('3. Data e luogo','epsExtra',extra,'text');
  if(existingPosterLoaded)html+='<p class="notice">È stata riaperta la locandina salvata. Per ricreare i testi e modificarli singolarmente, premi “Azzera sfondo”: la grafica torna allo sfondo Eventour e i testi tornano modificabili.</p>';
  if(kind==='news'||kind==='articolo') {
   let linkedTournamentRows=[];
@@ -332,10 +334,19 @@ async function renderContentFields() {
  });
  $('epsBody')?.addEventListener('input',()=>{
   let created=false;
-  if(!layers[0]) { layers.push({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});created=true; }
-  if(!layers[1]) { layers.push({id:layerSeq++,text:'',x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[0]) { layers.push({id:layerSeq++,text:'',x:W/2,y:400,size:44,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[1]) { layers.push({id:layerSeq++,text:'',x:W/2,y:555,size:25,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[2]) { layers.push({id:layerSeq++,text:'',x:W/2,y:690,size:23,color:'#f5cf59',align:'center',bold:true});created=true; }
   if(created)renderLayers();
   layers[1].text=$('epsBody').value;draw();
+ });
+ $('epsExtra')?.addEventListener('input',()=>{
+  let created=false;
+  if(!layers[0]) { layers.push({id:layerSeq++,text:$('epsTitle')?.value||'',x:W/2,y:400,size:44,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[1]) { layers.push({id:layerSeq++,text:$('epsBody')?.value||'',x:W/2,y:555,size:25,color:'#ffffff',align:'center',bold:true});created=true; }
+  if(!layers[2]) { layers.push({id:layerSeq++,text:'',x:W/2,y:690,size:23,color:'#f5cf59',align:'center',bold:true});created=true; }
+  if(created)renderLayers();
+  layers[2].text=$('epsExtra').value;draw();
  });
  if(kind==='torneo'&&!t) setStatus('Seleziona un torneo attivo e pubblicato.',true);
  if(kind==='torneo'&&t) setStatus('Torneo selezionato: la locandina sarà salvata direttamente nella sua configurazione.');
@@ -345,10 +356,14 @@ function seedLayers() {
  if(existingPosterLoaded)return;
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
- /* Rebuild only when there are no layers. The saved poster image is never used as the editable canvas background. */
+ const extra=$('epsExtra')?.value?.trim()||'';
+ /* Rebuild only when there are no layers. */
  if(layers.length) return;
- if(title) layers.push({id:layerSeq++,text:title,x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
- if(body) layers.push({id:layerSeq++,text:body,x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});
+ const saved=Array.isArray(editingRow?.livelli)?editingRow.livelli:null;
+ if(saved&&saved.length){layers=saved.map(l=>Object.assign({},l,{id:layerSeq++}));return;}
+ if(title) layers.push({id:layerSeq++,text:title,x:W/2,y:400,size:44,color:'#ffffff',align:'center',bold:true});
+ if(body) layers.push({id:layerSeq++,text:body,x:W/2,y:555,size:25,color:'#ffffff',align:'center',bold:true});
+ if(extra) layers.push({id:layerSeq++,text:extra,x:W/2,y:690,size:23,color:'#f5cf59',align:'center',bold:true});
  renderLayers();
 }
 function canvasDataUrl() {
@@ -377,6 +392,7 @@ async function savePoster() {
  const button=$('epsPublish');
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
+ const extra=$('epsExtra')?.value?.trim()||'';
  if(!title){setStatus('Inserisci il titolo del contenuto.',true);return;}
  if(!layers.length&&!existingPosterLoaded){addLayer(title,W/2,430,44);}
  if(button){button.disabled=true;button.textContent='⏳ Salvataggio…';}
@@ -393,7 +409,7 @@ async function savePoster() {
    if(String(fresh.data.stato||'').toLowerCase()!=='attivo'||fresh.data.pubblicato!==true)throw new Error('Il torneo non risulta attivo e pubblicato.');
    const cfg=cfgOf(fresh.data),arr=Array.isArray(cfg.news)?cfg.news.slice():[];
    const posterId=editingRow?.id||'eventour-poster-'+String(t.id);
-   const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
+   const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,testoExtra:extra,livelli:layers.map(({id,...layer})=>Object.assign({},layer)),link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
    const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
    if(ix>=0)next.splice(ix,1);
@@ -403,7 +419,8 @@ async function savePoster() {
    const savedCfg=cfgOf(write.data);
    if(!Array.isArray(savedCfg.news)||!savedCfg.news.some(n=>String(n.id)===posterId&&n.immagine))throw new Error('Verifica fallita: la locandina non è presente nella configurazione del torneo.');
    t.configurazione=savedCfg;
-   setStatus('Locandina salvata e collegata al torneo "'+title+'".');
+   editingRow=item;
+   setStatus('Locandina salvata e collegata al torneo "'+title+'". Testi e posizioni sono stati memorizzati per la riapertura.');
   } else if(kind==='news'||kind==='articolo') {
    const linked=$('epsLinkedTournament')?.value||null;
    const link=$('epsLink')?.value?.trim()||null;
@@ -413,7 +430,7 @@ async function savePoster() {
     const linkedCheck=await client.from('tornei').select('id').eq('id',linked).eq('azienda_id',window.aziendaId).eq('stato','attivo').eq('pubblicato',true).maybeSingle();
     if(linkedCheck.error||!linkedCheck.data)throw new Error(linkedCheck.error?.message||'Il torneo selezionato non appartiene alla società corrente o non è attivo e pubblicato.');
    }
-   const payload={titolo:title,testo:body,immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked||null,azienda_id:window.aziendaId};
+   const payload={titolo:title,testo:body,testoExtra:extra,livelli:layers.map(({id,...layer})=>Object.assign({},layer)),immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked||null,azienda_id:window.aziendaId};
    let result;
    if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
@@ -434,7 +451,7 @@ async function savePoster() {
     const cat=$('epsMarketCategory')?.value||'altro';
     const price=$('epsMarketPrice')?.value?.trim()||'';
     const condition=$('epsMarketCondition')?.value?.trim()||'';
-    const payload={titolo,descrizione:body,anteprima:body.slice(0,180),categoria:cat,categoria_label:({racchette:'Racchette',abbigliamento:'Abbigliamento',accessori:'Accessori',altro:'Altro'})[cat]||'Altro',prezzo:price,condizioni:condition,immagine:'',locandina:image,stato:'disponibile',pubblicato:true,created_by:user?.id||null,contatto:''};
+    const payload={titolo,descrizione:body,testoExtra:extra,livelli:layers.map(({id,...layer})=>Object.assign({},layer)),anteprima:body.slice(0,180),categoria:cat,categoria_label:({racchette:'Racchette',abbigliamento:'Abbigliamento',accessori:'Accessori',altro:'Altro'})[cat]||'Altro',prezzo:price,condizioni:condition,immagine:'',locandina:image,stato:'disponibile',pubblicato:true,created_by:user?.id||null,contatto:''};
     const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
