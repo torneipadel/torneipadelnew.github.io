@@ -134,7 +134,7 @@ function renderStudio() {
  '<div id="epsContentFields"></div><label for="epsBgFile">Sfondo personalizzato (facoltativo)</label><input id="epsBgFile" class="input" type="file" accept="image/png,image/jpeg,image/webp">' +
  '<p class="notice">Selezionando una foto, questa sostituisce lo sfondo grafico Eventour per questa locandina. Puoi tornare allo sfondo Eventour con il pulsante Azzera sfondo.</p>' +
  '<div class="eps-actions"><button class="btn" type="button" id="epsResetBg">Azzera sfondo</button><button class="btn" type="button" id="epsAddText">＋ Aggiungi testo</button><button class="btn" type="button" id="epsResetText">Azzera testi</button></div>' +
- '<div id="epsLayers"></div><div class="eps-actions"><button class="btn primary" type="button" id="epsPublish">💾 Salva e collega la locandina</button></div><div id="epsStatus" class="notice eps-status" role="status" aria-live="polite"></div></div>' +
+ '<div id="epsLayers"></div><div class="eps-actions"><button class="btn" type="button" id="epsDownload">⬇ Scarica PNG</button><button class="btn primary" type="button" id="epsPublish">💾 Salva e collega la locandina</button></div><div id="epsStatus" class="notice eps-status" role="status" aria-live="polite"></div></div>' +
  '<div><h3 style="margin-top:0">Anteprima locandina</h3><div class="eps-preview"><canvas id="epsCanvas" width="720" height="900"></canvas></div><p class="notice">Formato verticale 4:5. L’anteprima viene salvata insieme al contenuto selezionato.</p></div></div></section></div>';
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
@@ -145,6 +145,7 @@ function renderStudio() {
  $('epsAddText').onclick=()=>addLayer('Nuovo testo',W/2,H/2,30);
  $('epsResetText').onclick=()=>{layers=[];layerSeq=1;renderLayers();draw();};
  $('epsPublish').onclick=savePoster;
+ $('epsDownload').onclick=downloadPoster;
  loadTargets().then(async()=>{await selectTarget();renderContentFields();seedLayers();renderLayers();draw();});
 }
 function fileToDataUrl(file) {
@@ -252,6 +253,16 @@ function canvasDataUrl() {
  if(url.length>800000)url=out.toDataURL('image/jpeg',0.55);
  if(url.length>1000000)throw new Error('La locandina è troppo pesante. Riduci la complessità dello sfondo e riprova.');
  return url;
+}
+async function downloadPoster() {
+ try {
+  await draw();
+  const canvas=$('epsCanvas');if(!canvas)throw new Error('Anteprima locandina non disponibile.');
+  const a=document.createElement('a');
+  const title=($('epsTitle')?.value||'locandina-eventour').trim().toLowerCase().replace(/[^a-z0-9à-ÿ]+/gi,'-').replace(/^-+|-+$/g,'')||'locandina-eventour';
+  a.href=canvas.toDataURL('image/png');a.download=title+'.png';document.body.appendChild(a);a.click();a.remove();
+  setStatus('Locandina PNG generata e scaricata.');
+ } catch(err) { setStatus('Download non riuscito: '+(err?.message||String(err)),true); }
 }
 async function savePoster() {
  if(busy)return;
