@@ -20,7 +20,7 @@ function openExistingNews(){
 }
 window.openEventourPosterEditor=openExistingNews;
 function capture(e){
- const b=e.target?.closest?.('[data-com-page="locandine"]');
+ const b=e.target?.closest?.('#sideLocandineArticles, #mobileLocandineArticles, [data-com-page="locandine"]');
  if(!b)return;
  e.preventDefault();
  e.stopPropagation();
