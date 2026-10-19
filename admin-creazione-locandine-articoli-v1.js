@@ -196,7 +196,7 @@ async function selectTarget() {
   selectedTournamentId=selectedId;
   const t=currentTournament();
   const arr=Array.isArray(cfgOf(t).news)?cfgOf(t).news:[];
-  editingRow=t?arr.find(n=>String(n.id)==='eventour-poster-'+String(t.id)&&n?.immagine)||null;
+  editingRow=t ? (arr.find(n=>String(n.id)==='eventour-poster-'+String(t.id)&&n?.immagine) || null) : null;
   if(editingRow?.immagine)await loadPosterBackground(editingRow.immagine);
   return;
  }
