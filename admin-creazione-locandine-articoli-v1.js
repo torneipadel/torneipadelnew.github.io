@@ -310,7 +310,7 @@ async function savePoster() {
     const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
-    editingRow=Object.assign({},payload,{id:rowId});marketRows.unshift(editingRow);chooseSavedTarget(rowId,title);
+    editingRow=Object.assign({},payload,{id:rowId});marketRows.unshift(editingRow);chooseSavedTarget(rowId,title);renderContentFields();
    } else {
     const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).eq('azienda_id',window.aziendaId).select('id,titolo').maybeSingle();
     if(upd.error||!upd.data)throw new Error(upd.error?.message||'Locandina non collegata all’articolo del mercatino.');
