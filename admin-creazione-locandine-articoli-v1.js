@@ -342,16 +342,38 @@ async function savePoster() {
  }
 }
 function openStudio() {
+ const root=$('appContent');
+ if(!root) {
+  console.error('Creazione Locandine & Articoli: contenitore #appContent non disponibile.');
+  window.alert('Impossibile aprire l’editor: la schermata amministrativa non è pronta. Ricarica la pagina e riprova.');
+  return;
+ }
  const overlay=$('mobileOverlay');overlay?.classList.remove('open');
  kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;activeRows=null;newsRows=[];marketRows=[];layers=[];layerSeq=1;
- renderStudio();
+ try {
+  renderStudio();
+  if(!$('eventourPosterStudio'))throw new Error('L’interfaccia dell’editor non è stata creata.');
+ } catch(err) {
+  console.error('Apertura Creazione Locandine & Articoli non riuscita:',err);
+  window.alert('L’editor delle locandine non si è aperto: '+(err?.message||String(err)));
+ }
 }
 window.openEventourContentStudio=openStudio;
-document.addEventListener('click',e=>{
- const b=e.target?.closest?.('#sideLocandineArticles,#mobileLocandineArticles,[data-com-page="locandine"]');
- if(!b)return;
- e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
- openStudio();
-},true);
+const bindStudioButton=id=>{
+ const b=$(id);
+ if(!b||b.dataset.epsOpenBound==='1')return;
+ b.dataset.epsOpenBound='1';
+ b.addEventListener('click',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  openStudio();
+ });
+};
+const bindStudioButtons=()=>{
+ bindStudioButton('sideLocandineArticles');
+ bindStudioButton('mobileLocandineArticles');
+};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindStudioButtons,{once:true});
+else bindStudioButtons();
 window.openAdminComPage=(function(previous){return function(page,...args){if(page==='news'||page==='news-ai'||page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
 })();
