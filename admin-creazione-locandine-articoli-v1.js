@@ -11,7 +11,7 @@ const state = () => window.adminState || {};
 const tournaments = () => Array.isArray(state().tornei) ? state().tornei : [];
 const cfgOf = t => t && t.configurazione && typeof t.configurazione === 'object' ? Object.assign({}, t.configurazione) : {};
 const W = 720, H = 900;
-let kind = 'torneo', selectedId = '', selectedTournamentId = '', newsRows = [], marketRows = [];
+let kind = 'torneo', selectedId = '', selectedTournamentId = '', newsRows = [], marketRows = [], activeRows = null;
 let bgImage = null, logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false;
 
 function css() {
@@ -22,7 +22,7 @@ function css() {
  document.head.appendChild(s);
 }
 function activeTournaments() {
- return tournaments().filter(t => String(t.stato || '').toLowerCase() === 'attivo' && t.pubblicato === true);
+ return activeRows !== null ? activeRows : tournaments().filter(t => String(t.stato || '').toLowerCase() === 'attivo' && t.pubblicato === true);
 }
 function currentTournament() {
  return activeTournaments().find(t => String(t.id) === String(selectedId)) || null;
@@ -149,6 +149,12 @@ async function loadTargets() {
  target.innerHTML='<option value="">Caricamento…</option>';
  try {
   if(kind==='torneo') {
+   const client=sb();
+   if(!client)throw new Error('Connessione Supabase non disponibile.');
+   if(!window.aziendaId)throw new Error('Contesto società non disponibile: impossibile caricare i tornei della società corretta.');
+   const res=await client.from('tornei').select('id,nome,data,data_torneo,descrizione,configurazione,stato,pubblicato,azienda_id').eq('azienda_id',window.aziendaId).eq('stato','attivo').eq('pubblicato',true).order('id',{ascending:false});
+   if(res.error)throw res.error;
+   activeRows=res.data||[];
    const rows=activeTournaments();
    target.innerHTML=rows.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.nome||('Torneo '+t.id))+' · '+esc(t.data_torneo||t.data||'data non indicata')+'</option>').join('')||'<option value="">Nessun torneo attivo pubblicato</option>';
    if(rows.length){selectedId=String(rows[0].id);target.value=selectedId;}
