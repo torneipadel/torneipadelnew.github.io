@@ -9,7 +9,15 @@ const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp
 const sb = () => window.supabaseClient || window.sb;
 const state = () => window.adminState || {};
 const tournaments = () => Array.isArray(state().tornei) ? state().tornei : [];
-const cfgOf = t => t && t.configurazione && typeof t.configurazione === 'object' ? Object.assign({}, t.configurazione) : {};
+const cfgOf = t => {
+ if (!t || !t.configurazione) return {};
+ if (typeof t.configurazione === 'object' && !Array.isArray(t.configurazione)) return Object.assign({}, t.configurazione);
+ if (typeof t.configurazione === 'string') {
+  try { const parsed = JSON.parse(t.configurazione); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? Object.assign({}, parsed) : {}; }
+  catch (_) { return {}; }
+ }
+ return {};
+};
 const W = 720, H = 900;
 let kind = 'torneo', selectedId = '', selectedTournamentId = '', newsRows = [], marketRows = [], activeRows = null;
 let bgImage = null, logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false, existingPosterLoaded = false;
@@ -127,6 +135,7 @@ function categoryOptions() {
 function renderStudio() {
  const root = $('appContent');
  if (!root) return;
+ selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;busy=false;
  css();
  root.innerHTML = '<div class="page-head"><div><h1>Creazione Locandine &amp; Articoli</h1><p>Un solo flusso per selezionare il contenuto, creare la locandina e salvarla collegata all’elemento corretto.</p></div><button class="btn" type="button" id="epsBack">← Torna al torneo</button></div>' +
  '<div id="eventourPosterStudio"><section class="eps-card"><div class="eps-grid"><div><label for="epsKind">Tipo di contenuto</label><select id="epsKind" class="input">' + categoryOptions() + '</select>' +
@@ -244,8 +253,17 @@ async function renderContentFields() {
   const linked=$('epsLinkedTournament');
   if(linked)linked.value=row.torneo_id?String(row.torneo_id):'';
  }
- $('epsTitle')?.addEventListener('input',()=>{if(layers[0]){layers[0].text=$('epsTitle').value;draw();}});
- $('epsBody')?.addEventListener('input',()=>{if(layers[1]){layers[1].text=$('epsBody').value;draw();}});
+ $('epsTitle')?.addEventListener('input',()=>{
+  if(!layers[0]) layers.unshift({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
+  layers[0].text=$('epsTitle').value;renderLayers();draw();
+ });
+ $('epsBody')?.addEventListener('input',()=>{
+  if(!layers[1]) {
+   if(!layers[0]) layers.push({id:layerSeq++,text:'',x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
+   layers.push({id:layerSeq++,text:'',x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});
+  }
+  layers[1].text=$('epsBody').value;renderLayers();draw();
+ });
  if(kind==='torneo'&&!t) setStatus('Seleziona un torneo attivo e pubblicato.',true);
  if(kind==='torneo'&&t) setStatus('Torneo selezionato: la locandina sarà salvata direttamente nella sua configurazione.');
  if(isNew&&kind!=='torneo')setStatus('Nuovo contenuto: sarà creato e collegato alla locandina al momento del salvataggio.');
@@ -254,9 +272,11 @@ function seedLayers() {
  if(existingPosterLoaded)return;
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
+ /* Rebuild only when there are no layers. The saved poster image is never used as the editable canvas background. */
  if(layers.length) return;
- if(title) addLayer(title,W/2,430,44);
- if(body) addLayer(body,W/2,590,25);
+ if(title) layers.push({id:layerSeq++,text:title,x:W/2,y:430,size:44,color:'#ffffff',align:'center',bold:true});
+ if(body) layers.push({id:layerSeq++,text:body,x:W/2,y:590,size:25,color:'#ffffff',align:'center',bold:true});
+ renderLayers();
 }
 function canvasDataUrl() {
  const canvas=$('epsCanvas');
