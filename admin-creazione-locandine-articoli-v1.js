@@ -293,7 +293,7 @@ async function renderContentFields() {
  const row=editingRow||{};
  const t=kind==='torneo'?currentTournament():null;
  const title=(row.titolo||t?.nome||'');
- const body=(row.testo||row.descrizione||t?.descrizione||'');
+ const body=(row.testo||row.descrizione||t?.descrizione||'Descrizione del torneo da inserire');
  const extra=(row.testoExtra||[t?.data_torneo||t?.data||'',t?.luogo||t?.indirizzo||''].filter(Boolean).join(' · ')||'Data e luogo da inserire');
  let html=makeField('Titolo del contenuto','epsTitle',title,'text');
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
@@ -355,7 +355,7 @@ async function renderContentFields() {
 function seedLayers() {
  if(existingPosterLoaded)return;
  const title=$('epsTitle')?.value?.trim()||'';
- const body=$('epsBody')?.value?.trim()||'';
+ const body=$('epsBody')?.value?.trim()||'Descrizione del torneo da inserire';
  const extra=$('epsExtra')?.value?.trim()||'Data e luogo da inserire';
  /* Rebuild only when there are no layers. */
  if(layers.length) return;
