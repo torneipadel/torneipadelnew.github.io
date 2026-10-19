@@ -146,6 +146,7 @@ function fileToDataUrl(file) {
 }
 async function loadTargets() {
  const target=$('epsTarget'); if(!target)return;
+ if(!window.aziendaId)throw new Error('Contesto società mancante: per proteggere i dati delle aziende, seleziona prima la società da amministrare.');
  target.innerHTML='<option value="">Caricamento…</option>';
  try {
   if(kind==='torneo') {
@@ -160,7 +161,7 @@ async function loadTargets() {
    if(rows.length){selectedId=String(rows[0].id);target.value=selectedId;}
   } else if(kind==='news'||kind==='articolo') {
    const client=sb(); if(!client)throw new Error('Connessione Supabase non disponibile.');
-   const res=await client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id').order('created_at',{ascending:false});
+   const res=await client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id,azienda_id').eq('azienda_id',window.aziendaId).order('created_at',{ascending:false});
    if(res.error)throw res.error;
    newsRows=res.data||[];
    const rows=newsRows.filter(n=>kind==='articolo'?String(n.tipo||'').toLowerCase()==='articolo':String(n.tipo||'').toLowerCase()!=='articolo');
@@ -168,7 +169,7 @@ async function loadTargets() {
    selectedId='__new__';target.value=selectedId;
   } else if(kind==='mercatino') {
    const client=sb(); if(!client)throw new Error('Connessione Supabase non disponibile.');
-   const res=await client.from('mercatino').select('*').order('created_at',{ascending:false});
+   const res=await client.from('mercatino').select('*').eq('azienda_id',window.aziendaId).order('created_at',{ascending:false});
    if(res.error)throw res.error;
    marketRows=res.data||[];
    target.innerHTML='<option value="__new__">＋ Crea nuovo articolo del mercatino</option>'+marketRows.map(n=>'<option value="'+esc(n.id)+'">'+esc(n.titolo||('Articolo '+n.id))+' · '+esc(n.stato||'')+'</option>').join('');
@@ -247,7 +248,7 @@ async function savePoster() {
   if(kind==='torneo') {
    const t=currentTournament();
    if(!t)throw new Error('Il torneo selezionato non è più attivo o pubblicato. Ricarica l’elenco.');
-   const fresh=await client.from('tornei').select('id,nome,data,data_torneo,descrizione,configurazione,azienda_id,stato,pubblicato').eq('id',t.id).maybeSingle();
+   const fresh=await client.from('tornei').select('id,nome,data,data_torneo,descrizione,configurazione,azienda_id,stato,pubblicato').eq('id',t.id).eq('azienda_id',window.aziendaId).maybeSingle();
    if(fresh.error||!fresh.data)throw new Error(fresh.error?.message||'Torneo non trovato o non accessibile.');
    if(String(fresh.data.stato||'').toLowerCase()!=='attivo'||fresh.data.pubblicato!==true)throw new Error('Il torneo non risulta attivo e pubblicato.');
    const cfg=cfgOf(fresh.data),arr=Array.isArray(cfg.news)?cfg.news.slice():[];
@@ -256,7 +257,7 @@ async function savePoster() {
    const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
    if(ix>=0)next[ix]=item;else next.unshift(item);
-   const write=await client.from('tornei').update({configurazione:Object.assign({},cfg,{news:next})}).eq('id',t.id).select('id,configurazione').maybeSingle();
+   const write=await client.from('tornei').update({configurazione:Object.assign({},cfg,{news:next})}).eq('id',t.id).eq('azienda_id',window.aziendaId).select('id,configurazione').maybeSingle();
    if(write.error||!write.data)throw new Error(write.error?.message||'Salvataggio locandina del torneo non riuscito.');
    const savedCfg=cfgOf(write.data);
    if(!Array.isArray(savedCfg.news)||!savedCfg.news.some(n=>String(n.id)===posterId&&n.immagine))throw new Error('Verifica fallita: la locandina non è presente nella configurazione del torneo.');
@@ -266,9 +267,9 @@ async function savePoster() {
    const linked=$('epsLinkedTournament')?.value||null;
    const link=$('epsLink')?.value?.trim()||null;
    const existing=editingRow;
-   const payload={titolo:title,testo:body,immagine:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked?Number(linked):null};
+   const payload={titolo:title,testo:body,immagine:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked?Number(linked):null,azienda_id:window.aziendaId};
    let result;
-   if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).select('id,titolo,torneo_id').maybeSingle();
+   if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
    if(result.error||!result.data)throw new Error(result.error?.message||'Salvataggio del contenuto e della locandina non riuscito.');
    selectedId=String(result.data.id);
@@ -283,14 +284,14 @@ async function savePoster() {
     const price=$('epsMarketPrice')?.value?.trim()||'';
     const condition=$('epsMarketCondition')?.value?.trim()||'';
     const payload={titolo,descrizione:body,anteprima:body.slice(0,180),categoria:cat,categoria_label:({racchette:'Racchette',abbigliamento:'Abbigliamento',accessori:'Accessori',altro:'Altro'})[cat]||'Altro',prezzo:price,condizioni:condition,immagine:'',locandina:image,stato:'disponibile',pubblicato:true,created_by:user?.id||null,contatto:user?.email||''};
-    const ins=await client.from('mercatino').insert(payload).select('id,titolo').single();
+    const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
    } else {
-    const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).select('id,titolo').maybeSingle();
+    const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).eq('azienda_id',window.aziendaId).select('id,titolo').maybeSingle();
     if(upd.error||!upd.data)throw new Error(upd.error?.message||'Locandina non collegata all’articolo del mercatino.');
    }
-   const verify=await client.from('mercatino').select('id,locandina').eq('id',rowId).maybeSingle();
+   const verify=await client.from('mercatino').select('id,locandina').eq('id',rowId).eq('azienda_id',window.aziendaId).maybeSingle();
    if(verify.error||!verify.data||!verify.data.locandina)throw new Error(verify.error?.message||'Verifica del collegamento alla locandina non riuscita.');
    setStatus('Locandina salvata e collegata all’articolo del mercatino "'+title+'". ID articolo: '+rowId+'.');
   }
