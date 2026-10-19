@@ -32,9 +32,10 @@ function setStatus(message, error) {
  if (el) { el.textContent = message || ''; el.style.color = error ? '#ffb4b4' : ''; }
 }
 function makeField(label, id, value, type) {
- return '<label for="' + id + '">' + esc(label) + '</label><' + (type === 'textarea' ? 'textarea' : 'input') +
-  ' id="' + id + '" class="input eps-field"' + (type && type !== 'textarea' ? ' type="' + type + '"' : '') +
-  (type === 'textarea' ? ' rows="4"' : '') + '>' + (type === 'textarea' ? esc(value || '') + '</textarea>' : '') ;
+ const tag = type === 'textarea' ? 'textarea' : 'input';
+ const typeAttr = type && type !== 'textarea' ? ' type="' + type + '"' : '';
+ const valueAttr = type === 'textarea' ? '' : ' value="' + esc(value || '') + '"';
+ return '<label for="' + id + '">' + esc(label) + '</label><' + tag + ' id="' + id + '" class="input eps-field"' + typeAttr + valueAttr + (type === 'textarea' ? ' rows="4">' + esc(value || '') + '</textarea>' : '>');
 }
 function loadLogo() {
  return new Promise(resolve => {
@@ -196,11 +197,13 @@ function renderContentFields() {
   html+='<label for="epsMarketPrice">Prezzo</label><input id="epsMarketPrice" class="input eps-field" value="" placeholder="Es. € 35">';
   html+='<label for="epsMarketCondition">Condizioni</label><input id="epsMarketCondition" class="input eps-field" value="" placeholder="Es. Ottime condizioni">';
  }
+ box.innerHTML=html;
  if(kind==='news'||kind==='articolo') {
   const linked=$('epsLinkedTournament');
   if(linked)linked.value=row.torneo_id?String(row.torneo_id):'';
  }
- box.innerHTML=html;
+ $('epsTitle')?.addEventListener('input',()=>{if(layers[0]){layers[0].text=$('epsTitle').value;draw();}});
+ $('epsBody')?.addEventListener('input',()=>{if(layers[1]){layers[1].text=$('epsBody').value;draw();}});
  if(kind==='torneo'&&!t) setStatus('Seleziona un torneo attivo e pubblicato.',true);
  if(kind==='torneo'&&t) setStatus('Torneo selezionato: la locandina sarà salvata direttamente nella sua configurazione.');
  if(isNew&&kind!=='torneo')setStatus('Nuovo contenuto: sarà creato e collegato alla locandina al momento del salvataggio.');
@@ -244,7 +247,7 @@ async function savePoster() {
    const cfg=cfgOf(fresh.data),arr=Array.isArray(cfg.news)?cfg.news.slice():[];
    const posterId='eventour-poster-'+String(t.id);
    const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
-   const next=arr.map(n=>Object.assign({},n,{inEvidenza:false}));
+   const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
    if(ix>=0)next[ix]=item;else next.unshift(item);
    const write=await client.from('tornei').update({configurazione:Object.assign({},cfg,{news:next})}).eq('id',t.id).select('id,configurazione').maybeSingle();
