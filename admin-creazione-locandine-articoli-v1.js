@@ -359,6 +359,22 @@ function openStudio() {
  }
 }
 window.openEventourContentStudio=openStudio;
+/* Routing prioritario sul window capture: viene eseguito prima dei listener document
+   del bootstrap, che in precedenza potevano interrompere il click prima dei listener
+   del pulsante. Gestisce esclusivamente i due pulsanti Locandine & Articoli. */
+window.addEventListener('click',function(event){
+ const button=event.target?.closest?.('#sideLocandineArticles, #mobileLocandineArticles');
+ if(!button)return;
+ event.preventDefault();
+ event.stopPropagation();
+ event.stopImmediatePropagation();
+ document.getElementById('mobileOverlay')?.classList.remove('open');
+ try{openStudio();}
+ catch(error){
+  console.error('Apertura editor Eventour non riuscita:',error);
+  window.alert('Impossibile aprire l’editor Locandine & Articoli: '+(error?.message||String(error)));
+ }
+},true);
 const bindStudioButton=id=>{
  const b=$(id);
  if(!b||b.dataset.epsOpenBound==='1')return;
