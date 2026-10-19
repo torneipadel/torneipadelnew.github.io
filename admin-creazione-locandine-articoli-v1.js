@@ -277,7 +277,8 @@ async function savePoster() {
    const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
    const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
-   if(ix>=0)next[ix]=item;else next.unshift(item);
+   if(ix>=0)next.splice(ix,1);
+   next.unshift(item);
    const write=await client.from('tornei').update({configurazione:Object.assign({},cfg,{news:next})}).eq('id',t.id).eq('azienda_id',window.aziendaId).select('id,configurazione').maybeSingle();
    if(write.error||!write.data)throw new Error(write.error?.message||'Salvataggio locandina del torneo non riuscito.');
    const savedCfg=cfgOf(write.data);
