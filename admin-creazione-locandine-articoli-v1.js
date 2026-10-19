@@ -148,7 +148,7 @@ async function loadTargets() {
  const target=$('epsTarget'); if(!target)return;
  target.innerHTML='<option value="">Caricamento…</option>';
  try {
-  if(!window.aziendaId)throw new Error('Contesto società mancante: per proteggere i dati delle aziende, seleziona prima la società da amministrare.');
+  if(!window.aziendaId){activeRows=[];newsRows=[];marketRows=[];throw new Error('Contesto società mancante: per proteggere i dati delle aziende, seleziona prima la società da amministrare.');}
   if(kind==='torneo') {
    const client=sb();
    if(!client)throw new Error('Connessione Supabase non disponibile.');
@@ -320,7 +320,7 @@ async function savePoster() {
 }
 function openStudio() {
  const overlay=$('mobileOverlay');overlay?.classList.remove('open');
- kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;
+ kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;activeRows=null;newsRows=[];marketRows=[];layers=[];layerSeq=1;
  renderStudio();
 }
 window.openEventourContentStudio=openStudio;
