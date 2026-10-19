@@ -189,7 +189,7 @@ async function selectTarget() {
   selectedTournamentId=selectedId;
   const t=currentTournament();
   const arr=Array.isArray(cfgOf(t).news)?cfgOf(t).news:[];
-  editingRow=arr.find(n=>String(n.id)==='eventour-poster-'+String(t?.id))||null;
+  editingRow=arr.find(n=>String(n.id)==='eventour-poster-'+String(t?.id))||arr.slice().reverse().find(n=>n?.immagine&&(String(n.tipo||'').toLowerCase()==='locandina'||String(n.id||'').startsWith('poster-')||n.aiMode==='manual-poster'))||null;
   if(editingRow?.immagine)await loadPosterBackground(editingRow.immagine);
   return;
  }
@@ -267,7 +267,7 @@ async function savePoster() {
    if(fresh.error||!fresh.data)throw new Error(fresh.error?.message||'Torneo non trovato o non accessibile.');
    if(String(fresh.data.stato||'').toLowerCase()!=='attivo'||fresh.data.pubblicato!==true)throw new Error('Il torneo non risulta attivo e pubblicato.');
    const cfg=cfgOf(fresh.data),arr=Array.isArray(cfg.news)?cfg.news.slice():[];
-   const posterId='eventour-poster-'+String(t.id);
+   const posterId=editingRow?.id||'eventour-poster-'+String(t.id);
    const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
    const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
