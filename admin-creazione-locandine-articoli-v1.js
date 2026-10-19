@@ -146,9 +146,9 @@ function fileToDataUrl(file) {
 }
 async function loadTargets() {
  const target=$('epsTarget'); if(!target)return;
- if(!window.aziendaId)throw new Error('Contesto società mancante: per proteggere i dati delle aziende, seleziona prima la società da amministrare.');
  target.innerHTML='<option value="">Caricamento…</option>';
  try {
+  if(!window.aziendaId)throw new Error('Contesto società mancante: per proteggere i dati delle aziende, seleziona prima la società da amministrare.');
   if(kind==='torneo') {
    const client=sb();
    if(!client)throw new Error('Connessione Supabase non disponibile.');
