@@ -12,7 +12,7 @@ const tournaments = () => Array.isArray(state().tornei) ? state().tornei : [];
 const cfgOf = t => t && t.configurazione && typeof t.configurazione === 'object' ? Object.assign({}, t.configurazione) : {};
 const W = 720, H = 900;
 let kind = 'torneo', selectedId = '', selectedTournamentId = '', newsRows = [], marketRows = [], activeRows = null;
-let bgImage = null, logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false;
+let bgImage = null, logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false, existingPosterLoaded = false;
 
 function css() {
  if ($('eventourPosterStudioStyle')) return;
@@ -132,14 +132,14 @@ function renderStudio() {
  '<div><h3 style="margin-top:0">Anteprima locandina</h3><div class="eps-preview"><canvas id="epsCanvas" width="720" height="900"></canvas></div><p class="notice">Formato verticale 4:5. L’anteprima viene salvata insieme al contenuto selezionato.</p></div></div></section></div>';
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
- $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;layers=[];layerSeq=1;await loadTargets();renderContentFields();renderLayers();draw();};
- $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;layers=[];layerSeq=1;await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
- $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;draw();return;}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
- $('epsResetBg').onclick=()=>{bgImage=null;$('epsBgFile').value='';draw();setStatus('Sfondo Eventour ripristinato.');};
+ $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;existingPosterLoaded=false;draw();return;}const hadPoster=existingPosterLoaded;existingPosterLoaded=false;if(hadPoster&&!layers.length){seedLayers();renderLayers();}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
+ $('epsResetBg').onclick=()=>{const hadPoster=existingPosterLoaded;bgImage=null;existingPosterLoaded=false;$('epsBgFile').value='';if(hadPoster){layers=[];layerSeq=1;seedLayers();renderLayers();}draw();setStatus(hadPoster?'Sfondo Eventour ripristinato. I testi sono di nuovo modificabili.':'Sfondo Eventour ripristinato.');};
  $('epsAddText').onclick=()=>addLayer('Nuovo testo',W/2,H/2,30);
  $('epsResetText').onclick=()=>{layers=[];layerSeq=1;renderLayers();draw();};
  $('epsPublish').onclick=savePoster;
- loadTargets().then(()=>{renderContentFields();seedLayers();renderLayers();draw();});
+ loadTargets().then(async()=>{await selectTarget();renderContentFields();seedLayers();renderLayers();draw();});
 }
 function fileToDataUrl(file) {
  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('Lettura file non riuscita.'));r.readAsDataURL(file);});
@@ -161,7 +161,7 @@ async function loadTargets() {
    if(rows.length){selectedId=String(rows[0].id);target.value=selectedId;}
   } else if(kind==='news'||kind==='articolo') {
    const client=sb(); if(!client)throw new Error('Connessione Supabase non disponibile.');
-   const res=await client.from('news').select('id,titolo,testo,immagine,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id,azienda_id').eq('azienda_id',window.aziendaId).order('created_at',{ascending:false});
+   const res=await client.from('news').select('id,titolo,testo,immagine,locandina,pubblicata,created_at,tipo,link,in_evidenza,ordine,torneo_id,azienda_id').eq('azienda_id',window.aziendaId).order('created_at',{ascending:false});
    if(res.error)throw res.error;
    newsRows=res.data||[];
    const rows=newsRows.filter(n=>kind==='articolo'?String(n.tipo||'').toLowerCase()==='articolo':String(n.tipo||'').toLowerCase()!=='articolo');
@@ -180,11 +180,24 @@ async function loadTargets() {
   setStatus('Errore caricamento contenuti: '+(err.message||err),true);
  }
 }
+async function loadPosterBackground(url) {
+ if(!url)return false;
+ return new Promise(resolve=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{bgImage=img;existingPosterLoaded=true;draw();resolve(true);};img.onerror=()=>{bgImage=null;existingPosterLoaded=false;setStatus('La locandina precedente non è stata caricata. Puoi crearne una nuova.',true);resolve(false);};img.src=url;});
+}
 async function selectTarget() {
- if(kind==='torneo'){selectedTournamentId=selectedId;return;}
+ if(kind==='torneo'){
+  selectedTournamentId=selectedId;
+  const t=currentTournament();
+  const arr=Array.isArray(cfgOf(t).news)?cfgOf(t).news:[];
+  editingRow=arr.find(n=>String(n.id)==='eventour-poster-'+String(t?.id))||null;
+  if(editingRow?.immagine)await loadPosterBackground(editingRow.immagine);
+  return;
+ }
  if(selectedId==='__new__'){editingRow=null;return;}
  if(kind==='mercatino')editingRow=marketRows.find(x=>String(x.id)===String(selectedId))||null;
  else editingRow=newsRows.find(x=>String(x.id)===String(selectedId))||null;
+ const posterUrl=editingRow?.locandina||'';
+ if(posterUrl)await loadPosterBackground(posterUrl);
 }
 function renderContentFields() {
  const box=$('epsContentFields'); if(!box)return;
@@ -216,6 +229,7 @@ function renderContentFields() {
  if(isNew&&kind!=='torneo')setStatus('Nuovo contenuto: sarà creato e collegato alla locandina al momento del salvataggio.');
 }
 function seedLayers() {
+ if(existingPosterLoaded)return;
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
  if(layers.length) return;
@@ -238,7 +252,7 @@ async function savePoster() {
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
  if(!title){setStatus('Inserisci il titolo del contenuto.',true);return;}
- if(!layers.length){addLayer(title,W/2,430,44);}
+ if(!layers.length&&!existingPosterLoaded){addLayer(title,W/2,430,44);}
  if(button){button.disabled=true;button.textContent='⏳ Salvataggio…';}
  busy=true;
  try {
@@ -267,7 +281,7 @@ async function savePoster() {
    const linked=$('epsLinkedTournament')?.value||null;
    const link=$('epsLink')?.value?.trim()||null;
    const existing=editingRow;
-   const payload={titolo:title,testo:body,immagine:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked?Number(linked):null,azienda_id:window.aziendaId};
+   const payload={titolo:title,testo:body,immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked?Number(linked):null,azienda_id:window.aziendaId};
    let result;
    if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
@@ -305,7 +319,7 @@ async function savePoster() {
 }
 function openStudio() {
  const overlay=$('mobileOverlay');overlay?.classList.remove('open');
- kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;layers=[];layerSeq=1;
+ kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;
  renderStudio();
 }
 window.openEventourContentStudio=openStudio;
