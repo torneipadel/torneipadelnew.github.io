@@ -20,7 +20,7 @@ const cfgOf = t => {
 };
 const W = 720, H = 900;
 let kind = 'torneo', selectedId = '', selectedTournamentId = '', newsRows = [], marketRows = [], activeRows = null;
-let bgImage = null, logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false, existingPosterLoaded = false;
+let bgImage = null, bgImageDataUrl = '', logoImage = null, layers = [], layerSeq = 1, editingRow = null, busy = false, existingPosterLoaded = false;
 
 function css() {
  if ($('eventourPosterStudioStyle')) return;
@@ -204,7 +204,7 @@ function categoryOptions() {
 function renderStudio() {
  const root = $('appContent');
  if (!root) return;
- selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;busy=false;
+ selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;layers=[];layerSeq=1;busy=false;
  css();
  root.innerHTML = '<div class="page-head"><div><h1>Creazione Locandine &amp; Articoli</h1><p>Un solo flusso per selezionare il contenuto, creare la locandina e salvarla collegata all’elemento corretto.</p></div><button class="btn" type="button" id="epsBack">← Torna al torneo</button></div>' +
  '<div id="eventourPosterStudio"><section class="eps-card"><div class="eps-grid"><div><label for="epsKind">Tipo di contenuto</label><select id="epsKind" class="input">' + categoryOptions() + '</select>' +
@@ -217,10 +217,10 @@ function renderStudio() {
  enableCanvasDragging();
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
- $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
- $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
- $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;existingPosterLoaded=false;draw();return;}const hadPoster=existingPosterLoaded;existingPosterLoaded=false;if(hadPoster&&!layers.length){seedLayers();renderLayers();}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
- $('epsResetBg').onclick=()=>{const hadPoster=existingPosterLoaded;bgImage=null;existingPosterLoaded=false;$('epsBgFile').value='';if(hadPoster){layers=[];layerSeq=1;seedLayers();renderLayers();}draw();setStatus(hadPoster?'Sfondo Eventour ripristinato. I testi sono di nuovo modificabili.':'Sfondo Eventour ripristinato.');};
+ $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;layers=[];layerSeq=1;await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;draw();return;}const hadPoster=existingPosterLoaded;existingPosterLoaded=false;if(hadPoster&&!layers.length){seedLayers();renderLayers();}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;try{bgImageDataUrl=compactBackgroundDataUrl(img);}catch(err){bgImage=null;bgImageDataUrl='';setStatus(err.message||String(err),true);return;}draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
+ $('epsResetBg').onclick=()=>{const hadPoster=existingPosterLoaded;bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;$('epsBgFile').value='';if(hadPoster){layers=[];layerSeq=1;seedLayers();renderLayers();}draw();setStatus(hadPoster?'Sfondo Eventour ripristinato. I testi sono di nuovo modificabili.':'Sfondo Eventour ripristinato.');};
  $('epsAddText').onclick=()=>addLayer('Nuovo testo',W/2,H/2,30);
  $('epsResetText').onclick=()=>{layers=[];layerSeq=1;renderLayers();draw();};
  $('epsPublish').onclick=savePoster;
@@ -275,6 +275,10 @@ async function loadTargets() {
   setStatus('Errore caricamento contenuti: '+(err.message||err),true);
  }
 }
+async function loadEditableBackground(url) {
+ if(!url)return false;
+ return new Promise(resolve=>{const img=new Image();img.onload=()=>{bgImage=img;bgImageDataUrl=url;draw();resolve(true);};img.onerror=()=>{bgImage=null;bgImageDataUrl='';setStatus('Lo sfondo personalizzato salvato non è stato caricato. Puoi selezionarlo di nuovo.',true);resolve(false);};img.src=url;});
+}
 async function loadPosterBackground(url) {
  if(!url)return false;
  return new Promise(resolve=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{bgImage=img;existingPosterLoaded=true;draw();resolve(true);};img.onerror=()=>{bgImage=null;existingPosterLoaded=false;setStatus('La locandina precedente non è stata caricata. Puoi crearne una nuova.',true);resolve(false);};img.src=url;});
@@ -287,7 +291,9 @@ async function selectTarget() {
   editingRow=t ? (arr.find(n=>String(n.id)==='eventour-poster-'+String(t.id)&&n?.immagine) || null) : null;
   /* Una locandina salvata è un'immagine raster: caricarla come sfondo rende le vecchie scritte parte dell'immagine e quindi non modificabili. In apertura ricostruiamo invece i livelli dal titolo e dal testo salvati; la locandina esistente resta invariata finché l'utente non salva esplicitamente. */
   bgImage=null;
+  bgImageDataUrl=String(editingRow?.sfondoDataUrl||'');
   existingPosterLoaded=false;
+  if(bgImageDataUrl)await loadEditableBackground(bgImageDataUrl);
   return;
  }
  if(selectedId==='__new__'){editingRow=null;return;}
@@ -418,7 +424,7 @@ async function savePoster() {
    if(String(fresh.data.stato||'').toLowerCase()!=='attivo'||fresh.data.pubblicato!==true)throw new Error('Il torneo non risulta attivo e pubblicato.');
    const cfg=cfgOf(fresh.data),arr=Array.isArray(cfg.news)?cfg.news.slice():[];
    const posterId=editingRow?.id||'eventour-poster-'+String(t.id);
-   const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,testoExtra:extra,livelli:layers.map(({id,...layer})=>Object.assign({},layer)),link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
+   const item={id:posterId,tipo:'Locandina',titolo:title,testo:body,testoExtra:extra,livelli:layers.map(({id,...layer})=>Object.assign({},layer)),sfondoDataUrl:bgImageDataUrl||'',link:'tabellone.html?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):''),immagine:image,inEvidenza:true,pubblicataVisitatore:true,data:new Date().toISOString(),ordine:0,aiMode:'central-poster'};
    const next=arr.slice();
    const ix=next.findIndex(n=>String(n.id)===posterId);
    if(ix>=0)next.splice(ix,1);
@@ -426,9 +432,12 @@ async function savePoster() {
    const write=await client.from('tornei').update({configurazione:Object.assign({},cfg,{news:next})}).eq('id',t.id).eq('azienda_id',window.aziendaId).select('id,configurazione').maybeSingle();
    if(write.error||!write.data)throw new Error(write.error?.message||'Salvataggio locandina del torneo non riuscito.');
    const savedCfg=cfgOf(write.data);
-   if(!Array.isArray(savedCfg.news)||!savedCfg.news.some(n=>String(n.id)===posterId&&n.immagine))throw new Error('Verifica fallita: la locandina non è presente nella configurazione del torneo.');
+   const savedPoster=Array.isArray(savedCfg.news)?savedCfg.news.find(n=>String(n.id)===posterId&&n.immagine):null;
+   if(!savedPoster)throw new Error('Verifica fallita: la locandina non è presente nella configurazione del torneo.');
+   if(!Array.isArray(savedPoster.livelli)||savedPoster.livelli.length!==layers.length)throw new Error('Verifica fallita: i livelli di testo non risultano salvati correttamente.');
+   if(String(savedPoster.sfondoDataUrl||'')!==String(bgImageDataUrl||''))throw new Error('Verifica fallita: lo sfondo personalizzato non risulta salvato correttamente.');
    t.configurazione=savedCfg;
-   editingRow=item;
+   editingRow=savedPoster;
    setStatus('Locandina salvata e collegata al torneo "'+title+'". Testi e posizioni sono stati memorizzati per la riapertura.');
   } else if(kind==='news'||kind==='articolo') {
    const linked=$('epsLinkedTournament')?.value||null;
@@ -491,7 +500,7 @@ function openStudio() {
   return;
  }
  const overlay=$('mobileOverlay');overlay?.classList.remove('open');
- kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;existingPosterLoaded=false;activeRows=null;newsRows=[];marketRows=[];layers=[];layerSeq=1;
+ kind='torneo';selectedId='';selectedTournamentId='';editingRow=null;bgImage=null;bgImageDataUrl='';existingPosterLoaded=false;activeRows=null;newsRows=[];marketRows=[];layers=[];layerSeq=1;
  try {
   renderStudio();
   if(!$('eventourPosterStudio'))throw new Error('L’interfaccia dell’editor non è stata creata.');
