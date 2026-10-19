@@ -315,5 +315,5 @@ document.addEventListener('click',e=>{
  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
  openStudio();
 },true);
-window.openAdminComPage=(function(previous){return function(page,...args){if(page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
+window.openAdminComPage=(function(previous){return function(page,...args){if(page==='news'||page==='news-ai'||page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
 })();
