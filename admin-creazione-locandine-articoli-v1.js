@@ -197,7 +197,9 @@ async function selectTarget() {
   const t=currentTournament();
   const arr=Array.isArray(cfgOf(t).news)?cfgOf(t).news:[];
   editingRow=t ? (arr.find(n=>String(n.id)==='eventour-poster-'+String(t.id)&&n?.immagine) || null) : null;
-  if(editingRow?.immagine)await loadPosterBackground(editingRow.immagine);
+  /* Una locandina salvata è un'immagine raster: caricarla come sfondo rende le vecchie scritte parte dell'immagine e quindi non modificabili. In apertura ricostruiamo invece i livelli dal titolo e dal testo salvati; la locandina esistente resta invariata finché l'utente non salva esplicitamente. */
+  bgImage=null;
+  existingPosterLoaded=false;
   return;
  }
  if(selectedId==='__new__'){editingRow=null;return;}
