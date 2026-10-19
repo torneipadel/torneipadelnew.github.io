@@ -196,7 +196,7 @@ async function selectTarget() {
   selectedTournamentId=selectedId;
   const t=currentTournament();
   const arr=Array.isArray(cfgOf(t).news)?cfgOf(t).news:[];
-  editingRow=arr.find(n=>String(n.id)==='eventour-poster-'+String(t?.id))||arr.slice().reverse().find(n=>n?.immagine&&(String(n.tipo||'').toLowerCase()==='locandina'||String(n.id||'').startsWith('poster-')||n.aiMode==='manual-poster'))||null;
+  editingRow=t?arr.find(n=>String(n.id)==='eventour-poster-'+String(t.id)&&n?.immagine)||null;
   if(editingRow?.immagine)await loadPosterBackground(editingRow.immagine);
   return;
  }
