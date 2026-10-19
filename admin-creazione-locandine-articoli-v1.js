@@ -31,6 +31,12 @@ function setStatus(message, error) {
  const el = $('epsStatus');
  if (el) { el.textContent = message || ''; el.style.color = error ? '#ffb4b4' : ''; }
 }
+function chooseSavedTarget(id, title) {
+ const select=$('epsTarget');if(!select)return;
+ let option=Array.from(select.options).find(o=>String(o.value)===String(id));
+ if(!option){option=document.createElement('option');option.value=String(id);option.textContent=String(title||('Contenuto '+id));select.appendChild(option);}
+ option.textContent=String(title||('Contenuto '+id));select.value=String(id);selectedId=String(id);
+}
 function makeField(label, id, value, type) {
  const tag = type === 'textarea' ? 'textarea' : 'input';
  const typeAttr = type && type !== 'textarea' ? ' type="' + type + '"' : '';
@@ -287,7 +293,9 @@ async function savePoster() {
    if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
    if(result.error||!result.data)throw new Error(result.error?.message||'Salvataggio del contenuto e della locandina non riuscito.');
-   selectedId=String(result.data.id);
+   editingRow=Object.assign({},existing||{},payload,{id:result.data.id});
+   newsRows=newsRows.filter(n=>String(n.id)!==String(result.data.id));newsRows.unshift(editingRow);
+   chooseSavedTarget(result.data.id,title);
    setStatus('Contenuto pubblicato e locandina collegata. ID contenuto: '+result.data.id+'.');
   } else if(kind==='mercatino') {
    const existing=editingRow;
@@ -302,9 +310,12 @@ async function savePoster() {
     const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
+    editingRow=Object.assign({},payload,{id:rowId});marketRows.unshift(editingRow);chooseSavedTarget(rowId,title);
    } else {
     const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).eq('azienda_id',window.aziendaId).select('id,titolo').maybeSingle();
     if(upd.error||!upd.data)throw new Error(upd.error?.message||'Locandina non collegata all’articolo del mercatino.');
+    editingRow=Object.assign({},existing,{titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()});
+    marketRows=marketRows.map(n=>String(n.id)===String(rowId)?editingRow:n);chooseSavedTarget(rowId,title);
    }
    const verify=await client.from('mercatino').select('id,locandina').eq('id',rowId).eq('azienda_id',window.aziendaId).maybeSingle();
    if(verify.error||!verify.data||!verify.data.locandina)throw new Error(verify.error?.message||'Verifica del collegamento alla locandina non riuscita.');
