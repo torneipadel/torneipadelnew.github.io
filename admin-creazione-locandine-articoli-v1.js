@@ -133,7 +133,7 @@ function renderStudio() {
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
  $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;layers=[];layerSeq=1;await loadTargets();renderContentFields();renderLayers();draw();};
- $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;layers=[];layerSeq=1;await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
  $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;draw();return;}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
  $('epsResetBg').onclick=()=>{bgImage=null;$('epsBgFile').value='';draw();setStatus('Sfondo Eventour ripristinato.');};
  $('epsAddText').onclick=()=>addLayer('Nuovo testo',W/2,H/2,30);
@@ -281,7 +281,7 @@ async function savePoster() {
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
    } else {
-    const upd=await client.from('mercatino').update({locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).select('id,titolo').maybeSingle();
+    const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).select('id,titolo').maybeSingle();
     if(upd.error||!upd.data)throw new Error(upd.error?.message||'Locandina non collegata all’articolo del mercatino.');
    }
    const verify=await client.from('mercatino').select('id,locandina').eq('id',rowId).maybeSingle();
