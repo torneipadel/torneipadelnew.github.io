@@ -208,6 +208,7 @@ function renderContentFields() {
  const body=(row.testo||row.descrizione||t?.descrizione||'');
  let html=makeField('Titolo del contenuto','epsTitle',title,'text');
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
+ if(existingPosterLoaded)html+='<p class="notice">È stata riaperta la locandina salvata. Per ricreare i testi e modificarli singolarmente, premi “Azzera sfondo”: la grafica torna allo sfondo Eventour e i testi tornano modificabili.</p>';
  if(kind==='news'||kind==='articolo') {
   html+='<label for="epsLinkedTournament">Collega a un torneo (facoltativo)</label><select id="epsLinkedTournament" class="input"><option value="">News generale · nessun torneo</option>'+tournaments().map(tn=>'<option value="'+esc(tn.id)+'">'+esc(tn.nome||('Torneo '+tn.id))+'</option>').join('')+'</select>';
   html+='<label for="epsLink">Link facoltativo</label><input id="epsLink" class="input eps-field" type="url" value="'+esc(row.link||'')+'" placeholder="https://…">';
