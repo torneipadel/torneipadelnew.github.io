@@ -103,6 +103,75 @@ function drawLayer(ctx, layer) {
  });
  ctx.restore();
 }
+function enableCanvasDragging() {
+ const canvas=$('epsCanvas');
+ if(!canvas || canvas.dataset.epsDragBound==='1')return;
+ canvas.dataset.epsDragBound='1';
+ canvas.style.touchAction='none';
+ canvas.style.cursor='grab';
+ let drag=null;
+ function point(event) {
+  const rect=canvas.getBoundingClientRect();
+  return {x:(event.clientX-rect.left)*W/rect.width,y:(event.clientY-rect.top)*H/rect.height};
+ }
+ function hitLayer(p) {
+  const ctx=canvas.getContext('2d');
+  for(let i=layers.length-1;i>=0;i--){
+   const l=layers[i]; if(!l.text)continue;
+   const size=Math.max(8,Number(l.size)||34);
+   ctx.save();
+   ctx.font=(l.bold?'800 ':'600 ')+size+'px Arial';
+   ctx.textAlign=l.align||'center';ctx.textBaseline='middle';
+   const lines=String(l.text).split('\\n'),lh=size*1.18;
+   const startY=Number(l.y)-(lines.length-1)*lh/2;
+   let found=false;
+   for(let j=0;j<lines.length;j++){
+    const width=Math.min(W-40,ctx.measureText(lines[j]).width);
+    let left=Number(l.x)-width/2,right=Number(l.x)+width/2;
+    if((l.align||'center')==='left'){left=Number(l.x);right=left+width;}
+    if(l.align==='right'){right=Number(l.x);left=right-width;}
+    const cy=startY+j*lh;
+    if(p.x>=left-10&&p.x<=right+10&&p.y>=cy-lh/2-7&&p.y<=cy+lh/2+7){found=true;break;}
+   }
+   ctx.restore();
+   if(found)return l;
+  }
+  return null;
+ }
+ canvas.addEventListener('pointerdown',event=>{
+  if(event.button!==0&&event.pointerType!=='touch')return;
+  const p=point(event),layer=hitLayer(p);
+  if(!layer)return;
+  drag={id:layer.id,dx:p.x-Number(layer.x),dy:p.y-Number(layer.y),moved:false};
+  canvas.style.cursor='grabbing';
+  try{canvas.setPointerCapture(event.pointerId);}catch(_){}
+  event.preventDefault();
+ });
+ canvas.addEventListener('pointermove',event=>{
+  const p=point(event);
+  if(!drag){canvas.style.cursor=hitLayer(p)?'grab':'default';return;}
+  const layer=layers.find(l=>String(l.id)===String(drag.id));
+  if(!layer)return;
+  layer.x=Math.max(0,Math.min(W,p.x-drag.dx));
+  layer.y=Math.max(0,Math.min(H,p.y-drag.dy));
+  drag.moved=true;
+  const xInput=document.querySelector('[data-eps-num="x"][data-id="'+layer.id+'"]');
+  const yInput=document.querySelector('[data-eps-num="y"][data-id="'+layer.id+'"]');
+  if(xInput)xInput.value=Math.round(layer.x);
+  if(yInput)yInput.value=Math.round(layer.y);
+  draw();
+  event.preventDefault();
+ });
+ function stopDrag(event){
+  if(!drag)return;
+  const moved=drag.moved;drag=null;canvas.style.cursor='grab';
+  try{if(event&&canvas.hasPointerCapture(event.pointerId))canvas.releasePointerCapture(event.pointerId);}catch(_){}
+  if(moved)renderLayers();
+ }
+ canvas.addEventListener('pointerup',stopDrag);
+ canvas.addEventListener('pointercancel',stopDrag);
+ canvas.addEventListener('lostpointercapture',()=>{drag=null;canvas.style.cursor='grab';});
+}
 function renderLayers() {
  const box = $('epsLayers');
  if (!box) return;
@@ -145,6 +214,7 @@ function renderStudio() {
  '<div class="eps-actions"><button class="btn" type="button" id="epsResetBg">Azzera sfondo</button><button class="btn" type="button" id="epsAddText">＋ Aggiungi testo</button><button class="btn" type="button" id="epsResetText">Azzera testi</button></div>' +
  '<div id="epsLayers"></div><div class="eps-actions"><button class="btn" type="button" id="epsDownload">⬇ Scarica PNG</button><button class="btn primary" type="button" id="epsPublish">💾 Salva e collega la locandina</button></div><div id="epsStatus" class="notice eps-status" role="status" aria-live="polite"></div></div>' +
  '<div><h3 style="margin-top:0">Anteprima locandina</h3><div class="eps-preview"><canvas id="epsCanvas" width="720" height="900"></canvas></div><p class="notice">Formato verticale 4:5. L’anteprima viene salvata insieme al contenuto selezionato.</p></div></div></section></div>';
+ enableCanvasDragging();
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
  $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
