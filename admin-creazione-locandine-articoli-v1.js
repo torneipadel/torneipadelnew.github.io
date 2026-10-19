@@ -138,15 +138,15 @@ function renderStudio() {
  '<div><h3 style="margin-top:0">Anteprima locandina</h3><div class="eps-preview"><canvas id="epsCanvas" width="720" height="900"></canvas></div><p class="notice">Formato verticale 4:5. L’anteprima viene salvata insieme al contenuto selezionato.</p></div></div></section></div>';
  $('epsBack').onclick=()=>window.openAdminPage?.('torneo');
  $('epsKind').value=kind;
- $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
- $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await selectTarget();renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsKind').onchange=async e=>{kind=e.target.value;selectedId='';editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await loadTargets();await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
+ $('epsTarget').onchange=async e=>{selectedId=e.target.value;editingRow=null;bgImage=null;existingPosterLoaded=false;layers=[];layerSeq=1;await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();};
  $('epsBgFile').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f){bgImage=null;existingPosterLoaded=false;draw();return;}const hadPoster=existingPosterLoaded;existingPosterLoaded=false;if(hadPoster&&!layers.length){seedLayers();renderLayers();}if(!['image/png','image/jpeg','image/webp'].includes(f.type)){setStatus('Formato non valido: usa PNG, JPG o WEBP.',true);e.target.value='';return;}if(f.size>8*1024*1024){setStatus('Immagine troppo grande: massimo 8 MB.',true);e.target.value='';return;}try{const url=await fileToDataUrl(f);const img=new Image();img.onload=()=>{bgImage=img;draw();setStatus('Sfondo caricato.');};img.onerror=()=>setStatus('Impossibile leggere lo sfondo selezionato.',true);img.src=url;}catch(err){setStatus(err.message,true);}};
  $('epsResetBg').onclick=()=>{const hadPoster=existingPosterLoaded;bgImage=null;existingPosterLoaded=false;$('epsBgFile').value='';if(hadPoster){layers=[];layerSeq=1;seedLayers();renderLayers();}draw();setStatus(hadPoster?'Sfondo Eventour ripristinato. I testi sono di nuovo modificabili.':'Sfondo Eventour ripristinato.');};
  $('epsAddText').onclick=()=>addLayer('Nuovo testo',W/2,H/2,30);
  $('epsResetText').onclick=()=>{layers=[];layerSeq=1;renderLayers();draw();};
  $('epsPublish').onclick=savePoster;
  $('epsDownload').onclick=downloadPoster;
- loadTargets().then(async()=>{await selectTarget();renderContentFields();seedLayers();renderLayers();draw();});
+ loadTargets().then(async()=>{await selectTarget();await renderContentFields();seedLayers();renderLayers();draw();});
 }
 function fileToDataUrl(file) {
  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('Lettura file non riuscita.'));r.readAsDataURL(file);});
@@ -206,7 +206,7 @@ async function selectTarget() {
  const posterUrl=editingRow?.locandina||'';
  if(posterUrl)await loadPosterBackground(posterUrl);
 }
-function renderContentFields() {
+async function renderContentFields() {
  const box=$('epsContentFields'); if(!box)return;
  const isNew=selectedId==='__new__';
  const row=editingRow||{};
@@ -217,7 +217,19 @@ function renderContentFields() {
  html+='<label for="epsBody">Testo / descrizione</label><textarea id="epsBody" class="input eps-field" rows="4">'+esc(body)+'</textarea>';
  if(existingPosterLoaded)html+='<p class="notice">È stata riaperta la locandina salvata. Per ricreare i testi e modificarli singolarmente, premi “Azzera sfondo”: la grafica torna allo sfondo Eventour e i testi tornano modificabili.</p>';
  if(kind==='news'||kind==='articolo') {
-  html+='<label for="epsLinkedTournament">Collega a un torneo (facoltativo)</label><select id="epsLinkedTournament" class="input"><option value="">News generale · nessun torneo</option>'+tournaments().map(tn=>'<option value="'+esc(tn.id)+'">'+esc(tn.nome||('Torneo '+tn.id))+'</option>').join('')+'</select>';
+  let linkedTournamentRows=[];
+  try {
+   const client=sb();
+   if(!client)throw new Error('Connessione Supabase non disponibile.');
+   if(!window.aziendaId)throw new Error('Contesto società mancante.');
+   const linkedRes=await client.from('tornei').select('id,nome,stato,pubblicato,azienda_id').eq('azienda_id',window.aziendaId).eq('stato','attivo').eq('pubblicato',true).order('id',{ascending:false});
+   if(linkedRes.error)throw linkedRes.error;
+   linkedTournamentRows=linkedRes.data||[];
+  } catch(linkedError) {
+   console.error('Impossibile caricare i tornei collegabili alla news:',linkedError);
+   setStatus('Non riesco a caricare i tornei della società per il collegamento. Puoi continuare a modificare il contenuto senza collegare un torneo.',true);
+  }
+  html+='<label for="epsLinkedTournament">Collega a un torneo (facoltativo)</label><select id="epsLinkedTournament" class="input"><option value="">News generale · nessun torneo</option>'+linkedTournamentRows.map(tn=>'<option value="'+esc(tn.id)+'">'+esc(tn.nome||('Torneo '+tn.id))+'</option>').join('')+'</select>';
   html+='<label for="epsLink">Link facoltativo</label><input id="epsLink" class="input eps-field" type="url" value="'+esc(row.link||'')+'" placeholder="https://…">';
  }
  if(kind==='mercatino'&&isNew) {
@@ -266,6 +278,7 @@ async function downloadPoster() {
 }
 async function savePoster() {
  if(busy)return;
+ if(!window.aziendaId){setStatus('Contesto società mancante: salvataggio bloccato per proteggere i dati delle aziende.',true);return;}
  const button=$('epsPublish');
  const title=$('epsTitle')?.value?.trim()||'';
  const body=$('epsBody')?.value?.trim()||'';
@@ -300,12 +313,20 @@ async function savePoster() {
    const linked=$('epsLinkedTournament')?.value||null;
    const link=$('epsLink')?.value?.trim()||null;
    const existing=editingRow;
-   const payload={titolo:title,testo:body,immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked?Number(linked):null,azienda_id:window.aziendaId};
+   if(!window.aziendaId)throw new Error('Contesto società mancante: salvataggio bloccato per proteggere i dati delle aziende.');
+   if(linked) {
+    const linkedCheck=await client.from('tornei').select('id').eq('id',linked).eq('azienda_id',window.aziendaId).eq('stato','attivo').eq('pubblicato',true).maybeSingle();
+    if(linkedCheck.error||!linkedCheck.data)throw new Error(linkedCheck.error?.message||'Il torneo selezionato non appartiene alla società corrente o non è attivo e pubblicato.');
+   }
+   const payload={titolo:title,testo:body,immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked||null,azienda_id:window.aziendaId};
    let result;
    if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
    if(result.error||!result.data)throw new Error(result.error?.message||'Salvataggio del contenuto e della locandina non riuscito.');
-   editingRow=Object.assign({},existing||{},payload,{id:result.data.id});
+   const verifyNews=await client.from('news').select('id,titolo,locandina,torneo_id,azienda_id').eq('id',result.data.id).eq('azienda_id',window.aziendaId).maybeSingle();
+   if(verifyNews.error||!verifyNews.data||!verifyNews.data.locandina)throw new Error(verifyNews.error?.message||'Verifica fallita: la locandina non risulta salvata nel contenuto della società.');
+   if(String(verifyNews.data.torneo_id||'')!==String(linked||''))throw new Error('La locandina è stata salvata, ma il collegamento al torneo non coincide con quello selezionato. Verifica il contenuto prima di riprovare.');
+   editingRow=Object.assign({},existing||{},payload,{id:result.data.id,locandina:verifyNews.data.locandina});
    newsRows=newsRows.filter(n=>String(n.id)!==String(result.data.id));newsRows.unshift(editingRow);
    chooseSavedTarget(result.data.id,title);
    setStatus('Contenuto pubblicato e locandina collegata. ID contenuto: '+result.data.id+'.');
@@ -322,7 +343,7 @@ async function savePoster() {
     const ins=await client.from('mercatino').insert(Object.assign({},payload,{azienda_id:window.aziendaId})).select('id,titolo').single();
     if(ins.error||!ins.data)throw new Error(ins.error?.message||'Creazione articolo del mercatino non riuscita.');
     rowId=ins.data.id;
-    editingRow=Object.assign({},payload,{id:rowId});marketRows.unshift(editingRow);chooseSavedTarget(rowId,title);renderContentFields();
+    editingRow=Object.assign({},payload,{id:rowId});marketRows.unshift(editingRow);chooseSavedTarget(rowId,title);await renderContentFields();
    } else {
     const upd=await client.from('mercatino').update({titolo,descrizione:body,anteprima:body.slice(0,180),locandina:image,updated_at:new Date().toISOString()}).eq('id',rowId).eq('azienda_id',window.aziendaId).select('id,titolo').maybeSingle();
     if(upd.error||!upd.data)throw new Error(upd.error?.message||'Locandina non collegata all’articolo del mercatino.');
