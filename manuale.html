@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Manuale Operativo — Next Point Padel</title>
+<title>Manuale Operativo — Eventour</title>
 <style>
 :root{--bg:#f5f7fa;--card:#fff;--ink:#20252b;--muted:#68717c;--line:#dfe4e9;--accent:#1261a0;--ok:#176b3a;--warn:#9a6700}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Arial,sans-serif}
@@ -24,7 +24,7 @@ footer{max-width:1180px;margin:0 auto;padding:30px 18px 60px;color:var(--muted);
 </head>
 <body>
 <header><div class="wrap">
-<h1>Manuale Operativo — Next Point Padel</h1>
+<h1>Manuale Operativo — Eventour</h1>
 <div class="lead">Guida pratica per amministrazione, tornei, Bove, King, comunicazioni, sito pubblico, Supabase e GitHub.</div>
 <div class="meta">Edizione operativa · stato documentato al 25 settembre 2026 · repository: torneipadel/torneipadelnew.github.io</div>
 </div></header>
@@ -272,7 +272,7 @@ Correzione 22/09/2026 — input risultati Bove</h3>
 <section><h2>18. Principi di manutenzione</h2>
 <ul><li>Una correzione deve risolvere il problema senza rompere funzioni già operative.</li><li>Prima di sostituire una logica, confrontarla con la versione precedente funzionante quando disponibile.</li><li>Non eliminare grandi porzioni di codice per risolvere un difetto locale.</li><li>Non introdurre nuove autenticazioni, menu o flussi se non richiesti.</li><li>Separare sempre diagnosi, correzione e verifica.</li><li>Ogni correzione importante deve avere un commit identificabile.</li><li>Il manuale deve essere aggiornato quando cambia un flusso operativo stabile.</li></ul>
 </section>
-<section id="architettura-aziendale"><h2>Architettura aziendale — ambiente autonomo</h2><p>Il repository MASTER rappresenta un <strong>ambiente aziendale autonomo</strong> di Next Point Padel: sito, repository GitHub, progetto Supabase, Auth, amministratori, dati, News, Sponsor, Mercatino, privacy e backup appartengono a questo ambiente e non condividono i dati operativi con altre società.</p><ul><li><strong>Sito:</strong> <code>https://torneipadel.github.io/torneipadelnew.github.io/</code></li><li><strong>Repository:</strong> <code>torneipadel/torneipadelnew.github.io</code></li><li><strong>Supabase MASTER:</strong> <code>dkeqicstprvvfebiaooc</code></li><li><strong>Superadmin:</strong> <code>giose.rizzi@gmail.com</code></li><li><strong>Admin:</strong> <code>boverob@libero.it</code> e <code>cfalba@libero.it</code></li></ul><p>Il laboratorio storico rimane separato. Per una nuova società si replica questo modello creando un nuovo repository, un nuovo progetto Supabase/Auth e una nuova configurazione del sito; non si inseriscono i dati di società diverse nello stesso ambiente operativo.</p></section><section id="onboarding"><h2>12. Onboarding nuova società — configurazione automatica</h2>
+<section id="architettura-aziendale"><h2>Architettura aziendale — ambiente autonomo</h2><p>Il repository MASTER rappresenta un <strong>ambiente aziendale autonomo</strong> di Eventour: sito, repository GitHub, progetto Supabase, Auth, amministratori, dati, News, Sponsor, Mercatino, privacy e backup appartengono a questo ambiente e non condividono i dati operativi con altre società.</p><ul><li><strong>Sito:</strong> <code>https://torneipadel.github.io/torneipadelnew.github.io/</code></li><li><strong>Repository:</strong> <code>torneipadel/torneipadelnew.github.io</code></li><li><strong>Supabase MASTER:</strong> <code>dkeqicstprvvfebiaooc</code></li><li><strong>Superadmin:</strong> <code>giose.rizzi@gmail.com</code></li><li><strong>Admin:</strong> <code>boverob@libero.it</code> e <code>cfalba@libero.it</code></li></ul><p>Il laboratorio storico rimane separato. Per una nuova società si replica questo modello creando un nuovo repository, un nuovo progetto Supabase/Auth e una nuova configurazione del sito; non si inseriscono i dati di società diverse nello stesso ambiente operativo.</p></section><section id="onboarding"><h2>12. Onboarding nuova società — configurazione automatica</h2>
 <div class="note"><b>MASTER dal 25 settembre 2026:</b> il flusso di registrazione usa esclusivamente il Supabase MASTER <code>dkeqicstprvvfebiaooc</code>. Un nuovo utente non eredita i dati operativi di altre società.</div>
 <ol>
 <li>Dalla pagina Login selezionare <b>REGISTRA LA TUA SOCIETÀ</b>.</li>
@@ -285,7 +285,7 @@ Correzione 22/09/2026 — input risultati Bove</h3>
 <div class="note danger"><b>Confine architetturale:</b> questo flusso crea la società e il suo isolamento applicativo dentro il MASTER. La creazione automatica di un nuovo repository GitHub e di un nuovo progetto Supabase fisicamente separato per ogni nuova società richiede credenziali server-side dedicate e un processo di provisioning; tali segreti non devono essere inseriti nel browser.</div>
 </section>
 </main>
-<footer>Manuale operativo Next Point Padel · documento integrato nel repository · aggiornare la data e la sezione “Stato documentale” dopo modifiche strutturali.</footer>
+<footer>Manuale operativo Eventour · documento integrato nel repository · aggiornare la data e la sezione “Stato documentale” dopo modifiche strutturali.</footer>
 <div class="note"><b>Aggiornamento monitor GitHub:</b> GitHub viene letto con cache di 10 minuti per evitare il limite delle richieste anonime API. L’aggiornamento automatico Supabase resta ogni 30 secondi. Se GitHub restituisce temporaneamente HTTP 403, il monitor usa l’ultimo dato GitHub valido in cache invece di interrompere il monitor.</div>
 <!-- FIX 22/09/2026 - risultati semifinali e finale -->
 <section>
