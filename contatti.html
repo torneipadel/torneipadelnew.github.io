@@ -28,8 +28,8 @@
 </section>
 <section class="hero"><div class="eyebrow">eventour gestione & eventi · CONTATTI</div><h1>Contatti</h1><p>Per informazioni, richieste o comunicazioni con Eventour puoi utilizzare direttamente i nostri recapiti.</p></section>
 <section class="contacts" aria-label="Recapiti">
-<article class="contact-card"><div class="contact-icon" aria-hidden="true">✉</div><h2>Email</h2><p>Scrivici per informazioni e richieste.</p><a class="contact-link" href="mailto:info@nextpointpadel.it">SCRIVI UNA EMAIL</a></article>
-<article class="contact-card"><div class="contact-icon" aria-hidden="true">☎</div><h2>Telefono</h2><p>Contattaci direttamente per le tue richieste.</p><a class="contact-link" href="tel:+39333444556">CHIAMA</a></article>
+<article class="contact-card"><div class="contact-icon" aria-hidden="true">✉</div><h2>Email</h2><p>Scrivici per informazioni e richieste.</p><a class="contact-link" id="companyContactEmail" href="#" hidden>SCRIVI UNA EMAIL</a></article>
+<article class="contact-card"><div class="contact-icon" aria-hidden="true">☎</div><h2>Telefono</h2><p>Contattaci direttamente per le tue richieste.</p><a class="contact-link" id="companyContactPhone" href="#" hidden>CHIAMA</a></article>
 </section><div style="text-align:center;padding:14px 0 4px;font-size:10px;color:rgba(255,255,255,.55)"><a href="privacy.html" style="color:#fff;margin:0 7px;text-decoration:none">Privacy</a><a href="cookie.html" style="color:#fff;margin:0 7px;text-decoration:none">Cookie</a><a href="termini.html" style="color:#fff;margin:0 7px;text-decoration:none">Termini</a></div>
 <footer class="footer">eventour gestione & eventi · CONTATTI</footer>
 </main>
@@ -52,5 +52,20 @@
 })();
 </script>
 <script src="site-navigation-v1.js?v=1"></script>
+<script>
+(async function loadCompanyContacts(){
+  const emailLink=document.getElementById('companyContactEmail');
+  const phoneLink=document.getElementById('companyContactPhone');
+  const emailCard=emailLink?.closest('.contact-card');
+  const phoneCard=phoneLink?.closest('.contact-card');
+  try{await window.tenantTheme?.load?.()}catch(e){console.warn('Caricamento società per i contatti non riuscito',e)}
+  const a=window.tenantTheme?.current?.azienda||{};
+  const email=String(a.email_contatto||a.contatto_email||a.email_pubblica||a.email_azienda||a.email||'').trim();
+  const phone=String(a.telefono_contatto||a.contatto_telefono||a.telefono_pubblico||a.telefono_azienda||a.telefono||a.cellulare||'').trim();
+  if(email&&emailLink){emailLink.href='mailto:'+email;emailLink.textContent=email;emailLink.hidden=false}else if(emailCard){emailCard.hidden=true}
+  if(phone&&phoneLink){const digits=phone.replace(/[^0-9+]/g,'');phoneLink.href='tel:'+digits;phoneLink.textContent=phone;phoneLink.hidden=false}else if(phoneCard){phoneCard.hidden=true}
+})();
+</script>
+
 </body>
 </html>
