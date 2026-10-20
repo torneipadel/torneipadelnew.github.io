@@ -157,7 +157,7 @@
 
   function render(st){
     state=st||{};
-    document.title=(state.nomeTorneo||"NEXT POINT PADEL")+" — TV";
+    document.title=(state.nomeTorneo||"Eventour")+" — TV";
     $("#title").textContent=state.nomeTorneo||"Torneo Padel";
     $("#date").textContent=state.dataTorneo||"";
     $("#status").textContent="LIVE";
