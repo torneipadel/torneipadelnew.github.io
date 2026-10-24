@@ -19,7 +19,7 @@ body{background:linear-gradient(rgba(3,12,24,.30),rgba(3,12,24,.62)),url('2pages
 .page{width:min(760px,100%);margin:0 auto}
 .news-brand-banner{position:relative;isolation:isolate;width:100%;height:125px;margin:0 0 16px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}
 .news-brand-banner:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}
-.news-eventour-logo{position:relative;z-index:1;display:block;width:310px;height:88px;max-width:100%;margin:0 auto;object-fit:cover;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}
+.news-eventour-logo{position:relative;z-index:1;display:block;width:310px;height:88px;max-width:100%;margin:0 auto;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}
 .news-brand-subtitle{position:relative;z-index:1;display:block;width:100%;margin:-7px 0 0;color:#fff;font-family:Jost,Inter,'Open Sans',Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.35);text-align:center;white-space:nowrap}
 .hero{position:relative;isolation:isolate;padding:34px 26px 28px;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.055));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.23);box-shadow:0 16px 45px rgba(0,0,0,.28);text-align:center;overflow:hidden}
 .hero:before{content:"";position:absolute;z-index:-1;left:50%;top:-28px;width:min(470px,88vw);height:245px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(0,0,0,.52) 0%,rgba(0,0,0,.34) 38%,rgba(0,0,0,.14) 62%,rgba(0,0,0,0) 78%);filter:blur(11px);pointer-events:none}
@@ -81,7 +81,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 @media(max-width:650px){#companySetup>form>div{grid-template-columns:1fr!important}#companySetup form>div>div{grid-column:auto!important}}
 </style><main class="page">
 <section class="news-brand-banner" aria-label="EVENTOUR gestione & eventi">
-<img src="eventour_logo.jpg?v=20261018" class="news-eventour-logo" alt="EVENTOUR">
+<img src="loghi/eventour_trasp.png?v=20261025" class="news-eventour-logo" alt="EVENTOUR">
 <span class="news-brand-subtitle">gestione eventi &amp; tornei</span>
 </section>
 <section class="hero">
@@ -307,23 +307,5 @@ async function initTenantSafe(){
 window.addEventListener("load",initTenantSafe);
 </script>
 
-<script>
-(function isolateNewsEventourLogo(){
- const logo=document.querySelector(".news-eventour-logo");
- if(!logo)return;
- function isolate(){
-  if(!logo.naturalWidth||!logo.naturalHeight||logo.dataset.textIsolated==="1")return;
-  logo.dataset.textIsolated="1";
-  try{
-   const canvas=document.createElement("canvas");canvas.width=logo.naturalWidth;canvas.height=logo.naturalHeight;
-   const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(logo,0,0);
-   const frame=ctx.getImageData(0,0,canvas.width,canvas.height),px=frame.data;
-   for(let i=0;i<px.length;i+=4){const lum=.2126*px[i]+.7152*px[i+1]+.0722*px[i+2];const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));px[i]=255;px[i+1]=255;px[i+2]=255;px[i+3]=Math.round(px[i+3]*alpha/255)}
-   ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png");
-  }catch(e){console.warn("Isolamento logo EVENTOUR non riuscito:",e)}
- }
- function schedule(){if("requestIdleCallback" in window)window.requestIdleCallback(isolate,{timeout:1200});else window.setTimeout(isolate,250)}
- if(logo.complete){if(logo.naturalWidth)schedule();else logo.addEventListener("load",schedule,{once:true})}else logo.addEventListener("load",schedule,{once:true});
-})();
-</script>
+
 <script src="site-navigation-v1.js?v=5"></script>
