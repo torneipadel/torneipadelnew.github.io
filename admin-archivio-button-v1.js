@@ -196,11 +196,14 @@
         try {
           const { error } = await client
             .from('tornei')
-            .update({ stato: 'attivo', iscrizioni_chiuse: true, pubblicato: false })
+            .update({ stato: 'bozza', iscrizioni_chiuse: true, pubblicato: false })
             .eq('id', id)
             .eq('azienda_id', window.aziendaId)
-            .eq('stato', 'archiviato');
+            .eq('stato', 'archiviato')
+            .select('id')
+            .maybeSingle();
           if (error) throw error;
+          if (!data?.id) throw new Error('Nessun torneo è stato aggiornato. Verifica società selezionata e permessi Supabase.');
           if (typeof window.caricaTorneiSupabase === 'function') {
             await window.caricaTorneiSupabase();
           }
