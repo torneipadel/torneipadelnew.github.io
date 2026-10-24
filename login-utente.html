@@ -45,20 +45,24 @@ async function go(){
       msg.textContent=membership.error?.message||"Non è stato possibile verificare l'accesso a questa società.";
       return;
     }
-    if(String(result.ruolo||"").toLowerCase()!=="user"){
+    const ruoloAccesso=String(result.ruolo||"").toLowerCase();
+    const ruoliAmmessi=["user","owner","admin","superadmin"];
+    if(!ruoliAmmessi.includes(ruoloAccesso)){
       await sb.auth.signOut();
-      msg.textContent="Questo account non è un account visitatore. Usa l'accesso riservato alla società.";
+      msg.textContent="Questo account non è autorizzato ad accedere ai tornei di questa società.";
       return;
     }
-    const extra=await sb.rpc("update_visitor_profile",{
-      p_livello:meta.livello||null,
-      p_alias:meta.alias||null,
-      p_note:meta.note||null
-    });
-    if(extra.error){
-      await sb.auth.signOut();
-      msg.textContent="Accesso non completato: "+extra.error.message;
-      return;
+    // Il profilo visitatore è aggiornabile solo per gli account user.
+    // Gli amministratori mantengono il proprio ruolo e accedono alla pagina pubblica senza essere disconnessi.
+    if(ruoloAccesso==="user"){
+      const extra=await sb.rpc("update_visitor_profile",{
+        p_livello:meta.livello||null,
+        p_alias:meta.alias||null,
+        p_note:meta.note||null
+      });
+      if(extra.error){
+        console.error("Aggiornamento profilo visitatore non riuscito:",extra.error);
+      }
     }
     sessionStorage.setItem("nextpoint_login_azienda_id",companyRecord.id);
     sessionStorage.setItem("nextpoint_login_azienda_slug",companyRecord.slug);
