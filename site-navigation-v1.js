@@ -7,17 +7,19 @@
     .site-global-back{position:fixed!important;top:16px!important;left:16px!important;z-index:2147483000!important;width:38px!important;height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.72)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.22)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;text-decoration:none!important;cursor:pointer!important;padding:0!important}
     .site-global-back:hover{background:rgba(7,25,45,.9)!important;transform:translateY(-1px)}
     html.site-no-dashboard-menu .menu-button:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .mobile-menu:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .hamburger:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [data-hamburger]:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [aria-label="Apri menu"]:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [aria-label="Apri il menu"]:not([data-site-keep-menu-control]){display:none!important;visibility:hidden!important;pointer-events:none!important}
-    .site-dashboard-menu-button{position:fixed;top:16px;right:16px;z-index:2147483001;width:42px;height:42px;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(7,25,45,.72);color:#fff;font:700 23px/1 Arial,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-    .site-dashboard-menu-panel{position:fixed;top:64px;right:16px;z-index:2147483001;display:none;min-width:190px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(7,25,45,.94);box-shadow:0 12px 30px rgba(0,0,0,.3);backdrop-filter:blur(16px)}
+    html.site-dashboard .page{position:relative!important}
+    .site-dashboard-menu-button{position:relative;display:flex;align-items:center;justify-content:center;margin:0 0 12px auto;z-index:2147483001;width:42px;height:42px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(7,25,45,.72);color:#fff;font:700 23px/1 Arial,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .site-dashboard-menu-panel{position:absolute;top:54px;right:0;z-index:2147483001;display:none;min-width:190px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(7,25,45,.94);box-shadow:0 12px 30px rgba(0,0,0,.3);backdrop-filter:blur(16px)}
     .site-dashboard-menu-panel.open{display:grid;gap:4px}
     .site-dashboard-menu-panel a{display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font:600 12px/1.3 Arial,sans-serif}
     .site-dashboard-menu-panel a:hover,.site-dashboard-menu-exit:hover{background:rgba(255,255,255,.12)}
     .site-dashboard-menu-exit{display:block;width:100%;padding:10px 12px;border:0;border-top:1px solid rgba(255,255,255,.18);border-radius:8px;background:transparent;color:#fff;text-align:left;font:700 12px/1.3 Arial,sans-serif;cursor:pointer}
     .site-dashboard-menu-exit:disabled{opacity:.65;cursor:wait}
-    @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:36px!important;height:36px!important}.site-dashboard-menu-button{top:12px;right:12px}.site-dashboard-menu-panel{top:60px;right:12px}}
+    @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:36px!important;height:36px!important}.site-dashboard-menu-button{margin-bottom:12px}.site-dashboard-menu-panel{top:54px;right:0}}
   `;
   document.head.appendChild(style);
   if (!isDashboard) document.documentElement.classList.add('site-no-dashboard-menu');
+  else document.documentElement.classList.add('site-dashboard');
 
   // Keep existing navigation functions accessible without showing hamburger icons off-dashboard.
   document.querySelectorAll('.menu-button,.mobile-menu,.hamburger,[aria-label="Apri menu"],[aria-label="Apri il menu"]').forEach(el => {
@@ -134,7 +136,13 @@
           button.focus();
         }
       });
-      document.body.append(button, panel);
+      const dashboardPage = document.querySelector('main.page, .page');
+      if (dashboardPage) {
+        dashboardPage.insertBefore(button, dashboardPage.firstChild);
+        dashboardPage.appendChild(panel);
+      } else {
+        document.body.append(button, panel);
+      }
     }
   }
 })();
