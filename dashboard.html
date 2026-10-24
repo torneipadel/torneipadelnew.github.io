@@ -322,7 +322,8 @@ window.addEventListener("load",initTenantSafe);
    ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png");
   }catch(e){console.warn("Isolamento logo EVENTOUR non riuscito:",e)}
  }
- if(logo.complete){if(logo.naturalWidth)isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true});
+ function schedule(){if("requestIdleCallback" in window)window.requestIdleCallback(isolate,{timeout:1200});else window.setTimeout(isolate,250)}
+ if(logo.complete){if(logo.naturalWidth)schedule();else logo.addEventListener("load",schedule,{once:true})}else logo.addEventListener("load",schedule,{once:true});
 })();
 </script>
 <script src="site-navigation-v1.js?v=5"></script>
