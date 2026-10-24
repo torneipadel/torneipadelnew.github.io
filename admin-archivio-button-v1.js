@@ -36,10 +36,15 @@
   async function loadArchivedFromServer() {
     const client = getClient();
     if (!client) return [];
+    if (!window.aziendaId) {
+      console.error('Archivio Tornei: contesto società mancante; caricamento bloccato per proteggere i dati degli altri tenant.');
+      return [];
+    }
 
     const { data, error } = await client
       .from('tornei')
       .select('id,nome,data,data_torneo,created_at,stato,pubblicato,iscrizioni_chiuse')
+      .eq('azienda_id', window.aziendaId)
       .eq('stato', 'archiviato')
       .order('data_torneo', { ascending: false });
 
@@ -128,7 +133,7 @@
           '<th style="text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.16)">Giorno</th>' +
           '<th style="text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.16)">Torneo</th>' +
           '<th style="text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.16)">ID Torneo</th>' +
-          '<th style="text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.16)">Apri</th>' +
+          '<th style="text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.16)">Azioni</th>' +
           '</tr></thead><tbody>';
 
         items.forEach(t => {
@@ -141,7 +146,9 @@
           html += '<td style="padding:9px;border-bottom:1px solid rgba(255,255,255,.08)">' + esc(day) + '</td>';
           html += '<td style="padding:9px;border-bottom:1px solid rgba(255,255,255,.08)">' + esc(nameOf(t)) + '</td>';
           html += '<td style="padding:9px;border-bottom:1px solid rgba(255,255,255,.08)">' + esc(t.id) + '</td>';
-          html += '<td style="padding:9px;border-bottom:1px solid rgba(255,255,255,.08)"><button type="button" class="btn primary" data-open-archived-tournament="' + esc(t.id) + '" style="padding:6px 10px">Apri</button></td>';
+          html += '<td style="padding:9px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap;display:flex;gap:6px;flex-wrap:wrap">' +
+            '<button type="button" class="btn primary" data-open-archived-tournament="' + esc(t.id) + '" style="padding:6px 10px">Apri</button>' +
+            '<button type="button" class="btn" data-restore-archived-tournament="' + esc(t.id) + '" style="padding:6px 10px">↩ Ripristina</button></td>';
           html += '</tr>';
         });
 
@@ -163,7 +170,47 @@
         if (typeof window.apriBoveConTorneo === 'function') {
           window.apriBoveConTorneo(id);
         } else {
-          window.open('Bove.html?idTorneo=' + encodeURIComponent(id), '_blank');
+          window.open('tabellone.html?idTorneo=' + encodeURIComponent(id), '_blank');
+        }
+      });
+    });
+
+    panel.querySelectorAll('[data-restore-archived-tournament]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.getAttribute('data-restore-archived-tournament');
+        if (!id || button.disabled) return;
+        const tournament = rows.find(t => String(t.id) === String(id));
+        if (!tournament) return;
+        if (!window.aziendaId) {
+          alert('Contesto società mancante: ripristino bloccato per proteggere i dati.');
+          return;
+        }
+        if (!confirm('Vuoi ripristinare il torneo "' + nameOf(tournament) + '"?\n\nIl torneo tornerà nella gestione ordinaria. Per sicurezza resterà non pubblicato e con le iscrizioni chiuse, che potrai riaprire manualmente.')) return;
+        const client = getClient();
+        if (!client) {
+          alert('Connessione Supabase non disponibile.');
+          return;
+        }
+        button.disabled = true;
+        button.textContent = 'Ripristino…';
+        try {
+          const { error } = await client
+            .from('tornei')
+            .update({ stato: 'attivo', iscrizioni_chiuse: true, pubblicato: false })
+            .eq('id', id)
+            .eq('azienda_id', window.aziendaId)
+            .eq('stato', 'archiviato');
+          if (error) throw error;
+          if (typeof window.caricaTorneiSupabase === 'function') {
+            await window.caricaTorneiSupabase();
+          }
+          await renderArchivePanel();
+          alert('Torneo ripristinato nella gestione ordinaria. È rimasto non pubblicato e con le iscrizioni chiuse.');
+        } catch (error) {
+          console.error('Errore ripristino torneo:', error);
+          button.disabled = false;
+          button.textContent = '↩ Ripristina';
+          alert('Ripristino non riuscito: ' + (error?.message || error));
         }
       });
     });
