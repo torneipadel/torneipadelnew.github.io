@@ -8329,7 +8329,17 @@ async function reset(){
             statoPulito[lettera + "camp"] = [];
         });
 
-        // Aggiorna SOLO la configurazione del record esistente: non esegue DELETE né upsert.
+        // Elimina esclusivamente le iscrizioni associate a questo torneo:
+        // loadState() le ricarica da public.iscrizioni, quindi svuotare solo il JSON
+        // farebbe ricomparire i vecchi iscritti al prossimo caricamento.
+        const { error: erroreIscrizioni } = await sb
+            .from("iscrizioni")
+            .delete()
+            .eq("torneo_id", idTorneoDaAzzerare);
+
+        if (erroreIscrizioni) throw erroreIscrizioni;
+
+        // Aggiorna SOLO la configurazione del record esistente: il torneo non viene eliminato.
         const { error: erroreAggiornamento } = await sb
             .from("tornei")
             .update({ configurazione: statoPulito })
