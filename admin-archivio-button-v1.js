@@ -220,10 +220,26 @@
   }
 
   function ensureArchiveButton() {
-    const bar = document.getElementById('adminTournamentControls');
+    let bar = document.getElementById('adminTournamentControls');
+
+    // L'archivio deve essere accessibile anche quando non è selezionato alcun torneo.
     if (!bar) {
-      removeArchivedFromMainSelector();
-      return;
+      const root = document.querySelector('.content') || document.getElementById('appContent') ||
+        document.getElementById('areaAdmin');
+      if (!root || root.classList.contains('hidden')) {
+        removeArchivedFromMainSelector();
+        return;
+      }
+      bar = document.getElementById('adminArchiveStandaloneBarV1');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'adminArchiveStandaloneBarV1';
+        bar.style.cssText = 'display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:0 0 14px';
+        root.prepend(bar);
+      }
+    } else {
+      const standalone = document.getElementById('adminArchiveStandaloneBarV1');
+      if (standalone) standalone.remove();
     }
 
     const legacy = document.getElementById('adminArchiveOpen');
@@ -236,6 +252,8 @@
       button.type = 'button';
       button.className = 'btn action-tile';
       button.textContent = '📦 Archivio Tornei';
+      bar.appendChild(button);
+    } else if (button.parentElement !== bar) {
       bar.appendChild(button);
     }
 
