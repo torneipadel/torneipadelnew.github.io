@@ -8238,573 +8238,140 @@ function aggiornaNomeFormulaTorneo(){
 
                    
 
-function reset(){
+async function reset(){
 
+    const idTorneoDaAzzerare = Number(
+        (state && state.idTorneo) ||
+        new URLSearchParams(window.location.search).get("idTorneo") ||
+        new URLSearchParams(window.location.search).get("torneo")
+    );
 
-    if(
-        !confirm(
-            "Sei sicuro di voler cancellare il torneo corrente?\n\n" +
-            "ATTENZIONE: il reset cancellerà completamente il torneo " +
-            "corrente, compresi squadre, risultati, orari, campi, " +
-            "fase finale e dati salvati."
-        )
-    )
+    const nomeTorneoDaMantenere =
+        (state && state.nomeTorneo) ||
+        (document.getElementById("nomeTorneoInput")?.value || "").trim();
+
+    const dataTorneoDaMantenere =
+        (state && state.dataTorneo) || "";
+
+    if (!Number.isFinite(idTorneoDaAzzerare) || idTorneoDaAzzerare <= 0) {
+        alert("Impossibile eseguire il reset: ID del torneo non trovato. Nessun dato è stato modificato.");
         return;
-
-
-
-
-
-    /*
-    ============================
-    ID TORNEO DA CANCELLARE
-    ============================
-    */
-
-    const idTorneoDaCancellare =
-        state && state.idTorneo
-            ? state.idTorneo
-            : null;
-
-
-
-
-
-    /*
-    ============================
-    CANCELLAZIONE SUPABASE
-    ============================
-    */
-
-    const eseguiResetLocale = () => {
-
-
-        /*
-        ============================
-        RESET DATI TORNEO
-        ============================
-        */
-
-        state = {
-
-
-            ...state,
-
-
-
-            idTorneo:null,
-
-
-            nomeTorneo:"",
-
-
-            dataTorneo:"",
-
-
-
-
-
-            A:[],
-            B:[],
-            C:[],
-            D:[],
-            E:[],
-            F:[],
-
-
-
-
-
-
-            Ares:[],
-            Bres:[],
-            Cres:[],
-            Dres:[],
-            Eres:[],
-            Fres:[],
-
-
-
-            Atime:[],
-            Btime:[],
-            Ctime:[],
-            Dtime:[],
-            Etime:[],
-            Ftime:[],
-
-
-
-            Acamp:[],
-            Bcamp:[],
-            Ccamp:[],
-            Dcamp:[],
-            Ecamp:[],
-            Fcamp:[],
-
-
-
-
-
-
-
-            /*
-            ============================
-            FASE FINALE
-            ============================
-            */
-
-
-            qRes:
-                Array(4)
-                .fill("-"),
-
-
-
-            sTopRes:
-                Array(2)
-                .fill("-"),
-
-
-
-            fTopRes:
-                "-",
-
-
-
-            /*
-            DATI AGGIUNTIVI FASE FINALE
-            */
-
-            qCamp:
-                Array(4)
-                .fill(""),
-
-            qTime:
-                Array(4)
-                .fill(""),
-
-            sTopCamp:
-                Array(2)
-                .fill(""),
-
-            sTopTime:
-                Array(2)
-                .fill(""),
-
-            fTopCamp:
-                [""],
-
-            fTopTime:
-                [""],
-
-
-
-            finalTop:[],
-            finaliRes:[],
-            finaliTop:[],
-            finalGroupRes:[],
-            finalGroupTime:[],
-            finalGroupCamp:[],
-
-
-
-            campioneTop:null,
-
-
-
-
-
-
-
-            /*
-            ============================
-            MOTORI SPECIALI
-            ============================
-            */
-
-
-            svizzero:null,
-
-
-            americano:null,
-
-
-            mexicano:null,
-
-
-            king:null,
-
-
-            short:null,
-
-
-
-            /*
-            PARTITE GENERATE
-            */
-
-            partiteGironi:{},
-
-
-
-
-
-
-
-            /*
-            ============================
-            RESET REGOLAMENTO
-            ============================
-            */
-
-
-            rules:{
-
-
-                ...(state.rules || {}),
-
-
-                locked:false,
-
-
-                tipoTorneo:"",
-
-
-                formulaGironi:"",
-
-
-                formulaFinale:"",
-
-
-                numeroSquadre:0,
-
-
-                numeroGironi:0,
-
-
-                qualificatePerGirone:0,
-
-
-                numeroQualificateFinali:0,
-
-
-                usaQuarti:false,
-
-
-                usaSemifinali:false,
-
-
-                usaFinale:false
-
-
-            }
-
-
-
-        };
-
-
-
-
-
-
-
-
-
-        /*
-        ============================
-        PULIZIA STORAGE
-        ============================
-        */
-
-
-        localStorage.removeItem(
-            "torneoState"
-        );
-
-
-        localStorage.removeItem(
-            "savedTeams"
-        );
-
-
-
-        /*
-        ============================
-        PULIZIA EVENTUALI CHIAVI
-        ============================
-        */
-
-        [
-            "torneo",
-            "torneoCorrente",
-            "currentTournament",
-            "currentTorneo",
-            "partiteGironi",
-            "torneoData"
-        ].forEach(function(chiave){
-
-            localStorage.removeItem(
-                chiave
-            );
-
-        });
-
-
-
-
-
-        /*
-        ============================
-        SALVA STATO VUOTO
-        ============================
-        */
-
-        localStorage.setItem(
-            "torneoState",
-            JSON.stringify(state)
-        );
-
-
-
-
-
-        /*
-        ============================
-        CHIUSURA EVENTUALI MODAL
-        ============================
-        */
-
-        [
-            "teamModal",
-            "formatModal"
-        ].forEach(function(id){
-
-            const modal =
-                document.getElementById(id);
-
-            if(modal)
-                modal.style.display="none";
-
-        });
-
-
-
-
-
-        /*
-        ============================
-        PULIZIA TABELLE / UI
-        ============================
-        */
-
-        [
-            "Arows",
-            "Brows",
-            "Crows",
-            "Drows",
-            "Erows",
-            "Frows",
-            "Q",
-            "S",
-            "finaleBox"
-        ].forEach(function(id){
-
-            const el =
-                document.getElementById(id);
-
-            if(el)
-                el.innerHTML="";
-
-        });
-
-
-
-
-
-        /*
-        ============================
-        NASCONDI LE SCHEDE GIRONE
-        ============================
-        */
-
-        [
-            "cardA",
-            "cardB",
-            "cardC",
-            "cardD",
-            "cardE",
-            "cardF"
-        ].forEach(function(id){
-
-            const el =
-                document.getElementById(id);
-
-            if(el)
-                el.style.display="none";
-
-        });
-
-
-
-
-
-        /*
-        ============================
-        PULIZIA NOME TORNEO
-        ============================
-        */
-
-        const nomeInput =
-            document.getElementById(
-                "nomeTorneoInput"
-            );
-
-
-        if(nomeInput)
-            nomeInput.value="";
-
-
-
-
-
-        /*
-        ============================
-        AGGIORNAMENTO UI
-        ============================
-        */
-
-        if(
-            typeof aggiornaNomeFormulaTorneo ===
-            "function"
-        ){
-
-            aggiornaNomeFormulaTorneo();
-
+    }
+
+    if (!confirm(
+        "RESET COMPLETO DEL TABELLONE\n\n" +
+        "Verranno rimossi dal tabellone i vecchi iscritti/partecipanti, le coppie, i gironi, " +
+        "i risultati, gli orari, i campi e le finali.\n\n" +
+        "Il torneo e il suo ID resteranno in Supabase. La formula e le regole del torneo saranno mantenute.\n\n" +
+        "Vuoi continuare?"
+    )) return;
+
+    if (typeof sb === "undefined") {
+        alert("Connessione Supabase non disponibile. Nessun dato è stato modificato.");
+        return;
+    }
+
+    try {
+        const { data: torneoEsistente, error: erroreLettura } = await sb
+            .from("tornei")
+            .select("id,nome,data,configurazione")
+            .eq("id", idTorneoDaAzzerare)
+            .maybeSingle();
+
+        if (erroreLettura) throw erroreLettura;
+        if (!torneoEsistente) {
+            alert("Il torneo non è stato trovato in Supabase. Nessun dato è stato modificato.");
+            return;
         }
 
+        const statoPulito = {
+            ...(state || {}),
+            idTorneo: idTorneoDaAzzerare,
+            nomeTorneo: nomeTorneoDaMantenere || torneoEsistente.nome || "",
+            dataTorneo: dataTorneoDaMantenere || torneoEsistente.data || "",
+            A: [], B: [], C: [], D: [], E: [], F: [],
+            Ares: [], Bres: [], Cres: [], Dres: [], Eres: [], Fres: [],
+            Atime: [], Btime: [], Ctime: [], Dtime: [], Etime: [], Ftime: [],
+            Acamp: [], Bcamp: [], Ccamp: [], Dcamp: [], Ecamp: [], Fcamp: [],
+            iscritti: [],
+            partecipanti: [],
+            coppie: [],
+            partiteGironi: {},
+            qRes: Array(4).fill("-"),
+            sTopRes: Array(2).fill("-"),
+            fTopRes: "-",
+            qCamp: Array(4).fill(""),
+            qTime: Array(4).fill(""),
+            sTopCamp: Array(2).fill(""),
+            sTopTime: Array(2).fill(""),
+            fTopCamp: [""],
+            fTopTime: [""],
+            finalTop: [],
+            finaliRes: [],
+            finaliTop: [],
+            finalGroupRes: [],
+            finalGroupTime: [],
+            finalGroupCamp: [],
+            finaliGold: [],
+            finaliSilver: [],
+            finaliBronze: [],
+            finaliResGold: [],
+            finaliResSilver: [],
+            finaliResBronze: [],
+            campioneTop: null
+        };
 
-
-
-
-        /*
-        ============================
-        LOG FINALE
-        ============================
-        */
-
-        console.log(
-            "=== RESET COMPLETO ESEGUITO ==="
-        );
-
-        console.log(
-            "ID TORNEO CANCELLATO:",
-            idTorneoDaCancellare
-        );
-
-        console.log(
-            "STATE DOPO RESET:",
-            state
-        );
-
-        console.log(
-            "TORNEO STATE:",
-            localStorage.getItem(
-                "torneoState"
-            )
-        );
-
-        console.log(
-            "SAVED TEAMS:",
-            localStorage.getItem(
-                "savedTeams"
-            )
-        );
-
-
-        alert(
-            "✅ RESET COMPLETO ESEGUITO.\n\n" +
-            "Il torneo corrente è stato completamente azzerato."
-        );
-
-    };
-
-
-
-
-
-    /*
-    ============================
-    CANCELLAZIONE REMOTA
-    ============================
-    */
-
-    if(
-        idTorneoDaCancellare &&
-        typeof sb !== "undefined"
-    ){
-
-        sb
-        .from("tornei")
-        .delete()
-        .eq(
-            "id",
-            idTorneoDaCancellare
-        )
-        .then(function(risultato){
-
-            if(risultato.error){
-
-                console.error(
-                    "ERRORE CANCELLAZIONE TORNEO SUPABASE:",
-                    risultato.error
-                );
-
-                alert(
-                    "❌ ERRORE: il torneo non è stato cancellato dal server.\n\n" +
-                    risultato.error.message
-                );
-
-                return;
-
-            }
-
-
-            console.log(
-                "TORNEO CANCELLATO DA SUPABASE:",
-                idTorneoDaCancellare
-            );
-
-
-            eseguiResetLocale();
-
-        })
-        .catch(function(errore){
-
-            console.error(
-                "ERRORE RESET SUPABASE:",
-                errore
-            );
-
-            alert(
-                "❌ ERRORE DURANTE LA CANCELLAZIONE DAL SERVER.\n\n" +
-                errore.message
-            );
-
+        // Rimuove eventuali nomi di squadre e risultati memorizzati nelle chiavi standard dei gironi.
+        ["A","B","C","D","E","F"].forEach(lettera => {
+            statoPulito[lettera] = [];
+            statoPulito[lettera + "res"] = [];
+            statoPulito[lettera + "time"] = [];
+            statoPulito[lettera + "camp"] = [];
         });
 
+        // Aggiorna SOLO la configurazione del record esistente: non esegue DELETE né upsert.
+        const { error: erroreAggiornamento } = await sb
+            .from("tornei")
+            .update({ configurazione: statoPulito })
+            .eq("id", idTorneoDaAzzerare);
+
+        if (erroreAggiornamento) throw erroreAggiornamento;
+
+        state = statoPulito;
+        localStorage.setItem("torneoState", JSON.stringify(state));
+        localStorage.removeItem("savedTeams");
+
+        [
+            "Arows","Brows","Crows","Drows","Erows","Frows",
+            "Q","S","finaleBox"
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = "";
+        });
+
+        ["cardA","cardB","cardC","cardD","cardE","cardF"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = "";
+        });
+
+        const nomeInput = document.getElementById("nomeTorneoInput");
+        if (nomeInput) nomeInput.value = state.nomeTorneo;
+
+        if (typeof aggiornaNomeFormulaTorneo === "function") aggiornaNomeFormulaTorneo();
+        if (typeof render === "function") render();
+        if (typeof renderClass === "function") renderClass();
+        if (typeof renderKO === "function") renderKO();
+
+        alert(
+            "Reset completato. Il torneo è rimasto in Supabase con lo stesso ID. " +
+            "Vecchi iscritti del tabellone, coppie e risultati sono stati azzerati; " +
+            "formula e regole sono state mantenute."
+        );
+    } catch (errore) {
+        console.error("Errore durante il reset del tabellone:", errore);
+        alert("Reset non completato: " + (errore?.message || "errore sconosciuto") +
+            ". Il torneo non è stato eliminato da Supabase.");
     }
-    else{
-
-        /*
-        Se non esiste un ID remoto,
-        esegui comunque il reset locale completo.
-        */
-
-        eseguiResetLocale();
-
-    }
-
 }
 
 
