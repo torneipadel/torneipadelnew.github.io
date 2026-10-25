@@ -40,13 +40,21 @@ input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2
 <div class="box">
 <section class="news-brand-banner" aria-label="EVENTOUR gestione &amp; eventi"><img src="eventour_logo.jpg" class="news-eventour-logo" alt="EVENTOUR"><span class="news-brand-subtitle">gestione eventi &amp; tornei</span></section>
 <h2>Profilo giocatore</h2>
-<div class="info" id="emailBox">Caricamento...</div>
-<input id="nome" placeholder="Nome">
-<input id="cognome" placeholder="Cognome">
-<input id="telefono" placeholder="Telefono">
-<input id="livello" placeholder="Livello">
+<div class="info" id="emailBox">Caricamento dati account...</div>
+<input id="nome" autocomplete="given-name" placeholder="Nome">
+<input id="cognome" autocomplete="family-name" placeholder="Cognome">
+<input id="emailContatto" type="email" autocomplete="email" placeholder="Email di contatto">
+<input id="telefono" type="tel" autocomplete="tel" placeholder="Telefono / cellulare">
+<input id="indirizzo" autocomplete="street-address" placeholder="Via e numero civico">
+<input id="citta" autocomplete="address-level2" placeholder="Città">
+<input id="provincia" autocomplete="address-level1" placeholder="Provincia">
+<input id="cap" autocomplete="postal-code" inputmode="numeric" placeholder="CAP">
+<input id="paese" autocomplete="country-name" placeholder="Paese">
+<input id="data_nascita" type="date" autocomplete="bday" aria-label="Data di nascita">
+<input id="livello" placeholder="Livello di gioco">
 <input id="alias" placeholder="Alias torneo">
-<textarea id="note" placeholder="Note"></textarea>
+<textarea id="note" placeholder="Note personali"></textarea>
+<div class="info">L'email di contatto nel profilo non modifica l'indirizzo usato per accedere.</div>
 <button class="btn" onclick="salvaProfilo()">SALVA PROFILO</button>
 <button class="btn-back" onclick="tornaVisitatore()">⬅ Torna ai tornei</button>
 <div id="status"></div>
@@ -73,7 +81,7 @@ if(!user){window.location.href=aziendaSlug?"login-utente.html?azienda="+encodeUR
 userId=user.id;
 emailUtente=user.email;
 const emailBox=document.getElementById("emailBox");
-if(emailBox)emailBox.innerHTML="Email: "+emailUtente;
+if(emailBox)emailBox.textContent="Account: "+emailUtente;
 const {data,error}=await sb.from("profili").select("*").eq("user_id",userId).single();
 if(error && error.code !== "PGRST116"){
 console.error("Errore caricamento profilo:",error);
@@ -83,7 +91,7 @@ return;
 }
 if(!data){
 console.log("Profilo non presente, creo record iniziale");
-const {error:erroreCreazione}=await sb.from("profili").insert({user_id:userId,email:emailUtente,nome:"",cognome:"",telefono:"",livello:"",alias:"",note:"",ruolo:"user",updated_at:new Date().toISOString()});
+const {error:erroreCreazione}=await sb.from("profili").insert({user_id:userId,email:emailUtente,nome:"",cognome:"",telefono:"",indirizzo:"",citta:"",provincia:"",cap:"",paese:"",data_nascita:null,livello:"",alias:"",note:"",ruolo:"user",updated_at:new Date().toISOString()});
 if(erroreCreazione){
 console.error("Errore creazione profilo:",erroreCreazione);
 const status=document.getElementById("status");
@@ -96,7 +104,14 @@ return;
 ruoloUtente=data.ruolo || "user";
 document.getElementById("nome").value=data.nome || "";
 document.getElementById("cognome").value=data.cognome || "";
+document.getElementById("emailContatto").value=data.email || emailUtente || "";
 document.getElementById("telefono").value=data.telefono || "";
+document.getElementById("indirizzo").value=data.indirizzo || "";
+document.getElementById("citta").value=data.citta || "";
+document.getElementById("provincia").value=data.provincia || "";
+document.getElementById("cap").value=data.cap || "";
+document.getElementById("paese").value=data.paese || "";
+document.getElementById("data_nascita").value=data.data_nascita || "";
 document.getElementById("livello").value=data.livello || "";
 document.getElementById("alias").value=data.alias || "";
 document.getElementById("note").value=data.note || "";
@@ -104,13 +119,21 @@ document.getElementById("note").value=data.note || "";
 async function salvaProfilo(){
 const nome=document.getElementById("nome").value.trim();
 const cognome=document.getElementById("cognome").value.trim();
+const emailContatto=document.getElementById("emailContatto").value.trim();
 const telefono=document.getElementById("telefono").value.trim();
+const indirizzo=document.getElementById("indirizzo").value.trim();
+const citta=document.getElementById("citta").value.trim();
+const provincia=document.getElementById("provincia").value.trim();
+const cap=document.getElementById("cap").value.trim();
+const paese=document.getElementById("paese").value.trim();
+const data_nascita=document.getElementById("data_nascita").value || null;
 const livello=document.getElementById("livello").value.trim();
 let alias=document.getElementById("alias").value.trim();
 const note=document.getElementById("note").value.trim();
-if(!nome || !cognome){document.getElementById("status").innerHTML="Inserisci nome e cognome";return;}
+if(!nome || !cognome){document.getElementById("status").textContent="Inserisci nome e cognome";return;}
+if(emailContatto && !document.getElementById("emailContatto").checkValidity()){document.getElementById("status").textContent="Inserisci un indirizzo email valido";return;}
 if(!alias){alias=generaAlias(nome,cognome);document.getElementById("alias").value=alias;}
-const {error}=await sb.from("profili").upsert({user_id:userId,email:emailUtente,nome,cognome,telefono,livello,alias,note,ruolo:ruoloUtente,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+const {error}=await sb.from("profili").upsert({user_id:userId,email:emailContatto||emailUtente,nome,cognome,telefono,indirizzo,citta,provincia,cap,paese,data_nascita,livello,alias,note,ruolo:ruoloUtente,updated_at:new Date().toISOString()},{onConflict:"user_id"});
 if(error){
 console.error("Errore salvataggio profilo:",error);
 document.getElementById("status").innerHTML="Errore salvataggio";
