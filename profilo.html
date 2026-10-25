@@ -60,11 +60,13 @@ input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2
 <div id="status"></div>
 </div>
 <script>
-const sb = supabase.createClient(
+window.__NP_SUPABASE_CLIENT__=window.__NP_SUPABASE_CLIENT__||supabase.createClient(
 "https://dkeqicstprvvfebiaooc.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg",
+"sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",
 {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
 );
+window.sb=window.__NP_SUPABASE_CLIENT__;
+const sb=window.sb;
 let userId=null;
 let emailUtente="";
 let ruoloUtente="user";
@@ -77,7 +79,17 @@ return nome.trim().charAt(0)+"."+cognome.trim();
 }
 async function caricaProfilo(){
 const {data:{user}}=await sb.auth.getUser();
-if(!user){window.location.href="login-utente.html"+(aziendaSlug?"?azienda="+encodeURIComponent(aziendaSlug):"");return;}
+if(!user){
+  if(aziendaSlug){
+    window.location.replace("login-utente.html?azienda="+encodeURIComponent(aziendaSlug));
+  }else{
+    const status=document.getElementById("status");
+    if(status)status.textContent="La sessione visitatore non è attiva. Accedi dalla pagina Tornei e visitatori per aprire il profilo della tua società.";
+    const back=document.querySelector(".btn-back");
+    if(back){back.textContent="Vai a Tornei e visitatori";back.onclick=()=>window.location.replace("visitatore.html");}
+  }
+  return;
+}
 userId=user.id;
 emailUtente=user.email;
 const emailBox=document.getElementById("emailBox");
