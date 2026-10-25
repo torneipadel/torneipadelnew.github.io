@@ -55,6 +55,7 @@
     addLink('Mercatino','mercatino.html');
     addLink('Sponsor','sponsor-pubblico.html');
     addLink('Contatti','contatti.html');
+    addLink('Profilo','profilo.html');
     const sep=document.createElement('div'); sep.className='site-global-menu-separator'; sep.setAttribute('aria-hidden','true'); sep.hidden=true; panel.appendChild(sep);
     addLink('Area amministrativa','dashboard.html',true);
     addLink('Gestione torneo','admin.html',true);
