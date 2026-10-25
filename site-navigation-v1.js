@@ -2,6 +2,15 @@
   'use strict';
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const isTabellone = page === 'tabellone.html';
+  const authenticatedPages = new Set([
+    'dashboard.html','admin.html','eventour-control-center.html','configura-app.html',
+    'configurazione-app.html','utenti-societa.html','admin-mercatino.html','sponsor.html',
+    'profilo.html','tabellone.html','calendario.html','dati-torneo.html','iscritti.html',
+    'partecipanti.html','coppie.html','gestione-torneo.html','privacy-legale.html'
+  ]);
+  // Public pages and credential-entry pages must never display the global hamburger.
+  if (!authenticatedPages.has(page)) return;
+
   const isAdminPage = ['admin.html','eventour-control-center.html','configura-app.html','configurazione-app.html','utenti-societa.html','admin-mercatino.html','sponsor.html'].includes(page);
   const css = document.createElement('style');
   css.textContent = `
@@ -46,7 +55,8 @@
       const a=document.createElement('a'); a.textContent=label; a.href=href;
       if(adminOnly){a.dataset.adminOnly='true';a.hidden=true;}
       const q=new URLSearchParams(location.search);
-      if(q.has('azienda') && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(q.get('azienda'));
+      const companySlug=q.get('azienda') || sessionStorage.getItem('nextpoint_login_azienda_slug') || localStorage.getItem('nextpoint_public_azienda_slug') || '';
+      if(companySlug && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(companySlug);
       panel.appendChild(a);
     };
     addLink('Home','index.html');
@@ -102,9 +112,17 @@
     document.body.append(button,panel);
   }
 
-  function init(){
+  async function init(){
     removeNavigationArrows();
-    createMenu();
+    try {
+      const client = window.__NP_SUPABASE_CLIENT__ || window.sb;
+      if (!client?.auth?.getSession) return;
+      const { data, error } = await client.auth.getSession();
+      if (error || !data?.session?.user) return;
+      createMenu();
+    } catch (e) {
+      console.warn('Menu Eventour non attivato: sessione non verificata.', e);
+    }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
