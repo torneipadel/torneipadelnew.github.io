@@ -5,7 +5,8 @@
   const authenticatedPages = new Set([
     'dashboard.html','admin.html','eventour-control-center.html','configura-app.html',
     'configurazione-app.html','utenti-societa.html','admin-mercatino.html','sponsor.html',
-    'profilo.html','tabellone.html','calendario.html','dati-torneo.html','iscritti.html',
+    'profilo.html','visitatore.html','news.html','mercatino.html','sponsor-pubblico.html','contatti.html',
+    'tabellone.html','calendario.html','dati-torneo.html','iscritti.html',
     'partecipanti.html','coppie.html','gestione-torneo.html','privacy-legale.html'
   ]);
   // Public pages and credential-entry pages must never display the global hamburger.
