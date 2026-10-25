@@ -44,7 +44,7 @@
     const panel=document.createElement('nav'); panel.className='site-global-menu-panel'; panel.setAttribute('aria-label','Navigazione Eventour');
     const addLink=(label,href,adminOnly=false)=>{
       const a=document.createElement('a'); a.textContent=label; a.href=href;
-      if(adminOnly) a.dataset.adminOnly='true';
+      if(adminOnly){a.dataset.adminOnly='true';a.hidden=true;}
       const q=new URLSearchParams(location.search);
       if(q.has('azienda') && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(q.get('azienda'));
       panel.appendChild(a);
@@ -55,11 +55,11 @@
     addLink('Mercatino','mercatino.html');
     addLink('Sponsor','sponsor-pubblico.html');
     addLink('Contatti','contatti.html');
-    const sep=document.createElement('div'); sep.className='site-global-menu-separator'; sep.setAttribute('aria-hidden','true'); panel.appendChild(sep);
+    const sep=document.createElement('div'); sep.className='site-global-menu-separator'; sep.setAttribute('aria-hidden','true'); sep.hidden=true; panel.appendChild(sep);
     addLink('Area amministrativa','dashboard.html',true);
     addLink('Gestione torneo','admin.html',true);
     addLink('Centro di controllo','eventour-control-center.html',true);
-    const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci'; exit.dataset.adminOnly='true';
+    const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci'; exit.dataset.adminOnly='true'; exit.hidden=true;
     exit.addEventListener('click',async()=>{
       exit.disabled=true; exit.textContent='Uscita…';
       try{
@@ -71,14 +71,21 @@
     panel.appendChild(exit);
     function refreshRole(){
       const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
-      const admin=!!(window.isAdmin||role==='admin'||role==='owner'||role==='superadmin'||document.documentElement.dataset.isAdmin==='true');
+      const tenantAdmin=!!(window.aziendaId && ['admin','owner','superadmin'].includes(role) && window.isAdmin===true);
       const globalSuperadmin=!!(window.isGlobalSuperadmin===true || (window.isSuperadmin===true && !window.aziendaId));
+      const globalAdmin=!!(window.isGlobalPlatformAdmin===true || (window.isAdmin===true && role==='admin' && !window.aziendaId && !window.isSuperadmin));
+      const canManageTenant=tenantAdmin;
+      const canOpenControlCenter=globalSuperadmin || globalAdmin;
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
-        const isControlCenter=el.getAttribute('href')==='eventour-control-center.html';
+        const href=el.getAttribute('href')||'';
+        const isControlCenter=href==='eventour-control-center.html';
         const isExit=el.tagName==='BUTTON';
-        el.hidden=!admin || (globalSuperadmin && !isControlCenter && !isExit);
+        if(isControlCenter) el.hidden=!canOpenControlCenter;
+        else if(href==='dashboard.html'||href==='admin.html') el.hidden=!canManageTenant;
+        else if(isExit) el.hidden=!(tenantAdmin||globalSuperadmin||globalAdmin);
+        else el.hidden=true;
       });
-      sep.hidden=!admin;
+      sep.hidden=!(canManageTenant||canOpenControlCenter||tenantAdmin||globalSuperadmin||globalAdmin);
     }
     refreshRole();
     window.addEventListener('admin:role-ready',refreshRole);
