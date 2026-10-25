@@ -144,21 +144,20 @@ const data_nascita=document.getElementById("data_nascita").value || null;
 const livello=document.getElementById("livello").value.trim();
 let alias=document.getElementById("alias").value.trim();
 const note=document.getElementById("note").value.trim();
-if(!nome || !cognome){document.getElementById("status").textContent="Inserisci nome e cognome";return;}
+// Tutti i campi del profilo sono facoltativi: salva anche un profilo parziale o vuoto.
 if(emailContatto && !document.getElementById("emailContatto").checkValidity()){document.getElementById("status").textContent="Inserisci un indirizzo email valido";return;}
-if(!alias){alias=generaAlias(nome,cognome);document.getElementById("alias").value=alias;}
+if(!alias && nome && cognome){alias=generaAlias(nome,cognome);document.getElementById("alias").value=alias;}
 const {error}=await sb.from("profili").upsert({user_id:userId,email:emailContatto||emailUtente,nome,cognome,telefono,indirizzo,citta,provincia,cap,paese,data_nascita,livello,alias,note,ruolo:ruoloUtente,updated_at:new Date().toISOString()},{onConflict:"user_id"});
 if(error){
 console.error("Errore salvataggio profilo:",error);
 document.getElementById("status").innerHTML="Errore salvataggio";
 return;
 }
-document.getElementById("status").innerHTML="✅ Profilo salvato";
-setTimeout(()=>{tornaVisitatore();},1000);
+document.getElementById("status").innerHTML="✅ Profilo salvato. Puoi continuare a modificarlo quando vuoi.";
 }
 document.addEventListener("DOMContentLoaded",async()=>{await caricaProfilo();});
 </script>
-<script src="site-navigation-v1.js?v=8"></script>
+<script src="site-navigation-v1.js?v=10"></script>
 <script>
 (function isolateNewsEventourLogo(){const logo=document.querySelector(".news-eventour-logo");if(!logo)return;function isolate(){if(!logo.naturalWidth||!logo.naturalHeight||logo.dataset.textIsolated==="1")return;logo.dataset.textIsolated="1";try{const canvas=document.createElement("canvas");canvas.width=logo.naturalWidth;canvas.height=logo.naturalHeight;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(logo,0,0);const frame=ctx.getImageData(0,0,canvas.width,canvas.height),px=frame.data;for(let i=0;i<px.length;i+=4){const lum=.2126*px[i]+.7152*px[i+1]+.0722*px[i+2];const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));px[i]=255;px[i+1]=255;px[i+2]=255;px[i+3]=Math.round(px[i+3]*alpha/255)}ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png")}catch(e){console.warn("Trattamento logo Eventour non riuscito:",e)}}if(logo.complete){if(logo.naturalWidth)isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true})})();
 </script>
