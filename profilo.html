@@ -78,7 +78,9 @@ if(!nome || !cognome)return "";
 return nome.trim().charAt(0)+"."+cognome.trim();
 }
 async function caricaProfilo(){
-const {data:{user}}=await sb.auth.getUser();
+const {data:{session},error:sessionError}=await sb.auth.getSession();
+if(sessionError)console.error("Errore lettura sessione profilo:",sessionError);
+const user=session?.user||null;
 if(!user){
   if(aziendaSlug){
     window.location.replace("login-utente.html?azienda="+encodeURIComponent(aziendaSlug));
