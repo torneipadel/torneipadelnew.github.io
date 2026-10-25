@@ -77,7 +77,7 @@ return nome.trim().charAt(0)+"."+cognome.trim();
 }
 async function caricaProfilo(){
 const {data:{user}}=await sb.auth.getUser();
-if(!user){window.location.href=aziendaSlug?"login-utente.html?azienda="+encodeURIComponent(aziendaSlug):"index.html";return;}
+if(!user){window.location.href="login-utente.html"+(aziendaSlug?"?azienda="+encodeURIComponent(aziendaSlug):"");return;}
 userId=user.id;
 emailUtente=user.email;
 const emailBox=document.getElementById("emailBox");
