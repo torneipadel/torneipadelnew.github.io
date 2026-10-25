@@ -8,7 +8,7 @@
     .site-global-menu{position:fixed!important;top:16px!important;right:16px!important;z-index:2147483001!important;width:44px!important;height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.88)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.25)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;cursor:pointer!important;padding:0!important}
     .site-global-menu:hover{background:rgba(7,25,45,.98)!important}
     .site-global-menu-panel{position:fixed!important;top:68px!important;right:16px!important;z-index:2147483002!important;display:none!important;width:min(270px,calc(100vw - 32px))!important;max-height:calc(100vh - 90px)!important;overflow:auto!important;padding:8px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:14px!important;background:rgba(7,25,45,.97)!important;box-shadow:0 12px 32px rgba(0,0,0,.35)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important}
-    .site-global-menu-panel.open{display:grid!important;gap:4px!important}
+    .site-global-menu-panel.open{display:grid!important;gap:4px!important}\n    .site-global-menu-panel [hidden]{display:none!important}
     .site-global-menu-panel a,.site-global-menu-panel button{display:block!important;width:100%!important;box-sizing:border-box!important;padding:11px 12px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#fff!important;text-align:left!important;text-decoration:none!important;font:600 13px/1.35 Arial,sans-serif!important;cursor:pointer!important}
     .site-global-menu-panel a:hover,.site-global-menu-panel button:hover{background:rgba(255,255,255,.12)!important}
     .site-global-menu-separator{height:1px!important;margin:5px 4px!important;background:rgba(255,255,255,.2)!important}
@@ -71,8 +71,13 @@
     panel.appendChild(exit);
     function refreshRole(){
       const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
-      const admin=!!(window.isAdmin||role==='admin'||role==='superadmin'||document.documentElement.dataset.isAdmin==='true');
-      panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>el.hidden=!admin);
+      const admin=!!(window.isAdmin||role==='admin'||role==='owner'||role==='superadmin'||document.documentElement.dataset.isAdmin==='true');
+      const globalSuperadmin=!!(window.isGlobalSuperadmin===true || (window.isSuperadmin===true && !window.aziendaId));
+      panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
+        const isControlCenter=el.getAttribute('href')==='eventour-control-center.html';
+        const isExit=el.tagName==='BUTTON';
+        el.hidden=!admin || (globalSuperadmin && !isControlCenter && !isExit);
+      });
       sep.hidden=!admin;
     }
     refreshRole();
