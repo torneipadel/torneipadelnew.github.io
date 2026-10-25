@@ -48,7 +48,7 @@ input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2
 <input id="alias" placeholder="Alias torneo">
 <textarea id="note" placeholder="Note"></textarea>
 <button class="btn" onclick="salvaProfilo()">SALVA PROFILO</button>
-<button class="btn-back" onclick="location.href='dashboard.html'">⬅ Torna Dashboard</button>
+<button class="btn-back" onclick="tornaVisitatore()">⬅ Torna ai tornei</button>
 <div id="status"></div>
 </div>
 <script>
@@ -60,13 +60,16 @@ const sb = supabase.createClient(
 let userId=null;
 let emailUtente="";
 let ruoloUtente="user";
+const profiloParams=new URLSearchParams(location.search);
+const aziendaSlug=profiloParams.get("azienda")||sessionStorage.getItem("nextpoint_login_azienda_slug")||localStorage.getItem("nextpoint_public_azienda_slug")||"";
+function tornaVisitatore(){location.href="visitatore.html"+(aziendaSlug?"?azienda="+encodeURIComponent(aziendaSlug):"");}
 function generaAlias(nome,cognome){
 if(!nome || !cognome)return "";
 return nome.trim().charAt(0)+"."+cognome.trim();
 }
 async function caricaProfilo(){
 const {data:{user}}=await sb.auth.getUser();
-if(!user){window.location.href="index.html";return;}
+if(!user){window.location.href=aziendaSlug?"login-utente.html?azienda="+encodeURIComponent(aziendaSlug):"index.html";return;}
 userId=user.id;
 emailUtente=user.email;
 const emailBox=document.getElementById("emailBox");
@@ -114,7 +117,7 @@ document.getElementById("status").innerHTML="Errore salvataggio";
 return;
 }
 document.getElementById("status").innerHTML="✅ Profilo salvato";
-setTimeout(()=>{window.location.href="dashboard.html";},1000);
+setTimeout(()=>{tornaVisitatore();},1000);
 }
 document.addEventListener("DOMContentLoaded",async()=>{await caricaProfilo();});
 </script>
