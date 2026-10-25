@@ -1,148 +1,98 @@
 (()=> {
   'use strict';
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  const isDashboard = page === 'dashboard.html';
-  const style = document.createElement('style');
-  style.textContent = `
-    .site-global-back{position:fixed!important;top:16px!important;left:16px!important;z-index:2147483000!important;width:38px!important;height:38px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.72)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.22)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;text-decoration:none!important;cursor:pointer!important;padding:0!important}
-    .site-global-back:hover{background:rgba(7,25,45,.9)!important;transform:translateY(-1px)}
-    html.site-no-dashboard-menu .menu-button:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .mobile-menu:not([data-site-keep-menu-control]),html.site-no-dashboard-menu .hamburger:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [data-hamburger]:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [aria-label="Apri menu"]:not([data-site-keep-menu-control]),html.site-no-dashboard-menu [aria-label="Apri il menu"]:not([data-site-keep-menu-control]){display:none!important;visibility:hidden!important;pointer-events:none!important}
-    html.site-dashboard .page{position:relative!important}
-    .site-dashboard-menu-button{position:relative;display:flex;align-items:center;justify-content:center;margin:0 0 12px auto;z-index:2147483001;width:42px;height:42px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:12px;background:rgba(7,25,45,.72);color:#fff;font:700 23px/1 Arial,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-    .site-dashboard-menu-panel{position:absolute;top:54px;right:0;z-index:2147483001;display:none;min-width:190px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:14px;background:rgba(7,25,45,.94);box-shadow:0 12px 30px rgba(0,0,0,.3);backdrop-filter:blur(16px)}
-    .site-dashboard-menu-panel.open{display:grid;gap:4px}
-    .site-dashboard-menu-panel a{display:block;padding:10px 12px;border-radius:8px;color:#fff;text-decoration:none;font:600 12px/1.3 Arial,sans-serif}
-    .site-dashboard-menu-panel a:hover,.site-dashboard-menu-exit:hover{background:rgba(255,255,255,.12)}
-    .site-dashboard-menu-exit{display:block;width:100%;padding:10px 12px;border:0;border-top:1px solid rgba(255,255,255,.18);border-radius:8px;background:transparent;color:#fff;text-align:left;font:700 12px/1.3 Arial,sans-serif;cursor:pointer}
-    .site-dashboard-menu-exit:disabled{opacity:.65;cursor:wait}
-    @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:36px!important;height:36px!important}.site-dashboard-menu-button{margin-bottom:12px}.site-dashboard-menu-panel{top:54px;right:0}}
+  const isTabellone = page === 'tabellone.html';
+  const isAdminPage = ['admin.html','eventour-control-center.html','configura-app.html','configurazione-app.html','utenti-societa.html','admin-mercatino.html','sponsor.html'].includes(page);
+  const css = document.createElement('style');
+  css.textContent = `
+    .site-global-menu{position:fixed!important;top:16px!important;right:16px!important;z-index:2147483001!important;width:44px!important;height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.88)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.25)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;cursor:pointer!important;padding:0!important}
+    .site-global-menu:hover{background:rgba(7,25,45,.98)!important}
+    .site-global-menu-panel{position:fixed!important;top:68px!important;right:16px!important;z-index:2147483002!important;display:none!important;width:min(270px,calc(100vw - 32px))!important;max-height:calc(100vh - 90px)!important;overflow:auto!important;padding:8px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:14px!important;background:rgba(7,25,45,.97)!important;box-shadow:0 12px 32px rgba(0,0,0,.35)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important}
+    .site-global-menu-panel.open{display:grid!important;gap:4px!important}
+    .site-global-menu-panel a,.site-global-menu-panel button{display:block!important;width:100%!important;box-sizing:border-box!important;padding:11px 12px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#fff!important;text-align:left!important;text-decoration:none!important;font:600 13px/1.35 Arial,sans-serif!important;cursor:pointer!important}
+    .site-global-menu-panel a:hover,.site-global-menu-panel button:hover{background:rgba(255,255,255,.12)!important}
+    .site-global-menu-separator{height:1px!important;margin:5px 4px!important;background:rgba(255,255,255,.2)!important}
+    @media(max-width:600px){.site-global-menu{top:12px!important;right:12px!important;width:42px!important;height:42px!important}.site-global-menu-panel{top:62px!important;right:12px!important}}
   `;
-  document.head.appendChild(style);
-  if (!isDashboard) document.documentElement.classList.add('site-no-dashboard-menu');
-  else document.documentElement.classList.add('site-dashboard');
+  document.head.appendChild(css);
 
-  // Keep existing navigation functions accessible without showing hamburger icons off-dashboard.
-  document.querySelectorAll('.menu-button,.mobile-menu,.hamburger,[aria-label="Apri menu"],[aria-label="Apri il menu"]').forEach(el => {
-    if (isDashboard) return;
-    el.dataset.siteKeepMenuControl = '1';
-    if (page === 'tabellone.html' && el.classList.contains('menu-button')) {
-      el.textContent = '⚙️ Regole';
-      el.setAttribute('aria-label', 'Apri regole e formato del tabellone');
-    } else {
-      const text = (el.innerText || el.textContent || '').trim();
-      if (!text || /^[☰≡\u2630\s]+$/.test(text)) el.textContent = 'Menu';
-      el.setAttribute('aria-label', 'Menu di navigazione');
-    }
-    el.style.width = 'auto';
-    el.style.minWidth = '72px';
-    el.style.padding = '0 12px';
-    el.style.fontSize = '13px';
-  });
-
-  function hasNavigationBack() {
-    const candidates = document.querySelectorAll('.brand-back,.btn-back,.back,[aria-label*="indietro" i]');
-    for (const el of candidates) {
-      if (el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"]')) continue;
-      if (el.classList.contains('brand-back') || el.classList.contains('btn-back')) return true;
-      const text = (el.innerText || el.textContent || '').trim();
-      const action = (el.getAttribute('onclick') || '').toLowerCase();
-      if (el.id === 'back' || /indietro|torna|←|\bback\b/i.test(text) ||
-          /history\.back|location\.href|location\.assign|tornatornei/.test(action)) return true;
-    }
-    return false;
+  function isInsideModal(el){
+    return !!el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"],#teamModal,#rulesModal');
   }
-
-  // Dashboard must not receive the generic back arrow; its existing exit button
-  // is a logout control and must remain bound to logout().
-  if (!isDashboard && page !== 'index.html' && page !== 'admin.html' && page !== 'tabellone.html' && !hasNavigationBack()) {
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'site-global-back';
-    back.textContent = '←';
-    back.setAttribute('aria-label', 'Torna indietro');
-    back.title = 'Torna indietro';
-    back.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else if (page !== 'index.html') window.location.href = 'index.html';
+  function removeNavigationArrows(){
+    document.querySelectorAll('.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
+      if(!isInsideModal(el)) el.remove();
     });
-    document.body.appendChild(back);
-  }
-
-  if (isDashboard) {
-    // Dashboard owns the only visible hamburger. Keep the menu self-contained and non-invasive.
-    if (!document.querySelector('.site-dashboard-menu-button')) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'site-dashboard-menu-button';
-      button.textContent = '☰';
-      button.setAttribute('aria-label', 'Apri menu');
-      button.setAttribute('aria-expanded', 'false');
-      const panel = document.createElement('nav');
-      panel.className = 'site-dashboard-menu-panel';
-      panel.setAttribute('aria-label', 'Menu dashboard');
-      const links = [
-        ['Home', 'index.html'],
-        ['Tornei', 'visitatore.html'],
-        ['News', 'news.html'],
-        ['Mercatino', 'mercatino.html'],
-        ['Sponsor', 'sponsor-pubblico.html'],
-        ['Contatti', 'contatti.html']
-      ];
-      const query = new URLSearchParams(location.search);
-      links.forEach(([label, href]) => {
-        const link = document.createElement('a');
-        link.textContent = label;
-        if (query.has('azienda')) link.href = href + '?azienda=' + encodeURIComponent(query.get('azienda'));
-        else link.href = href;
-        panel.appendChild(link);
-      });
-      const exit = document.createElement('button');
-      exit.type = 'button';
-      exit.className = 'site-dashboard-menu-exit';
-      exit.textContent = 'Esci';
-      exit.setAttribute('aria-label', 'Esci dall’account');
-      exit.addEventListener('click', async () => {
-        exit.disabled = true;
-        exit.textContent = 'Uscita…';
-        try {
-          if (typeof window.logout === 'function') {
-            await window.logout();
-          } else {
-            exit.disabled = false;
-            exit.textContent = 'Esci';
-            window.location.href = 'index.html';
-          }
-        } catch (error) {
-          console.error('Errore durante la disconnessione:', error);
-          exit.disabled = false;
-          exit.textContent = 'Esci';
+    if(!isTabellone){
+      document.querySelectorAll('a,button').forEach(el=>{
+        if(isInsideModal(el)) return;
+        const t=(el.innerText||el.textContent||'').trim();
+        if(!t || t.length>100) return;
+        if(/^(←|⬅|❮|‹)\s*(società|indietro|torna|back)/i.test(t) ||
+           /^(torna indietro|indietro|←\s*torna alla società|←\s*società)$/i.test(t)){
+          el.remove();
         }
       });
-      panel.appendChild(exit);
-      button.addEventListener('click', () => {
-        const open = panel.classList.toggle('open');
-        button.setAttribute('aria-expanded', String(open));
-      });
-      document.addEventListener('click', event => {
-        if (!button.contains(event.target) && !panel.contains(event.target)) {
-          panel.classList.remove('open');
-          button.setAttribute('aria-expanded', 'false');
-        }
-      });
-      document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') {
-          panel.classList.remove('open');
-          button.setAttribute('aria-expanded', 'false');
-          button.focus();
-        }
-      });
-      const dashboardPage = document.querySelector('main.page, .page');
-      if (dashboardPage) {
-        dashboardPage.insertBefore(button, dashboardPage.firstChild);
-        dashboardPage.appendChild(panel);
-      } else {
-        document.body.append(button, panel);
-      }
     }
   }
+
+  function createMenu(){
+    if(document.querySelector('.site-global-menu')) return;
+    const button=document.createElement('button');
+    button.type='button'; button.className='site-global-menu'; button.textContent='☰';
+    button.setAttribute('aria-label','Apri menu di navigazione'); button.setAttribute('aria-expanded','false');
+    const panel=document.createElement('nav'); panel.className='site-global-menu-panel'; panel.setAttribute('aria-label','Navigazione Eventour');
+    const addLink=(label,href,adminOnly=false)=>{
+      const a=document.createElement('a'); a.textContent=label; a.href=href;
+      if(adminOnly) a.dataset.adminOnly='true';
+      const q=new URLSearchParams(location.search);
+      if(q.has('azienda') && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(q.get('azienda'));
+      panel.appendChild(a);
+    };
+    addLink('Home','index.html');
+    addLink('Tornei e visitatori','visitatore.html');
+    addLink('News','news.html');
+    addLink('Mercatino','mercatino.html');
+    addLink('Sponsor','sponsor-pubblico.html');
+    addLink('Contatti','contatti.html');
+    const sep=document.createElement('div'); sep.className='site-global-menu-separator'; sep.setAttribute('aria-hidden','true'); panel.appendChild(sep);
+    addLink('Area amministrativa','dashboard.html',true);
+    addLink('Gestione torneo','admin.html',true);
+    addLink('Centro di controllo','eventour-control-center.html',true);
+    const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci'; exit.dataset.adminOnly='true';
+    exit.addEventListener('click',async()=>{
+      exit.disabled=true; exit.textContent='Uscita…';
+      try{
+        if(typeof window.logout==='function') await window.logout();
+        else if(window.sb?.auth?.signOut){await window.sb.auth.signOut();location.href='index.html';}
+        else {location.href='index.html';}
+      }catch(e){console.error('Errore durante la disconnessione:',e);exit.disabled=false;exit.textContent='Esci';}
+    });
+    panel.appendChild(exit);
+    function refreshRole(){
+      const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
+      const admin=!!(window.isAdmin||role==='admin'||role==='superadmin'||document.documentElement.dataset.isAdmin==='true');
+      panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>el.hidden=!admin);
+      sep.hidden=!admin;
+    }
+    refreshRole();
+    window.addEventListener('admin:role-ready',refreshRole);
+    button.addEventListener('click',()=>{
+      const open=panel.classList.toggle('open'); button.setAttribute('aria-expanded',String(open));
+    });
+    document.addEventListener('click',e=>{
+      if(!button.contains(e.target)&&!panel.contains(e.target)){panel.classList.remove('open');button.setAttribute('aria-expanded','false');}
+    });
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){panel.classList.remove('open');button.setAttribute('aria-expanded','false');button.focus();}
+    });
+    document.body.append(button,panel);
+  }
+
+  function init(){
+    removeNavigationArrows();
+    createMenu();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
 })();
