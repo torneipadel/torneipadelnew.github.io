@@ -89,8 +89,10 @@
     function refreshRole(){
       const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
       const tenantAdmin=!!(window.aziendaId && ['admin','owner','superadmin'].includes(role) && window.isAdmin===true);
-      const globalSuperadmin=!!(window.isGlobalSuperadmin===true || (window.isSuperadmin===true && !window.aziendaId));
-      const globalAdmin=!!(window.isGlobalPlatformAdmin===true || (window.isAdmin===true && role==='admin' && !window.aziendaId && !window.isSuperadmin));
+      // I privilegi globali devono essere assegnati esplicitamente dal flusso di autenticazione.
+      // I flag generici isAdmin/isSuperadmin non autorizzano da soli un visitatore pubblico.
+      const globalSuperadmin=window.isGlobalSuperadmin===true;
+      const globalAdmin=window.isGlobalPlatformAdmin===true;
       const canManageTenant=tenantAdmin;
       const canOpenControlCenter=globalSuperadmin || globalAdmin;
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
