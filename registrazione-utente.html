@@ -66,7 +66,7 @@ a{color:#fff;font-weight:700}
 const sb=supabase.createClient(
 "https://dkeqicstprvvfebiaooc.supabase.co",
 "sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",
-{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
+{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
 );
 const params=new URLSearchParams(location.search);
 const azienda=params.get("azienda")||"";
