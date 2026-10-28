@@ -8,7 +8,7 @@
 @media(max-width:390px){.news-brand-banner{height:104px}.news-eventour-logo{height:64px;width:92%;max-width:92%}.news-brand-subtitle{font-size:12px;letter-spacing:1px}}
 </style><link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head><body><div class="box"><section class="news-brand-banner" aria-label="EVENTOUR gestione &amp; eventi"><img src="eventour_logo.jpg" class="news-eventour-logo" alt="EVENTOUR"><span class="news-brand-subtitle">gestione eventi &amp; tornei</span></section><a id="back">Torna alla società</a><h1>Accedi</h1><p id="company">Accesso utente</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Password"><button id="go">ACCEDI</button><div class="msg" id="msg"></div><p>Non hai un account? <a id="reg">REGISTRATI</a></p></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const params=new URLSearchParams(location.search),azienda=params.get("azienda")||"",q=encodeURIComponent(azienda);
 const msg=document.getElementById("msg"),goBtn=document.getElementById("go");
 let companyRecord=null,busy=false;
@@ -46,14 +46,12 @@ async function go(){
       return;
     }
     const ruoloAccesso=String(result.ruolo||"").toLowerCase();
-    const ruoliAmmessi=["user","owner","admin","superadmin"];
-    if(!ruoliAmmessi.includes(ruoloAccesso)){
+    if(ruoloAccesso!=="user"){
       await sb.auth.signOut();
-      msg.textContent="Questo account non è autorizzato ad accedere ai tornei di questa società.";
+      msg.textContent="Questo accesso è riservato agli account visitatore. Per la gestione della società, usa Accesso società.";
       return;
     }
-    // Il profilo visitatore è aggiornabile solo per gli account user.
-    // Gli amministratori mantengono il proprio ruolo e accedono alla pagina pubblica senza essere disconnessi.
+    // Questo client usa una sessione separata da quella amministrativa.
     if(ruoloAccesso==="user"){
       const extra=await sb.rpc("update_visitor_profile",{
         p_livello:meta.livello||null,
