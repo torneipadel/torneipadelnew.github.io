@@ -73,7 +73,7 @@
       exit.disabled=true; exit.textContent='Uscita…';
       try{
         if(typeof window.logout==='function') await window.logout();
-        else if((window.__NP_SUPABASE_CLIENT__||window.sb)?.auth?.signOut){const authClient=window.__NP_SUPABASE_CLIENT__||window.sb;const result=await authClient.auth.signOut();if(result?.error)throw result.error;try{sessionStorage.removeItem('nextpoint_login_azienda_id');sessionStorage.removeItem('nextpoint_login_azienda_slug');sessionStorage.removeItem('nextpoint_login_role');}catch(_){}location.href='index.html';}
+        else if((window.__NP_VISITOR_NAV_CLIENT__||window.__NP_SUPABASE_CLIENT__||window.sb)?.auth?.signOut){const authClient=window.__NP_VISITOR_NAV_CLIENT__||window.__NP_SUPABASE_CLIENT__||window.sb;const result=await authClient.auth.signOut();if(result?.error)throw result.error;try{sessionStorage.removeItem('nextpoint_login_azienda_id');sessionStorage.removeItem('nextpoint_login_azienda_slug');sessionStorage.removeItem('nextpoint_login_role');}catch(_){}location.href='index.html';}
         else {location.href='index.html';}
       }catch(e){console.error('Errore durante la disconnessione:',e);exit.disabled=false;exit.textContent='Esci';}
     });
@@ -111,15 +111,34 @@
     document.body.append(button,panel);
   }
 
+  async function ensureVisitorAuthClient(){
+    const URL='https://dkeqicstprvvfebiaooc.supabase.co';
+    const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
+    if(window.__NP_SUPABASE_CLIENT__?.auth?.getSession &&
+       window.__NP_SUPABASE_CLIENT__?.auth?.storageKey==='eventour-visitor-auth') {
+      return window.__NP_SUPABASE_CLIENT__;
+    }
+    if(!window.supabase?.createClient){
+      await new Promise((resolve,reject)=>{
+        const existing=document.querySelector('script[data-eventour-supabase-nav]');
+        if(existing){existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',reject,{once:true});return;}
+        const script=document.createElement('script');
+        script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.dataset.eventourSupabaseNav='true';
+        script.onload=resolve;script.onerror=reject;document.head.appendChild(script);
+      });
+    }
+    if(!window.supabase?.createClient) throw new Error('Libreria Supabase non disponibile');
+    window.__NP_VISITOR_NAV_CLIENT__=window.__NP_VISITOR_NAV_CLIENT__||window.supabase.createClient(URL,KEY,{
+      auth:{storageKey:'eventour-visitor-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    return window.__NP_VISITOR_NAV_CLIENT__;
+  }
+
   async function init(){
     removeNavigationArrows();
     try {
-      const client = window.__NP_SUPABASE_CLIENT__ || window.sb;
-      // Il menu pubblico non deve dipendere dalla presenza di Supabase nella pagina.
-      if (!client?.auth?.getSession) {
-        createMenu(null);
-        return;
-      }
+      const client = await ensureVisitorAuthClient();
       const { data, error } = await client.auth.getSession();
       if (error) {
         console.warn('Sessione non verificata: attivo comunque il menu pubblico.', error);
