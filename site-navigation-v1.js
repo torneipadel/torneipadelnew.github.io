@@ -88,11 +88,12 @@
     panel.appendChild(exit);
     function refreshRole(){
       const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
-      const tenantAdmin=!!(window.aziendaId && ['admin','owner','superadmin'].includes(role) && window.isAdmin===true);
-      // I privilegi globali devono essere assegnati esplicitamente dal flusso di autenticazione.
-      // I flag generici isAdmin/isSuperadmin non autorizzano da soli un visitatore pubblico.
-      const globalSuperadmin=window.isSuperadmin===true && role==='superadmin' && !window.aziendaId;
-      const globalAdmin=window.isGlobalPlatformAdmin===true && !window.aziendaId && ['admin','superadmin'].includes(role);
+      // Nessuna voce amministrativa viene mostrata senza una sessione autenticata verificata.
+      const hasAuthenticatedSession=!!activeSession?.user;
+      const tenantAdmin=hasAuthenticatedSession && !!window.aziendaId && ['admin','owner','superadmin'].includes(role) && window.isAdmin===true;
+      // I privilegi globali richiedono sessione, ruolo esplicito e assenza di azienda associata.
+      const globalSuperadmin=hasAuthenticatedSession && window.isSuperadmin===true && role==='superadmin' && !window.aziendaId;
+      const globalAdmin=hasAuthenticatedSession && window.isGlobalPlatformAdmin===true && !window.aziendaId && ['admin','superadmin'].includes(role);
       const canManageTenant=tenantAdmin;
       const canOpenControlCenter=globalSuperadmin || globalAdmin;
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
