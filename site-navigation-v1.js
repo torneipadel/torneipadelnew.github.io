@@ -115,7 +115,11 @@
     removeNavigationArrows();
     try {
       const client = window.__NP_SUPABASE_CLIENT__ || window.sb;
-      if (!client?.auth?.getSession) return;
+      // Il menu pubblico non deve dipendere dalla presenza di Supabase nella pagina.
+      if (!client?.auth?.getSession) {
+        createMenu(null);
+        return;
+      }
       const { data, error } = await client.auth.getSession();
       if (error) {
         console.warn('Sessione non verificata: attivo comunque il menu pubblico.', error);
@@ -126,7 +130,8 @@
       // Le voci amministrative restano nascoste finché il ruolo non è verificato.
       createMenu(data?.session || null);
     } catch (e) {
-      console.warn('Menu Eventour non attivato: sessione non verificata.', e);
+      console.warn('Sessione non verificata: attivo il menu pubblico Eventour.', e);
+      createMenu(null);
     }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
