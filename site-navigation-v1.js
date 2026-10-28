@@ -19,7 +19,10 @@
     .site-global-menu-panel a,.site-global-menu-panel button{display:block!important;width:100%!important;box-sizing:border-box!important;padding:11px 12px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#fff!important;text-align:left!important;text-decoration:none!important;font:600 13px/1.35 Arial,sans-serif!important;cursor:pointer!important}
     .site-global-menu-panel a:hover,.site-global-menu-panel button:hover{background:rgba(255,255,255,.12)!important}
     .site-global-menu-separator{height:1px!important;margin:5px 4px!important;background:rgba(255,255,255,.2)!important}
-    @media(max-width:600px){.site-global-menu{inset:12px 12px auto auto!important;top:12px!important;bottom:auto!important;left:auto!important;right:12px!important;width:42px!important;height:42px!important;margin:0!important;transform:none!important;.site-global-menu-panel{top:62px!important;right:12px!important}}
+    @media(max-width:600px){
+      .site-global-menu{inset:12px 12px auto auto!important;top:12px!important;bottom:auto!important;left:auto!important;right:12px!important;width:42px!important;height:42px!important;margin:0!important;transform:none!important}
+      .site-global-menu-panel{top:62px!important;right:12px!important}
+    }
   `;
   document.head.appendChild(css);
 
