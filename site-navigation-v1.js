@@ -14,7 +14,10 @@
   css.textContent = `
     .site-global-menu{position:fixed!important;inset:16px 16px auto auto!important;top:16px!important;bottom:auto!important;left:auto!important;right:16px!important;margin:0!important;transform:none!important;z-index:2147483001!important;width:44px!important;height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.88)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.25)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:700 23px/1 Arial,sans-serif!important;cursor:pointer!important;padding:0!important}
     .site-global-menu:hover{background:rgba(7,25,45,.98)!important}
-    .site-global-menu-panel{position:fixed!important;top:68px!important;right:16px!important;z-index:2147483002!important;display:none!important;width:min(270px,calc(100vw - 32px))!important;max-height:calc(100vh - 90px)!important;overflow:auto!important;padding:8px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:14px!important;background:rgba(7,25,45,.97)!important;box-shadow:0 12px 32px rgba(0,0,0,.35)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important}
+    .site-global-menu-panel{position:fixed!important;top:68px!important;right:16px!important;left:auto!important;bottom:auto!important;z-index:2147483002!important;display:none!important;box-sizing:border-box!important;width:min(270px,calc(100vw - 32px))!important;max-width:calc(100vw - 32px)!important;max-height:calc(100dvh - 84px)!important;height:auto!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:8px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:14px!important;background:rgba(7,25,45,.97)!important;box-shadow:0 12px 32px rgba(0,0,0,.35)!important;backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;isolation:isolate!important}
+    @supports not (height:100dvh){.site-global-menu-panel{max-height:calc(100vh - 84px)!important}}
+    .site-global-menu-panel::-webkit-scrollbar{width:6px!important}
+    .site-global-menu-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.35)!important;border-radius:8px!important}
     .site-global-menu-panel.open{display:grid!important;gap:4px!important}
     .site-global-menu-panel [hidden]{display:none!important}
     .site-global-menu-panel a,.site-global-menu-panel button{display:block!important;width:100%!important;box-sizing:border-box!important;padding:11px 12px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#fff!important;text-align:left!important;text-decoration:none!important;font:600 13px/1.35 Arial,sans-serif!important;cursor:pointer!important}
@@ -22,7 +25,8 @@
     .site-global-menu-separator{height:1px!important;margin:5px 4px!important;background:rgba(255,255,255,.2)!important}
     @media(max-width:600px){
       .site-global-menu{inset:12px 12px auto auto!important;top:12px!important;bottom:auto!important;left:auto!important;right:12px!important;width:42px!important;height:42px!important;margin:0!important;transform:none!important}
-      .site-global-menu-panel{top:62px!important;right:12px!important}
+      .site-global-menu-panel{top:62px!important;right:12px!important;left:auto!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 74px)!important}
+      @supports not (height:100dvh){.site-global-menu-panel{max-height:calc(100vh - 74px)!important}}
     }
   `;
   document.head.appendChild(css);
