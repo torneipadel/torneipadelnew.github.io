@@ -43,7 +43,7 @@
     }
   }
 
-  function createMenu(){
+  function createMenu(activeSession){
     if(document.querySelector('.site-global-menu')) return;
     const button=document.createElement('button');
     button.type='button'; button.className='site-global-menu'; button.textContent='☰';
@@ -68,12 +68,12 @@
     addLink('Area amministrativa','dashboard.html',true);
     addLink('Gestione torneo','admin.html',true);
     addLink('Centro di controllo','eventour-control-center.html',true);
-    const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci'; exit.dataset.adminOnly='true'; exit.hidden=true;
+    const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci dall’account'; exit.dataset.logout='true'; exit.hidden=!activeSession?.user;
     exit.addEventListener('click',async()=>{
       exit.disabled=true; exit.textContent='Uscita…';
       try{
         if(typeof window.logout==='function') await window.logout();
-        else if(window.sb?.auth?.signOut){await window.sb.auth.signOut();location.href='index.html';}
+        else if((window.__NP_SUPABASE_CLIENT__||window.sb)?.auth?.signOut){const authClient=window.__NP_SUPABASE_CLIENT__||window.sb;const result=await authClient.auth.signOut();if(result?.error)throw result.error;try{sessionStorage.removeItem('nextpoint_login_azienda_id');sessionStorage.removeItem('nextpoint_login_azienda_slug');sessionStorage.removeItem('nextpoint_login_role');}catch(_){}location.href='index.html';}
         else {location.href='index.html';}
       }catch(e){console.error('Errore durante la disconnessione:',e);exit.disabled=false;exit.textContent='Esci';}
     });
@@ -94,7 +94,8 @@
         else if(isExit) el.hidden=!(tenantAdmin||globalSuperadmin||globalAdmin);
         else el.hidden=true;
       });
-      sep.hidden=!(canManageTenant||canOpenControlCenter||tenantAdmin||globalSuperadmin||globalAdmin);
+      exit.hidden=!(!!activeSession?.user||tenantAdmin||globalSuperadmin||globalAdmin);
+      sep.hidden=!(canManageTenant||canOpenControlCenter||tenantAdmin||globalSuperadmin||globalAdmin||!!activeSession?.user);
     }
     refreshRole();
     window.addEventListener('admin:role-ready',refreshRole);
@@ -117,7 +118,7 @@
       if (!client?.auth?.getSession) return;
       const { data, error } = await client.auth.getSession();
       if (error || !data?.session?.user) return;
-      createMenu();
+      createMenu(data.session);
     } catch (e) {
       console.warn('Menu Eventour non attivato: sessione non verificata.', e);
     }
