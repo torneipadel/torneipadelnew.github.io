@@ -32,18 +32,33 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
 
 /* I pulsanti VEDI I TORNEI e IL MIO TORNEO riprendono lo sfondo del pulsante CALENDARIO. */
 .np-hero-actions .np-primary,#npUser .np-primary{background:rgba(255,255,255,.08)!important;color:#fff!important;border:1px solid rgba(255,255,255,.17)!important;box-shadow:none!important}
-.brand-back{width:40px;height:40px;margin:0 0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;font:400 20px 'Open Sans',Arial,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-.brand-back:hover{background:rgba(255,255,255,.15)}
+.visitor-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}.visitor-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;text-decoration:none;font-size:10px;font-weight:800;letter-spacing:.35px}.visitor-nav .visitor-home{background:#fff;color:#073b72;border-color:#fff}.visitor-public-home{margin:16px 0 26px;padding:clamp(22px,5vw,38px);border:1px solid rgba(255,255,255,.23);border-radius:24px;background:radial-gradient(circle at 92% 8%,rgba(255,231,107,.16),transparent 32%),linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.055));box-shadow:0 22px 55px rgba(0,0,0,.25)}.visitor-public-kicker{font-size:10px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}.visitor-public-home h1{margin:12px 0;font-size:clamp(32px,6vw,48px);line-height:1.03;letter-spacing:-1.5px;text-align:left}.visitor-public-home h1 span{display:block;color:var(--gold)}.visitor-public-home>p{max-width:620px;margin:0;color:rgba(255,255,255,.78);font-size:14px;line-height:1.75}.visitor-public-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}.visitor-public-actions a{min-height:44px;padding:0 16px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:11px;font-weight:900;letter-spacing:.4px}.visitor-public-primary{background:#fff;color:#073b72}.visitor-public-secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.24);color:#fff}.visitor-public-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}.visitor-public-feature{padding:16px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(3,13,25,.18)}.visitor-public-feature b{display:block;margin-bottom:6px;font-size:12px}.visitor-public-feature p{margin:0;color:rgba(255,255,255,.65);font-size:11px;line-height:1.55}.visitor-public-exit{margin-top:18px;color:rgba(255,255,255,.5);font-size:10px;line-height:1.6}@media(max-width:600px){.visitor-nav{margin-bottom:10px}.visitor-nav a{font-size:9px;padding:0 10px}.visitor-public-features{grid-template-columns:1fr}.visitor-public-feature{padding:13px}.visitor-public-home{border-radius:19px}}
 </style>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
 </head>
 <body>
 
 <div class="np-page" id="home">
-  <button type="button" class="brand-back" onclick="history.back()" aria-label="Torna indietro">←</button>
+  <nav class="visitor-nav" aria-label="Navigazione visitatore"><a class="visitor-home" href="index.html">⌂ TORNA A EVENTOUR</a><a href="index.html#trova-societa">ESPLORA LE SOCIETÀ →</a></nav>
   <section class="news-brand-banner" aria-label="EVENTOUR gestione & eventi">
     <img src="eventour_logo.jpg?v=20261018" class="news-eventour-logo" alt="EVENTOUR">
     <span class="news-brand-subtitle">gestione eventi &amp; tornei</span>
+  </section>
+
+  <section class="visitor-public-home" id="visitorPublicHome" hidden>
+    <span class="visitor-public-kicker">EVENTOUR · ACCESSO PUBBLICO</span>
+    <h1>Benvenuto su Eventour.<span>Entra nel mondo dei tornei.</span></h1>
+    <p>Puoi esplorare Eventour anche senza essere iscritto a una società e senza creare un account. Cerca una società, consulta le sue informazioni pubbliche e scopri i tornei e gli eventi disponibili. L’account personale serve solo quando una funzione richiede un’identificazione, per esempio per gestire una tua iscrizione.</p>
+    <div class="visitor-public-actions">
+      <a class="visitor-public-primary" href="index.html#trova-societa">ESPLORA SOCIETÀ E TORNEI</a>
+      <a class="visitor-public-secondary" href="index.html">TORNA ALLA PAGINA INIZIALE</a>
+    </div>
+    <div class="visitor-public-features">
+      <article class="visitor-public-feature"><b>🎾 Scopri i tornei</b><p>Apri la pagina pubblica di una società e consulta appuntamenti, dettagli e tabelloni pubblicati.</p></article>
+      <article class="visitor-public-feature"><b>📰 Resta aggiornato</b><p>Consulta news, sponsor e contenuti pubblici disponibili per ciascuna società.</p></article>
+      <article class="visitor-public-feature"><b>👤 Account solo quando serve</b><p>Non devi appartenere a una società per visitare il sito. L’accesso personale è separato dagli strumenti di gestione.</p></article>
+    </div>
+    <p class="visitor-public-exit">Per uscire da questa area, usa “Torna a Eventour” in alto oppure “Torna alla pagina iniziale”. Non viene chiusa alcuna sessione se stai semplicemente navigando senza aver effettuato l’accesso.</p>
   </section>
 
   <section class="np-hero">
@@ -93,6 +108,20 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
   <section class="np-section np-sponsor-slot" aria-label="Sponsor"></section>
   <footer class="np-footer">eventour gestione & eventi · CALENDARIO</footer>
 </div>
+<script>
+(function publicVisitorMode(){
+  const params=new URLSearchParams(location.search);
+  const hasCompany=Boolean(params.get('azienda'));
+  if(hasCompany)return;
+  const hub=document.getElementById('visitorPublicHome');
+  if(hub)hub.hidden=false;
+  ['.np-hero','.np-quick-actions','#npUser','#mioTorneo','#tornei','#eventi','.np-sponsor-slot'].forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>el.hidden=true);
+  });
+  const footer=document.querySelector('.np-footer');
+  if(footer)footer.textContent='EVENTOUR · ACCESSO PUBBLICO';
+})();
+</script>
 <script src="visitatore-public-v2.js?v=13"></script>
 <script src="visitatore-eventi-v1.js?v=2"></script>
   <script src="sponsor-public-v2.js?v=12"></script>
