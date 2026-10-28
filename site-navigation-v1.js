@@ -92,7 +92,7 @@
       // I privilegi globali devono essere assegnati esplicitamente dal flusso di autenticazione.
       // I flag generici isAdmin/isSuperadmin non autorizzano da soli un visitatore pubblico.
       const globalSuperadmin=window.isSuperadmin===true && role==='superadmin' && !window.aziendaId;
-      const globalAdmin=window.isGlobalPlatformAdmin===true;
+      const globalAdmin=window.isGlobalPlatformAdmin===true && !window.aziendaId && ['admin','superadmin'].includes(role);
       const canManageTenant=tenantAdmin;
       const canOpenControlCenter=globalSuperadmin || globalAdmin;
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
