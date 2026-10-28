@@ -82,14 +82,15 @@ const {data:{session},error:sessionError}=await sb.auth.getSession();
 if(sessionError)console.error("Errore lettura sessione profilo:",sessionError);
 const user=session?.user||null;
 if(!user){
-  if(aziendaSlug){
-    window.location.replace("login-utente.html?azienda="+encodeURIComponent(aziendaSlug));
-  }else{
-    const status=document.getElementById("status");
-    if(status)status.textContent="La sessione visitatore non è attiva. Accedi dalla pagina Tornei e visitatori per aprire il profilo della tua società.";
-    const back=document.querySelector(".btn-back");
-    if(back){back.textContent="Vai a Tornei e visitatori";back.onclick=()=>window.location.replace("visitatore.html");}
-  }
+  // Il profilo è facoltativo: non deve reindirizzare al login né chiudere la pagina.
+  const saved=(()=>{try{return JSON.parse(localStorage.getItem("eventour_profilo_ospite")||"{}")}catch(_){return {}}})();
+  const fields=["nome","cognome","emailContatto","telefono","indirizzo","citta","provincia","cap","paese","data_nascita","livello","alias","note"];
+  const keys={emailContatto:"email"};
+  fields.forEach(id=>{const el=document.getElementById(id);if(el)el.value=saved[keys[id]||id]||""});
+  const emailBox=document.getElementById("emailBox");
+  if(emailBox)emailBox.textContent="Profilo visitatore (facoltativo)";
+  const status=document.getElementById("status");
+  if(status)status.textContent="Puoi compilare e salvare i tuoi dati anche senza accedere. I dati resteranno salvati su questo dispositivo.";
   return;
 }
 userId=user.id;
@@ -147,6 +148,13 @@ const note=document.getElementById("note").value.trim();
 // Tutti i campi del profilo sono facoltativi: salva anche un profilo parziale o vuoto.
 if(emailContatto && !document.getElementById("emailContatto").checkValidity()){document.getElementById("status").textContent="Inserisci un indirizzo email valido";return;}
 if(!alias && nome && cognome){alias=generaAlias(nome,cognome);document.getElementById("alias").value=alias;}
+if(!userId){
+  try{
+    localStorage.setItem("eventour_profilo_ospite",JSON.stringify({nome,cognome,email:emailContatto,telefono,indirizzo,citta,provincia,cap,paese,data_nascita,livello,alias,note}));
+    document.getElementById("status").textContent="Profilo salvato su questo dispositivo. Puoi modificarlo quando vuoi.";
+  }catch(e){console.error("Errore salvataggio profilo locale:",e);document.getElementById("status").textContent="Impossibile salvare il profilo su questo dispositivo.";}
+  return;
+}
 const {error}=await sb.from("profili").upsert({user_id:userId,email:emailContatto||emailUtente,nome,cognome,telefono,indirizzo,citta,provincia,cap,paese,data_nascita,livello,alias,note,ruolo:ruoloUtente,updated_at:new Date().toISOString()},{onConflict:"user_id"});
 if(error){
 console.error("Errore salvataggio profilo:",error);
