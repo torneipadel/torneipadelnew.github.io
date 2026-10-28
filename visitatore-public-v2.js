@@ -10,7 +10,7 @@ const publicSlug=new URLSearchParams(location.search).get('azienda')||'';
 async function resolvePublicCompany(){
   if(!publicSlug) return null;
   try{
-    const resolver=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    const resolver=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||supabase.createClient(URL_SUPABASE,KEY,{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
     const {data,error}=await resolver.rpc('get_public_company',{p_slug:publicSlug});
     const company=Array.isArray(data)?data[0]:data;
     if(error||!company?.id) return null;
@@ -91,7 +91,7 @@ async function start(){
     const homeLink=document.querySelector('#npMenu a[href="dashboard.html"]');
     if(homeLink) homeLink.href='visitatore.html?azienda='+encodeURIComponent(publicCompany.slug);
   }
-  client=window.sb=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||(supabase.createClient(URL_SUPABASE,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
+  client=window.sb=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||(supabase.createClient(URL_SUPABASE,KEY,{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
   window.__NP_SUPABASE_CLIENT__=client;
   await loadData();
   renderHero();
