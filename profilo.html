@@ -165,7 +165,7 @@ document.getElementById("status").innerHTML="✅ Profilo salvato. Puoi continuar
 }
 document.addEventListener("DOMContentLoaded",async()=>{await caricaProfilo();});
 </script>
-<script src="site-navigation-v1.js?v=13"></script>
+<script src="site-navigation-v1.js?v=17"></script>
 <script>
 (function isolateNewsEventourLogo(){const logo=document.querySelector(".news-eventour-logo");if(!logo)return;function isolate(){if(!logo.naturalWidth||!logo.naturalHeight||logo.dataset.textIsolated==="1")return;logo.dataset.textIsolated="1";try{const canvas=document.createElement("canvas");canvas.width=logo.naturalWidth;canvas.height=logo.naturalHeight;const ctx=canvas.getContext("2d",{willReadFrequently:true});ctx.drawImage(logo,0,0);const frame=ctx.getImageData(0,0,canvas.width,canvas.height),px=frame.data;for(let i=0;i<px.length;i+=4){const lum=.2126*px[i]+.7152*px[i+1]+.0722*px[i+2];const alpha=Math.max(0,Math.min(255,Math.round((lum-132)*255/123)));px[i]=255;px[i+1]=255;px[i+2]=255;px[i+3]=Math.round(px[i+3]*alpha/255)}ctx.putImageData(frame,0,0);logo.src=canvas.toDataURL("image/png")}catch(e){console.warn("Trattamento logo Eventour non riuscito:",e)}}if(logo.complete){if(logo.naturalWidth)isolate();else logo.addEventListener("load",isolate,{once:true})}else logo.addEventListener("load",isolate,{once:true})})();
 </script>
