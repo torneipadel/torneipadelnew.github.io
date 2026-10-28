@@ -117,8 +117,14 @@
       const client = window.__NP_SUPABASE_CLIENT__ || window.sb;
       if (!client?.auth?.getSession) return;
       const { data, error } = await client.auth.getSession();
-      if (error || !data?.session?.user) return;
-      createMenu(data.session);
+      if (error) {
+        console.warn('Sessione non verificata: attivo comunque il menu pubblico.', error);
+        createMenu(null);
+        return;
+      }
+      // Il menu pubblico deve essere disponibile anche ai visitatori anonimi.
+      // Le voci amministrative restano nascoste finché il ruolo non è verificato.
+      createMenu(data?.session || null);
     } catch (e) {
       console.warn('Menu Eventour non attivato: sessione non verificata.', e);
     }
