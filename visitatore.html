@@ -10,7 +10,7 @@
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){var own=rs.filter(function(r){try{return new URL(r.scope).origin===location.origin}catch(e){return false}});if(own.length){Promise.all(own.map(function(r){return r.unregister()})).then(function(){location.reload()})}}).catch(function(){})}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.__NP_SUPABASE_CLIENT__=window.__NP_SUPABASE_CLIENT__||supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});window.sb=window.__NP_SUPABASE_CLIENT__;</script>
-<script src="tenant-theme-v1.js?v=3"></script>
+<script src="tenant-theme-v1.js?v=4"></script>
 <style>[hidden]{display:none!important}
 
 :root{--line:rgba(255,255,255,.22);--blue:#073b72;--gold:#ffe76b}
