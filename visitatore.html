@@ -132,7 +132,7 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
   document.title='Visitatori — Eventour';
 
   // Non caricare o mostrare sezioni che richiedono il contesto di una società.
-  ['.np-hero','.np-quick-actions','#npUser','#mioTorneo','.np-sponsor-slot'].forEach(selector=>{
+  ['.np-hero','.np-quick-actions','#npUser','#mioTorneo','#tornei','#eventi','.np-sponsor-slot'].forEach(selector=>{
     document.querySelectorAll(selector).forEach(node=>{node.hidden=true;});
   });
 
