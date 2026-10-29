@@ -75,6 +75,9 @@ function propagateCompanyLinks(){if(!publicSlug)return;const tenantPages=new Set
 async function start(){
   styles();
   publicCompany=await resolvePublicCompany();
+  // Senza ?azienda la pagina è una vetrina pubblica generale:
+  // non avviare query tenant-scoped né sovrascrivere i contenuti della directory.
+  if(!publicSlug)return;
   if(publicSlug&&!publicCompany){
     document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:#fff;font-family:Arial;background:#06111f"><div style="max-width:520px;text-align:center"><h1>Società non trovata</h1><p>Il collegamento della società non è valido o la società non è disponibile.</p><a href="index.html" style="display:inline-block;margin-top:12px;padding:12px 18px;border-radius:10px;background:#fff;color:#073b72;text-decoration:none;font-weight:800">TORNA ALLA PAGINA INIZIALE</a></div></div>';
     return;
