@@ -116,11 +116,32 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
   const params=new URLSearchParams(location.search);
   const hasCompany=Boolean(params.get('azienda'));
   if(hasCompany)return;
+
   const hub=document.getElementById('visitorPublicHome');
   if(hub)hub.hidden=false;
-  ['.np-hero','.np-quick-actions','#npUser','#mioTorneo','#tornei','#eventi','.np-sponsor-slot'].forEach(sel=>{
+
+  /* In accesso pubblico generale le sezioni restano raggiungibili:
+     senza una società selezionata mostriamo l'invito a scegliere un club,
+     non un calendario vuoto né dati aggregati non autorizzati. */
+  ['.np-hero','.np-quick-actions','#npUser','#mioTorneo','.np-sponsor-slot'].forEach(sel=>{
     document.querySelectorAll(sel).forEach(el=>el.hidden=true);
   });
+
+  const directoryUrl='index.html#societa';
+  const tournaments=document.getElementById('npTournaments');
+  if(tournaments){
+    tournaments.innerHTML='<div class="np-panel np-empty">Per consultare i tornei pubblicati, scegli prima una società Eventour. <a class="np-btn np-primary" href="'+directoryUrl+'">SCEGLI UNA SOCIETÀ</a></div>';
+  }
+  const events=document.getElementById('npEvents');
+  if(events){
+    events.innerHTML='<div class="np-empty">Per vedere il calendario degli appuntamenti, scegli la società che vuoi visitare. <a class="np-btn np-primary" href="'+directoryUrl+'">APRI IL CALENDARIO DELLA SOCIETÀ</a></div>';
+  }
+
+  const publicTournaments=document.querySelector('.visitor-public-primary');
+  if(publicTournaments)publicTournaments.href='#tornei';
+  const publicCalendar=document.querySelector('.visitor-public-secondary');
+  if(publicCalendar && publicCalendar.textContent.trim().toUpperCase()==='CALENDARIO')publicCalendar.href='#eventi';
+
   const footer=document.querySelector('.np-footer');
   if(footer)footer.textContent='EVENTOUR · ACCESSO PUBBLICO';
 })();
