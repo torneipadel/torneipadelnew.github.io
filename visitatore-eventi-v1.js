@@ -377,6 +377,9 @@ async function load(){
 }
 
 function init(){
+ // Il calendario è riservato alla vista della singola società (?azienda=).
+ // Nella pagina pubblica generale non deve generare un mese vuoto né sezioni tenant.
+ if(!publicSlug)return;
  styles();
  compactNavigation();
  load()
