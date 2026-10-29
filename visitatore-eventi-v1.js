@@ -175,7 +175,8 @@ function compactNavigation(){
  const discover=document.querySelector('.np-hero-actions .np-primary');
 
  if(discover)
-  discover.href='#eventi';
+  discover.href='#tornei';
+  discover.onclick=e=>{e.preventDefault();document.getElementById('tornei')?.scrollIntoView({behavior:'smooth',block:'start'})};
 
  const intro=document.querySelector('.np-hero-copy p');
 
