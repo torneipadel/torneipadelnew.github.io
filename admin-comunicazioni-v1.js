@@ -22,8 +22,9 @@ return true
 
 async function loadGlobalSponsors(){
 const sb=window.supabaseClient||window.sb;
-if(!sb)return [];
-const {data,error}=await sb.from('sponsor').select('id,nome,immagine,video,link').order('id',{ascending:true});
+const aziendaId=String(window.aziendaId||'').trim();
+if(!sb||!aziendaId){alert('Società non identificata: gestione sponsor bloccata per proteggere i dati degli altri tenant.');return []}
+const {data,error}=await sb.from('sponsor').select('id,nome,immagine,video,link,azienda_id').eq('azienda_id',aziendaId).order('id',{ascending:true});
 if(error){console.error('Errore caricamento sponsor:',error);alert('Errore caricamento sponsor: '+error.message);return []}
 return data||[];
 }
@@ -38,13 +39,15 @@ $('comBack')?.addEventListener('click',()=>window.openAdminPage?.('torneo'))
 async function news(){return newsEditor()}
 
 async function sponsor(){
+const aziendaId=String(window.aziendaId||'').trim();
+if(!aziendaId){shell('Sponsor','Seleziona una società per gestire i suoi sponsor.',`<div class="card"><div class="card-body">Contesto società non disponibile. Per sicurezza non è possibile mostrare o modificare sponsor.</div></div>`);return}
 const items=await loadGlobalSponsors();
 const form=(editing=null)=>{
 const s=editing||{};
 return `<div class="feature-form" id="sponsorForm"><h3>${editing?'Modifica sponsor':'Nuovo sponsor'}</h3><label>Nome sponsor</label> <input id="sponsorName" class="input" value="${esc(s.nome||'')}" placeholder="Nome sponsor"><label>Logo sponsor</label> <input id="sponsorLogo" class="input" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"> <small class="notice">${editing&&s.immagine?'Seleziona un nuovo file solo se vuoi sostituire il logo attuale.':'Seleziona il logo dello sponsor.'}</small><label>Video sponsor</label> <input id="sponsorVideo" class="input" value="${esc(s.video||'')}" placeholder="https://.../video"> <small class="notice">URL del video o della pagina video.</small><label>Link sponsor</label> <input id="sponsorUrl" class="input" value="${esc(s.link||'')}" placeholder="https://.../"> <small class="notice">Inserisci il sito dello sponsor.</small><div class="admin-feature-actions"><button class="btn primary" id="sponsorSave">${editing?'💾 Salva modifiche':'＋ Aggiungi sponsor'}</button>${editing?'<button type="button" class="btn" id="sponsorCancel">Annulla</button>':''}</div></div>`;
 };
 const list=items.length?items.map(n=>`<div class="list-item" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="width:90px;min-width:90px;height:60px;border-radius:10px;overflow:hidden;background:rgba(15,23,42,.12);display:flex;align-items:center;justify-content:center">${n.immagine?`<img src="${esc(n.immagine)}" alt="${esc(n.nome||'Sponsor')}" style="max-width:100%;max-height:100%;object-fit:contain" onerror="this.style.display='none';this.parentElement.innerHTML='🖼️'">`:'<span style="font-size:24px">🏢</span>'}</div><div style="flex:1;min-width:220px"><strong style="display:block;font-size:15px">${esc(n.nome||'Sponsor senza nome')}</strong><small style="display:block;margin-top:4px">${n.link?`Link: <a href="${esc(n.link)}" target="_blank" rel="noopener noreferrer">${esc(n.link)}</a>`:'Nessun link'}</small><small style="display:block;margin-top:3px">${n.immagine?'Logo caricato':'Nessun logo caricato'} · ${n.video?`Video: <a href="${esc(n.video)}" target="_blank" rel="noopener noreferrer">Apri video</a>`:'Nessun video'}</small></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small" data-sponsor-edit="${esc(n.id)}">✏️ Modifica</button><button type="button" class="btn small danger" data-sponsor-del="${esc(n.id)}">Elimina</button></div></div>`).join(''):'<div class="empty">Nessuno sponsor configurato. Inserisci il primo sponsor usando il modulo qui accanto.</div>';
-shell('Sponsor','Sponsor globali · visibili in tutti i tabelloni',`<div class="card feature-card"><div class="card-head"><div><h2>Gestione Sponsor</h2><span class="notice">Gestione completa degli sponsor globali. Il logo viene caricato direttamente dal menu Sponsor.</span></div></div><div class="card-body"><div class="section-grid"><div id="sponsorEditor">${form()}</div><div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3>Sponsor globali</h3><p class="notice">${items.length} sponsor configurat${items.length===1?'o':'i'}</p></div></div><div id="sponsorList" class="feature-list">${list}</div></div></div></div></div>`);
+shell('Sponsor','Sponsor della tua società · visibili nella vetrina pubblica',`<div class="card feature-card"><div class="card-head"><div><h2>Gestione Sponsor della società</h2><span class="notice">Gli sponsor inseriti qui appariranno nella pagina pubblica Sponsor della tua società e nel banner scorrevole, dove previsto.</span></div></div><div class="card-body"><div class="section-grid"><div id="sponsorEditor">${form()}</div><div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3>I tuoi sponsor</h3><p class="notice">${items.length} sponsor configurat${items.length===1?'o':'i'}</p></div></div><div id="sponsorList" class="feature-list">${list}</div></div></div></div></div>`);
 const reset=()=>{const box=$('sponsorEditor');if(box)box.innerHTML=form();bindForm()};
 const bindForm=()=>{
 $('sponsorCancel')?.addEventListener('click',reset);
@@ -53,16 +56,16 @@ const nome=$('sponsorName')?.value.trim(),video=$('sponsorVideo')?.value.trim(),
 if(!nome){alert('Inserisci il nome dello sponsor.');return}
 if(!link){alert('Inserisci il link del sito dello sponsor.');return}
 if(logoFile){const allowedTypes=['image/png','image/jpeg','image/webp','image/svg+xml'];if(!allowedTypes.includes(logoFile.type)){alert('Il logo deve essere un file PNG, JPG, WEBP o SVG.');return}if(logoFile.size>2*1024*1024){alert('Il logo è troppo grande. Usa un file massimo di 2 MB.');return}}
-const sb=window.supabaseClient||window.sb;if(!sb){alert('Connessione Supabase non disponibile.');return}
+const sb=window.supabaseClient||window.sb;const aziendaId=String(window.aziendaId||'').trim();if(!sb||!aziendaId){alert('Società o connessione Supabase non disponibile.');return}
 const saveButton=$('sponsorSave'),editId=saveButton?.dataset.editId;if(saveButton){saveButton.disabled=true;saveButton.textContent='⏳ Salvataggio...'}
 try{let immagine=editId?(items.find(x=>String(x.id)===String(editId))?.immagine||''):'';if(logoFile){immagine=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Impossibile leggere il file del logo.'));reader.readAsDataURL(logoFile)})}let savedId=editId||null;
 if(editId){
- const {data,error}=await sb.from('sponsor').update({nome,immagine,video,link}).eq('id',editId).select('id,nome,immagine,video,link').maybeSingle();
+ const {data,error}=await sb.from('sponsor').update({nome,immagine,video,link}).eq('id',editId).eq('azienda_id',aziendaId).select('id,nome,immagine,video,link,azienda_id').maybeSingle();
  if(error)throw new Error('Errore salvataggio sponsor: '+error.message);
  if(!data)throw new Error('Lo sponsor selezionato non è stato aggiornato.');
  savedId=data.id;
 }else{
- const {data,error}=await sb.from('sponsor').insert({nome,immagine,video,link}).select('id,nome,immagine,video,link').single();
+ const {data,error}=await sb.from('sponsor').insert({nome,immagine,video,link,azienda_id:aziendaId}).select('id,nome,immagine,video,link,azienda_id').single();
  if(error)throw new Error('Errore salvataggio sponsor: '+error.message);
  if(!data)throw new Error('Sponsor salvato senza ricevere il relativo ID.');
  savedId=data.id;
@@ -77,7 +80,7 @@ await sponsor()}catch(error){console.error('Errore gestione sponsor:',error);ale
 };
 bindForm();
 document.querySelectorAll('[data-sponsor-edit]').forEach(b=>b.onclick=()=>{const item=items.find(x=>String(x.id)===String(b.dataset.sponsorEdit));if(!item)return;const box=$('sponsorEditor');if(box){box.innerHTML=form(item);const save=$('sponsorSave');if(save)save.dataset.editId=item.id;bindForm();box.scrollIntoView({behavior:'smooth',block:'nearest'})}});
-document.querySelectorAll('[data-sponsor-del]').forEach(b=>b.onclick=async()=>{if(!confirm('Eliminare questo sponsor globale?'))return;const sb=window.supabaseClient||window.sb;if(!sb)return;const {error}=await sb.from('sponsor').delete().eq('id',b.dataset.sponsorDel);if(error){alert('Errore eliminazione sponsor: '+error.message);return}await sponsor()});
+document.querySelectorAll('[data-sponsor-del]').forEach(b=>b.onclick=async()=>{if(!confirm('Eliminare questo sponsor della società?'))return;const sb=window.supabaseClient||window.sb;const aziendaId=String(window.aziendaId||'').trim();if(!sb||!aziendaId)return;const {error}=await sb.from('sponsor').delete().eq('id',b.dataset.sponsorDel).eq('azienda_id',aziendaId);if(error){alert('Errore eliminazione sponsor: '+error.message);return}await sponsor()});
 }
 
 function whatsapp(){
