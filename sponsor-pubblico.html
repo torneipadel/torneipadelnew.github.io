@@ -28,12 +28,61 @@
 </section>
 <section class="hero"><div class="eyebrow">eventour gestione &amp; eventi</div><h1>I nostri Sponsor</h1><p class="subtitle">Le realtà che sostengono il nostro club e contribuiscono a rendere speciali tornei, iniziative e momenti da vivere insieme.</p></section>
 <section class="section"><div class="section-title">🤝 Partner del club</div><div class="section-note">Una vetrina dedicata alle attività che scelgono di essere al nostro fianco.</div><div class="sponsors" id="sponsorsGrid"></div><div class="demo-badge" id="demoBadge">Dati demo di prova</div></section>
+
+<section class="section" id="sponsorAdmin" hidden aria-label="Gestione sponsor società"><div class="section-title">⚙️ Gestione sponsor</div><div class="section-note" id="sponsorAdminStatus">Verifica dei permessi amministrativi…</div><form id="sponsorAdminForm" style="display:grid;gap:10px;max-width:560px;margin:0 auto;text-align:left"><label for="adminSponsorName">Nome sponsor</label><input id="adminSponsorName" required maxlength="120" placeholder="Nome sponsor" style="padding:12px;border-radius:9px;border:1px solid #ffffff40;background:#ffffff12;color:#fff"><label for="adminSponsorLogo">Logo (PNG, JPG, WEBP o SVG · max 2 MB)</label><input id="adminSponsorLogo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><label for="adminSponsorVideo">Video sponsor (URL facoltativo)</label><input id="adminSponsorVideo" type="url" placeholder="https://…" style="padding:12px;border-radius:9px;border:1px solid #ffffff40;background:#ffffff12;color:#fff"><label for="adminSponsorLink">Sito web sponsor</label><input id="adminSponsorLink" type="url" required placeholder="https://…" style="padding:12px;border-radius:9px;border:1px solid #ffffff40;background:#ffffff12;color:#fff"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="cta" id="adminSponsorSave" type="submit">＋ Inserisci sponsor</button><button class="filter" id="adminSponsorCancel" type="button" hidden>Annulla modifica</button></div></form><div id="sponsorAdminList" style="display:grid;gap:10px;margin-top:18px"></div></section>
 <a class="back" href="2Page.html">← Torna alla Home</a><footer><span id="sponsorCompanyName">Eventour</span> · gestione eventi · SPONSOR<br>Per informazioni, contatta la società organizzatrice.</footer>
 </main>
 <script>
 const SUPABASE_URL='https://dkeqicstprvvfebiaooc.supabase.co',SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg';const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 function getCompanySlug(){const p=(new URLSearchParams(location.search).get('azienda')||'').trim();if(p)return p;try{return (sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim()}catch(e){return ''}}
-const demo=[{nome:'PADEL PARTNER',type:'Partner tecnico',abbr:'PP'},{nome:'SPORT POINT',type:'Sport & benessere',abbr:'SP'},{nome:'NEXT FOOD',type:'Food & hospitality',abbr:'NF'},{nome:'URBAN CLUB',type:'Servizi per il territorio',abbr:'UC'}];function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(list,isDemo){const grid=document.getElementById('sponsorsGrid');document.getElementById('demoBadge').style.display=isDemo?'inline-block':'none';if(!list.length){grid.innerHTML='<div class="empty">Nessuno sponsor pubblicato al momento.</div>';return}grid.innerHTML=list.map(s=>{const logo=s.immagine?`<div class="sponsor-logo"><img src="${esc(s.immagine)}" alt="${esc(s.nome)}"></div>`:`<div class="sponsor-logo"><span class="demo-logo">${esc(s.abbr||s.nome.slice(0,2).toUpperCase())}</span></div>`;const link=s.link?`<a class="sponsor-link" href="${esc(s.link)}" target="_blank" rel="noopener noreferrer">VISITA IL SITO →</a>`:'';return `<article class="sponsor-card">${logo}<div class="sponsor-name">${esc(s.nome)}</div><div class="sponsor-type">${esc(s.type||'Partner')}</div>${link}</article>`}).join('')}async function loadCompanyBrand(){const slug=getCompanySlug();if(!slug)return;try{const r=await fetch(SUPABASE_URL+'/functions/v1/public-company-legal?slug='+encodeURIComponent(slug));if(!r.ok)return;const j=await r.json(),a=j?.azienda||{};const name=String(a.nome_app||a.ragione_sociale||a.nome||'').trim();if(name)document.getElementById('sponsorCompanyName').textContent=name}catch(e){console.warn('Nome società sponsor non disponibile',e)}}async function loadSponsors(){const slug=getCompanySlug();if(!slug){render([]);return}const {data,error}=await sb.rpc('get_public_company_sponsors',{p_slug:slug});if(error){console.error('Sponsor non disponibili',error);render([]);return}render((data||[]).filter(s=>s&&s.nome),false)}loadCompanyBrand();loadSponsors();
+const demo=[{nome:'PADEL PARTNER',type:'Partner tecnico',abbr:'PP'},{nome:'SPORT POINT',type:'Sport & benessere',abbr:'SP'},{nome:'NEXT FOOD',type:'Food & hospitality',abbr:'NF'},{nome:'URBAN CLUB',type:'Servizi per il territorio',abbr:'UC'}];function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(list,isDemo){const grid=document.getElementById('sponsorsGrid');document.getElementById('demoBadge').style.display=isDemo?'inline-block':'none';if(!list.length){grid.innerHTML='<div class="empty">Nessuno sponsor pubblicato al momento.</div>';return}grid.innerHTML=list.map(s=>{const logo=s.immagine?`<div class="sponsor-logo"><img src="${esc(s.immagine)}" alt="${esc(s.nome)}"></div>`:`<div class="sponsor-logo"><span class="demo-logo">${esc(s.abbr||s.nome.slice(0,2).toUpperCase())}</span></div>`;const link=s.link?`<a class="sponsor-link" href="${esc(s.link)}" target="_blank" rel="noopener noreferrer">VISITA IL SITO →</a>`:'';return `<article class="sponsor-card">${logo}<div class="sponsor-name">${esc(s.nome)}</div><div class="sponsor-type">${esc(s.type||'Partner')}</div>${link}</article>`}).join('')}async function loadCompanyBrand(){const slug=getCompanySlug();if(!slug)return;try{const r=await fetch(SUPABASE_URL+'/functions/v1/public-company-legal?slug='+encodeURIComponent(slug));if(!r.ok)return;const j=await r.json(),a=j?.azienda||{};const name=String(a.nome_app||a.ragione_sociale||a.nome||'').trim();if(name)document.getElementById('sponsorCompanyName').textContent=name}catch(e){console.warn('Nome società sponsor non disponibile',e)}}async function loadSponsors(){const slug=getCompanySlug();if(!slug){render([]);return}const {data,error}=await sb.rpc('get_public_company_sponsors',{p_slug:slug});if(error){console.error('Sponsor non disponibili',error);render([]);return}render((data||[]).filter(s=>s&&s.nome),false)}
+let sponsorAdminCompanyId='',sponsorAdminItems=[],sponsorAdminEditId=null;
+async function initSponsorAdmin(){
+ const panel=document.getElementById('sponsorAdmin'),status=document.getElementById('sponsorAdminStatus');
+ const slug=getCompanySlug();if(!slug)return;
+ try{
+  const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+  if(sessionError||!sessionData?.session?.user)return;
+  const companyId=(sessionStorage.getItem('nextpoint_login_azienda_id')||'').trim();
+  const role=(sessionStorage.getItem('nextpoint_login_role')||'').toLowerCase();
+  const sessionSlug=(sessionStorage.getItem('nextpoint_login_azienda_slug')||'').trim();
+  if(!companyId||!sessionSlug||sessionSlug!==slug||!['owner','admin','superadmin'].includes(role))return;
+  const {data:accessRows,error:accessError}=await sb.rpc('get_my_azienda_access',{p_azienda_id:companyId});
+  if(accessError)throw accessError;
+  const access=(Array.isArray(accessRows)?accessRows:[]).find(x=>String(x.azienda_id)===companyId);
+  if(!access?.accesso_consentito||!['owner','admin','superadmin'].includes(String(access.ruolo||'').toLowerCase()))return;
+  sponsorAdminCompanyId=companyId;panel.hidden=false;status.textContent='Puoi gestire esclusivamente gli sponsor di questa società.';
+  await refreshSponsorAdmin();
+ }catch(e){console.error('Verifica gestione sponsor non riuscita:',e);status.textContent='Gestione sponsor non disponibile: verifica dei permessi non riuscita.'}
+}
+async function refreshSponsorAdmin(){
+ const {data,error}=await sb.from('sponsor').select('id,nome,immagine,video,link,azienda_id').eq('azienda_id',sponsorAdminCompanyId).order('id',{ascending:true});
+ if(error)throw error;sponsorAdminItems=data||[];
+ const root=document.getElementById('sponsorAdminList');
+ root.innerHTML=sponsorAdminItems.length?sponsorAdminItems.map(s=>'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid #ffffff25;border-radius:12px;background:#ffffff0b"><strong style="flex:1">'+esc(s.nome)+'</strong><button class="filter" type="button" data-edit-sponsor="'+esc(s.id)+'">Modifica</button><button class="filter" type="button" data-delete-sponsor="'+esc(s.id)+'">Elimina</button></div>').join(''):'<div class="empty">Non hai ancora inserito sponsor.</div>';
+ root.querySelectorAll('[data-edit-sponsor]').forEach(b=>b.onclick=()=>{const s=sponsorAdminItems.find(x=>String(x.id)===b.dataset.editSponsor);if(!s)return;sponsorAdminEditId=s.id;document.getElementById('adminSponsorName').value=s.nome||'';document.getElementById('adminSponsorVideo').value=s.video||'';document.getElementById('adminSponsorLink').value=s.link||'';document.getElementById('adminSponsorLogo').value='';document.getElementById('adminSponsorSave').textContent='💾 Salva modifiche';document.getElementById('adminSponsorCancel').hidden=false;document.getElementById('sponsorAdmin').scrollIntoView({behavior:'smooth',block:'start'})});
+ root.querySelectorAll('[data-delete-sponsor]').forEach(b=>b.onclick=async()=>{if(!confirm('Eliminare questo sponsor?'))return;const {error}=await sb.from('sponsor').delete().eq('id',b.dataset.deleteSponsor).eq('azienda_id',sponsorAdminCompanyId);if(error){alert('Eliminazione non riuscita: '+error.message);return}await refreshSponsorAdmin();await loadSponsors()});
+}
+document.getElementById('sponsorAdminForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!sponsorAdminCompanyId)return;
+ const nome=document.getElementById('adminSponsorName').value.trim(),video=document.getElementById('adminSponsorVideo').value.trim(),link=document.getElementById('adminSponsorLink').value.trim(),file=document.getElementById('adminSponsorLogo').files?.[0];
+ if(!nome||!link){alert('Inserisci nome e sito dello sponsor.');return}
+ if(file&&(!['image/png','image/jpeg','image/webp','image/svg+xml'].includes(file.type)||file.size>2*1024*1024)){alert('Logo non valido: usa PNG, JPG, WEBP o SVG fino a 2 MB.');return}
+ const btn=document.getElementById('adminSponsorSave');btn.disabled=true;btn.textContent='Salvataggio…';
+ try{
+  let immagine=sponsorAdminEditId?(sponsorAdminItems.find(x=>String(x.id)===String(sponsorAdminEditId))?.immagine||''):'';
+  if(file)immagine=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result||''));reader.onerror=()=>reject(new Error('Lettura logo non riuscita'));reader.readAsDataURL(file)});
+  let q;
+  if(sponsorAdminEditId)q=await sb.from('sponsor').update({nome,immagine,video,link}).eq('id',sponsorAdminEditId).eq('azienda_id',sponsorAdminCompanyId);
+  else q=await sb.from('sponsor').insert({nome,immagine,video,link,azienda_id:sponsorAdminCompanyId});
+  if(q.error)throw q.error;
+  sponsorAdminEditId=null;e.target.reset();btn.textContent='＋ Inserisci sponsor';document.getElementById('adminSponsorCancel').hidden=true;
+  await refreshSponsorAdmin();await loadSponsors();
+ }catch(err){console.error(err);alert('Salvataggio sponsor non riuscito: '+err.message)}
+ finally{btn.disabled=false;if(!sponsorAdminEditId)btn.textContent='＋ Inserisci sponsor'}
+});
+document.getElementById('adminSponsorCancel').addEventListener('click',()=>{sponsorAdminEditId=null;document.getElementById('sponsorAdminForm').reset();document.getElementById('adminSponsorSave').textContent='＋ Inserisci sponsor';document.getElementById('adminSponsorCancel').hidden=true});
+\nloadCompanyBrand();loadSponsors();initSponsorAdmin();
 </script>
 <script>
 (function isolateNewsEventourLogo(){
