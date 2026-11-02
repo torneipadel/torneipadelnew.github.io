@@ -1,0 +1,50 @@
+name: Backup completo Eventour ZIP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/backup-completo-zip.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup-completo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout completo con tutta la cronologia Git
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepara archivio completo
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="Eventour_backup_${GITHUB_SHA}"
+          mkdir -p "$ROOT/progetto" "$ROOT/cronologia-git"
+          git archive HEAD | tar -x -C "$ROOT/progetto"
+          git bundle create "$ROOT/cronologia-git/repository-completo.bundle" --all
+          cat > "$ROOT/LEGGIMI.txt" <<EOF
+          BACKUP COMPLETO EVENTOUR
+          Commit: $GITHUB_SHA
+          Data UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          progetto/ contiene tutti i file e le cartelle versionati nel repository al commit indicato.
+          cronologia-git/repository-completo.bundle contiene la cronologia Git e i riferimenti disponibili.
+          Per ripristinare la cronologia: git clone repository-completo.bundle Eventour
+          EOF
+          zip -qr "Eventour_backup_completo_${GITHUB_SHA}.zip" "$ROOT"
+          sha256sum "Eventour_backup_completo_${GITHUB_SHA}.zip" > "Eventour_backup_completo_${GITHUB_SHA}.zip.sha256"
+
+      - name: Pubblica archivio ZIP come artefatto scaricabile
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eventour-backup-completo-${{ github.run_number }}
+          path: |
+            Eventour_backup_completo_*.zip
+            Eventour_backup_completo_*.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
