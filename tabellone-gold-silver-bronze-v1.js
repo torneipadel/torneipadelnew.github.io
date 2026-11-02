@@ -356,6 +356,10 @@ function renderCustomFinals(){
   });
   html+='</div>';
   html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Orari e campi vengono assegnati automaticamente in base a '+courts+' campo/i e alla durata di '+Number(s.rules.duration||20)+' minuti, senza sovrapporre due incontri della stessa squadra.</p>';
+  html+='<div class="gsb-save-panel" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin:18px auto;padding:14px;border:1px solid #64748b;border-radius:12px;max-width:680px">';
+  html+='<button type="button" id="gsb-save-button" style="padding:12px 22px;border:0;border-radius:9px;background:#166534;color:#fff;font-weight:700;cursor:pointer" onclick="window.saveGoldSilverBronzeResults(false)">SALVA RISULTATI FINALI</button>';
+  html+='<span id="gsb-save-status" role="status" aria-live="polite" style="font-weight:600">I risultati vengono salvati automaticamente quando li modifichi. Puoi anche premere SALVA RISULTATI FINALI.</span>';
+  html+='</div>';
   host.innerHTML=html;
 }
 function updateFinalStandings(stageKey){
@@ -428,8 +432,12 @@ async function saveGoldSilverBronzeResultsNow(automatic=false,request=0){
   // Garantisce che la fotografia completa delle coppie qualificate sia
   // inclusa nella stessa scrittura Supabase dei risultati finali.
   normalizeTeams();
-  const s=activeState();if(!s||!isSpecial())return false;
   const status=document.getElementById('gsb-save-status');
+  const s=activeState();
+  if(!s||!isSpecial()){
+    if(status)status.textContent='Errore: il torneo non risulta caricato nel formato Gold/Silver/Bronze. Nessun dato è stato salvato.';
+    return false;
+  }
   if(status)status.textContent='Salvataggio dei risultati in corso…';
   ['gold','silver','bronze'].forEach(stageKey=>{
     const key=stageKey+'Res';
