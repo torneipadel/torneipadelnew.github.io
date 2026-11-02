@@ -96,6 +96,19 @@ async function start(){
   }
   client=window.sb=window.__NP_SUPABASE_CLIENT__||window.sb||window.supabaseClient||(supabase.createClient(URL_SUPABASE,KEY,{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
   window.__NP_SUPABASE_CLIENT__=client;
+  // L'area della singola società è riservata agli utenti associati.
+  const sessionCheck=await client.auth.getSession();
+  if(!sessionCheck.data?.session){
+    location.replace('login-utente.html?azienda='+encodeURIComponent(publicCompany.slug));
+    return;
+  }
+  const accessCheck=await client.rpc('get_my_azienda_access',{p_azienda_id:publicCompany.id});
+  const accessRows=Array.isArray(accessCheck.data)?accessCheck.data:[];
+  const visitorAccess=accessRows.find(x=>String(x.azienda_id)===String(publicCompany.id));
+  if(accessCheck.error||!visitorAccess||!visitorAccess.accesso_consentito||String(visitorAccess.ruolo||'').toLowerCase()!=='user'){
+    location.replace('login-utente.html?azienda='+encodeURIComponent(publicCompany.slug));
+    return;
+  }
   await loadData();
   renderHero();
   await userBlock();
