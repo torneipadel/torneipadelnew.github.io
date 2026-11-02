@@ -11,7 +11,7 @@
 const sb=supabase.createClient("https://dkeqicstprvvfebiaooc.supabase.co","sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu",{auth:{storageKey:"eventour-visitor-auth",persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const params=new URLSearchParams(location.search),azienda=params.get("azienda")||"",q=encodeURIComponent(azienda);
 const msg=document.getElementById("msg"),goBtn=document.getElementById("go");
-let companyRecord=null,busy=false;
+let companyRecord=null,busy=false,loginSessionCreated=false;
 document.getElementById("back").href="societa.html?slug="+q;
 document.getElementById("reg").href="registrazione-utente.html?azienda="+q;
 async function init(){
@@ -32,6 +32,7 @@ async function go(){
   try{
     const auth=await sb.auth.signInWithPassword({email,password});
     if(auth.error||!auth.data?.user){msg.textContent=auth.error?.message||"Accesso non riuscito.";return}
+    loginSessionCreated=true;
     const user=auth.data.user,meta=user.user_metadata||{};
     const membership=await sb.rpc("complete_visitor_membership",{
       p_azienda_slug:companyRecord.slug,
@@ -41,13 +42,13 @@ async function go(){
     });
     const result=Array.isArray(membership.data)?membership.data[0]:membership.data;
     if(membership.error||!result?.ok||result.azienda_id!==companyRecord.id){
-      await sb.auth.signOut();
+      await sb.auth.signOut();loginSessionCreated=false;
       msg.textContent=membership.error?.message||"Non è stato possibile verificare l'accesso a questa società.";
       return;
     }
     const ruoloAccesso=String(result.ruolo||"").toLowerCase();
     if(ruoloAccesso!=="user"){
-      await sb.auth.signOut();
+      await sb.auth.signOut();loginSessionCreated=false;
       msg.textContent="Questo accesso è riservato agli account visitatore. Per la gestione della società, usa Accesso società.";
       return;
     }
@@ -67,8 +68,10 @@ async function go(){
     sessionStorage.setItem("nextpoint_login_role","user");
     sessionStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
     localStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
+    loginSessionCreated=false;
     window.location.replace("visitatore.html?azienda="+encodeURIComponent(companyRecord.slug));
   }catch(e){
+    if(loginSessionCreated){try{await sb.auth.signOut()}catch(cleanupError){console.error("Pulizia sessione dopo errore login non riuscita:",cleanupError)}loginSessionCreated=false}
     console.error("Errore accesso visitatore:",e);
     msg.textContent="Errore di collegamento. Riprova.";
   }finally{busy=false;goBtn.disabled=false}
