@@ -7018,6 +7018,49 @@ async function updateAndSyncImpl(showSaveResult=false){
         }
 
 
+        // La configurazione del tabellone non contiene i contenuti editoriali
+        // gestiti dall'admin (es. locandina in configurazione.news). Prima di
+        // aggiornare il torneo leggiamo la configurazione attuale e la fondiamo
+        // con lo snapshot del tabellone, evitando di cancellare dati estranei.
+        let configurazioneRemotaEsistente = {};
+        if(remoto){
+            const letturaConfigurazione = await sb
+                .from("tornei")
+                .select("id,configurazione")
+                .eq("id", snapshot.idTorneo)
+                .maybeSingle();
+
+            if(letturaConfigurazione.error || !letturaConfigurazione.data){
+                console.error(
+                    "UPDATE AND SYNC: impossibile leggere la configurazione esistente; salvataggio interrotto per non perdere dati.",
+                    letturaConfigurazione.error || null
+                );
+                return false;
+            }
+
+            configurazioneRemotaEsistente = letturaConfigurazione.data.configurazione || {};
+            if(typeof configurazioneRemotaEsistente === "string"){
+                try{
+                    configurazioneRemotaEsistente = JSON.parse(configurazioneRemotaEsistente);
+                }catch(_){
+                    configurazioneRemotaEsistente = {};
+                }
+            }
+            if(!configurazioneRemotaEsistente || typeof configurazioneRemotaEsistente !== "object" || Array.isArray(configurazioneRemotaEsistente)){
+                configurazioneRemotaEsistente = {};
+            }
+        }
+
+        const configurazioneDaSalvare = remoto
+            ? Object.assign({}, configurazioneRemotaEsistente, snapshot)
+            : snapshot;
+
+        // "news" è gestito dall'editor amministrativo e non deve essere
+        // sovrascritto da uno snapshot del tabellone, nemmeno se vuoto.
+        if(remoto && Object.prototype.hasOwnProperty.call(configurazioneRemotaEsistente, "news")){
+            configurazioneDaSalvare.news = configurazioneRemotaEsistente.news;
+        }
+
         const payloadSupabase = {
             nome:
                 snapshot.nomeTorneo,
@@ -7026,7 +7069,7 @@ async function updateAndSyncImpl(showSaveResult=false){
                 snapshot.dataTorneo || null,
 
             configurazione:
-                snapshot,
+                configurazioneDaSalvare,
 
             updated_at:
                 new Date().toISOString()
@@ -8426,10 +8469,36 @@ async function reset(){
 
         if (erroreIscrizioni) throw erroreIscrizioni;
 
-        // Aggiorna SOLO la configurazione del record esistente: il torneo non viene eliminato.
+        // Il reset riguarda i dati del tabellone, non i contenuti editoriali.
+        // Manteniamo quindi la configurazione esistente e sostituiamo solo i
+        // campi gestiti dal tabellone, preservando in particolare configurazione.news.
+        const letturaConfigReset = await sb
+            .from("tornei")
+            .select("id,configurazione")
+            .eq("id", idTorneoDaAzzerare)
+            .maybeSingle();
+
+        if(letturaConfigReset.error || !letturaConfigReset.data){
+            throw letturaConfigReset.error || new Error("Torneo non trovato: reset interrotto per proteggere i dati.");
+        }
+
+        let configResetEsistente = letturaConfigReset.data.configurazione || {};
+        if(typeof configResetEsistente === "string"){
+            try{ configResetEsistente = JSON.parse(configResetEsistente); }
+            catch(_){ configResetEsistente = {}; }
+        }
+        if(!configResetEsistente || typeof configResetEsistente !== "object" || Array.isArray(configResetEsistente)){
+            configResetEsistente = {};
+        }
+
+        const configResetFinale = Object.assign({}, configResetEsistente, statoPulito);
+        if(Object.prototype.hasOwnProperty.call(configResetEsistente, "news")){
+            configResetFinale.news = configResetEsistente.news;
+        }
+
         const { error: erroreAggiornamento } = await sb
             .from("tornei")
-            .update({ configurazione: statoPulito })
+            .update({ configurazione: configResetFinale })
             .eq("id", idTorneoDaAzzerare);
 
         if (erroreAggiornamento) throw erroreAggiornamento;
