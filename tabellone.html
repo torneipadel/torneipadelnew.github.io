@@ -8563,44 +8563,53 @@ function formatCoppiaDisplay(coppia){
     if(coppia===undefined || coppia===null)
         return "";
 
+    function formatNomeCompleto(valore){
+        const testo=String(valore??"").trim().replace(/\\s+/g," ");
+        if(!testo) return "";
+        if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\\./.test(testo)) return testo;
+        const parti=testo.split(" ").filter(Boolean);
+        if(parti.length>=2)
+            return parti[0].charAt(0).toLocaleUpperCase("it-IT")+"."+parti.slice(1).join(" ");
+        return testo;
+    }
+
     function giocatore(g){
         if(g===undefined || g===null)
             return "";
 
         if(typeof g==="string" || typeof g==="number"){
-            const t=String(g).trim();
-            if(!t) return "";
-            if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\\./.test(t)) return t;
-            const p=t.split(/\\s+/).filter(Boolean);
-            if(p.length>=2)
-                return p[0].charAt(0).toUpperCase()+"."+p.slice(1).join(" ");
-            return t;
+            const testo=String(g).trim();
+            if(!testo) return "";
+            if(testo.includes(" / "))
+                return testo.split(" / ").map(formatNomeCompleto).join(" / ");
+            return formatNomeCompleto(testo);
         }
 
         if(typeof g==="object"){
             const nome=String(g.nome||g.name||"").trim();
             const cognome=String(g.cognome||g.surname||"").trim();
             if(nome && cognome)
-                return nome.charAt(0).toUpperCase()+"."+cognome;
+                return nome.charAt(0).toLocaleUpperCase("it-IT")+"."+cognome;
+            const nomeCompleto=
+                g.nome_giocatore||g.nominativo||g.full_name||g.fullName||
+                g.display_name||g.nome_completo||nome;
+            if(nomeCompleto) return formatNomeCompleto(nomeCompleto);
             if(cognome) return cognome;
-            if(nome) return nome;
         }
         return String(g);
     }
 
-    if(typeof coppia==="string" || typeof coppia==="number"){
-        const t=String(coppia).trim();
-        if(t.includes(" / "))
-            return t.split(" / ").map(giocatore).join(" / ");
-        return giocatore(t);
-    }
+    if(typeof coppia==="string" || typeof coppia==="number")
+        return giocatore(coppia);
 
     if(typeof coppia==="object"){
         if(coppia.g1!==undefined || coppia.g2!==undefined)
             return [giocatore(coppia.g1),giocatore(coppia.g2)].filter(Boolean).join(" / ");
         if(coppia.giocatore1!==undefined || coppia.giocatore2!==undefined)
             return [giocatore(coppia.giocatore1),giocatore(coppia.giocatore2)].filter(Boolean).join(" / ");
-        if(coppia.nome!==undefined || coppia.cognome!==undefined)
+        if(coppia.nome!==undefined || coppia.cognome!==undefined ||
+           coppia.nome_giocatore!==undefined || coppia.nominativo!==undefined ||
+           coppia.full_name!==undefined || coppia.fullName!==undefined)
             return giocatore(coppia);
     }
 
