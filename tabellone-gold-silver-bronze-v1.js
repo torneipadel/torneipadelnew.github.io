@@ -141,6 +141,7 @@ function normalizeTeams(){
   s.goldSilverBronze.courts=Math.max(1,Math.min(50,Math.floor(Number(s.rules?.campi)||3)));
   s.goldSilverBronze.matchDurationMinutes=Math.max(1,Number(s.rules?.duration)||20);
   ['gold','silver','bronze'].forEach(k=>s.goldSilverBronze.results[k]=normalizedResults(s[k+'Res']));
+  syncQualificationAssignments();
   syncFinalPlacements();
 }
 function standings(tag){
@@ -157,6 +158,41 @@ function finalTeams(stage){
   const s=activeState();
   if(!groupsComplete())return [];
   return groups.map(g=>standings(g)[stage.position-1]?.n||'');
+}
+function teamIdentity(value){
+  if(value&&typeof value==='object')return String(value.id||displayTeamName(value)||teamName(value));
+  return String(value??'');
+}
+function syncQualificationAssignments(){
+  const s=activeState();if(!s||!isSpecial())return;
+  if(!s.goldSilverBronze||typeof s.goldSilverBronze!=='object')s.goldSilverBronze={version:1,results:{}};
+  const previous=s.goldSilverBronze.qualifiedTeams||null;
+  if(!groupsComplete()){
+    if(previous){
+      ['gold','silver','bronze'].forEach(key=>{
+        s[key+'Res']=Array(3).fill('-');
+        s.goldSilverBronze.results=s.goldSilverBronze.results||{};
+        s.goldSilverBronze.results[key]=['-','-','-'];
+      });
+      s.goldSilverBronze.qualifiedTeams=null;
+    }
+    return;
+  }
+  const current={};
+  stages.forEach(stage=>{current[stage.key]=finalTeams(stage).map(teamIdentity)});
+  if(previous&&JSON.stringify(previous)!==JSON.stringify(current)){
+    // I risultati finali appartengono alle squadre precedentemente qualificate:
+    // se cambia anche l'ordine degli incontri, vanno azzerati per evitare abbinamenti errati.
+    ['gold','silver','bronze'].forEach(key=>{
+      s[key+'Res']=Array(3).fill('-');
+      s.goldSilverBronze.results=s.goldSilverBronze.results||{};
+      s.goldSilverBronze.results[key]=['-','-','-'];
+    });
+    s.goldSilverBronze.finalPlacements=[];
+    s.goldSilverBronze.winners={};
+    s.goldSilverBronze.finalStandingsComplete=false;
+  }
+  s.goldSilverBronze.qualifiedTeams=current;
 }
 function timeAt(offset){
   const s=activeState(),r=s?.rules||{},parts=String(r.start||'20:00').split(':');
