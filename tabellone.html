@@ -651,6 +651,15 @@ function configuraMenuIscritto(){
     const menu = document.getElementById("menuComandi");
     if(!container || !toggle || !menu) return;
 
+    /* In modalità iscritto deve esistere un solo pulsante hamburger:
+       conserva quello che controlla #menuComandi e rimuove eventuali copie
+       create da script precedenti o da markup duplicato. */
+    document.querySelectorAll(
+        "button.menu-button, button.admin-rules-button, button[aria-label='Apri menu']"
+    ).forEach(function(candidate){
+        if(candidate !== toggle) candidate.remove();
+    });
+
     toggle.textContent = "☰";
     toggle.setAttribute("aria-label", "Apri menu");
     toggle.title = "Menu";
