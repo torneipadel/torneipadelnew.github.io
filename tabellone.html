@@ -646,52 +646,51 @@ function configuraMenuIscritto(){
     document.body.classList.add("user-mode");
     document.body.classList.remove("access-pending");
 
-    const container = document.querySelector(".menu-container");
-    const toggle = container && container.querySelector(".admin-rules-button.menu-button");
-    const menu = document.getElementById("menuComandi");
-    if(!container || !toggle || !menu) return;
+    /*
+      MODALITÀ ISCRITTO TEMPORANEA:
+      disattiva completamente il vecchio menu amministrativo e crea
+      un menu autonomo che contiene esclusivamente Esci.
+    */
+    const vecchioMenu = document.querySelector(".menu-container");
+    if(vecchioMenu){
+        vecchioMenu.style.setProperty("display","none","important");
+        vecchioMenu.setAttribute("aria-hidden","true");
+    }
 
-    /* In modalità iscritto deve esistere un solo pulsante hamburger:
-       conserva quello che controlla #menuComandi e rimuove eventuali copie
-       create da script precedenti o da markup duplicato. */
-    document.querySelectorAll(
-        "button.menu-button, button.admin-rules-button, button[aria-label='Apri menu']"
-    ).forEach(function(candidate){
-        if(candidate !== toggle) candidate.remove();
-    });
+    let nuovoMenu = document.getElementById("iscrittoExitMenu");
+    if(!nuovoMenu){
+        nuovoMenu = document.createElement("div");
+        nuovoMenu.id = "iscrittoExitMenu";
+        nuovoMenu.innerHTML = `
+            <button type="button" id="iscrittoExitToggle" aria-label="Apri menu" title="Menu">☰</button>
+            <div id="iscrittoExitDropdown" hidden>
+                <button type="button" id="iscrittoExitButton">🚪 Esci</button>
+            </div>
+        `;
+        document.body.appendChild(nuovoMenu);
 
-    toggle.textContent = "☰";
-    toggle.setAttribute("aria-label", "Apri menu");
-    toggle.title = "Menu";
+        const toggle = nuovoMenu.querySelector("#iscrittoExitToggle");
+        const dropdown = nuovoMenu.querySelector("#iscrittoExitDropdown");
+        toggle.addEventListener("click", function(){
+            dropdown.hidden = !dropdown.hidden;
+        });
 
-    const buttons = [...menu.querySelectorAll("button")];
-    buttons.forEach((button, index) => {
-        const isExit = index === buttons.length - 1;
-        button.classList.toggle("user-exit", isExit);
-        button.style.setProperty("display", isExit ? "block" : "none", "important");
-        button.style.setProperty("visibility", isExit ? "visible" : "hidden", "important");
-        button.style.setProperty("pointer-events", isExit ? "auto" : "none", "important");
-        button.disabled = !isExit;
-        if(isExit){
-            button.textContent = "🚪 Esci";
-            button.onclick = async function(){
-                button.disabled = true;
-                button.textContent = "⏳ Uscita...";
-                try{
-                    if(window.sb && window.sb.auth){
-                        const uscita = await window.sb.auth.signOut({scope:"local"});
-                        if(uscita && uscita.error){
-                            console.error("Errore durante la disconnessione:", uscita.error);
-                        }
-                    }
-                }catch(errore){
-                    console.error("Errore durante la disconnessione:", errore);
-                }finally{
-                    window.location.replace(new URL("index.html", window.location.href).href);
+        nuovoMenu.querySelector("#iscrittoExitButton").addEventListener("click", async function(){
+            const button = this;
+            button.disabled = true;
+            button.textContent = "⏳ Uscita...";
+            try{
+                if(window.sb && window.sb.auth){
+                    const uscita = await window.sb.auth.signOut({scope:"local"});
+                    if(uscita && uscita.error) console.error("Errore durante la disconnessione:", uscita.error);
                 }
-            };
-        }
-    });
+            }catch(errore){
+                console.error("Errore durante la disconnessione:", errore);
+            }finally{
+                window.location.replace(new URL("index.html", window.location.href).href);
+            }
+        });
+    }
 }
 
 async function verifyAccess(){
@@ -13712,5 +13711,54 @@ body.user-mode #menuComandi button.user-exit {
     min-height: 42px !important;
 }
 </style>
+
+<style id="iscritto-exit-only-menu">
+/* Menu temporaneo iscritti: sostituisce, non riutilizza, il menu amministrativo. */
+body.user-mode #iscrittoExitMenu {
+    position: fixed !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 2147483000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+}
+body.user-mode #iscrittoExitToggle {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: #000 !important;
+    color: #fff !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+}
+body.user-mode #iscrittoExitDropdown:not([hidden]) {
+    display: block !important;
+    min-width: 120px !important;
+    padding: 6px !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,.25) !important;
+}
+body.user-mode #iscrittoExitDropdown[hidden] { display: none !important; }
+body.user-mode #iscrittoExitButton {
+    display: block !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #111827 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    cursor: pointer !important;
+}
+</style>
+
 </body>
 </html>
