@@ -154,10 +154,20 @@ function groupsComplete(){
   const s=activeState();
   return !!s&&groups.every(g=>Array.isArray(s[g])&&s[g].length===3&&s[g].every(x=>String(x||'').trim())&&normalizedResults(s[g+'res']).every(validScore));
 }
-function finalTeams(stage){
-  const s=activeState();
+function computeFinalTeams(stage){
   if(!groupsComplete())return [];
   return groups.map(g=>standings(g)[stage.position-1]?.n||'');
+}
+function finalTeams(stage){
+  const s=activeState();
+  if(!s||!groupsComplete())return [];
+  const computed=computeFinalTeams(stage);
+  const snapshot=s.goldSilverBronze?.qualifiedTeamsSnapshot?.[stage.key];
+  // Riutilizza la copia completa salvata solo se gli identificativi coincidono
+  // con le qualificazioni ricalcolate dai risultati dei gironi.
+  if(Array.isArray(snapshot)&&snapshot.length===3&&
+     snapshot.every((team,i)=>teamIdentity(team)===teamIdentity(computed[i])))return snapshot;
+  return computed;
 }
 function teamIdentity(value){
   if(value&&typeof value==='object')return String(value.id||displayTeamName(value)||teamName(value));
@@ -175,11 +185,19 @@ function syncQualificationAssignments(){
         s.goldSilverBronze.results[key]=['-','-','-'];
       });
       s.goldSilverBronze.qualifiedTeams=null;
+      s.goldSilverBronze.qualifiedTeamsSnapshot=null;
     }
     return;
   }
-  const current={};
-  stages.forEach(stage=>{current[stage.key]=finalTeams(stage).map(teamIdentity)});
+  const current={},snapshot={};
+  stages.forEach(stage=>{
+    const teams=computeFinalTeams(stage);
+    current[stage.key]=teams.map(teamIdentity);
+    // Copia autonoma dei dati anagrafici: non dipende più dal ricalcolo
+    // dei gironi per mostrare i nomi nelle fasi finali.
+    snapshot[stage.key]=teams.map(team=>team&&typeof team==='object'
+      ? JSON.parse(JSON.stringify(team)) : team);
+  });
   if(previous&&JSON.stringify(previous)!==JSON.stringify(current)){
     // I risultati finali appartengono alle squadre precedentemente qualificate:
     // se cambia anche l'ordine degli incontri, vanno azzerati per evitare abbinamenti errati.
@@ -193,6 +211,7 @@ function syncQualificationAssignments(){
     s.goldSilverBronze.finalStandingsComplete=false;
   }
   s.goldSilverBronze.qualifiedTeams=current;
+  s.goldSilverBronze.qualifiedTeamsSnapshot=snapshot;
 }
 function timeAt(offset){
   const s=activeState(),r=s?.rules||{},parts=String(r.start||'20:00').split(':');
@@ -401,6 +420,9 @@ window.saveGoldSilverBronzeResults=function(automatic=false){
   return gsbSaveQueue;
 };
 async function saveGoldSilverBronzeResultsNow(automatic=false,request=0){
+  // Garantisce che la fotografia completa delle coppie qualificate sia
+  // inclusa nella stessa scrittura Supabase dei risultati finali.
+  normalizeTeams();
   const s=activeState();if(!s||!isSpecial())return false;
   const status=document.getElementById('gsb-save-status');
   if(status)status.textContent='Salvataggio dei risultati in corso…';
