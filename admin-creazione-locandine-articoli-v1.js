@@ -448,7 +448,7 @@ async function savePoster() {
     const linkedCheck=await client.from('tornei').select('id').eq('id',linked).eq('azienda_id',window.aziendaId).eq('stato','attivo').eq('pubblicato',true).maybeSingle();
     if(linkedCheck.error||!linkedCheck.data)throw new Error(linkedCheck.error?.message||'Il torneo selezionato non appartiene alla società corrente o non è attivo e pubblicato.');
    }
-   const payload={titolo:title,testo:body,immagine:existing?.immagine||null,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked||null,azienda_id:window.aziendaId};
+   const payload={titolo:title,testo:body,immagine:image,locandina:image,pubblicata:true,tipo:kind==='articolo'?'Articolo':(existing?.tipo||'Comunicazione'),link,in_evidenza:existing?.in_evidenza||false,ordine:existing?.ordine||0,torneo_id:linked||null,azienda_id:window.aziendaId};
    let result;
    if(existing?.id)result=await client.from('news').update(payload).eq('id',existing.id).eq('azienda_id',window.aziendaId).select('id,titolo,torneo_id').maybeSingle();
    else result=await client.from('news').insert(payload).select('id,titolo,torneo_id').single();
