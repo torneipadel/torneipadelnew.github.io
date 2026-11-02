@@ -13947,5 +13947,23 @@ body.user-mode #iscrittoExitButton {
 }
 </style>
 
+
+<style id="admin-girone-b-score-hitarea-fix">
+/* Admin: porta i soli campi risultato del Girone B davanti a eventuali
+   livelli sovrapposti dell'area comandi. La modalità visitatore resta invariata. */
+body:not(.user-mode) #cardB {
+    position: relative !important;
+    z-index: 10000 !important;
+}
+body:not(.user-mode) #cardB .db-cell,
+body:not(.user-mode) #cardB .db-cell input {
+    pointer-events: auto !important;
+}
+body:not(.user-mode) #cardB .db-cell input {
+    position: relative !important;
+    z-index: 10001 !important;
+    cursor: text !important;
+}
+</style>
 </body>
 </html>
