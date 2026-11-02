@@ -356,11 +356,15 @@ function renderCustomFinals(){
   });
   html+='</div>';
   html+='<p class="gsb-total"><b>Riepilogo:</b> 9 partite nei gironi + 9 partite nelle finali = 18 partite. Orari e campi vengono assegnati automaticamente in base a '+courts+' campo/i e alla durata di '+Number(s.rules.duration||20)+' minuti, senza sovrapporre due incontri della stessa squadra.</p>';
-  html+='<div class="gsb-save-panel" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin:18px auto;padding:14px;border:1px solid #64748b;border-radius:12px;max-width:680px">';
-  html+='<button type="button" id="gsb-save-button" style="padding:12px 22px;border:0;border-radius:9px;background:#166534;color:#fff;font-weight:700;cursor:pointer" onclick="window.saveGoldSilverBronzeResults(false)">SALVA RISULTATI FINALI</button>';
-  html+='<span id="gsb-save-status" role="status" aria-live="polite" style="font-weight:600">I risultati vengono salvati automaticamente quando li modifichi. Puoi anche premere SALVA RISULTATI FINALI.</span>';
+  html+='<div class="gsb-save-panel" style="display:flex;align-items:center;justify-content:center;margin:18px auto;padding:10px;border-top:1px solid #64748b;max-width:680px">';
+  html+='<span id="gsb-save-status" role="status" aria-live="polite" style="font-weight:600">I risultati vengono salvati automaticamente quando li modifichi. Per il salvataggio manuale usa il pulsante “Salva risultato” già presente nella pagina.</span>';
   html+='</div>';
   host.innerHTML=html;
+  const saveButton=document.getElementById('adminSaveResultButton');
+  if(saveButton){
+    saveButton.onclick=function(){window.saveGoldSilverBronzeResults(false);};
+    saveButton.textContent='💾 Salva risultati';
+  }
 }
 function updateFinalStandings(stageKey){
   const stage=stages.find(x=>x.key===stageKey);if(!stage)return;
@@ -479,7 +483,7 @@ async function saveGoldSilverBronzeResultsNow(automatic=false,request=0){
     return true;
   }catch(error){
     console.error('Salvataggio risultati finali non confermato:',error);
-    if(status)status.textContent='⚠ Salvataggio non confermato: riprova con “Salva risultati finali”.';
+    if(status)status.textContent='⚠ Salvataggio non confermato: '+String(error?.message||error||'errore non specificato');
     return false;
   }
 };
