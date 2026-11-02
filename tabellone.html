@@ -803,7 +803,7 @@ async function verifyAccess(){
         console.warn("Impossibile determinare la società dell'utente:",e);
     }
 
-    if(!aziendaAccess || !aziendaAccess.azienda_id){
+    if(!aziendaAccess || !aziendaAccess.azienda_id || !aziendaAccess.ruolo){
         try{
             const ownerResult = await sb
                 .from("aziende")
