@@ -8564,9 +8564,9 @@ function formatCoppiaDisplay(coppia){
         return "";
 
     function formatNomeCompleto(valore){
-        const testo=String(valore??"").trim().replace(/\\s+/g," ");
+        const testo=String(valore??"").trim().replace(/\s+/g," ");
         if(!testo) return "";
-        if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\\./.test(testo)) return testo;
+        if(/^[A-Za-zÀ-ÖØ-öø-ÿ]\./.test(testo)) return testo;
         const parti=testo.split(" ").filter(Boolean);
         if(parti.length>=2)
             return parti[0].charAt(0).toLocaleUpperCase("it-IT")+"."+parti.slice(1).join(" ");
