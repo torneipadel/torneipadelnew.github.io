@@ -8623,6 +8623,7 @@ function calc(squadre, risultati){
         for(let j=i+1;j<squadre.length;j++){
             const risultato=risultati[indice++];
             if(!risultato || risultato==="-" || typeof risultato!=="string") continue;
+            if(!/^\s*\d+\s*-\s*\d+\s*$/.test(risultato)) continue;
             const parti=risultato.split("-");
             if(parti.length!==2) continue;
             const a=Number(parti[0]), b=Number(parti[1]);
@@ -8665,9 +8666,11 @@ function calc(squadre, risultati){
     }
 
     const indexed=classifica.map((x,index)=>({x,index}));
+    // Fotografia stabile: il gruppo dei pari merito non cambia durante il sort.
+    const tieSource=indexed.slice();
     indexed.sort((A,B)=>{
         if(B.x.pt!==A.x.pt) return B.x.pt-A.x.pt;
-        const tied=indexed.filter(z=>z.x.pt===A.x.pt && z.x.pt===B.x.pt).map(z=>z.index);
+        const tied=tieSource.filter(z=>z.x.pt===A.x.pt && z.x.pt===B.x.pt).map(z=>z.index);
 
         for(const criterio of criteri){
             if(criterio==="scontroDiretto"){
