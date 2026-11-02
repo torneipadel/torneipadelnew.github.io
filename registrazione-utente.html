@@ -82,6 +82,8 @@ function generaAlias(nome,cognome){
  return nome.trim().charAt(0)+"."+cognome.trim();
 }
 
+let registrationSessionCreated=false;
+
 async function init(){
  const r=await sb.rpc("get_public_company",{p_slug:azienda});
  const c=Array.isArray(r.data)?r.data[0]:r.data;
@@ -135,6 +137,7 @@ async function go(){
  }
 
  if(r.data.session){
+   registrationSessionCreated=true;
    const m=await sb.rpc("complete_visitor_membership",{
      p_azienda_slug:azienda,
      p_nome:nome,
@@ -143,7 +146,7 @@ async function go(){
    });
    const member=Array.isArray(m.data)?m.data[0]:m.data;
    if(m.error||!member?.ok||String(member.azienda_id)!==String(companyRecord.id)||String(member.ruolo||"").toLowerCase()!=="user"){
-     await sb.auth.signOut();
+     await sb.auth.signOut();registrationSessionCreated=false;
      statusBox.textContent="Account creato, ma l'associazione alla società non è riuscita o l'account non è un visitatore. Accedi con un account visitatore. "+(m.error?.message||"");
      busy=false;submitButton.disabled=false;
      return;
@@ -155,7 +158,7 @@ async function go(){
      p_note:note
    });
    if(extra.error){
-     await sb.auth.signOut();
+     await sb.auth.signOut();registrationSessionCreated=false;
      statusBox.textContent="Account creato, ma il profilo non è stato completato. Accedi con le stesse credenziali per riprovare. Dettaglio: "+extra.error.message;
      busy=false;submitButton.disabled=false;
      return;
@@ -167,6 +170,7 @@ async function go(){
    sessionStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
    localStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
    statusBox.textContent="Registrazione avvenuta con successo.";
+   registrationSessionCreated=false;
    window.location.replace("visitatore.html?azienda="+encodeURIComponent(companyRecord.slug));
    return;
  }
@@ -175,7 +179,7 @@ async function go(){
  busy=false;submitButton.disabled=false;
 }
 
-document.getElementById("go").onclick=async()=>{try{await go()}catch(e){console.error("Errore registrazione visitatore:",e);statusBox.textContent="Errore di collegamento. Riprova.";busy=false;document.getElementById("go").disabled=false}};
+document.getElementById("go").onclick=async()=>{try{await go()}catch(e){if(registrationSessionCreated){try{await sb.auth.signOut()}catch(cleanupError){console.error("Pulizia sessione dopo errore registrazione non riuscita:",cleanupError)}registrationSessionCreated=false}console.error("Errore registrazione visitatore:",e);statusBox.textContent="Errore di collegamento. Riprova.";busy=false;document.getElementById("go").disabled=false}};
 init();
 </script>
 <script src="site-navigation-v1.js?v=7"></script>
