@@ -8442,6 +8442,23 @@ async function reset(){
             finalGroupRes: [],
             finalGroupTime: [],
             finalGroupCamp: [],
+            // Reset esplicito anche dei risultati Gold/Silver/Bronze:
+            // queste chiavi vengono caricate direttamente da Supabase e,
+            // se omesse, il merge della configurazione conserva i vecchi punteggi.
+            goldRes: Array(3).fill("-"),
+            silverRes: Array(3).fill("-"),
+            bronzeRes: Array(3).fill("-"),
+            goldSilverBronze: {
+                ...(state?.goldSilverBronze || {}),
+                results: {
+                    gold: Array(3).fill("-"),
+                    silver: Array(3).fill("-"),
+                    bronze: Array(3).fill("-")
+                },
+                winners: {},
+                finalPlacements: [],
+                finalStandingsComplete: false
+            },
             finaliGold: [],
             finaliSilver: [],
             finaliBronze: [],
