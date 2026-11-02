@@ -8,6 +8,9 @@
     'registrazione-demo.html','registrazione-piva.html','reset-password.html','iscrizione.html'
   ]);
   if (credentialPages.has(page)) return;
+  // Il tabellone gestisce già un menu proprio, differenziato per ruolo:
+  // non aggiungere qui un secondo hamburger globale.
+  if (isTabellone) return;
 
   const isAdminPage = ['admin.html','eventour-control-center.html','configura-app.html','configurazione-app.html','utenti-societa.html','admin-mercatino.html','sponsor.html'].includes(page);
   const css = document.createElement('style');
