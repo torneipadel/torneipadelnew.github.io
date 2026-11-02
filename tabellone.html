@@ -644,6 +644,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 async function verifyAccess(){
 
+    document.body.classList.add("access-pending");
     let aziendaAccess = null;
 
     const result = await sb.auth.getSession();
@@ -666,6 +667,7 @@ async function verifyAccess(){
             window.__BOVE_TENANT_ID__ = String(publicTenant);
             window.__BOVE_PUBLIC_READONLY__ = true;
             document.body.classList.add("user-mode");
+            document.body.classList.remove("access-pending");
 
             console.log(
                 "ACCESSO PUBBLICO TABELLONE: sola lettura",
@@ -681,6 +683,7 @@ async function verifyAccess(){
         );
 
         bloccaGestionale();
+        document.body.classList.remove("access-pending");
 
         return;
 
@@ -719,6 +722,7 @@ async function verifyAccess(){
         );
 
         bloccaGestionale();
+        document.body.classList.remove("access-pending");
 
         return;
 
@@ -791,60 +795,9 @@ async function verifyAccess(){
 
         bloccaGestionale();
         document.body.classList.add("user-mode");
+        document.body.classList.remove("access-pending");
 
-        const hamburger = document.querySelector(".menu-button");
-        const menu = document.getElementById("menuComandi");
-
-        if(hamburger){
-            hamburger.disabled = false;
-            hamburger.style.setProperty("display", "flex", "important");
-            hamburger.style.setProperty("visibility", "visible", "important");
-            hamburger.style.setProperty("opacity", "1", "important");
-            hamburger.style.setProperty("pointer-events", "auto", "important");
-        }
-
-        if(menu){
-            const buttons = [...menu.querySelectorAll("button")];
-
-            buttons.forEach(function(button, index){
-                const testo = (button.textContent || "").trim();
-                const isPrint = /stampa/i.test(testo);
-                const isExit = index === buttons.length - 1 || /uscita/i.test(testo);
-                const allowed = isPrint || isExit;
-
-                button.classList.toggle("user-print", isPrint);
-                button.classList.toggle("user-exit", isExit && !isPrint);
-                button.disabled = !allowed;
-
-                button.style.setProperty(
-                    "display",
-                    allowed ? "block" : "none",
-                    "important"
-                );
-                button.style.setProperty(
-                    "visibility",
-                    allowed ? "visible" : "hidden",
-                    "important"
-                );
-                button.style.setProperty(
-                    "pointer-events",
-                    allowed ? "auto" : "none",
-                    "important"
-                );
-
-                if(isExit && !isPrint){
-                    button.textContent = "🚪 Uscita";
-                    button.onclick = function(){
-                        window.location.href = "index.html";
-                    };
-                }
-            });
-        }
-
-        console.log(
-            "=== ACCESSO USER: SOLO STAMPA E USCITA ==="
-        );
-
+        console.log("ACCESSO ISCRITTO: sola visualizzazione del tabellone");
 
         return;
 
@@ -859,6 +812,7 @@ async function verifyAccess(){
     Riabilita il gestionale dopo il controllo sessione.
     */
     document.body.classList.remove("user-mode");
+    document.body.classList.remove("access-pending");
     document.querySelectorAll('input, button, textarea, select').forEach(function(el){
         el.disabled = false;
         el.style.opacity = "1";
@@ -937,6 +891,8 @@ async function verifyAccess(){
 
 
 function bloccaGestionale(){
+
+    document.body.classList.add("user-mode");
 
     document.querySelectorAll('input, button, textarea, select').forEach(el => {
 
@@ -1062,6 +1018,8 @@ body.user-mode #menuComandi button.user-exit {
 </style>
 <script id="bove-user-menu-toggle">
 window.toggleMenu = function(){
+    if(document.body.classList.contains("user-mode") || document.body.classList.contains("access-pending")) return;
+
     const menu = document.getElementById("menuComandi");
     if(!menu) return;
 
@@ -13037,13 +12995,7 @@ window.addEventListener("load", async()=>{
         }
 
 
-        /* Mostra hamburger */
-        const menu =
-            document.querySelector(".menu-button");
-
-        if (menu) {
-            menu.style.display = "flex";
-        }
+        /* In modalità iscritto non mostrare controlli o menu amministrativi. */
 
 
         /* Recupera ID direttamente dall'URL */
@@ -13669,5 +13621,20 @@ window.print();
  });
 })();
 </script>
+<style id="bove-readonly-board-only">
+/* Iscritti e accessi non amministrativi: mostrare esclusivamente il tabellone.
+   La barra contiene Salva risultato, Regole e il menu con i comandi di gestione. */
+body.access-pending .menu-container,
+body.user-mode .menu-container,
+body.access-pending .menu-button,
+body.user-mode .menu-button,
+body.access-pending #menuComandi,
+body.user-mode #menuComandi {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+</style>
 </body>
 </html>
