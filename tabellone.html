@@ -665,8 +665,21 @@ function configuraMenuIscritto(){
         button.disabled = !isExit;
         if(isExit){
             button.textContent = "🚪 Esci";
-            button.onclick = function(){
-                window.location.href = "index.html";
+            button.onclick = async function(){
+                button.disabled = true;
+                button.textContent = "⏳ Uscita...";
+                try{
+                    if(window.sb && window.sb.auth){
+                        const uscita = await window.sb.auth.signOut({scope:"local"});
+                        if(uscita && uscita.error){
+                            console.error("Errore durante la disconnessione:", uscita.error);
+                        }
+                    }
+                }catch(errore){
+                    console.error("Errore durante la disconnessione:", errore);
+                }finally{
+                    window.location.replace(new URL("index.html", window.location.href).href);
+                }
             };
         }
     });
