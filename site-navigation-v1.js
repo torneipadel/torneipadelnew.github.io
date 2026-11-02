@@ -152,13 +152,13 @@
       const client = await ensureVisitorAuthClient();
       const { data, error } = await client.auth.getSession();
       if (error) {
-        console.warn('Sessione non verificata: attivo comunque il menu pubblico.', error);
-        createMenu(null);
+        console.warn('Sessione non verificata: menu non attivato per sicurezza.', error);
         return;
       }
-      // Il menu pubblico deve essere disponibile anche ai visitatori anonimi.
-      // Le voci amministrative restano nascoste finché il ruolo non è verificato.
-      createMenu(data?.session || null);
+      // Il menu hamburger compare esclusivamente con una sessione autenticata verificata.
+      // La navigazione anonima resta affidata ai collegamenti pubblici della singola pagina.
+      if (!data?.session?.user) return;
+      createMenu(data.session);
     } catch (e) {
       console.warn('Sessione non verificata: attivo il menu pubblico Eventour.', e);
       createMenu(null);
