@@ -360,6 +360,18 @@ async function load(){
   publicCompany=await resolvePublicCompany();
   if(publicSlug&&!publicCompany?.id)throw new Error('Società pubblica non trovata');
   if(!publicCompany?.id){allTournaments=[];render();return}
+  const sessionCheck=await sb.auth.getSession();
+  if(!sessionCheck.data?.session){
+   location.replace('login-utente.html?azienda='+encodeURIComponent(publicCompany.slug));
+   return
+  }
+  const accessCheck=await sb.rpc('get_my_azienda_access',{p_azienda_id:publicCompany.id});
+  const accessRows=Array.isArray(accessCheck.data)?accessCheck.data:[];
+  const visitorAccess=accessRows.find(x=>String(x.azienda_id)===String(publicCompany.id));
+  if(accessCheck.error||!visitorAccess||!visitorAccess.accesso_consentito||String(visitorAccess.ruolo||'').toLowerCase()!=='user'){
+   location.replace('login-utente.html?azienda='+encodeURIComponent(publicCompany.slug));
+   return
+  }
   const {data,error}=await sb.rpc('get_public_tornei',{
    p_torneo_id:null,
    p_azienda_id:publicCompany.id
