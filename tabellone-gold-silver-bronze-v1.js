@@ -401,6 +401,43 @@ window.updateGoldSilverBronzeSchedule=async function(stageKey,index,field,value)
     return false;
   }
 };
+
+const gsbMatchQueues=new Map();
+function gsbTournamentId(){
+  const s=activeState();
+  const fromUrl=new URLSearchParams(window.location.search).get('idTorneo');
+  const id=Number(s?.idTorneo||fromUrl||0);
+  return Number.isSafeInteger(id)&&id>0?id:null;
+}
+window.saveGoldSilverBronzeMatch=function(stageKey,index,score){
+  if(!stages.some(x=>x.key===stageKey)||!Number.isInteger(index)||index<0||index>2)return Promise.resolve(false);
+  const normalized=String(score??'').replace(/\s/g,'');
+  if(!/^\d+-\d+$/.test(normalized))return Promise.resolve(false);
+  const id=gsbTournamentId();
+  const status=document.getElementById('gsb-save-status');
+  if(!id){if(status)status.textContent='Errore: ID del torneo non disponibile.';return Promise.resolve(false);}
+  if(typeof sb==='undefined'||!sb){if(status)status.textContent='Errore: connessione Supabase non disponibile.';return Promise.resolve(false);}
+  const queueKey=stageKey+':'+index;
+  const previous=gsbMatchQueues.get(queueKey)||Promise.resolve();
+  const next=previous.catch(()=>false).then(async()=>{
+    if(status)status.textContent='Salvataggio '+stageKey.toUpperCase()+' partita '+(index+1)+'…';
+    const {data,error}=await sb.rpc('save_gold_silver_bronze_result',{
+      p_torneo_id:id,p_stage:stageKey,p_match_index:index,p_score:normalized
+    });
+    if(error)throw error;
+    if(!data||data.success!==true)throw new Error('Supabase non ha confermato il risultato.');
+    const current=activeState();
+    if(current&&current[stageKey+'Res']?.[index]===normalized)window.__GSB_DIRTY_SCORES__?.delete(queueKey);
+    if(status)status.textContent='✓ '+stageKey.toUpperCase()+' partita '+(index+1)+' salvata su Supabase.';
+    return true;
+  }).catch(error=>{
+    console.error('Errore RPC salvataggio risultato Gold/Silver/Bronze:',error);
+    if(status)status.textContent='⚠ '+stageKey.toUpperCase()+' partita '+(index+1)+' NON salvata: '+String(error?.message||error);
+    return false;
+  });
+  gsbMatchQueues.set(queueKey,next.then(()=>undefined,()=>undefined));
+  return next;
+};
 window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   if(!isSpecial())return;
   const s=activeState();if(!s||!stages.some(x=>x.key===stageKey)||index<0||index>2||![0,1].includes(side))return;
@@ -409,86 +446,57 @@ window.updateGoldSilverBronzeScore=function(stageKey,index,side,value){
   const otherSide=side===0?1:0;
   const other=document.querySelector('input[data-gsb-stage="'+stageKey+'"][data-gsb-index="'+index+'"][data-gsb-side="'+otherSide+'"]');
   const parts=side===0?[String(value??'').trim(),String(other?.value??'').trim()]:[String(other?.value??'').trim(),String(value??'').trim()];
-  s[key][index]=parts.every(x=>x==='')?'-':(parts.every(x=>/^\d+$/.test(x))?parts.join('-'):'-');
+  const complete=parts.every(x=>/^\d+$/.test(x));
+  s[key][index]=complete?parts.join('-'):'-';
   s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
   s.goldSilverBronze.results=s.goldSilverBronze.results||{};
   s.goldSilverBronze.results[stageKey]=normalizedResults(s[key]);
-  // Anche cancellazioni e risultati incompleti devono prevalere sul valore remoto.
   window.__GSB_DIRTY_SCORES__=window.__GSB_DIRTY_SCORES__||new Set();
   window.__GSB_DIRTY_SCORES__.add(stageKey+':'+index);
+  // Classifica e piazzamenti aggiornati immediatamente in memoria.
   syncFinalPlacements();
   updateFinalStandings(stageKey);
-  // Persisti anche la cancellazione o il risultato incompleto: altrimenti
-  // Supabase può conservare un punteggio precedente dopo che l'utente lo svuota.
-  // La coda serializzata mantiene l'ordine degli aggiornamenti durante la digitazione.
-  window.saveGoldSilverBronzeResults(true);
-};
-let gsbSaveQueue=Promise.resolve();
-let gsbSaveRequested=0;
-window.saveGoldSilverBronzeResults=function(automatic=false){
-  const request=++gsbSaveRequested;
-  // Serializza le scritture: due autosalvataggi ravvicinati non possono
-  // terminare fuori ordine e sovrascrivere un punteggio più recente.
-  gsbSaveQueue=gsbSaveQueue.catch(()=>false).then(()=>saveGoldSilverBronzeResultsNow(automatic,request));
-  return gsbSaveQueue;
-};
-async function saveGoldSilverBronzeResultsNow(automatic=false,request=0){
-  // Garantisce che la fotografia completa delle coppie qualificate sia
-  // inclusa nella stessa scrittura Supabase dei risultati finali.
-  normalizeTeams();
-  const status=document.getElementById('gsb-save-status');
-  const s=activeState();
-  if(!s||!isSpecial()){
-    if(status)status.textContent='Errore: il torneo non risulta caricato nel formato Gold/Silver/Bronze. Nessun dato è stato salvato.';
-    return false;
+  if(complete){
+    window.saveGoldSilverBronzeMatch(stageKey,index,parts.join('-'));
+  }else{
+    const status=document.getElementById('gsb-save-status');
+    if(status)status.textContent='Punteggio in modifica: completa entrambi i numeri per salvarlo automaticamente.';
   }
-  if(status)status.textContent='Salvataggio dei risultati in corso…';
+};
+window.saveGoldSilverBronzeResults=function(){
+  const s=activeState();
+  const status=document.getElementById('gsb-save-status');
+  if(!s||!isSpecial()){
+    if(status)status.textContent='Errore: torneo non caricato nel formato Gold/Silver/Bronze.';
+    return Promise.resolve(false);
+  }
+  const jobs=[];
   ['gold','silver','bronze'].forEach(stageKey=>{
     const key=stageKey+'Res';
-    s[key]=Array.from({length:3},(_,i)=>{
-      const a=document.querySelector('input[data-gsb-stage="'+stageKey+'"][data-gsb-index="'+i+'"][data-gsb-side="0"]')?.value?.trim()??'';
-      const b=document.querySelector('input[data-gsb-stage="'+stageKey+'"][data-gsb-index="'+i+'"][data-gsb-side="1"]')?.value?.trim()??'';
-      return /^\d+$/.test(a)&&/^\d+$/.test(b)?a+'-'+b:'-';
-    });
-    s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
-    s.goldSilverBronze.results=s.goldSilverBronze.results||{};
-    s.goldSilverBronze.results[stageKey]=[...s[key]];
-  });
-  syncFinalPlacements();
-  if(typeof window.updateAndSync!=='function'){if(status)status.textContent='Errore: funzione di salvataggio non disponibile.';return false;}
-  try{
-    const saved=await window.updateAndSync();
-    if(saved===false)throw new Error('Supabase non ha confermato la scrittura.');
-    if(typeof sb==='undefined'||!sb)throw new Error('Client Supabase non disponibile per la verifica.');
-    const check=await sb.from('tornei').select('configurazione').eq('id',s.idTorneo).maybeSingle();
-    if(check.error||!check.data)throw check.error||new Error('Torneo non trovato dopo il salvataggio.');
-    const remote=check.data.configurazione||{};
-    for(const stageKey of ['gold','silver','bronze']){
-      const key=stageKey+'Res';
-      if(JSON.stringify(normalizedResults(remote[key]))!==JSON.stringify(normalizedResults(s[key]))||JSON.stringify(normalizedResults(remote.goldSilverBronze?.results?.[stageKey]))!==JSON.stringify(normalizedResults(s[key])))throw new Error('Verifica risultati fallita per la fascia '+stageKey.toUpperCase()+'.');
-    }
-    if(status)status.textContent='✓ Risultati salvati e riletti da Supabase.';
-    if(window.__GSB_DIRTY_SCORES__ instanceof Set){
-      // Rimuove solo le modifiche già incluse nella scrittura verificata.
-      for(const dirtyKey of Array.from(window.__GSB_DIRTY_SCORES__)){
-        const [stage,indexText]=dirtyKey.split(':');
-        const index=Number(indexText),key=stage+'Res';
-        if(validScore(s[key]?.[index]) &&
-           normalizedResults(remote[key])[index]===normalizedResults(s[key])[index]){
-          window.__GSB_DIRTY_SCORES__.delete(dirtyKey);
-        }
+    if(!Array.isArray(s[key])||s[key].length!==3)s[key]=Array(3).fill('-');
+    for(let index=0;index<3;index++){
+      const a=document.querySelector('input[data-gsb-stage="'+stageKey+'"][data-gsb-index="'+index+'"][data-gsb-side="0"]')?.value?.trim()??'';
+      const b=document.querySelector('input[data-gsb-stage="'+stageKey+'"][data-gsb-index="'+index+'"][data-gsb-side="1"]')?.value?.trim()??'';
+      if(/^\d+$/.test(a)&&/^\d+$/.test(b)){
+        s[key][index]=a+'-'+b;
+        jobs.push(window.saveGoldSilverBronzeMatch(stageKey,index,a+'-'+b));
       }
     }
-    syncFinalPlacements();
-    return true;
-  }catch(error){
-    console.error('Salvataggio risultati finali non confermato:',error);
-    if(status)status.textContent='⚠ Salvataggio non confermato: '+String(error?.message||error||'errore non specificato');
-    return false;
+    s.goldSilverBronze=s.goldSilverBronze||{version:1,results:{}};
+    s.goldSilverBronze.results=s.goldSilverBronze.results||{};
+    s.goldSilverBronze.results[stageKey]=normalizedResults(s[key]);
+  });
+  syncFinalPlacements();
+  if(!jobs.length){
+    if(status)status.textContent='Nessun risultato completo da salvare: inserisci entrambi i punteggi di una partita.';
+    return Promise.resolve(false);
   }
+  return Promise.all(jobs).then(results=>{
+    const ok=results.every(Boolean);
+    if(status&&ok)status.textContent='✓ Tutti i '+jobs.length+' risultati completi sono stati salvati su Supabase.';
+    return ok;
+  });
 };
-
-
 window.aggiornaDescrizioneTipoTorneo=function(){
   const selector=document.getElementById('tipoTorneo');
   const box=document.getElementById('descrizioneTipoTorneo');
