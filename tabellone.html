@@ -8708,8 +8708,16 @@ function calc(squadre, risultati){
                 return hash>>>0;
             };
             const seed=String(state.idTorneo||state.nomeTorneo||"torneo");
-            const hashA=hashSorteggio(seed+"|"+String(A.x.n));
-            const hashB=hashSorteggio(seed+"|"+String(B.x.n));
+            const sortKey=valore=>{
+                if(valore&&typeof valore==="object"){
+                    return String(valore.id ||
+                        (typeof formatCoppiaDisplay==="function"?formatCoppiaDisplay(valore):"") ||
+                        valore.nome || valore.nome_squadra || valore.nomeSquadra || "");
+                }
+                return String(valore);
+            };
+            const hashA=hashSorteggio(seed+"|"+sortKey(A.x.n));
+            const hashB=hashSorteggio(seed+"|"+sortKey(B.x.n));
             if(hashA!==hashB) return hashA-hashB;
         }
 
