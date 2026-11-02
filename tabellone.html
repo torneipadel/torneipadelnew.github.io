@@ -7517,8 +7517,18 @@ try{
                     return;
                 }
 
-                configurazione =
-                    torneo.configurazione || {};
+                configurazione = torneo.configurazione || {};
+                if(typeof configurazione === "string"){
+                    try{
+                        configurazione = JSON.parse(configurazione);
+                    }catch(parseError){
+                        console.error("Configurazione torneo non leggibile:", parseError);
+                        configurazione = {};
+                    }
+                }
+                if(!configurazione || typeof configurazione !== "object" || Array.isArray(configurazione)){
+                    configurazione = {};
+                }
 
                 /*
                  * Recupera la locandina dalla configurazione DEL TORNEO già
@@ -8187,7 +8197,12 @@ try{
 
     }
 
-    if(window.__BOVE_ISCRITTO_MODE__ === true){
+    /*
+     * Mostra la locandina sia nell'area dell'iscritto autenticato sia
+     * nella consultazione pubblica in sola lettura (senza sessione).
+     * Entrambe le modalità passano dal caricamento del torneo specifico.
+     */
+    if(window.__BOVE_ISCRITTO_MODE__ === true || window.__BOVE_PUBLIC_READONLY__ === true){
         mostraLocandinaTorneoIscritto(window.__BOVE_TORNEO_LOCANDINA__ || null);
     }
 
