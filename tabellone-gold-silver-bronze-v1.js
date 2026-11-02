@@ -78,6 +78,10 @@ function teamName(v){
   if(v.giocatore1&&v.giocatore2)return String(v.giocatore1).trim()+' / '+String(v.giocatore2).trim();
   return String(v.nome_squadra||v.nomeSquadra||'').trim();
 }
+function displayTeamName(v){
+  if(v&&typeof v==='object'&&(v.g1!==undefined||v.g2!==undefined||v.giocatore1!==undefined||v.giocatore2!==undefined)&&typeof formatCoppiaDisplay==='function')return formatCoppiaDisplay(v);
+  return teamName(v);
+}
 function validScore(v){return /^\s*\d+\s*-\s*\d+\s*$/.test(String(v??''))}
 function normalizedResults(v){return Array.from({length:3},(_,i)=>validScore(v?.[i])?String(v[i]).replace(/\s/g,''):'-')}
 function scheduleGroupMatches(force){
@@ -90,7 +94,7 @@ function scheduleGroupMatches(force){
 function normalizeTeams(){
   const s=activeState();if(!s||!isSpecial())return;
   configureRules();
-  const source=Array.isArray(s.coppie)?s.coppie.map(teamName).filter(Boolean):[];
+  const source=Array.isArray(s.coppie)?s.coppie.filter(v=>teamName(v)):[];
   const current=groups.flatMap(g=>Array.isArray(s[g])?s[g].map(teamName):[]).filter(Boolean);
   const balanced=groups.every(g=>Array.isArray(s[g])&&s[g].length===3&&s[g].every(x=>String(teamName(x)||'').trim()));
   if(source.length===9 && (!balanced||current.length!==9)){
@@ -201,9 +205,9 @@ function finalStandingsHtml(stage,teams){
   const s=activeState(),scores=normalizedResults(s[stage.key+'Res']);
   const rank=typeof calc==='function'?calc(teams,scores):[];
   const complete=scores.every(validScore);
-  const winner=complete&&rank.length?'<div class="gsb-winner">🏆 Vincitore fascia '+stage.key.toUpperCase()+': <strong>'+esc(teamName(rank[0].n))+'</strong> · '+stage.firstOverall+'° posto generale</div>':'<div class="gsb-winner-pending">Il vincitore della fascia sarà indicato quando tutte e 3 le partite avranno un risultato valido.</div>';
+  const winner=complete&&rank.length?'<div class="gsb-winner">🏆 Vincitore fascia '+stage.key.toUpperCase()+': <strong>'+esc(displayTeamName(rank[0].n))+'</strong> · '+stage.firstOverall+'° posto generale</div>':'<div class="gsb-winner-pending">Il vincitore della fascia sarà indicato quando tutte e 3 le partite avranno un risultato valido.</div>';
   return winner+'<h4>'+(complete?'Classifica finale':'Classifica provvisoria')+'</h4><table class="gsb-standing"><thead><tr><th>Pos.</th><th>Squadra</th><th>PT</th><th>GF</th><th>GS</th><th>DG</th></tr></thead><tbody>'+
-    rank.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(teamName(x.n))+'</td><td>'+x.pt+'</td><td>'+x.gf+'</td><td>'+x.gs+'</td><td>'+x.df+'</td></tr>').join('')+
+    rank.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(displayTeamName(x.n))+'</td><td>'+x.pt+'</td><td>'+x.gf+'</td><td>'+x.gs+'</td><td>'+x.df+'</td></tr>').join('')+
     '</tbody></table>';
 }
 function finalPlacementData(){
@@ -223,7 +227,7 @@ function finalPlacementData(){
       position:stage.firstOverall+i,
       stage:stage.key,
       stageLabel:stage.key.toUpperCase(),
-      team:teamName(x.n),
+      team:displayTeamName(x.n),
       pt:x.pt,gf:x.gf,gs:x.gs,df:x.df
     }));
   });
@@ -283,7 +287,7 @@ function renderCustomFinals(){
       const turnValue=turnValues[i]!==undefined&&String(turnValues[i]).trim()!==''?turnValues[i]:scheduled.slot+1;
       const timeValue=timeValues[i]!==undefined&&String(timeValues[i]).trim()!==''?timeValues[i]:timeAt(scheduled.offset);
       const courtValue=courtValues[i]!==undefined&&String(courtValues[i]).trim()!==''?courtValues[i]:scheduled.court;
-      html+='<tr><td><input class="gsb-schedule-input gsb-court-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Campo '+stage.key+' partita '+(i+1)+'" value="'+esc(courtValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'camp\',this.value)"></td><td><input class="gsb-schedule-input gsb-time-input" type="text" inputmode="numeric" maxlength="5" autocomplete="off" aria-label="Ora '+stage.key+' partita '+(i+1)+'" value="'+esc(timeValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'time\',this.value)"></td><td class="gsb-match-name">'+esc(teamName(labels[pair[0]]))+' <b>vs</b> '+esc(teamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
+      html+='<tr><td><input class="gsb-schedule-input gsb-court-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Campo '+stage.key+' partita '+(i+1)+'" value="'+esc(courtValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'camp\',this.value)"></td><td><input class="gsb-schedule-input gsb-time-input" type="text" inputmode="numeric" maxlength="5" autocomplete="off" aria-label="Ora '+stage.key+' partita '+(i+1)+'" value="'+esc(timeValue)+'" onchange="window.updateGoldSilverBronzeSchedule(\''+stage.key+'\','+i+',\'time\',this.value)"></td><td class="gsb-match-name">'+esc(displayTeamName(labels[pair[0]]))+' <b>vs</b> '+esc(displayTeamName(labels[pair[1]]))+'</td><td><div class="gsb-score">'+
         '<input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="0" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 1" value="'+(score[0]==='-'?'':esc(score[0]))+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',0,this.value)">'+
         '<span>–</span><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" data-gsb-stage="'+stage.key+'" data-gsb-index="'+i+'" data-gsb-side="1" aria-label="Risultato '+stage.key+' partita '+(i+1)+' squadra 2" value="'+esc(score[1]||'')+'"'+disabled+' oninput="window.updateGoldSilverBronzeScore(\''+stage.key+'\','+i+',1,this.value)">'+
         '</div></td></tr>';
