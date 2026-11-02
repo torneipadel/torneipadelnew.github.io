@@ -7520,20 +7520,52 @@ try{
                 configurazione =
                     torneo.configurazione || {};
 
-                /* Recupera la locandina collegata esclusivamente a questo torneo. */
+                /*
+                 * Recupera la locandina dalla configurazione DEL TORNEO già
+                 * identificato e verificato per azienda_id. Gli editor Eventour
+                 * storici usano ID e tipi diversi:
+                 * - eventour-poster-[id torneo] / tipo Locandina
+                 * - poster-[timestamp] / tipo Torneo o Locandina
+                 * Non si legge mai da un'altra riga/azienda.
+                 */
                 const newsTorneo = Array.isArray(configurazione.news) ? configurazione.news : [];
+                const immaginePosterValida = function(item){
+                    return item &&
+                        typeof item.immagine === "string" &&
+                        (/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(item.immagine.trim()) ||
+                         /^https:\/\//i.test(item.immagine.trim()));
+                };
+                const tipoPosterValido = function(item){
+                    const tipo = String(item && item.tipo || "").trim().toLowerCase();
+                    const id = String(item && item.id || "").toLowerCase();
+                    return tipo === "locandina" ||
+                        tipo === "torneo" ||
+                        id.indexOf("eventour-poster-") === 0 ||
+                        id.indexOf("poster-") === 0 ||
+                        String(item && item.aiMode || "").toLowerCase().indexOf("poster") !== -1;
+                };
+                const idTorneoCorrente = String(torneo.id);
                 const locandinaTorneo = newsTorneo.find(function(item){
                     return item &&
-                        String(item.id || "") === "eventour-poster-" + String(torneo.id) &&
-                        String(item.tipo || "").toLowerCase() === "locandina" &&
-                        typeof item.immagine === "string" && item.immagine.trim() !== "";
+                        String(item.id || "") === "eventour-poster-" + idTorneoCorrente &&
+                        immaginePosterValida(item);
                 }) || newsTorneo.find(function(item){
-                    return item &&
-                        String(item.tipo || "").toLowerCase() === "locandina" &&
-                        item.pubblicataVisitatore === true &&
-                        typeof item.immagine === "string" && item.immagine.trim() !== "";
+                    if(!immaginePosterValida(item) || !tipoPosterValido(item)) return false;
+                    const link = String(item.link || "");
+                    return String(item.torneo_id || "") === idTorneoCorrente ||
+                        link.indexOf("idTorneo=" + encodeURIComponent(idTorneoCorrente)) !== -1;
+                }) || newsTorneo.find(function(item){
+                    return immaginePosterValida(item) &&
+                        tipoPosterValido(item) &&
+                        item.pubblicataVisitatore === true;
                 }) || null;
                 window.__BOVE_TORNEO_LOCANDINA__ = locandinaTorneo;
+                console.info("LOCANDINA TORNEO:", {
+                    idTorneo: idTorneoCorrente,
+                    trovata: !!locandinaTorneo,
+                    idLocandina: locandinaTorneo && locandinaTorneo.id || null,
+                    tipo: locandinaTorneo && locandinaTorneo.tipo || null
+                });
 
                 state.idTorneo =
                     torneo.id;
