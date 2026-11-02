@@ -8512,6 +8512,9 @@ async function reset(){
         if(Object.prototype.hasOwnProperty.call(configResetEsistente, "news")){
             configResetFinale.news = configResetEsistente.news;
         }
+        // Segnale one-shot letto dal trigger PostgreSQL: autorizza solo questo
+        // reset esplicito a cancellare punteggi e classifiche già salvati.
+        configResetFinale.__resetFinalResults = true;
 
         const { error: erroreAggiornamento } = await sb
             .from("tornei")
