@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 const state=()=>window.adminState||{};
 const selected=()=>window.getTorneoAdminCorrente?.()||((state().tornei||[]).find(t=>String(t.id)===String(state().torneoSelezionato))||null);
-const esc=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&','<':'<','>':'>','\"':'\"'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const cfgOf=t=>t?.configurazione&&typeof t.configurazione==='object'?{...t.configurazione}:{};
 
 async function saveCfg(t,cfg){
