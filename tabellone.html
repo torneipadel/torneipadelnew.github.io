@@ -807,7 +807,7 @@ async function verifyAccess(){
         try{
             const ownerResult = await sb
                 .from("aziende")
-                .select("id,nome_app,slug")
+                .select("id,nome_app,slug,owner_user_id")
                 .eq("owner_user_id", userId)
                 .limit(1)
                 .maybeSingle();
@@ -816,7 +816,8 @@ async function verifyAccess(){
                 aziendaAccess = {
                     azienda_id: ownerResult.data.id,
                     nome_app: ownerResult.data.nome_app || "",
-                    slug: ownerResult.data.slug || ""
+                    slug: ownerResult.data.slug || "",
+                    ruolo: "owner"
                 };
             }
         }catch(e){
@@ -830,20 +831,16 @@ async function verifyAccess(){
             .trim();
 
     /*
-     * Se l'utente ha un'associazione alla società, il ruolo aziendale
-     * è quello che determina i permessi nel tabellone.
-     * Il ruolo globale del profilo si usa soltanto quando manca
-     * un ruolo aziendale: un membro non deve ereditare i privilegi
-     * admin del profilo generale.
+     * ACCESSO AL TABELLONE: conta esclusivamente il ruolo della società.
+     * Il ruolo globale del profilo NON deve trasformare un iscritto in admin.
+     * Il superadmin globale non acquisisce privilegi sui dati di una società.
+     * L'account proprietario viene marcato esplicitamente come owner nel
+     * fallback sopra, quando owner_user_id coincide con l'utente autenticato.
      */
-    const ruoloEffettivo =
-        aziendaAccess && ruoloAzienda
-            ? ruoloAzienda
-            : ruoloProfilo;
+    const isAdminDellaSocieta =
+        !!aziendaAccess && ["admin","owner"].includes(ruoloAzienda);
 
-    if(
-        !["admin","superadmin","owner"].includes(ruoloEffettivo)
-    ){
+    if(!isAdminDellaSocieta){
 
         console.warn(
             "Utente senza permessi admin:",
