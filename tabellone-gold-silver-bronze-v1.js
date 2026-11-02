@@ -23,14 +23,19 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'
 const specialValues=new Set(['goldSilverBronze','gironiGoldSilverBronze','gold_silver_bronze']);
 function isSpecial(){
   const selector=document.getElementById('tipoTorneo');
-  if(selector&&selector.value&&selector.value!=='goldSilverBronze')return false;
   const r=window.state?.rules;
   const s=typeof state!=='undefined'?state:null;
   const rules=s?.rules||r||{};
-  return [s?.formula,s?.formulaTorneo,rules.tipoTorneo,rules.formulaScelta,rules.formulaFinale,rules.formulaConfig?.formula]
+  const stateIsSpecial=[s?.formula,s?.formulaTorneo,rules.tipoTorneo,rules.formulaScelta,rules.formulaFinale,rules.formulaConfig?.formula]
     .some(v=>specialValues.has(String(v||'')));
+  const modal=document.getElementById('rulesModal');
+  const editingRules=!!modal&&modal.style.display!=='none';
+  if(stateIsSpecial){
+    if(editingRules&&selector?.value&&selector.value!=='goldSilverBronze')return false;
+    return true;
+  }
+  return selector?.value==='goldSilverBronze';
 }
-window.isGoldSilverBronzeTournament=isSpecial;
 function activeState(){return typeof state!=='undefined'?state:null}
 function configureRules(){
   const s=activeState(); if(!s)return;
