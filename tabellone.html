@@ -642,6 +642,36 @@ body.user-mode textarea {
 
 window.addEventListener("DOMContentLoaded", () => {
 
+function configuraMenuIscritto(){
+    document.body.classList.add("user-mode");
+    document.body.classList.remove("access-pending");
+
+    const container = document.querySelector(".menu-container");
+    const toggle = container && container.querySelector(".admin-rules-button.menu-button");
+    const menu = document.getElementById("menuComandi");
+    if(!container || !toggle || !menu) return;
+
+    toggle.textContent = "☰";
+    toggle.setAttribute("aria-label", "Apri menu");
+    toggle.title = "Menu";
+
+    const buttons = [...menu.querySelectorAll("button")];
+    buttons.forEach((button, index) => {
+        const isExit = index === buttons.length - 1;
+        button.classList.toggle("user-exit", isExit);
+        button.style.setProperty("display", isExit ? "block" : "none", "important");
+        button.style.setProperty("visibility", isExit ? "visible" : "hidden", "important");
+        button.style.setProperty("pointer-events", isExit ? "auto" : "none", "important");
+        button.disabled = !isExit;
+        if(isExit){
+            button.textContent = "🚪 Esci";
+            button.onclick = function(){
+                window.location.href = "index.html";
+            };
+        }
+    });
+}
+
 async function verifyAccess(){
 
     document.body.classList.add("access-pending");
@@ -666,8 +696,7 @@ async function verifyAccess(){
 
             window.__BOVE_TENANT_ID__ = String(publicTenant);
             window.__BOVE_PUBLIC_READONLY__ = true;
-            document.body.classList.add("user-mode");
-            document.body.classList.remove("access-pending");
+            configuraMenuIscritto();
 
             console.log(
                 "ACCESSO PUBBLICO TABELLONE: sola lettura",
@@ -794,8 +823,7 @@ async function verifyAccess(){
         );
 
         bloccaGestionale();
-        document.body.classList.add("user-mode");
-        document.body.classList.remove("access-pending");
+        configuraMenuIscritto();
 
         console.log("ACCESSO ISCRITTO: sola visualizzazione del tabellone");
 
@@ -1018,33 +1046,12 @@ body.user-mode #menuComandi button.user-exit {
 </style>
 <script id="bove-user-menu-toggle">
 window.toggleMenu = function(){
-    if(document.body.classList.contains("user-mode") || document.body.classList.contains("access-pending")) return;
-
+    if(document.body.classList.contains("access-pending")) return;
     const menu = document.getElementById("menuComandi");
     if(!menu) return;
-
     if(document.body.classList.contains("user-mode")){
-        const buttons = [...menu.querySelectorAll("button")];
-        buttons.forEach(function(button, index){
-            const text = (button.textContent || "").trim();
-            const print = /stampa/i.test(text);
-            const exit = button.classList.contains("user-exit") || index === buttons.length - 1 || /uscita/i.test(text);
-            const allowed = print || exit;
-
-            button.classList.toggle("user-print", print);
-            button.classList.toggle("user-exit", exit && !print);
-            button.disabled = !allowed;
-            button.style.setProperty("display", allowed ? "block" : "none", "important");
-            button.style.setProperty("visibility", allowed ? "visible" : "hidden", "important");
-            button.style.setProperty("pointer-events", allowed ? "auto" : "none", "important");
-
-            if(exit && !print){
-                button.textContent = "🚪 Uscita";
-                button.onclick = function(){ window.location.href = "index.html"; };
-            }
-        });
+        configuraMenuIscritto();
     }
-
     menu.classList.toggle("show");
 };
 </script>
@@ -13622,18 +13629,58 @@ window.print();
 })();
 </script>
 <style id="bove-readonly-board-only">
-/* Iscritti e accessi non amministrativi: mostrare esclusivamente il tabellone.
-   La barra contiene Salva risultato, Regole e il menu con i comandi di gestione. */
+/* Iscritti: resta visibile il menu essenziale, con la sola voce Esci. */
 body.access-pending .menu-container,
-body.user-mode .menu-container,
 body.access-pending .menu-button,
-body.user-mode .menu-button,
-body.access-pending #menuComandi,
+body.access-pending #menuComandi {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+body.user-mode .menu-container {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 99999 !important;
+}
+body.user-mode .admin-save-result-button,
+body.user-mode .admin-rules-button {
+    display: none !important;
+}
+body.user-mode .menu-container .admin-rules-button.menu-button {
+    display: flex !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    font-size: 22px !important;
+    color: #fff !important;
+    background: #000 !important;
+}
 body.user-mode #menuComandi {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
+}
+body.user-mode #menuComandi.show {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+body.user-mode #menuComandi button {
+    display: none !important;
+}
+body.user-mode #menuComandi button.user-exit {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    width: 100% !important;
+    min-height: 42px !important;
 }
 </style>
 </body>
