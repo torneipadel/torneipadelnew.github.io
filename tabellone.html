@@ -821,8 +821,15 @@ async function verifyAccess(){
             .toLowerCase()
             .trim();
 
+    /*
+     * Se l'utente ha un'associazione alla società, il ruolo aziendale
+     * è quello che determina i permessi nel tabellone.
+     * Il ruolo globale del profilo si usa soltanto quando manca
+     * un ruolo aziendale: un membro non deve ereditare i privilegi
+     * admin del profilo generale.
+     */
     const ruoloEffettivo =
-        ["admin","superadmin","owner"].includes(ruoloAzienda)
+        aziendaAccess && ruoloAzienda
             ? ruoloAzienda
             : ruoloProfilo;
 
