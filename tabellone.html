@@ -13824,7 +13824,7 @@ window.print();
 
         try{
             channel = sb
-                .channel("torneo:"+idTorneo)
+                .channel("torneo:"+idTorneo,{config:{private:false}})
                 .on("broadcast",{event:"UPDATE"},function(payload){
                     aggiornaDaRealtime(payload);
                 })
@@ -13886,9 +13886,6 @@ window.print();
         avviaSincronizzazionePubblica();
     }
     window.addEventListener("bove-public-board-ready",avviaSincronizzazionePubblica);
-
-    var adminSaveButton = document.getElementById("adminSaveResultButton");
-
 
 })();
 </script>
