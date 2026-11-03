@@ -236,10 +236,15 @@
     try { await salvaTorneoBove(); }
     finally {
       saveInProgress = false;
-      const menu = document.getElementById('menuComandi');
-      if (menu) menu.classList.remove('show');
-      const toggle = document.querySelector('.menu-container .menu-button');
-      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      if (typeof window.chiudiMenu === 'function') {
+        window.chiudiMenu();
+      } else {
+        const menu = document.getElementById('menuComandi');
+        if (menu) menu.classList.remove('show');
+        const toggle = document.querySelector('.menu-container .menu-button');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('admin-menu-open');
+      }
     }
   }, true);
 
