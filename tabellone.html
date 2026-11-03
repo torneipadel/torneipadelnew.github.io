@@ -13854,6 +13854,26 @@ window.print();
  });
 })();
 </script>
+<style id="rules-modal-layer-fix">
+/* Il pannello Regole deve stare sopra tabellone, gironi e menu, non dietro le schede con z-index elevato. */
+#rulesModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482000 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+#rulesModal .modal-content {
+    position: relative !important;
+    z-index: 2147482001 !important;
+    width: min(100%, 560px) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    margin: 3vh auto !important;
+    box-sizing: border-box !important;
+}
+</style>
+
 <style id="bove-readonly-board-only">
 /* Iscritti: resta visibile il menu essenziale, con la sola voce Esci. */
 body.access-pending .menu-container,
