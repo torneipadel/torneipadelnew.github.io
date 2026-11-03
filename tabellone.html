@@ -13994,6 +13994,24 @@ body:not(.user-mode) #cardB .db-cell input {
     z-index: 10001 !important;
     cursor: text !important;
 }
+
+/* MENU HAMBURGER ADMIN: sempre sopra gironi e tabellone */
+body:not(.user-mode) .tournament-control-row {
+    position: relative !important;
+    z-index: 2147483000 !important;
+}
+body:not(.user-mode) .tournament-control-row .menu-container {
+    position: relative !important;
+    z-index: 2147483001 !important;
+}
+body:not(.user-mode) .tournament-control-row #menuComandi {
+    position: absolute !important;
+    z-index: 2147483002 !important;
+    top: 42px !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
 </style>
 </body>
 </html>
