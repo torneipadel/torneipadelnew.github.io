@@ -2790,14 +2790,14 @@ Chiudi
   </div>
   <div class="menu-container">
     <button id="adminSaveResultButton" class="admin-save-result-button" type="button" onclick="updateAndSync(true)">💾 Salva risultato</button>
-    <button type="button" class="admin-rules-button menu-button" onclick="toggleMenu()">Regole ▾</button>
+    <button type="button" class="menu-button" aria-label="Apri menu amministratore" aria-expanded="false" onclick="toggleMenu()">☰</button>
     <div id="menuComandi" class="menu-dropdown">
-      <button type="button" onclick="document.getElementById('teamModal').style.display='block'">📝 Squadre</button>
-      <button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📐 Formato torneo</button>
-      <button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">Regole torneo</button>
-      <button type="button" onclick="stampaTabelloneGrafico(event)">🖨️ Stampa</button>
-      <button type="button" onclick="updateAndSync()">💾 Salva</button>
-      <button type="button" onclick="reset()">🗑️ Reset completo</button>
+      <button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">⚙️ Formato</button>
+      <button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">📖 Regole</button>
+      <button type="button" onclick="document.getElementById('teamModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📝 Squadre</button>
+      <button type="button" onclick="stampaTabelloneGrafico(event);document.getElementById('menuComandi').classList.remove('show')">🖨️ Stampa</button>
+      <button type="button" onclick="updateAndSync();document.getElementById('menuComandi').classList.remove('show')">💾 Salva</button>
+      <button type="button" onclick="reset();document.getElementById('menuComandi').classList.remove('show')">🗑️ Reset completo</button>
       <button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
     </div>
   </div>
