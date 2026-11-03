@@ -14019,8 +14019,7 @@ body.user-mode #iscrittoExitButton {
 
 
 <style id="admin-girone-b-score-hitarea-fix">
-/* Admin: porta i soli campi risultato del Girone B davanti a eventuali
-   livelli sovrapposti dell'area comandi. La modalità visitatore resta invariata. */
+/* I campi risultato del Girone B restano direttamente interattivi. */
 body:not(.user-mode) #cardB {
     position: relative !important;
     z-index: 10000 !important;
@@ -14035,8 +14034,22 @@ body:not(.user-mode) #cardB .db-cell input {
     cursor: text !important;
 }
 
-/* Il menu ha una riga autonoma: non altera più la riga data/ora. */
+/*
+ * Il menu amministratore viene spostato temporaneamente sotto <body>.
+ * Quando è chiuso non deve poter intercettare tocchi/clic sul tabellone,
+ * anche se una regola precedente ne conserva il box o la posizione.
+ */
+body:not(.user-mode) #menuComandi:not(.show) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+body:not(.user-mode) #menuComandi.show {
+    pointer-events: auto !important;
+}
 
+/* Il menu ha una riga autonoma: non altera la riga data/ora. */
 </style>
 
 <style id="admin-menu-modal-layer-fix">
