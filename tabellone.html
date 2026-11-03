@@ -2792,12 +2792,12 @@ Chiudi
     <button type="button" class="menu-button" aria-label="Apri menu amministratore" aria-expanded="false" onclick="toggleMenu()">☰</button>
     <div id="menuComandi" class="menu-dropdown">
       <button type="button" class="admin-menu-close" onclick="chiudiMenu()" aria-label="Chiudi menu">✕ Chiudi menu</button>
-      <button type="button" onclick="document.getElementById('formatModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">⚙️ Formato</button>
-      <button type="button" onclick="openRules();document.getElementById('menuComandi').classList.remove('show')">📖 Regole</button>
-      <button type="button" onclick="document.getElementById('teamModal').style.display='block';document.getElementById('menuComandi').classList.remove('show')">📝 Squadre</button>
-      <button type="button" onclick="stampaTabelloneGrafico(event);document.getElementById('menuComandi').classList.remove('show')">🖨️ Stampa</button>
-      <button type="button" onclick="updateAndSync();document.getElementById('menuComandi').classList.remove('show')">💾 Salva</button>
-      <button type="button" onclick="reset();document.getElementById('menuComandi').classList.remove('show')">🗑️ Reset completo</button>
+      <button type="button" onclick="document.getElementById('formatModal').style.display='block';chiudiMenu()">⚙️ Formato</button>
+      <button type="button" onclick="openRules();chiudiMenu()">📖 Regole</button>
+      <button type="button" onclick="document.getElementById('teamModal').style.display='block';chiudiMenu()">📝 Squadre</button>
+      <button type="button" onclick="stampaTabelloneGrafico(event);chiudiMenu()">🖨️ Stampa</button>
+      <button type="button" onclick="updateAndSync();chiudiMenu()">💾 Salva</button>
+      <button type="button" onclick="reset();chiudiMenu()">🗑️ Reset completo</button>
       <button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
     </div>
   </div>
@@ -12558,25 +12558,52 @@ function toggleMenu(){
     if(document.body.classList.contains("access-pending")) return;
     const menu=document.getElementById("menuComandi");
     if(!menu) return;
-    if(document.body.classList.contains("user-mode") && typeof configuraMenuIscritto==="function"){
+
+    const userMode=document.body.classList.contains("user-mode");
+    if(userMode && typeof configuraMenuIscritto==="function"){
         configuraMenuIscritto();
+        const aperto=menu.classList.toggle("show");
+        const toggle=document.querySelector(".menu-container .menu-button");
+        if(toggle) toggle.setAttribute("aria-expanded",String(aperto));
+        return;
     }
-    const aperto=menu.classList.toggle("show");
+
+    if(menu.classList.contains("show")){
+        chiudiMenu();
+        return;
+    }
+
+    const portal=window.__EVENTOUR_ADMIN_MENU_PORTAL__ ||
+        (window.__EVENTOUR_ADMIN_MENU_PORTAL__={placeholder:null});
+    if(!portal.placeholder && menu.parentNode){
+        portal.placeholder=document.createComment("posizione originale menu amministratore");
+        menu.parentNode.insertBefore(portal.placeholder,menu);
+    }
+    document.body.appendChild(menu);
+    document.body.classList.add("admin-menu-open");
+    menu.classList.add("show");
+
     const toggle=document.querySelector(".menu-container .menu-button");
-    if(toggle) toggle.setAttribute("aria-expanded",String(aperto));
+    if(toggle) toggle.setAttribute("aria-expanded","true");
 }
 
-
-
 function chiudiMenu(){
-
-    let menu = document.getElementById("menuComandi");
-
-    if(!menu)
-        return;
+    const menu=document.getElementById("menuComandi");
+    if(!menu) return;
 
     menu.classList.remove("show");
+    const toggle=document.querySelector(".menu-container .menu-button");
+    if(toggle) toggle.setAttribute("aria-expanded","false");
 
+    if(!document.body.classList.contains("user-mode")){
+        const portal=window.__EVENTOUR_ADMIN_MENU_PORTAL__;
+        if(portal && portal.placeholder && portal.placeholder.parentNode){
+            portal.placeholder.parentNode.insertBefore(menu,portal.placeholder);
+            portal.placeholder.parentNode.removeChild(portal.placeholder);
+            portal.placeholder=null;
+        }
+        document.body.classList.remove("admin-menu-open");
+    }
 }
 
 
@@ -12600,7 +12627,7 @@ function chiudiMenuAutomatico(){
 
                 setTimeout(()=>{
 
-                    menu.classList.remove("show");
+                    chiudiMenu();
 
                 },100);
 
@@ -14055,64 +14082,36 @@ body:not(.user-mode) .tournament-control-row #menuComandi {
 
 
 <style id="admin-menu-solid-surface">
-/* Menu amministratore a pagina intera: nasconde completamente data, ora e tabellone
-   mentre il menu è aperto. Il pulsante Chiudi riporta alla pagina del torneo. */
-body:not(.user-mode) .tournament-control-row #menuComandi.show {
-    position: fixed !important;
-    inset: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    max-width: none !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 18px 18px 28px !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    justify-content: flex-start !important;
-    gap: 10px !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: none !important;
-    background: #111827 !important;
-    background-color: #111827 !important;
-    background-image: none !important;
-    isolation: isolate !important;
-    z-index: 2147483002 !important;
-    transition: none !important;
-    box-shadow: none !important;
-    border: 0 !important;
-    border-radius: 0 !important;
+/* Pannello admin indipendente dai contenitori del tabellone. */
+body.admin-menu-open { overflow: hidden !important; }
+body:not(.user-mode) #menuComandi.show {
+    position: fixed !important; inset: 0 !important;
+    width: 100vw !important; max-width: none !important;
+    height: 100vh !important; height: 100dvh !important; max-height: none !important;
+    margin: 0 !important; padding: 18px 18px 28px !important;
+    box-sizing: border-box !important; display: flex !important;
+    flex-direction: column !important; align-items: flex-end !important;
+    justify-content: flex-start !important; gap: 10px !important;
+    overflow-y: auto !important; overscroll-behavior: contain !important;
+    visibility: visible !important; opacity: 1 !important; transform: none !important;
+    background: #111827 !important; background-color: #111827 !important;
+    background-image: none !important; isolation: isolate !important;
+    z-index: 2147483647 !important; transition: none !important;
+    box-shadow: none !important; border: 0 !important; border-radius: 0 !important;
 }
-body:not(.user-mode) .tournament-control-row #menuComandi.show > button,
-body:not(.user-mode) .tournament-control-row #menuComandi.show > a {
-    display: block !important;
-    flex: 0 0 auto !important;
-    width: min(100%, 320px) !important;
-    min-height: 46px !important;
-    box-sizing: border-box !important;
-    opacity: 1 !important;
-    background: #000000 !important;
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border: 1px solid #475569 !important;
+body:not(.user-mode) #menuComandi.show > button,
+body:not(.user-mode) #menuComandi.show > a {
+    display: block !important; flex: 0 0 auto !important;
+    width: min(100%, 320px) !important; min-height: 46px !important;
+    box-sizing: border-box !important; opacity: 1 !important;
+    background: #000000 !important; background-color: #000000 !important;
+    color: #ffffff !important; border: 1px solid #475569 !important;
     text-align: left !important;
 }
-body:not(.user-mode) .tournament-control-row #menuComandi.show > .admin-menu-close {
-    width: auto !important;
-    min-width: 150px !important;
-    text-align: center !important;
-    background: #263449 !important;
-    font-weight: 700 !important;
-    margin-bottom: 12px !important;
+body:not(.user-mode) #menuComandi.show > .admin-menu-close {
+    width: auto !important; min-width: 150px !important;
+    text-align: center !important; background: #263449 !important;
+    font-weight: 700 !important; margin-bottom: 12px !important;
 }
 </style>
 
