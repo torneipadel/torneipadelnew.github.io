@@ -2783,18 +2783,6 @@ Chiudi
 <div id="nomeFormulaTorneo" style="display:block;position:relative;width:100%;margin:4px auto 8px;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:2;pointer-events:none;box-sizing:border-box;"></div>
 <div id="locandinaTorneoIscritto" hidden style="width:100%;max-width:460px;margin:12px auto 18px;padding:12px;text-align:center;background:rgba(15,23,42,.78);border:1px solid rgba(255,255,255,.35);border-radius:14px;box-sizing:border-box;"></div>
 <div class="tournament-menu-row">
-</div>
-<div class="tournament-control-row">
-  <div class="tournament-date-time">
-    <div style="text-align:center;">
-      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Data prevista:</div>
-      <input type="date" id="dataTorneoHeader" class="date-input-field" onchange="aggiornaDataTorneo(this.value)">
-    </div>
-    <div style="text-align:center;">
-      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Start ore:</div>
-      <input type="time" id="startTimeHeader" class="date-input-field" value="20:00" onchange="aggiornaOraInizioTorneo(this.value)" style="width:80px">
-    </div>
-  </div>
   <div class="menu-container">
     <button type="button" class="menu-button" aria-label="Apri menu amministratore" aria-expanded="false" onclick="toggleMenu()">☰</button>
     <div id="menuComandi" class="menu-dropdown">
@@ -2806,6 +2794,18 @@ Chiudi
       <button type="button" onclick="updateAndSync();chiudiMenu()">💾 Salva</button>
       <button type="button" onclick="reset();chiudiMenu()">🗑️ Reset completo</button>
       <button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
+    </div>
+  </div>
+</div>
+<div class="tournament-control-row">
+  <div class="tournament-date-time">
+    <div style="text-align:center;">
+      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Data prevista:</div>
+      <input type="date" id="dataTorneoHeader" class="date-input-field" onchange="aggiornaDataTorneo(this.value)">
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:0.7rem;color:#94a3b8;margin-bottom:2px;">Start ore:</div>
+      <input type="time" id="startTimeHeader" class="date-input-field" value="20:00" onchange="aggiornaOraInizioTorneo(this.value)" style="width:80px">
     </div>
   </div>
 </div>
