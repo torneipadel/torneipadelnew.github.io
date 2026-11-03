@@ -12561,6 +12561,7 @@ function toggleMenu(){
         configuraMenuIscritto();
     }
     const aperto=menu.classList.toggle("show");
+    document.body.classList.toggle("admin-menu-open",aperto && !document.body.classList.contains("user-mode"));
     const toggle=document.querySelector(".menu-container .menu-button");
     if(toggle) toggle.setAttribute("aria-expanded",String(aperto));
 }
@@ -12575,6 +12576,9 @@ function chiudiMenu(){
         return;
 
     menu.classList.remove("show");
+    document.body.classList.remove("admin-menu-open");
+    const toggle=document.querySelector(".menu-container .menu-button");
+    if(toggle) toggle.setAttribute("aria-expanded","false");
 
 }
 
@@ -14049,6 +14053,37 @@ body:not(.user-mode) .tournament-control-row #menuComandi {
     overflow-y: auto !important;
     margin: 3vh auto !important;
     box-sizing: border-box !important;
+}
+</style>
+
+<style id="admin-menu-opaque-backdrop">
+/* Menu amministratore: copre visivamente la pagina sottostante quando è aperto. */
+body:not(.user-mode).admin-menu-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    display: block;
+    background: #080d16 !important;
+    opacity: 1 !important;
+    z-index: 2147482999 !important;
+    pointer-events: auto !important;
+}
+body:not(.user-mode).admin-menu-open .tournament-control-row {
+    position: relative !important;
+    z-index: 2147483000 !important;
+}
+body:not(.user-mode) #menuComandi {
+    background: #111827 !important;
+    background-color: #111827 !important;
+    opacity: 1 !important;
+    isolation: isolate !important;
+    border: 1px solid #475569 !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,.75) !important;
+}
+body:not(.user-mode) #menuComandi.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 2147483002 !important;
 }
 </style>
 
