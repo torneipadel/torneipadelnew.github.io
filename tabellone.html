@@ -1070,17 +1070,7 @@ body.user-mode #menuComandi button.user-exit {
     box-sizing: border-box !important;
 }
 </style>
-<script id="bove-user-menu-toggle">
-window.toggleMenu = function(){
-    if(document.body.classList.contains("access-pending")) return;
-    const menu = document.getElementById("menuComandi");
-    if(!menu) return;
-    if(document.body.classList.contains("user-mode")){
-        configuraMenuIscritto();
-    }
-    menu.classList.toggle("show");
-};
-</script>
+<!-- Toggle unico: gestito dalla funzione toggleMenu principale, con supporto admin portal e modalità iscritto. -->
 
 <style id="bove-print-bracket-style">
 @page{size:A4 landscape;margin:8mm}
@@ -12605,6 +12595,10 @@ function chiudiMenu(){
         document.body.classList.remove("admin-menu-open");
     }
 }
+
+// Esporta esplicitamente gli handler usati dai pulsanti HTML.
+window.toggleMenu = toggleMenu;
+window.chiudiMenu = chiudiMenu;
 
 
 
