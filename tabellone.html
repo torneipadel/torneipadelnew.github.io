@@ -733,6 +733,7 @@ async function verifyAccess(){
             window.__BOVE_TENANT_ID__ = String(publicTenant);
             window.__BOVE_PUBLIC_READONLY__ = true;
             configuraMenuIscritto();
+            window.dispatchEvent(new CustomEvent("bove-public-board-ready"));
 
             console.log(
                 "ACCESSO PUBBLICO TABELLONE: sola lettura",
@@ -865,6 +866,7 @@ async function verifyAccess(){
         bloccaGestionale();
         window.__BOVE_ISCRITTO_MODE__ = true;
         configuraMenuIscritto();
+        window.dispatchEvent(new CustomEvent("bove-public-board-ready"));
 
         console.log("ACCESSO ISCRITTO: sola visualizzazione del tabellone");
 
@@ -13504,7 +13506,7 @@ window.print();
 
     var search = window.location.search || "";
     var isTV = /(?:^|&)tv=1(?:&|$)/.test(search.replace(/^\?/,""));
-    if(!isTV) return;
+    var realtimeStarted = false;
 
     function getParam(name){
         try{
@@ -13731,105 +13733,83 @@ window.print();
         return true;
     }
 
+    function getTenantId(){
+        var tenant = window.__BOVE_TENANT_ID__ || getParam("azienda_id");
+        if(!tenant || tenant === "__INVALID__") return "";
+        return String(tenant);
+    }
+
+    var snapshotLoading = false;
+
     function caricaSnapshotREST(){
-        var xhr;
-
-        try{
-            xhr = new XMLHttpRequest();
-
-            xhr.open(
-                "GET",
-                "https://dkeqicstprvvfebiaooc.supabase.co/rest/v1/tornei?id=eq."+
-                encodeURIComponent(idTorneo)+
-                "&select=id,nome,data,azienda_id,configurazione,updated_at"+
-                (window.__BOVE_TENANT_ID__
-                    ? "&azienda_id=eq."+encodeURIComponent(window.__BOVE_TENANT_ID__)
-                    : "")+
-                "&_="+Date.now(),
-                true
-            );
-
-            xhr.setRequestHeader(
-                "apikey",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg"
-            );
-
-            xhr.setRequestHeader(
-                "Authorization",
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg"
-            );
-
-            xhr.setRequestHeader("Cache-Control","no-cache");
-            xhr.timeout = 5000;
-
-            xhr.onreadystatechange=function(){
-                if(xhr.readyState!==4) return;
-
-                if(xhr.status<200 || xhr.status>=300){
-                    console.warn("BOVE TV V8 REST HTTP:",xhr.status);
-                    return;
-                }
-
-                try{
-                    var rows = JSON.parse(xhr.responseText);
-                    var row = rows && rows.length ? rows[0] : null;
-                    if(!row) return;
-
-                    var stamp = String(row.updated_at || "");
-
-                    if(!lastUpdatedAt){
-                        lastUpdatedAt = stamp;
-                        applicaSnapshot(row);
-                        return;
-                    }
-
-                    if(stamp !== lastUpdatedAt){
-                        lastUpdatedAt = stamp;
-                        applicaSnapshot(row);
-                    }
-                }catch(e){
-                    console.warn("BOVE TV V8 REST PARSE:",e);
-                }
-            };
-
-            xhr.onerror=function(){
-                console.warn("BOVE TV V8 REST NETWORK");
-            };
-
-            xhr.ontimeout=function(){
-                console.warn("BOVE TV V8 REST TIMEOUT");
-            };
-
-            xhr.send(null);
-
-        }catch(e){
-            console.warn("BOVE TV V8 REST:",e);
+        if(snapshotLoading) return;
+        if(typeof sb === "undefined" || !sb || typeof sb.rpc !== "function"){
+            console.warn("BOVE TV V9: client Supabase non disponibile");
+            return;
         }
+
+        var tenantId = getTenantId();
+        if(!tenantId){
+            console.warn("BOVE TV V9: azienda_id mancante nel link pubblico");
+            return;
+        }
+
+        snapshotLoading = true;
+        sb.rpc("get_public_tornei", {
+            p_torneo_id: Number(idTorneo),
+            p_azienda_id: tenantId
+        }).then(function(result){
+            if(result && result.error){
+                console.warn("BOVE TV V9 RPC:", result.error);
+                return;
+            }
+
+            var rows = result && result.data;
+            var row = Array.isArray(rows) && rows.length ? rows[0] : null;
+            if(!row){
+                console.warn("BOVE TV V9: torneo non pubblicato o non appartenente alla società indicata");
+                return;
+            }
+
+            var stamp = String(row.updated_at || "");
+            if(!lastUpdatedAt || stamp !== lastUpdatedAt){
+                lastUpdatedAt = stamp;
+                applicaSnapshot(row);
+            }
+        }).catch(function(error){
+            console.warn("BOVE TV V9 RPC NETWORK:", error);
+        }).finally(function(){
+            snapshotLoading = false;
+        });
     }
 
     function aggiornaDaRealtime(payload){
         if(busy) return;
 
-        var row = payload && payload.new ? payload.new : null;
+        var row = payload && (
+            payload.record ||
+            (payload.payload && payload.payload.record) ||
+            payload.new
+        );
         if(!row) return;
 
-        busy = true;
+        if(row.pubblicato === false){
+            window.__BOVE_REMOTE_NOT_FOUND__ = true;
+            console.warn("BOVE TV V9: il torneo non è più pubblicato");
+            return;
+        }
 
+        busy = true;
         try{
             var stamp = String(row.updated_at || "");
-
-            if(stamp && stamp === lastUpdatedAt){
-                busy = false;
-                return;
-            }
-
+            if(stamp && stamp === lastUpdatedAt) return;
             if(stamp) lastUpdatedAt = stamp;
 
             if(!applicaSnapshot(row)){
                 caricaSnapshotREST();
             }
         }catch(e){
-            console.error("BOVE TV V8 APPLY:",e);
+            console.error("BOVE TV V9 APPLY:",e);
             caricaSnapshotREST();
         }finally{
             busy = false;
@@ -13838,74 +13818,77 @@ window.print();
 
     function avviaRealtime(){
         if(typeof sb === "undefined" || !sb || !sb.channel){
-            console.warn("BOVE TV V8: client Supabase non disponibile");
+            console.warn("BOVE TV V9: client Supabase non disponibile");
             return;
         }
 
         try{
             channel = sb
-                .channel("bove-tv-"+idTorneo)
-                .on(
-                    "postgres_changes",
-                    {
-                        event:"UPDATE",
-                        schema:"public",
-                        table:"tornei",
-                        filter:"id=eq."+idTorneo
-                    },
-                    function(payload){
-                        aggiornaDaRealtime(payload);
-                    }
-                )
+                .channel("torneo:"+idTorneo)
+                .on("broadcast",{event:"UPDATE"},function(payload){
+                    aggiornaDaRealtime(payload);
+                })
+                .on("broadcast",{event:"DELETE"},function(payload){
+                    aggiornaDaRealtime(payload);
+                })
                 .subscribe(function(status,err){
-                    console.log(
-                        "BOVE TV V8 REALTIME STATUS:",
-                        status,
-                        err || ""
-                    );
+                    console.log("BOVE TV V9 BROADCAST STATUS:",status,err || "");
+                    if(status === "SUBSCRIBED"){
+                        caricaSnapshotREST();
+                    }
                 });
         }catch(e){
-            console.error("BOVE TV V8 REALTIME:",e);
+            console.error("BOVE TV V9 BROADCAST:",e);
         }
     }
+
+    function avviaSincronizzazionePubblica(){
+        if(realtimeStarted) return;
+        if(!isTV &&
+           window.__BOVE_PUBLIC_READONLY__ !== true &&
+           window.__BOVE_ISCRITTO_MODE__ !== true){
+            return;
+        }
+        realtimeStarted = true;
+
+        if(!idTorneo){
+            console.error("BOVE TV V9: ID TORNEO ASSENTE");
+            return;
+        }
+
+        var adminSaveButton = document.getElementById("adminSaveResultButton");
+        if(adminSaveButton){
+            adminSaveButton.style.setProperty("display","none","important");
+        }
+
+        window.__BOVE_TV_V8_ACTIVE__ = true;
+        window.__BOVE_TV_V9_ACTIVE__ = true;
+        window.__BOVE_TV_ID__ = idTorneo;
+
+        caricaSnapshotREST();
+        avviaRealtime();
+
+        /* Poll di sicurezza: il canale Broadcast resta il percorso immediato. */
+        pollTimer = window.setInterval(caricaSnapshotREST,5000);
+
+        window.addEventListener("beforeunload",function(){
+            if(pollTimer){
+                clearInterval(pollTimer);
+                pollTimer=null;
+            }
+            if(channel && typeof sb !== "undefined" && sb && typeof sb.removeChannel === "function"){
+                try{ sb.removeChannel(channel); }catch(e){}
+            }
+        });
+    }
+
+    if(isTV){
+        avviaSincronizzazionePubblica();
+    }
+    window.addEventListener("bove-public-board-ready",avviaSincronizzazionePubblica);
 
     var adminSaveButton = document.getElementById("adminSaveResultButton");
-    if(adminSaveButton){
-        adminSaveButton.style.setProperty("display","none","important");
-    }
 
-    window.__BOVE_TV_V8_ACTIVE__ = true;
-    window.__BOVE_TV_ID__ = idTorneo;
-
-    /* Prima lettura completa dello snapshot. */
-    caricaSnapshotREST();
-
-    /* Da qui in poi gli aggiornamenti arrivano direttamente da Realtime. */
-    avviaRealtime();
-
-    /* Sicurezza: una verifica completa ogni 5 secondi, non ogni secondo. */
-    pollTimer = window.setInterval(
-        caricaSnapshotREST,
-        5000
-    );
-
-    window.addEventListener("beforeunload",function(){
-        if(pollTimer){
-            clearInterval(pollTimer);
-            pollTimer=null;
-        }
-
-        if(
-            channel &&
-            typeof sb !== "undefined" &&
-            sb &&
-            typeof sb.removeChannel === "function"
-        ){
-            try{
-                sb.removeChannel(channel);
-            }catch(e){}
-        }
-    });
 
 })();
 </script>
