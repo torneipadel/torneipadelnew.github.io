@@ -12554,14 +12554,15 @@ function aggiornaDescrizioneTipoTorneo(){
 
 }
 function toggleMenu(){
-
-    let menu = document.getElementById("menuComandi");
-
-    if(!menu)
-        return;
-
-    menu.classList.toggle("show");
-
+    if(document.body.classList.contains("access-pending")) return;
+    const menu=document.getElementById("menuComandi");
+    if(!menu) return;
+    if(document.body.classList.contains("user-mode") && typeof configuraMenuIscritto==="function"){
+        configuraMenuIscritto();
+    }
+    const aperto=menu.classList.toggle("show");
+    const toggle=document.querySelector(".menu-container .menu-button");
+    if(toggle) toggle.setAttribute("aria-expanded",String(aperto));
 }
 
 
@@ -14013,5 +14014,43 @@ body:not(.user-mode) .tournament-control-row #menuComandi {
 }
 
 </style>
+
+<style id="admin-menu-modal-layer-fix">
+/* Menu e pannelli amministrativi sopra tutti i gironi, senza alterare il layout del tabellone. */
+body:not(.user-mode) .tournament-control-row {
+    position: relative !important;
+    z-index: 2147483000 !important;
+}
+body:not(.user-mode) .tournament-control-row .menu-container {
+    position: relative !important;
+    z-index: 2147483001 !important;
+}
+body:not(.user-mode) .tournament-control-row #menuComandi {
+    position: absolute !important;
+    z-index: 2147483002 !important;
+    top: 42px !important;
+    right: 0 !important;
+    left: auto !important;
+    max-height: calc(100vh - 80px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+}
+#teamModal, #formatModal, #rulesModal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147482500 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+#teamModal .modal-content, #formatModal .modal-content, #rulesModal .modal-content {
+    position: relative !important;
+    z-index: 2147482501 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    margin: 3vh auto !important;
+    box-sizing: border-box !important;
+}
+</style>
+
 </body>
 </html>
