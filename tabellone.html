@@ -7247,6 +7247,41 @@ async function updateAndSyncImpl(showSaveResult=false){
             salvatoSupabase
         );
 
+        // Nel Reset controlla anche i punteggi effettivamente riletti da Supabase.
+        // L'ID aggiornato da solo non basta: il trigger potrebbe aver ripristinato
+        // un risultato precedente pur avendo completato l'UPDATE.
+        if(remoto && window.__BOVE_RESETTING_RESULTS__ === true){
+            const __cfgVerificata = salvatoSupabase.configurazione || {};
+            const __chiaviPunteggi = [
+                "Ares","Bres","Cres","Dres","Eres","Fres","Gres",
+                "qRes","sTopRes","fTopRes","finaliRes","finalGroupRes",
+                "goldRes","silverRes","bronzeRes",
+                "finaliResGold","finaliResSilver","finaliResBronze"
+            ];
+            for(const __key of __chiaviPunteggi){
+                if(Object.prototype.hasOwnProperty.call(snapshot,__key)){
+                    if(JSON.stringify(__cfgVerificata[__key]) !== JSON.stringify(snapshot[__key])){
+                        console.error("RESET NON CONFERMATO DA SUPABASE:",__key,{
+                            atteso:snapshot[__key],
+                            salvato:__cfgVerificata[__key]
+                        });
+                        return false;
+                    }
+                }
+            }
+            const __gsbAtteso = snapshot.goldSilverBronze?.results || {};
+            const __gsbSalvato = __cfgVerificata.goldSilverBronze?.results || {};
+            for(const __stage of ["gold","silver","bronze"]){
+                if(JSON.stringify(__gsbSalvato[__stage]) !== JSON.stringify(__gsbAtteso[__stage])){
+                    console.error("RESET NON CONFERMATO DA SUPABASE: goldSilverBronze.results."+__stage,{
+                        atteso:__gsbAtteso[__stage],
+                        salvato:__gsbSalvato[__stage]
+                    });
+                    return false;
+                }
+            }
+        }
+
 
         /*
         ==========================================
