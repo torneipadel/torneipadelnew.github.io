@@ -2792,7 +2792,7 @@ Chiudi
       <button type="button" onclick="document.getElementById('teamModal').style.display='block';chiudiMenu()">📝 Squadre</button>
       <button type="button" onclick="stampaTabelloneGrafico(event);chiudiMenu()">🖨️ Stampa</button>
       <button type="button" onclick="updateAndSync();chiudiMenu()">💾 Salva</button>
-      <button type="button" onclick="reset();chiudiMenu()">🗑️ Reset completo</button>
+      <button type="button" onclick="reset();chiudiMenu()">🧹 Azzera risultati</button>
       <button type="button" onclick="window.location.href='admin.html'">⬅️ Torna ad Admin</button>
     </div>
   </div>
@@ -8371,199 +8371,155 @@ function aggiornaNomeFormulaTorneo(){
                    
 
 async function reset(){
-
-    const idTorneoDaAzzerare = Number(
+    const idTorneo = Number(
         (state && state.idTorneo) ||
         new URLSearchParams(window.location.search).get("idTorneo") ||
         new URLSearchParams(window.location.search).get("torneo")
     );
 
-    const nomeTorneoDaMantenere =
-        (state && state.nomeTorneo) ||
-        (document.getElementById("nomeTorneoInput")?.value || "").trim();
-
-    const dataTorneoDaMantenere =
-        (state && state.dataTorneo) || "";
-
-    if (!Number.isFinite(idTorneoDaAzzerare) || idTorneoDaAzzerare <= 0) {
-        alert("Impossibile eseguire il reset: ID del torneo non trovato. Nessun dato è stato modificato.");
-        return;
+    if(!Number.isFinite(idTorneo) || idTorneo <= 0){
+        alert("Impossibile azzerare i risultati: ID del torneo non trovato. Nessun dato è stato modificato.");
+        return false;
     }
-
-    if (!confirm(
-        "RESET COMPLETO DEL TABELLONE\n\n" +
-        "Verranno rimossi dal tabellone i vecchi iscritti/partecipanti, le coppie, i gironi, " +
-        "i risultati, gli orari, i campi e le finali.\n\n" +
-        "Il torneo e il suo ID resteranno in Supabase. La formula e le regole del torneo saranno mantenute.\n\n" +
-        "Vuoi continuare?"
-    )) return;
-
-    if (typeof sb === "undefined") {
+    if(typeof sb === "undefined" || !sb){
         alert("Connessione Supabase non disponibile. Nessun dato è stato modificato.");
-        return;
+        return false;
     }
+    if(!confirm(
+        "AZZERA SOLTANTO I RISULTATI\n\n" +
+        "Saranno cancellati i punteggi di gironi e fasi finali e le classifiche/vincitori ricalcolati.\n\n" +
+        "Iscritti, giocatori, coppie, gironi, incontri, date, orari, campi, formula e regole resteranno invariati.\n\n" +
+        "Vuoi procedere?"
+    )) return false;
 
-    try {
-        const { data: torneoEsistente, error: erroreLettura } = await sb
+    const statoPrecedente = JSON.parse(JSON.stringify(state || {}));
+    const dirtyPrecedente = window.__GSB_DIRTY_SCORES__ instanceof Set
+        ? new Set(window.__GSB_DIRTY_SCORES__)
+        : null;
+
+    try{
+        const {data:torneo,error:letturaErrore} = await sb
             .from("tornei")
-            .select("id,nome,data,configurazione")
-            .eq("id", idTorneoDaAzzerare)
+            .select("id")
+            .eq("id",idTorneo)
             .maybeSingle();
 
-        if (erroreLettura) throw erroreLettura;
-        if (!torneoEsistente) {
-            alert("Il torneo non è stato trovato in Supabase. Nessun dato è stato modificato.");
-            return;
-        }
+        if(letturaErrore) throw letturaErrore;
+        if(!torneo) throw new Error("Torneo non trovato in Supabase. Nessun dato è stato modificato.");
 
-        const statoPulito = {
-            ...(state || {}),
-            idTorneo: idTorneoDaAzzerare,
-            nomeTorneo: nomeTorneoDaMantenere || torneoEsistente.nome || "",
-            dataTorneo: dataTorneoDaMantenere || torneoEsistente.data || "",
-            A: [], B: [], C: [], D: [], E: [], F: [],
-            Ares: [], Bres: [], Cres: [], Dres: [], Eres: [], Fres: [],
-            Atime: [], Btime: [], Ctime: [], Dtime: [], Etime: [], Ftime: [],
-            Acamp: [], Bcamp: [], Ccamp: [], Dcamp: [], Ecamp: [], Fcamp: [],
-            iscritti: [],
-            partecipanti: [],
-            coppie: [],
-            partiteGironi: {},
-            qRes: Array(4).fill("-"),
-            sTopRes: Array(2).fill("-"),
-            fTopRes: "-",
-            qCamp: Array(4).fill(""),
-            qTime: Array(4).fill(""),
-            sTopCamp: Array(2).fill(""),
-            sTopTime: Array(2).fill(""),
-            fTopCamp: [""],
-            fTopTime: [""],
-            finalTop: [],
-            finaliRes: [],
-            finaliTop: [],
-            finalGroupRes: [],
-            finalGroupTime: [],
-            finalGroupCamp: [],
-            // Reset esplicito anche dei risultati Gold/Silver/Bronze:
-            // queste chiavi vengono caricate direttamente da Supabase e,
-            // se omesse, il merge della configurazione conserva i vecchi punteggi.
-            goldRes: Array(3).fill("-"),
-            silverRes: Array(3).fill("-"),
-            bronzeRes: Array(3).fill("-"),
-            goldSilverBronze: {
-                ...(state?.goldSilverBronze || {}),
-                results: {
-                    gold: Array(3).fill("-"),
-                    silver: Array(3).fill("-"),
-                    bronze: Array(3).fill("-")
-                },
-                winners: {},
-                finalPlacements: [],
-                finalStandingsComplete: false
-            },
-            finaliGold: [],
-            finaliSilver: [],
-            finaliBronze: [],
-            finaliResGold: [],
-            finaliResSilver: [],
-            finaliResBronze: [],
-            campioneTop: null
-        };
+        const clearArray = (value, fallbackLength=0) =>
+            Array.from(
+                {length:Math.max(Array.isArray(value)?value.length:0, fallbackLength)},
+                () => "-"
+            );
 
-        // Rimuove eventuali nomi di squadre e risultati memorizzati nelle chiavi standard dei gironi.
-        ["A","B","C","D","E","F"].forEach(lettera => {
-            statoPulito[lettera] = [];
-            statoPulito[lettera + "res"] = [];
-            statoPulito[lettera + "time"] = [];
-            statoPulito[lettera + "camp"] = [];
+        // Solo punteggi dei gironi: non vengono toccati squadre, incontri,
+        // campi o orari già programmati.
+        ["A","B","C","D","E","F","G"].forEach(tag=>{
+            const teams = Array.isArray(state[tag]) ? state[tag] : [];
+            let count = Array.isArray(state[tag+"res"]) ? state[tag+"res"].length : 0;
+            if(Array.isArray(state.partiteGironi?.[tag])){
+                count = Math.max(count,state.partiteGironi[tag].length);
+            }else if(typeof getScheduledMatchCount === "function" && teams.length >= 2){
+                count = Math.max(count,Number(getScheduledMatchCount(teams.length)) || 0);
+            }
+            state[tag+"res"] = clearArray(state[tag+"res"],count);
         });
 
-        // Elimina esclusivamente le iscrizioni associate a questo torneo:
-        // loadState() le ricarica da public.iscrizioni, quindi svuotare solo il JSON
-        // farebbe ricomparire i vecchi iscritti al prossimo caricamento.
-        const { error: erroreIscrizioni } = await sb
-            .from("iscrizioni")
-            .delete()
-            .eq("torneo_id", idTorneoDaAzzerare);
-
-        if (erroreIscrizioni) throw erroreIscrizioni;
-
-        // Il reset riguarda i dati del tabellone, non i contenuti editoriali.
-        // Manteniamo quindi la configurazione esistente e sostituiamo solo i
-        // campi gestiti dal tabellone, preservando in particolare configurazione.news.
-        const letturaConfigReset = await sb
-            .from("tornei")
-            .select("id,configurazione")
-            .eq("id", idTorneoDaAzzerare)
-            .maybeSingle();
-
-        if(letturaConfigReset.error || !letturaConfigReset.data){
-            throw letturaConfigReset.error || new Error("Torneo non trovato: reset interrotto per proteggere i dati.");
-        }
-
-        let configResetEsistente = letturaConfigReset.data.configurazione || {};
-        if(typeof configResetEsistente === "string"){
-            try{ configResetEsistente = JSON.parse(configResetEsistente); }
-            catch(_){ configResetEsistente = {}; }
-        }
-        if(!configResetEsistente || typeof configResetEsistente !== "object" || Array.isArray(configResetEsistente)){
-            configResetEsistente = {};
-        }
-
-        const configResetFinale = Object.assign({}, configResetEsistente, statoPulito);
-        if(Object.prototype.hasOwnProperty.call(configResetEsistente, "news")){
-            configResetFinale.news = configResetEsistente.news;
-        }
-        // Segnale one-shot letto dal trigger PostgreSQL: autorizza solo questo
-        // reset esplicito a cancellare punteggi e classifiche già salvati.
-        configResetFinale.__resetFinalResults = true;
-
-        const { error: erroreAggiornamento } = await sb
-            .from("tornei")
-            .update({ configurazione: configResetFinale })
-            .eq("id", idTorneoDaAzzerare);
-
-        if (erroreAggiornamento) throw erroreAggiornamento;
-
-        state = statoPulito;
-        localStorage.setItem("torneoState", JSON.stringify(state));
-        localStorage.removeItem("savedTeams");
-
-        [
-            "Arows","Brows","Crows","Drows","Erows","Frows",
-            "Q","S","finaleBox"
-        ].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = "";
-        });
-
-        ["cardA","cardB","cardC","cardD","cardE","cardF"].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = "";
-        });
-
-        const nomeInput = document.getElementById("nomeTorneoInput");
-        if (nomeInput) nomeInput.value = state.nomeTorneo;
-
-        if (typeof aggiornaNomeFormulaTorneo === "function") aggiornaNomeFormulaTorneo();
-        if (typeof render === "function") render();
-        if (typeof renderClass === "function") renderClass();
-        if (typeof renderKO === "function") renderKO();
-
-        alert(
-            "Reset completato. Il torneo è rimasto in Supabase con lo stesso ID. " +
-            "Vecchi iscritti del tabellone, coppie e risultati sono stati azzerati; " +
-            "formula e regole sono state mantenute."
+        // Quarti, semifinali e finali: vengono azzerati i soli punteggi.
+        state.qRes = clearArray(state.qRes,4);
+        state.sTopRes = clearArray(state.sTopRes,2);
+        state.fTopRes = "-";
+        state.finaliRes = clearArray(
+            state.finaliRes,
+            Math.max(0,Math.floor(Number(state.rules?.numeroFinali)||0))
         );
-    } catch (errore) {
-        console.error("Errore durante il reset del tabellone:", errore);
-        alert("Reset non completato: " + (errore?.message || "errore sconosciuto") +
-            ". Il torneo non è stato eliminato da Supabase.");
+        state.finalGroupRes = clearArray(
+            state.finalGroupRes,
+            Number(window.__BOVE_FINAL_GROUP_MATCH_COUNT__)||0
+        );
+
+        // Risultati delle finali Gold/Silver/Bronze, se presenti.
+        ["gold","silver","bronze"].forEach(stage=>{
+            const key=stage+"Res";
+            state[key]=clearArray(state[key],3);
+        });
+        ["finaliResGold","finaliResSilver","finaliResBronze"].forEach(key=>{
+            state[key]=clearArray(state[key]);
+        });
+        if(state.goldSilverBronze && typeof state.goldSilverBronze==="object"){
+            state.goldSilverBronze={
+                ...state.goldSilverBronze,
+                results:{
+                    ...(state.goldSilverBronze.results||{}),
+                    gold:[...state.goldRes],
+                    silver:[...state.silverRes],
+                    bronze:[...state.bronzeRes]
+                },
+                winners:{},
+                finalPlacements:[],
+                finalStandingsComplete:false
+            };
+        }
+
+        // Formati alternativi: si azzerano i risultati senza eliminare
+        // giocatori, coppie, rotazioni, turni o classificazioni configurate.
+        ["svizzero","americano","mexicano","king","short"].forEach(key=>{
+            const format=state[key];
+            if(format && typeof format==="object" && Array.isArray(format.risultati)){
+                format.risultati=clearArray(format.risultati);
+                if(Array.isArray(format.classifica)) format.classifica=[];
+                if(Array.isArray(format.qualificati)) format.qualificati=[];
+            }
+        });
+
+        state.campioneTop=null;
+
+        // Il salvataggio speciale G/S/B deve considerare esplicitamente
+        // azzerati anche i risultati remoti, senza ripristinarli dal vecchio snapshot.
+        const dirty = window.__GSB_DIRTY_SCORES__ instanceof Set
+            ? window.__GSB_DIRTY_SCORES__
+            : (window.__GSB_DIRTY_SCORES__ = new Set());
+        ["gold","silver","bronze"].forEach(stage=>{
+            for(let i=0;i<3;i++) dirty.add(stage+":"+i);
+        });
+
+        localStorage.setItem("torneoState",JSON.stringify(state));
+
+        // Ridisegna il tabellone e ricalcola classifiche e vincitori.
+        if(typeof render === "function") render();
+        else{
+            if(typeof renderTables==="function") renderTables();
+            if(typeof renderClass==="function") renderClass();
+            if(typeof renderKO==="function") renderKO();
+            if(typeof renderFinalGroupKO==="function") renderFinalGroupKO();
+        }
+
+        const salvato = await updateAndSync();
+        if(salvato === false){
+            throw new Error("Il salvataggio su Supabase non è stato confermato.");
+        }
+
+        alert("Risultati azzerati correttamente. Iscritti, coppie, gironi, incontri, orari, campi e regole sono rimasti invariati.");
+        return true;
+    }catch(error){
+        state = statoPrecedente;
+        localStorage.setItem("torneoState",JSON.stringify(statoPrecedente));
+        if(dirtyPrecedente){
+            window.__GSB_DIRTY_SCORES__ = dirtyPrecedente;
+        }else{
+            delete window.__GSB_DIRTY_SCORES__;
+        }
+        if(typeof renderTables==="function") renderTables();
+        if(typeof renderClass==="function") renderClass();
+        if(typeof renderKO==="function") renderKO();
+        if(typeof renderFinalGroupKO==="function") renderFinalGroupKO();
+        console.error("Errore durante l'azzeramento dei soli risultati:",error);
+        alert("Azzeramento non completato: "+(error?.message||"errore sconosciuto")+". I dati precedenti sono stati ripristinati nella pagina.");
+        return false;
     }
 }
 
-
-                   
 function formatCoppiaDisplay(coppia){
     if(coppia===undefined || coppia===null)
         return "";
