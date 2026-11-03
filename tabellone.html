@@ -376,6 +376,21 @@ table.standing .trend-up, table.standing .trend-down,
    MENU HAMBURGER E BOTTONI (FLUIDO E SOVRAPPOSTO)
    ======================================================== */
 
+.tournament-menu-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: min(100%, 1200px);
+    margin: 8px auto 4px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 10002;
+}
+.tournament-menu-row .menu-container {
+    position: relative;
+    z-index: 10003;
+}
 .tournament-control-row {
     position: relative;
     display: flex;
@@ -2767,6 +2782,8 @@ Chiudi
 </div>
 <div id="nomeFormulaTorneo" style="display:block;position:relative;width:100%;margin:4px auto 8px;font-size:12px;color:#60a5fa;font-weight:bold;text-align:center;z-index:2;pointer-events:none;box-sizing:border-box;"></div>
 <div id="locandinaTorneoIscritto" hidden style="width:100%;max-width:460px;margin:12px auto 18px;padding:12px;text-align:center;background:rgba(15,23,42,.78);border:1px solid rgba(255,255,255,.35);border-radius:14px;box-sizing:border-box;"></div>
+<div class="tournament-menu-row">
+</div>
 <div class="tournament-control-row">
   <div class="tournament-date-time">
     <div style="text-align:center;">
@@ -14018,45 +14035,12 @@ body:not(.user-mode) #cardB .db-cell input {
     cursor: text !important;
 }
 
-/* MENU HAMBURGER ADMIN: sempre sopra gironi e tabellone */
-body:not(.user-mode) .tournament-control-row {
-    position: relative !important;
-    z-index: 2147483000 !important;
-}
-body:not(.user-mode) .tournament-control-row .menu-container {
-    position: relative !important;
-    z-index: 2147483001 !important;
-}
-body:not(.user-mode) .tournament-control-row #menuComandi {
-    position: absolute !important;
-    z-index: 2147483002 !important;
-    top: 42px !important;
-    right: 0 !important;
-    left: auto !important;
-}
+/* Il menu ha una riga autonoma: non altera più la riga data/ora. */
 
 </style>
 
 <style id="admin-menu-modal-layer-fix">
-/* Menu e pannelli amministrativi sopra tutti i gironi, senza alterare il layout del tabellone. */
-body:not(.user-mode) .tournament-control-row {
-    position: relative !important;
-    z-index: 2147483000 !important;
-}
-body:not(.user-mode) .tournament-control-row .menu-container {
-    position: relative !important;
-    z-index: 2147483001 !important;
-}
-body:not(.user-mode) .tournament-control-row #menuComandi {
-    position: absolute !important;
-    z-index: 2147483002 !important;
-    top: 42px !important;
-    right: 0 !important;
-    left: auto !important;
-    max-height: calc(100vh - 80px) !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-}
+/* Menu separato dalla riga dei controlli data/ora. */
 #teamModal, #formatModal, #rulesModal {
     position: fixed !important;
     inset: 0 !important;
