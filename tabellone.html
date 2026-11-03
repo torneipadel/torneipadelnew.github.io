@@ -8486,7 +8486,9 @@ async function reset(){
 
         localStorage.setItem("torneoState",JSON.stringify(state));
 
-        // Ridisegna il tabellone e ricalcola classifiche e vincitori.
+        // Durante il reset il render deve soltanto aggiornare la schermata:
+        // il salvataggio viene eseguito una sola volta, qui sotto, e atteso.
+        window.__BOVE_RESETTING_RESULTS__ = true;
         if(typeof render === "function") render();
         else{
             if(typeof renderTables==="function") renderTables();
@@ -8496,6 +8498,7 @@ async function reset(){
         }
 
         const salvato = await updateAndSync();
+        window.__BOVE_RESETTING_RESULTS__ = false;
         if(salvato === false){
             throw new Error("Il salvataggio su Supabase non è stato confermato.");
         }
@@ -8503,6 +8506,7 @@ async function reset(){
         alert("Risultati azzerati correttamente. Iscritti, coppie, gironi, incontri, orari, campi e regole sono rimasti invariati.");
         return true;
     }catch(error){
+        window.__BOVE_RESETTING_RESULTS__ = false;
         state = statoPrecedente;
         localStorage.setItem("torneoState",JSON.stringify(statoPrecedente));
         if(dirtyPrecedente){
@@ -10688,7 +10692,10 @@ if(inputData){
         renderManuale();
     }
 
-    if(typeof updateAndSync==="function"){
+    if(
+        typeof updateAndSync==="function" &&
+        window.__BOVE_RESETTING_RESULTS__ !== true
+    ){
         updateAndSync();
     }
 }
