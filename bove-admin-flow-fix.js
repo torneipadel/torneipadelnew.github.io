@@ -234,7 +234,13 @@
     if (saveInProgress) return;
     saveInProgress = true;
     try { await salvaTorneoBove(); }
-    finally { saveInProgress = false; }
+    finally {
+      saveInProgress = false;
+      const menu = document.getElementById('menuComandi');
+      if (menu) menu.classList.remove('show');
+      const toggle = document.querySelector('.menu-container .menu-button');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
   }, true);
 
   function neutralizeSaveButton() {
