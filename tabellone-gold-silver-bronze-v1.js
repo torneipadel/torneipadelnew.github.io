@@ -183,15 +183,8 @@ function syncQualificationAssignments(){
   if(!s.goldSilverBronze||typeof s.goldSilverBronze!=='object')s.goldSilverBronze={version:1,results:{}};
   const previous=s.goldSilverBronze.qualifiedTeams||null;
   if(!groupsComplete()){
-    if(previous){
-      ['gold','silver','bronze'].forEach(key=>{
-        s[key+'Res']=Array(3).fill('-');
-        s.goldSilverBronze.results=s.goldSilverBronze.results||{};
-        s.goldSilverBronze.results[key]=['-','-','-'];
-      });
-      s.goldSilverBronze.qualifiedTeams=null;
-      s.goldSilverBronze.qualifiedTeamsSnapshot=null;
-    }
+    // Durante il caricamento i gironi possono essere temporaneamente incompleti.
+    // Non cancellare mai risultati finali già salvati: attendere il ripristino dei gironi.
     return;
   }
   const current={},snapshot={};
@@ -204,16 +197,9 @@ function syncQualificationAssignments(){
       ? JSON.parse(JSON.stringify(team)) : team);
   });
   if(previous&&JSON.stringify(previous)!==JSON.stringify(current)){
-    // I risultati finali appartengono alle squadre precedentemente qualificate:
-    // se cambia anche l'ordine degli incontri, vanno azzerati per evitare abbinamenti errati.
-    ['gold','silver','bronze'].forEach(key=>{
-      s[key+'Res']=Array(3).fill('-');
-      s.goldSilverBronze.results=s.goldSilverBronze.results||{};
-      s.goldSilverBronze.results[key]=['-','-','-'];
-    });
-    s.goldSilverBronze.finalPlacements=[];
-    s.goldSilverBronze.winners={};
-    s.goldSilverBronze.finalStandingsComplete=false;
+    // Una variazione temporanea dell'ordine delle qualificazioni al caricamento
+    // non deve cancellare i punteggi delle finali già persistiti su Supabase.
+    // Gli abbinamenti vengono aggiornati, ma i risultati restano intatti.
   }
   s.goldSilverBronze.qualifiedTeams=current;
   s.goldSilverBronze.qualifiedTeamsSnapshot=snapshot;
