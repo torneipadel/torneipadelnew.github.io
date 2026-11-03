@@ -7063,6 +7063,39 @@ async function updateAndSyncImpl(showSaveResult=false){
             configurazioneDaSalvare.news = configurazioneRemotaEsistente.news;
         }
 
+        /*
+         * RESET RISULTATI: il caricamento storico del torneo può dare
+         * precedenza a configurazione.configurazione rispetto ai campi
+         * allo stesso livello. Allineiamo quindi anche lo snapshot interno,
+         * evitando che punteggi finali precedenti ricompaiano al refresh.
+         * Si esegue esclusivamente durante il reset e solo per i campi
+         * dei risultati: regole, squadre, incontri e programmazione restano intatti.
+         */
+        if(remoto && window.__BOVE_RESETTING_RESULTS__ === true){
+            const chiaviRisultatiReset = [
+                "qRes","sTopRes","fTopRes","finaliRes","finalGroupRes",
+                "goldRes","silverRes","bronzeRes",
+                "finaliResGold","finaliResSilver","finaliResBronze",
+                "goldSilverBronze"
+            ];
+            const configurazioneInterna =
+                configurazioneDaSalvare.configurazione &&
+                typeof configurazioneDaSalvare.configurazione === "object" &&
+                !Array.isArray(configurazioneDaSalvare.configurazione)
+                    ? {...configurazioneDaSalvare.configurazione}
+                    : {};
+            chiaviRisultatiReset.forEach(chiave => {
+                if(Object.prototype.hasOwnProperty.call(snapshot,chiave)){
+                    const valore = snapshot[chiave];
+                    configurazioneInterna[chiave] =
+                        valore && typeof valore === "object"
+                            ? JSON.parse(JSON.stringify(valore))
+                            : valore;
+                }
+            });
+            configurazioneDaSalvare.configurazione = configurazioneInterna;
+        }
+
         const payloadSupabase = {
             nome:
                 snapshot.nomeTorneo,
