@@ -7072,6 +7072,14 @@ async function updateAndSyncImpl(showSaveResult=false){
          * dei risultati: regole, squadre, incontri e programmazione restano intatti.
          */
         if(remoto && window.__BOVE_RESETTING_RESULTS__ === true){
+            /*
+             * Il trigger PostgreSQL trg_preserve_gsb_final_results protegge
+             * i punteggi validi dalle schede obsolete. Per il Reset esplicito
+             * richiede questo flag: il trigger lo consuma (non lo persiste)
+             * e consente di salvare davvero i risultati vuoti.
+             */
+            configurazioneDaSalvare.__resetFinalResults = true;
+
             const chiaviRisultatiReset = [
                 "qRes","sTopRes","fTopRes","finaliRes","finalGroupRes",
                 "goldRes","silverRes","bronzeRes",
