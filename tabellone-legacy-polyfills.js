@@ -1,5 +1,18 @@
 (function () {
-  if (!Array.prototype.flatMap) {
+  if (typeof window !== "undefined" && typeof window.globalThis === "undefined") {
+    window.globalThis = window;
+  }
+  if (typeof Promise !== "undefined" && !Promise.prototype.finally) {
+    Promise.prototype.finally = function (callback) {
+      var Constructor = this.constructor;
+      return this.then(
+        function (value) { return Constructor.resolve(callback()).then(function () { return value; }); },
+        function (reason) { return Constructor.resolve(callback()).then(function () { throw reason; }); }
+      );
+    };
+  }
+})();
+if (!Array.prototype.flatMap) {
     Array.prototype.flatMap = function (callback, thisArg) {
       var result = [];
       for (var i = 0; i < this.length; i++) {
