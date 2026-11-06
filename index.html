@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="description" content="Eventour: la piattaforma digitale professionale per società e club di padel. Tornei, giocatori, eventi e comunicazione in un unico ambiente.">
 <title data-i18n="pageTitle">Eventour — La piattaforma digitale per il tuo club</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="lingue.js?v=3"></script>
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap");
@@ -219,7 +218,6 @@ img,video,svg{max-width:100%}
 <script>
 const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZlYmlhb29jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const grid=document.getElementById("companyGrid"),statusEl=document.getElementById("companyStatus"),searchInput=document.getElementById("searchInput");
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]})}
 function companyUrl(company){if(company.slug)return "societa.html?slug="+encodeURIComponent(company.slug);const appUrl=String(company.app_url||"").trim();if(appUrl)return appUrl.replace(/\/$/,"")+"/";return "#"}
@@ -237,9 +235,21 @@ grid.appendChild(card)
 async function loadCompanies(search){
 statusEl.textContent="Caricamento delle società...";grid.innerHTML="";let timer;
 try{
-const result=await Promise.race([sb.rpc("get_public_companies",{search_text:search||null}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("TIMEOUT")),12000)})]);clearTimeout(timer);
-if(result.error)throw result.error;
-const data=result.data||[];statusEl.textContent=data.length?(data.length+" societ"+(data.length===1?"à disponibile":"à disponibili")):"";renderCompanies(data)
+const controller=new AbortController();
+const timeoutPromise=new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new Error("TIMEOUT"))},12000)});
+const requestPromise=fetch(SUPABASE_URL+"/rest/v1/rpc/get_public_companies",{
+ method:"POST",
+ headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY},
+ body:JSON.stringify({search_text:search||null}),
+ signal:controller.signal,
+ cache:"no-store"
+}).then(async response=>{
+ const payload=await response.json().catch(()=>null);
+ if(!response.ok)throw new Error(payload?.message||payload?.error_description||("HTTP "+response.status));
+ return payload;
+});
+const data=await Promise.race([requestPromise,timeoutPromise]);clearTimeout(timer);
+statusEl.textContent=data.length?(data.length+" societ"+(data.length===1?"à disponibile":"à disponibili")):"";renderCompanies(Array.isArray(data)?data:[])
 }catch(err){clearTimeout(timer);console.error("Caricamento società dalla landing page non riuscito:",err);statusEl.innerHTML='Non è stato possibile caricare le società. Controlla la connessione e riprova. <button type="button" id="retryCompanyList" class="btn" style="min-height:38px;margin:8px auto;background:#0a4778;color:#fff">RIPROVA</button>';document.getElementById("retryCompanyList")?.addEventListener("click",()=>loadCompanies(search))}
 }
 document.getElementById("companySearch").addEventListener("submit",function(e){e.preventDefault();loadCompanies(searchInput.value.trim());document.getElementById("societa").scrollIntoView({behavior:"smooth",block:"start"})});
