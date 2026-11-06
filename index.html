@@ -200,6 +200,14 @@ img,video,svg{max-width:100%}
 }
 
 
+/* Correzione mirata: larghezza utile e spaziatura menu su tablet e smartphone. */
+@media screen and (min-width:601px) and (max-width:1024px){
+  .container{width:calc(100% - 32px);max-width:none}
+  .nav .nav-inner{width:calc(100% - 32px);max-width:none}
+  .nav .nav-links{column-gap:26px;row-gap:18px;padding:4px 0 8px}
+  .nav .nav-links a{padding:7px 4px}
+}
+
 </style>
 <!-- Layout responsive della landing gestito da regole locali in questo file. -->
 </head>
