@@ -14141,5 +14141,88 @@ body:not(.user-mode) #menuComandi.show > .admin-menu-close {
     margin-bottom: 8px !important;
 }
 </style>
+
+
+<style id="ipad-tabellone-layout-only">
+/*
+ * Adattamento esclusivamente visivo per iPad (larghezza dispositivo 768–1024px).
+ * Nessuna regola JavaScript, autenticazione, salvataggio o sincronizzazione viene modificata.
+ */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    body {
+        -webkit-text-size-adjust: 100%;
+    }
+    .container {
+        width: 100%;
+        max-width: 1000px;
+        padding: 12px 16px;
+        box-sizing: border-box;
+    }
+    .header-box {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .brand {
+        max-width: 100%;
+    }
+    .brand img {
+        max-width: min(310px, 48vw);
+        height: auto;
+        object-fit: contain;
+    }
+    .tournament-header-details {
+        width: 100%;
+        padding: 0 8px;
+        box-sizing: border-box;
+    }
+    .tournament-header-details h1 {
+        font-size: 1.3rem !important;
+        line-height: 1.3 !important;
+        overflow-wrap: anywhere;
+    }
+    .tournament-menu-row,
+    .tournament-control-row {
+        width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+        box-sizing: border-box;
+    }
+    .tournament-control-row {
+        justify-content: center;
+        gap: 12px;
+        margin-top: 10px;
+        margin-bottom: 14px;
+    }
+    .tournament-date-time {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+    .card {
+        min-width: 0;
+        -webkit-overflow-scrolling: touch;
+    }
+    table {
+        max-width: 100%;
+    }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+    .groups,
+    .ko {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+    .groups,
+    .ko {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+</style>
+
 </body>
 </html>
