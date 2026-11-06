@@ -50,4 +50,25 @@ if (!html.includes("tabellone-legacy-polyfills.js")) {
   html = html.slice(0, firstScript) + polyfillTag + "\n" + html.slice(firstScript);
 }
 fs.writeFileSync(htmlPath, html, "utf8");
-console.log("Tabellone legacy build completata. Script locali trasformati: " + localScripts.size);
+
+// Anche la pagina di accesso societario viene compilata per Safari 10.3:
+// il login deve poter creare la sessione prima di riaprire il tabellone.
+const loginPath = path.resolve("login-societa-admin.html");
+if (fs.existsSync(loginPath)) {
+  let loginHtml = fs.readFileSync(loginPath, "utf8");
+  loginHtml = loginHtml.replace(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script\\s*>/gi, (whole, attrs, source) => {
+    if (/\\bsrc\\s*=/.test(attrs) || !source.trim()) return whole;
+    if (/\\btype\\s*=\\s*["'](?:application\\/json|application\\/ld\\+json)["']/i.test(attrs)) return whole;
+    const result = babel.transformSync(source, {
+      filename: "login-societa-admin-inline.js",
+      sourceType: "script",
+      comments: true,
+      compact: false,
+      presets: [[presetEnv, { targets: { safari: "10.3" }, bugfixes: true, modules: false }]]
+    });
+    return "<script" + attrs + ">\\n" + result.code + "\\n</script>";
+  });
+  fs.writeFileSync(loginPath, loginHtml, "utf8");
+}
+
+console.log("Build legacy completata. Script locali tabellone: " + localScripts.size + "; login societario compilato.");
