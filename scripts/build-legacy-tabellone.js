@@ -43,7 +43,7 @@ for (const relative of localScripts) {
   fs.writeFileSync(file, result.code + "\n", "utf8");
 }
 
-const polyfillTag = '<script src="tabellone-legacy-polyfills.js?v=1"><\/script>';
+const polyfillTag = '<script src="tabellone-legacy-polyfills.js?v=2"><\/script>';
 if (!html.includes("tabellone-legacy-polyfills.js")) {
   const firstScript = html.search(/<script\b/i);
   if (firstScript < 0) throw new Error("Nessun tag script trovato in tabellone.html");
