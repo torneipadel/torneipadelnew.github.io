@@ -3,12 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="0;url=https://torneipadel.github.io/torneipadelnew.github.io/tabellone.html?idTorneo=1792109774684&amp;azienda_id=7b6f26e9-cefa-4755-b15c-aeadcd4411c9">
-<title>Eventour - Apertura torneo</title>
+<title>Eventour - Accesso al torneo</title>
 </head>
 <body>
-<p>Sto aprendo il torneo corretto...</p>
-<p><a href="https://torneipadel.github.io/torneipadelnew.github.io/tabellone.html?idTorneo=1792109774684&amp;azienda_id=7b6f26e9-cefa-4755-b15c-aeadcd4411c9">Apri il torneo dell'8 novembre</a></p>
-<script>window.location.replace("https://torneipadel.github.io/torneipadelnew.github.io/tabellone.html?idTorneo=1792109774684&azienda_id=7b6f26e9-cefa-4755-b15c-aeadcd4411c9");</script>
+<p>Accesso amministrativo Eventour. Dopo l'accesso si aprirà il torneo dell'8 novembre.</p>
+<p><a id="go" href="login-societa-admin.html?azienda=eventour-3d6d3b6d">Continua all'accesso Eventour</a></p>
+<script>
+(function () {
+  var tournament = "tabellone.html?idTorneo=1792109774684&azienda_id=7b6f26e9-cefa-4755-b15c-aeadcd4411c9";
+  var login = "login-societa-admin.html?azienda=eventour-3d6d3b6d&returnTo=" + encodeURIComponent(tournament);
+  document.getElementById("go").href = login;
+  window.location.replace(login);
+})();
+</script>
 </body>
 </html>
