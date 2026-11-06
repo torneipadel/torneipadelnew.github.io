@@ -140,61 +140,6 @@ img,video,svg{max-width:100%}
  .hero-content{padding-top:265px}
 }
 
-/* Eventour landing: spaziatura verticale dedicata a tablet e smartphone.
-   La navigazione resta nel flusso: logo, menu e contenuto non si sovrappongono. */
-@media screen and (max-width: 1024px) {
-  .nav {
-    position: relative;
-    top: auto; left: auto; right: auto;
-    padding: 16px 0 18px;
-    background: linear-gradient(115deg, rgba(3,17,31,.90), rgba(3,26,48,.78)), url("FOTO_PADEL1.jpg") center/cover no-repeat;
-  }
-  .nav .nav-inner {
-    width: calc(100% - 32px);
-    gap: 18px;
-  }
-  .nav .brand-logo-wrap { height: 132px; }
-  .nav .brand img { height: 82px; }
-  .nav .brand-subtitle { margin: 0; line-height: 1.25; }
-  .nav .nav-links {
-    width: 100%;
-    margin: 0;
-    padding-top: 2px;
-    gap: 12px 22px;
-    row-gap: 14px;
-  }
-  .hero { min-height: 0; display: block; }
-  .hero-content {
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 42px 0 86px;
-  }
-}
-@media screen and (max-width: 767px) {
-  .nav { padding: 12px 0 16px; }
-  .nav .nav-inner { width: calc(100% - 28px); gap: 16px; }
-  .nav .brand-logo-wrap { height: 116px; }
-  .nav .brand img { width: min(290px, 94%); height: 72px; }
-  .nav .brand-subtitle {
-    font-size: 11px;
-    letter-spacing: .8px;
-    white-space: normal;
-    padding: 0 8px;
-  }
-  .nav .nav-links { gap: 10px 14px; row-gap: 12px; }
-  .nav .nav-links a:not(.nav-cta) { padding: 5px 3px; }
-  .nav .nav-links .nav-cta { min-height: 42px; padding: 9px 13px; }
-  .hero-content { padding: 34px 0 70px; }
-  .eyebrow { margin-bottom: 18px; }
-  h1 { margin-bottom: 20px; }
-  .hero-lead { margin-bottom: 26px; }
-}
-@media screen and (max-width: 380px) {
-  .nav .brand-logo-wrap { height: 106px; }
-  .nav .nav-links { gap: 9px 10px; }
-  .hero-content { padding-top: 28px; }
-}
 
 </style>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
