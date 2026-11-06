@@ -235,10 +235,12 @@ grid.appendChild(card)
 }
 }
 async function loadCompanies(search){
-statusEl.textContent="Caricamento delle società...";grid.innerHTML="";
-const result=await sb.rpc("get_public_companies",{search_text:search||null});
-if(result.error){console.error(result.error);statusEl.textContent="Impossibile caricare le società al momento.";return}
+statusEl.textContent="Caricamento delle società...";grid.innerHTML="";let timer;
+try{
+const result=await Promise.race([sb.rpc("get_public_companies",{search_text:search||null}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("TIMEOUT")),12000)})]);clearTimeout(timer);
+if(result.error)throw result.error;
 const data=result.data||[];statusEl.textContent=data.length?(data.length+" societ"+(data.length===1?"à disponibile":"à disponibili")):"";renderCompanies(data)
+}catch(err){clearTimeout(timer);console.error("Caricamento società dalla landing page non riuscito:",err);statusEl.innerHTML='Non è stato possibile caricare le società. Controlla la connessione e riprova. <button type="button" id="retryCompanyList" class="btn" style="min-height:38px;margin:8px auto;background:#0a4778;color:#fff">RIPROVA</button>';document.getElementById("retryCompanyList")?.addEventListener("click",()=>loadCompanies(search))}
 }
 document.getElementById("companySearch").addEventListener("submit",function(e){e.preventDefault();loadCompanies(searchInput.value.trim());document.getElementById("societa").scrollIntoView({behavior:"smooth",block:"start"})});
 loadCompanies("");
