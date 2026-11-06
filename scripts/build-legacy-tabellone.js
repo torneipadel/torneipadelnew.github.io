@@ -56,9 +56,9 @@ fs.writeFileSync(htmlPath, html, "utf8");
 const loginPath = path.resolve("login-societa-admin.html");
 if (fs.existsSync(loginPath)) {
   let loginHtml = fs.readFileSync(loginPath, "utf8");
-  loginHtml = loginHtml.replace(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script\\s*>/gi, (whole, attrs, source) => {
-    if (/\\bsrc\\s*=/.test(attrs) || !source.trim()) return whole;
-    if (/\\btype\\s*=\\s*["'](?:application\\/json|application\\/ld\\+json)["']/i.test(attrs)) return whole;
+  loginHtml = loginHtml.replace(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi, (whole, attrs, source) => {
+    if (/\bsrc\s*=/.test(attrs) || !source.trim()) return whole;
+    if (/\btype\s*=\s*["'](?:application\/json|application\/ld\+json)["']/i.test(attrs)) return whole;
     const result = babel.transformSync(source, {
       filename: "login-societa-admin-inline.js",
       sourceType: "script",
@@ -66,7 +66,7 @@ if (fs.existsSync(loginPath)) {
       compact: false,
       presets: [[presetEnv, { targets: { safari: "10.3" }, bugfixes: true, modules: false }]]
     });
-    return "<script" + attrs + ">\\n" + result.code + "\\n</script>";
+    return "<script" + attrs + ">\n" + result.code + "\n</script>";
   });
   fs.writeFileSync(loginPath, loginHtml, "utf8");
 }
