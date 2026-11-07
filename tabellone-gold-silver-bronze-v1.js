@@ -414,7 +414,24 @@ window.saveGoldSilverBronzeMatch=function(stageKey,index,score){
     if(!data||data.success!==true)throw new Error('Supabase non ha confermato il risultato.');
     const current=activeState();
     if(current&&current[stageKey+'Res']?.[index]===normalized)window.__GSB_DIRTY_SCORES__?.delete(queueKey);
-    if(status)status.textContent='✓ '+stageKey.toUpperCase()+' partita '+(index+1)+' salvata su Supabase.';
+
+    /*
+     * Il salvataggio RPC delle finali registra il punteggio, ma da solo non
+     * percorre il normale UPDATE della riga tornei usato dai gironi per
+     * attivare il Broadcast pubblico. Dopo la conferma RPC, pubblica quindi
+     * anche lo snapshot completo tramite il percorso comune già verificato.
+     * updateAndSync rilegge prima i risultati remoti e conserva quelli GSB.
+     */
+    if(typeof window.updateAndSync!=='function'){
+      throw new Error('Risultato registrato, ma percorso Broadcast del tabellone non disponibile.');
+    }
+    const liveSync=await window.updateAndSync();
+    if(liveSync===false){
+      if(status)status.textContent='⚠ '+stageKey.toUpperCase()+' partita '+(index+1)+' salvata, ma aggiornamento istantaneo non confermato.';
+      console.warn('GSB: risultato salvato tramite RPC; UPDATE Broadcast non confermato.',{stageKey,index,score:normalized});
+      return true;
+    }
+    if(status)status.textContent='✓ '+stageKey.toUpperCase()+' partita '+(index+1)+' salvata e sincronizzata.';
     return true;
   }).catch(error=>{
     console.error('Errore RPC salvataggio risultato Gold/Silver/Bronze:',error);
