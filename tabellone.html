@@ -1188,6 +1188,14 @@ linear-gradient(0deg,transparent 49.6%,rgba(255,255,255,.72) 49.6%,rgba(255,255,
 .gsb-flow-groups,.gsb-flow-finals{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:space-between;min-height:0;gap:2mm}
 .gsb-flow-group,.gsb-flow-final{height:calc((100% - 4mm)/3);min-height:0;box-sizing:border-box;overflow:hidden;background:rgba(255,255,255,.97);border:1.3px solid #64748b;border-radius:2mm;padding:2mm;position:relative}
 .gsb-flow-group h3{font-size:10px;text-align:center;margin:0 0 1mm;color:#1e293b}
+.gsb-flow-matches{margin-bottom:1.2mm}
+.gsb-flow-matches table{font-size:6.2px}
+.gsb-flow-matches th,.gsb-flow-matches td{padding:.45mm .35mm}
+.gsb-flow-standings table{font-size:6.2px}
+.gsb-flow-standings th,.gsb-flow-standings td{padding:.45mm .35mm}
+.gsb-flow-group .gsb-flow-table{width:100%;overflow:hidden}
+.gsb-flow-group .gsb-flow-matches td:nth-child(3){text-align:left;font-size:6px}
+.gsb-flow-group .gsb-flow-matches td:nth-child(1),.gsb-flow-group .gsb-flow-matches td:nth-child(2),.gsb-flow-group .gsb-flow-matches td:nth-child(4){white-space:nowrap}
 .gsb-flow-table table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7px}
 .gsb-flow-table th,.gsb-flow-table td{border:1px solid #cbd5e1;padding:.7mm .5mm;text-align:center;line-height:1.15;overflow-wrap:anywhere}
 .gsb-flow-table th{background:#e2e8f0;font-weight:900}.gsb-flow-table td:first-child{font-weight:900}
@@ -13508,7 +13516,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
   clone.querySelectorAll("[style]").forEach(el=>el.removeAttribute("style"));
   specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — GIRONE FINALE</div><div class="bpl-special-content">${clone.innerHTML}</div></section>`;
  }
-}else if(typeof window.isGoldSilverBronzeTournament==="function"&&window.isGoldSilverBronzeTournament()){
+}else if(["goldSilverBronze","gironiGoldSilverBronze","gold_silver_bronze"].includes(String(state?.formula||state?.formulaTorneo||state?.rules?.tipoTorneo||state?.rules?.formulaScelta||state?.rules?.formulaFinale||state?.rules?.formulaConfig?.formula||""))){
   const source=document.getElementById("goldSilverBronzeStage");
   if(source){
    const cards=[...source.querySelectorAll(".gsb-final-card")];
@@ -13522,9 +13530,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
     const letter=(card.id||"card"+String.fromCharCode(65+index)).replace(/^card/i,"").toUpperCase();
     const matchTable=card.querySelector(`table#${letter}`);
     const classTable=card.querySelector(`table tbody#${letter}class`)?.closest("table");
-    const table=classTable||matchTable;
-    const clone=table?printableClone(table):null;
-    return `<section class="gsb-flow-group"><h3>GIRONE ${esc(letter)}</h3><div class="gsb-flow-table">${clone?clone.outerHTML:'<p>Classifica non disponibile</p>'}</div></section>`;
+    return `<section class="gsb-flow-group"><h3>GIRONE ${esc(letter)}</h3><div class="gsb-flow-table gsb-flow-matches">${matchTable?printableClone(matchTable).outerHTML:'<p>Calendario non disponibile</p>'}</div><div class="gsb-flow-table gsb-flow-standings">${classTable?printableClone(classTable).outerHTML:'<p>Classifica non disponibile</p>'}</div></section>`;
    }).join("");
    const finalBoxes=cards.map(card=>{
     const clone=printableClone(card);
@@ -13535,15 +13541,18 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
    const paths=[];
    [166,500,834].forEach(center=>{
     [-42,0,42].forEach((offset,index)=>{
-     paths.push(`<path class="gsb-flow-link gsb-flow-rank-${index+1}" d="M 380 ${center+offset} C 455 ${center+offset}, 545 ${[166,500,834][index]}, 620 ${[166,500,834][index]}"/>`);
+     const target=[166,500,834][index];
+     paths.push(`<path class="gsb-flow-link gsb-flow-rank-${index+1}" d="M 380 ${center+offset} C 455 ${center+offset}, 545 ${target}, 620 ${target}"/>`);
     });
    });
-   gsbFlowPage=`<section class="bpl-page gsb-flow-page"><div class="bpl-watermark" aria-hidden="true"><img src="loghi/logo_senza_scritte.jpg" alt=""></div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">PERCORSO DEI GIRONI VERSO LE FINALI GOLD · SILVER · BRONZE</div><div class="gsb-flow-layout"><div class="gsb-flow-groups">${groupBoxes}</div><svg class="gsb-flow-connectors" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">${paths.join("")}</svg><div class="gsb-flow-finals">${finalBoxes}</div></div><div class="bpl-note">1ª classificata di ogni girone → GOLD · 2ª → SILVER · 3ª → BRONZE</div></section>`;
+   gsbFlowPage=`<section class="bpl-page gsb-flow-page"><div class="bpl-watermark" aria-hidden="true"><img src="loghi/logo_senza_scritte.jpg" alt=""></div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">GIRONI A · B · C → FINALI GOLD · SILVER · BRONZE</div><div class="gsb-flow-layout"><div class="gsb-flow-groups">${groupBoxes}</div><svg class="gsb-flow-connectors" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">${paths.join("")}</svg><div class="gsb-flow-finals">${finalBoxes}</div></div><div class="bpl-note">1ª classificata di ogni girone → GOLD · 2ª → SILVER · 3ª → BRONZE</div></section>`;
    const overall=source.querySelector("#gsb-overall-standings");
    if(overall){
     const clone=printableClone(overall);
     specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">CLASSIFICA GENERALE FINALE</div><div class="bpl-special-content">${clone.innerHTML}</div></section>`;
    }
+  }else{
+   specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><p>Sezione finali Gold/Silver/Bronze non caricata: stampa annullata.</p></section>`;
   }
 }else if(["americano","mexicano","king","short","svizzero"].includes(tipoStampa)){
  const boxId={americano:"americanoBox",mexicano:"mexicanoBox",king:"kingBox",short:"shortBox",svizzero:"svizzeroBox"}[tipoStampa];
@@ -13556,7 +13565,12 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
  }
 }
 root.innerHTML=`${gsbFlowPage||groupPages.join("")}${specialPrintPages}<section class="bpl-page bpl-bracket-page ${state?.rules?.formulaFinale==="gironeFinale"||(state?.rules?.usaQuarti!==true&&state?.rules?.usaSemifinali!==true&&state?.rules?.usaFinale!==true)?"bpl-hide-page":""}"><div class="bpl-watermark" aria-hidden="true"><img src="eventour_logo.jpg" alt=""></div><div class="bpl-organization">eventour gestione &amp; eventi</div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">QUARTI DI FINALE → SEMIFINALI → FINALE → CAMPIONE</div><div class="bpl-bracket ${state?.rules?.usaQuarti!==true||state?.rules?.usaSemifinali!==true||state?.rules?.usaFinale!==true||Number(state?.rules?.numeroFinali)>1?"bpl-adaptive":""} ${state?.rules?.usaFinale===true?"bpl-has-winner":""}">${stage("Q","QUARTI DI FINALE","q")}<div class="bpl-bracket-connector bpl-conn-q1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div><div class="bpl-bracket-connector bpl-conn-q2" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("S","SEMIFINALI","s")}<div class="bpl-bracket-connector bpl-conn-s1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("finaleBox","FINALE","f")}<div class="bpl-bracket-connector bpl-conn-f1" aria-hidden="true"><span class="h-right-mid"></span></div><section class="bpl-stage" data-stage="w"><div class="bpl-stage-title">CAMPIONE</div><div class="bpl-stage-body"><div class="bpl-winner"><div class="bpl-winner-label">🏆 CAMPIONE TORNEO</div><div class="bpl-winner-name">${esc(winner||"Da determinare")}</div></div></div></section></div><div class="bpl-note">Stampa delle sole fasi finali del torneo.</div></section>`
-window.print();
+const printGuard=document.getElementById("bove-print-runtime-guard")||document.createElement("style");
+printGuard.id="bove-print-runtime-guard";
+printGuard.textContent="@media print{html,body{margin:0!important;padding:0!important}body.bove-printing>*:not(#bovePrintLayout){display:none!important;visibility:hidden!important}body.bove-printing>#bovePrintLayout{display:block!important;visibility:visible!important;position:static!important;width:100%!important}body.bove-printing #bovePrintLayout *{visibility:visible!important}}";
+if(!printGuard.parentNode)document.head.appendChild(printGuard);
+document.body.classList.add("bove-printing");
+try{window.print();}finally{document.body.classList.remove("bove-printing");}
 }
 </script>
 
