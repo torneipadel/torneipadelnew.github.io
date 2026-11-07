@@ -13580,13 +13580,14 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
         scores=[...row.querySelectorAll(".db-cell input")].map(el=>String(el.value||"").trim());
       }else{
         const nameCell=row.querySelector(".gsb-match-name");
-        const parts=String(nameCell?.textContent||"").split(/\\s+vs\\s+/i);
+        const parts=String(nameCell?.textContent||"").split(/\s+vs\s+/i);
         names=parts.length>1?parts:[String(nameCell?.textContent||"").trim(),"Da determinare"];
         scores=[...row.querySelectorAll(".gsb-score input")].map(el=>String(el.value||"").trim());
       }
       const cells=[...row.cells];
+      const cellValue=cell=>{const input=cell?.querySelector("input");return String(input?input.value:textOf(cell)||"").trim();};
       const meta=kind==="group"
-        ? [textOf(cells[0]?.querySelector("input")||cells[0]),textOf(cells[1]?.querySelector("input")||cells[1])].filter(Boolean).join(" · ")
+        ? [cellValue(cells[0]),cellValue(cells[1])].filter(Boolean).join(" · ")
         : [String(cells[0]?.querySelector("input")?.value||"").trim(),String(cells[1]?.querySelector("input")?.value||"").trim()].filter(Boolean).join(" · ");
       return '<div class="bpl-gsb-match">'+
         '<div class="bpl-gsb-team"><span>'+esc(names[0]||"Da determinare")+'</span><b>'+esc(scores[0]||"—")+'</b></div>'+
@@ -13597,7 +13598,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
     let winner="Da determinare",complete=false;
     if(kind==="group"){
       const results=Array.isArray(state?.[letter+"res"])?state[letter+"res"]:[];
-      complete=results.length>=3&&results.slice(0,3).every(value=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(value??"")));
+      complete=results.length>=3&&results.slice(0,3).every(value=>/^\s*\d+\s*-\s*\d+\s*$/.test(String(value??"")));
       if(complete&&typeof calc==="function"){
         const ranking=calc(state?.[letter]||[],results);
         if(ranking?.[0]?.n){
