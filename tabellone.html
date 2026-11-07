@@ -13565,14 +13565,58 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
     const headers=head?[...head.cells].map(cell=>'<th>'+esc(printCellValue(cell))+'</th>').join(""):"";
     return '<table class="bpl-sheet-table bpl-sheet-'+kind+'">'+(headers?'<thead><tr>'+headers+'</tr></thead>':"")+'<tbody>'+body.map(row=>'<tr>'+cells(row)+'</tr>').join("")+'</tbody></table>';
   };
-  const printCard=(card,index,kind)=>{
-    const heading=card.querySelector("h3")?.innerText?.trim()||((kind==="group"?"GIRONE ":"")+String.fromCharCode(65+index));
-    const tables=[...card.querySelectorAll("table")].filter(table=>getComputedStyle(table).display!=="none");
-    const content=tables.map(table=>printTable(table,kind)).filter(Boolean).join("");
-    return '<article class="bpl-print-card bpl-print-'+kind+'"><h2>'+esc(heading)+'</h2>'+content+'</article>';
+  const printRoundRobinCard=(card,index,kind)=>{
+    const heading=card.querySelector("h3")?.innerText?.trim()||
+      (kind==="group"?"GIRONE "+String.fromCharCode(65+index):"FASE FINALE");
+    const letter=String(card.id||"").replace(/^card/i,"").toUpperCase();
+    const table=kind==="group"
+      ? card.querySelector("table#"+letter)
+      : card.querySelector("table.gsb-matches");
+    const rows=table?[...table.querySelectorAll("tbody tr")].filter(row=>getComputedStyle(row).display!=="none"):[];
+    const matches=rows.map((row,i)=>{
+      let names=[],scores=[];
+      if(kind==="group"){
+        names=[...row.querySelectorAll(".match-cell .team-line")].map(el=>textOf(el));
+        scores=[...row.querySelectorAll(".db-cell input")].map(el=>String(el.value||"").trim());
+      }else{
+        const nameCell=row.querySelector(".gsb-match-name");
+        const parts=String(nameCell?.textContent||"").split(/\\s+vs\\s+/i);
+        names=parts.length>1?parts:[String(nameCell?.textContent||"").trim(),"Da determinare"];
+        scores=[...row.querySelectorAll(".gsb-score input")].map(el=>String(el.value||"").trim());
+      }
+      const cells=[...row.cells];
+      const meta=kind==="group"
+        ? [textOf(cells[0]?.querySelector("input")||cells[0]),textOf(cells[1]?.querySelector("input")||cells[1])].filter(Boolean).join(" · ")
+        : [String(cells[0]?.querySelector("input")?.value||"").trim(),String(cells[1]?.querySelector("input")?.value||"").trim()].filter(Boolean).join(" · ");
+      return '<div class="bpl-gsb-match">'+
+        '<div class="bpl-gsb-team"><span>'+esc(names[0]||"Da determinare")+'</span><b>'+esc(scores[0]||"—")+'</b></div>'+
+        '<div class="bpl-gsb-team"><span>'+esc(names[1]||"Da determinare")+'</span><b>'+esc(scores[1]||"—")+'</b></div>'+
+        (meta?'<div class="bpl-gsb-meta">'+esc(meta)+'</div>':"")+
+        '<div class="bpl-gsb-match-label">INCONTRO '+(i+1)+'</div></div>';
+    }).join("");
+    let winner="Da determinare",complete=false;
+    if(kind==="group"){
+      const results=Array.isArray(state?.[letter+"res"])?state[letter+"res"]:[];
+      complete=results.length>=3&&results.slice(0,3).every(value=>/^\\s*\\d+\\s*-\\s*\\d+\\s*$/.test(String(value??"")));
+      if(complete&&typeof calc==="function"){
+        const ranking=calc(state?.[letter]||[],results);
+        if(ranking?.[0]?.n){
+          winner=typeof formatCoppiaDisplay==="function"?formatCoppiaDisplay(ranking[0].n):textOf({textContent:String(ranking[0].n)});
+        }
+      }
+    }else{
+      const savedWinner=card.querySelector(".gsb-winner strong");
+      if(savedWinner){winner=textOf(savedWinner);complete=true;}
+    }
+    return '<article class="bpl-print-card bpl-print-'+kind+' bpl-bracket-card">'+
+      '<h2>'+esc(heading)+'</h2>'+
+      '<div class="bpl-gsb-flow"><div class="bpl-gsb-matches">'+matches+'</div>'+
+      '<div class="bpl-gsb-winner"><div class="bpl-gsb-winner-title">'+(kind==="group"?"VINCITORE DEL GIRONE":"VINCITORE FASCIA")+'</div>'+
+      '<div class="bpl-gsb-winner-name">'+esc(winner)+'</div>'+
+      '<div class="bpl-gsb-winner-status">'+(complete?"Classifica definitiva":"In attesa dei risultati")+'</div></div></div></article>';
   };
-  const groupHtml=groupCards.map((card,index)=>printCard(card,index,"group")).join("");
-  const finalsHtml=finalCards.map((card,index)=>printCard(card,index,"final")).join("");
+  const groupHtml=groupCards.map((card,index)=>printRoundRobinCard(card,index,"group")).join("");
+  const finalsHtml=finalCards.map((card,index)=>printRoundRobinCard(card,index,"final")).join("");
   const title=esc(state?.nomeTorneo||"TABELLONE TORNEO");
   gsbFlowPage=
     '<section class="bpl-page bpl-real-groups-page">'+
@@ -13624,6 +13668,24 @@ const realPrintCss=`
  .bpl-real-groups-grid,.bpl-real-finals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important;align-items:stretch!important;width:100%!important}
  .bpl-print-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;box-sizing:border-box!important;padding:3mm!important;margin:0!important;border:1.2px solid #64748b!important;border-top:3px solid #334155!important;border-radius:1.5mm!important;background:#fff!important;color:#172033!important;box-shadow:none!important;break-inside:avoid!important;overflow:visible!important}
  .bpl-print-card h2{font-size:12pt!important;line-height:1.15!important;text-align:center!important;margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;color:#172033!important;font-weight:900!important}
+ .bpl-bracket-card{height:145mm!important;min-height:145mm!important;max-height:145mm!important;overflow:hidden!important;padding:2.5mm!important}
+ .bpl-bracket-card h2{margin-bottom:2mm!important}
+ .bpl-gsb-flow{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;height:calc(100% - 10mm)!important;min-height:0!important;padding-right:6mm!important;box-sizing:border-box!important}
+ .bpl-gsb-flow:before{content:""!important;position:absolute!important;right:2mm!important;top:7mm!important;bottom:10mm!important;border-right:1.2px solid #64748b!important}
+ .bpl-gsb-matches{display:flex!important;flex-direction:column!important;gap:3mm!important;position:relative!important;z-index:1!important}
+ .bpl-gsb-match{position:relative!important;border:1.2px solid #64748b!important;border-radius:1.5mm!important;background:#fff!important;padding:1.5mm!important;break-inside:avoid!important}
+ .bpl-gsb-match:after{content:""!important;position:absolute!important;right:-6mm!important;top:50%!important;width:6mm!important;border-top:1.2px solid #64748b!important}
+ .bpl-gsb-team{display:grid!important;grid-template-columns:minmax(0,1fr) 7mm!important;align-items:center!important;gap:1mm!important;min-height:7mm!important;border-bottom:1px solid #cbd5e1!important;font-size:7.3pt!important;font-weight:700!important;line-height:1.15!important}
+ .bpl-gsb-team:last-of-type{border-bottom:0!important}
+ .bpl-gsb-team span{overflow-wrap:anywhere!important}
+ .bpl-gsb-team b{display:block!important;text-align:center!important;border:1px solid #94a3b8!important;border-radius:1mm!important;min-height:5mm!important;padding:.5mm!important;font-size:8pt!important}
+ .bpl-gsb-meta{font-size:5.8pt!important;color:#64748b!important;text-align:right!important;margin-top:.7mm!important}
+ .bpl-gsb-match-label{position:absolute!important;top:-1.5mm!important;left:1.5mm!important;transform:translateY(-100%)!important;font-size:5.5pt!important;font-weight:800!important;color:#64748b!important;letter-spacing:.04em!important}
+ .bpl-gsb-winner{position:relative!important;z-index:2!important;margin:5mm 0 0 auto!important;width:78%!important;min-height:17mm!important;padding:2mm!important;border:2px solid #b88718!important;border-radius:2mm!important;background:#fff8df!important;text-align:center!important;box-sizing:border-box!important}
+ .bpl-gsb-winner:before{content:""!important;position:absolute!important;right:100%!important;top:50%!important;width:6mm!important;border-top:1.2px solid #64748b!important}
+ .bpl-gsb-winner-title{font-size:6pt!important;font-weight:900!important;letter-spacing:.08em!important;color:#64748b!important}
+ .bpl-gsb-winner-name{font-size:9pt!important;font-weight:900!important;line-height:1.15!important;color:#172033!important;overflow-wrap:anywhere!important;margin-top:1mm!important}
+ .bpl-gsb-winner-status{font-size:5.5pt!important;color:#64748b!important;margin-top:.7mm!important}
  .bpl-sheet-table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:8pt!important;margin:1.5mm 0 3mm!important;color:#172033!important}
  .bpl-sheet-table th,.bpl-sheet-table td{padding:1.5mm 1mm!important;border:1px solid #cbd5e1!important;color:#172033!important;line-height:1.25!important;white-space:pre-line!important;overflow-wrap:anywhere!important;vertical-align:middle!important}
  .bpl-sheet-table th{background:#e2e8f0!important;font-weight:900!important;text-align:center!important}
