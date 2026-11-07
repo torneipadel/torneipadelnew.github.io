@@ -13516,7 +13516,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
   clone.querySelectorAll("[style]").forEach(el=>el.removeAttribute("style"));
   specialPrintPages+=`<section class="bpl-page bpl-special-print-page"><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">FASE FINALE — GIRONE FINALE</div><div class="bpl-special-content">${clone.innerHTML}</div></section>`;
  }
-}else if(["goldSilverBronze","gironiGoldSilverBronze","gold_silver_bronze"].includes(String(state?.formula||state?.formulaTorneo||state?.rules?.tipoTorneo||state?.rules?.formulaScelta||state?.rules?.formulaFinale||state?.rules?.formulaConfig?.formula||""))){
+}else if([state?.formula,state?.formulaTorneo,state?.rules?.tipoTorneo,state?.rules?.formulaScelta,state?.rules?.formulaFinale,state?.rules?.formulaConfig?.formula].some(value=>["goldSilverBronze","gironiGoldSilverBronze","gold_silver_bronze"].includes(String(value||"")))){
   const source=document.getElementById("goldSilverBronzeStage");
   if(source){
    const cards=[...source.querySelectorAll(".gsb-final-card")];
