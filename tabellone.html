@@ -13554,7 +13554,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
       const values=fields.map(el=>el.tagName==="SELECT"?(el.selectedOptions?.[0]?.textContent||el.value||""):String(el.value??"").trim()).filter(Boolean);
       if(values.length)return values.join(" – ");
     }
-    return String(cell.innerText||cell.textContent||"").replace(/\\s*\\n\\s*/g," / ").replace(/\\s+/g," ").trim();
+    return String(cell.innerText||cell.textContent||"").replace(/\s*\n\s*/g," / ").replace(/\s+/g," ").trim();
   };
   const printTable=(table,kind)=>{
     const rows=[...table.querySelectorAll("tr")].filter(row=>getComputedStyle(row).display!=="none");
