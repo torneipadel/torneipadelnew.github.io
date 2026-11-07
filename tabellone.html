@@ -7433,22 +7433,46 @@ function mostraLocandinaTorneoIscritto(locandina){
     const immagine = locandina.immagine.trim();
     if(!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(immagine) && !/^https:\/\//i.test(immagine)) return;
 
-    const foto = document.createElement("img");
-    foto.src = immagine;
-    foto.alt = locandina.titolo || "Locandina del torneo";
-    foto.loading = "eager";
-    foto.decoding = "async";
-    foto.style.cssText = "display:block;width:100%;height:auto;max-width:430px;max-height:620px;object-fit:contain;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.35);margin:0 auto;";
-    foto.addEventListener("error", function(){
-        contenitore.hidden = true;
-        console.error("Locandina del torneo non caricata.");
-    }, {once:true});
+    /* La locandina è disponibile solo nella vista pubblica/iscritto:
+       resta chiusa all'apertura e si mostra soltanto su richiesta. */
+    while(contenitore.firstChild){
+        contenitore.removeChild(contenitore.firstChild);
+    }
+
+    const pulsante = document.createElement("button");
+    pulsante.type = "button";
+    pulsante.textContent = "📋 Visualizza locandina";
+    pulsante.setAttribute("aria-expanded", "false");
+    pulsante.style.cssText = "display:block;width:100%;max-width:430px;min-height:42px;margin:0 auto;padding:10px 14px;background:#1d4ed8;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;";
+
+    const pannello = document.createElement("div");
+    pannello.hidden = true;
+    pannello.style.cssText = "margin:12px auto 0;";
 
     const titolo = document.createElement("div");
     titolo.textContent = "LOCANDINA DEL TORNEO";
     titolo.style.cssText = "font-size:12px;font-weight:800;letter-spacing:1.2px;color:#fff;text-align:center;margin:0 0 9px;text-shadow:0 1px 3px #000;";
 
-    contenitore.replaceChildren(titolo, foto);
+    const foto = document.createElement("img");
+    foto.src = immagine;
+    foto.alt = locandina.titolo || "Locandina del torneo";
+    foto.style.cssText = "display:block;width:100%;height:auto;max-width:430px;max-height:620px;object-fit:contain;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.35);margin:0 auto;";
+    foto.addEventListener("error", function(){
+        contenitore.hidden = true;
+        console.error("Locandina del torneo non caricata.");
+    }, false);
+
+    pannello.appendChild(titolo);
+    pannello.appendChild(foto);
+    pulsante.addEventListener("click", function(){
+        const aperta = pannello.hidden;
+        pannello.hidden = !aperta;
+        pulsante.setAttribute("aria-expanded", aperta ? "true" : "false");
+        pulsante.textContent = aperta ? "✕ Nascondi locandina" : "📋 Visualizza locandina";
+    }, false);
+
+    contenitore.appendChild(pulsante);
+    contenitore.appendChild(pannello);
     contenitore.hidden = false;
 }
 
