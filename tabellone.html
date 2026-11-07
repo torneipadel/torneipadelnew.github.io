@@ -13565,12 +13565,29 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
  }
 }
 root.innerHTML=`${gsbFlowPage||groupPages.join("")}${specialPrintPages}<section class="bpl-page bpl-bracket-page ${state?.rules?.formulaFinale==="gironeFinale"||(state?.rules?.usaQuarti!==true&&state?.rules?.usaSemifinali!==true&&state?.rules?.usaFinale!==true)?"bpl-hide-page":""}"><div class="bpl-watermark" aria-hidden="true"><img src="eventour_logo.jpg" alt=""></div><div class="bpl-organization">eventour gestione &amp; eventi</div><h1 class="bpl-title">${esc(state?.nomeTorneo||"TABELLONE TORNEO")}</h1><div class="bpl-subtitle">QUARTI DI FINALE → SEMIFINALI → FINALE → CAMPIONE</div><div class="bpl-bracket ${state?.rules?.usaQuarti!==true||state?.rules?.usaSemifinali!==true||state?.rules?.usaFinale!==true||Number(state?.rules?.numeroFinali)>1?"bpl-adaptive":""} ${state?.rules?.usaFinale===true?"bpl-has-winner":""}">${stage("Q","QUARTI DI FINALE","q")}<div class="bpl-bracket-connector bpl-conn-q1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div><div class="bpl-bracket-connector bpl-conn-q2" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("S","SEMIFINALI","s")}<div class="bpl-bracket-connector bpl-conn-s1" aria-hidden="true"><span class="h-left-top"></span><span class="h-left-bottom"></span><span class="h-right-mid"></span><span class="v-mid"></span></div>${stage("finaleBox","FINALE","f")}<div class="bpl-bracket-connector bpl-conn-f1" aria-hidden="true"><span class="h-right-mid"></span></div><section class="bpl-stage" data-stage="w"><div class="bpl-stage-title">CAMPIONE</div><div class="bpl-stage-body"><div class="bpl-winner"><div class="bpl-winner-label">🏆 CAMPIONE TORNEO</div><div class="bpl-winner-name">${esc(winner||"Da determinare")}</div></div></div></section></div><div class="bpl-note">Stampa delle sole fasi finali del torneo.</div></section>`
-const printGuard=document.getElementById("bove-print-runtime-guard")||document.createElement("style");
-printGuard.id="bove-print-runtime-guard";
-printGuard.textContent="@media print{html,body{margin:0!important;padding:0!important}body.bove-printing>*:not(#bovePrintLayout){display:none!important;visibility:hidden!important}body.bove-printing>#bovePrintLayout{display:block!important;visibility:visible!important;position:static!important;width:100%!important}body.bove-printing #bovePrintLayout *{visibility:visible!important}}";
-if(!printGuard.parentNode)document.head.appendChild(printGuard);
-document.body.classList.add("bove-printing");
-try{window.print();}finally{document.body.classList.remove("bove-printing");}
+/* Anteprima isolata: la pagina amministrativa non viene mai inviata alla stampante. */
+const printCss=document.getElementById("bove-print-bracket-style")?.textContent||"";
+const printWindow=window.open("","_blank");
+if(printWindow){
+  const baseUrl=window.location.origin+window.location.pathname;
+  const printDocument="<!doctype html><html lang=\"it\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><base href=\""+esc(baseUrl)+"\"><title>"+esc(state?.nomeTorneo||"Tabellone torneo")+"</title><style>"+printCss+"</style></head><body><div id=\"bovePrintLayout\">"+root.innerHTML+"</div></body></html>";
+  printWindow.document.open();
+  printWindow.document.write(printDocument);
+  printWindow.document.close();
+  printWindow.addEventListener("afterprint",()=>{try{printWindow.close();}catch(e){}},{once:true});
+  const avviaAnteprima=()=>{
+    if(printWindow.closed)return;
+    try{printWindow.focus();printWindow.print();}
+    catch(error){console.error("Anteprima di stampa non avviata:",error);}
+  };
+  printWindow.requestAnimationFrame(()=>printWindow.requestAnimationFrame(avviaAnteprima));
+}else{
+  /* Fallback se il browser blocca la finestra: mantieni la modalità fino ad afterprint. */
+  const ripristina=()=>document.body.classList.remove("bove-printing");
+  window.addEventListener("afterprint",ripristina,{once:true});
+  document.body.classList.add("bove-printing");
+  window.print();
+}
 }
 </script>
 
