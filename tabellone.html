@@ -13590,8 +13590,8 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
         ? [cellValue(cells[0]),cellValue(cells[1])].filter(Boolean).join(" · ")
         : [String(cells[0]?.querySelector("input")?.value||"").trim(),String(cells[1]?.querySelector("input")?.value||"").trim()].filter(Boolean).join(" · ");
       return '<div class="bpl-gsb-match">'+
-        '<div class="bpl-gsb-team"><span>'+esc(names[0]||"Da determinare")+'</span><b>'+esc(scores[0]||"—")+'</b></div>'+
-        '<div class="bpl-gsb-team"><span>'+esc(names[1]||"Da determinare")+'</span><b>'+esc(scores[1]||"—")+'</b></div>'+
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name">'+esc(names[0]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[0]||"—")+'</span></div>'+
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name">'+esc(names[1]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[1]||"—")+'</span></div>'+
         (meta?'<div class="bpl-gsb-meta">'+esc(meta)+'</div>':"")+
         '<div class="bpl-gsb-match-label">INCONTRO '+(i+1)+'</div></div>';
     }).join("");
@@ -13669,25 +13669,25 @@ const realPrintCss=`
  .bpl-real-groups-grid,.bpl-real-finals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important;align-items:stretch!important;width:100%!important}
  .bpl-print-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;box-sizing:border-box!important;padding:3mm!important;margin:0!important;border:1.2px solid #64748b!important;border-top:3px solid #334155!important;border-radius:1.5mm!important;background:#fff!important;color:#172033!important;box-shadow:none!important;break-inside:avoid!important;overflow:visible!important}
  .bpl-print-card h2{font-size:12pt!important;line-height:1.15!important;text-align:center!important;margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;color:#172033!important;font-weight:900!important}
- .bpl-bracket-card{height:145mm!important;min-height:145mm!important;max-height:145mm!important;overflow:hidden!important;padding:2.5mm!important}
- .bpl-bracket-card h2{margin-bottom:2mm!important}
+ .bpl-bracket-card{height:145mm!important;min-height:145mm!important;max-height:145mm!important;overflow:hidden!important;padding:3mm!important;background:#fff!important;border:1.5px solid #94a3b8!important;border-top:3px solid #1e3a5f!important;border-radius:3mm!important;box-shadow:0 1mm 2mm rgba(15,23,42,.08)!important}
+ .bpl-bracket-card h2{margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;text-align:center!important;font-size:12pt!important;font-weight:900!important;letter-spacing:.04em!important;color:#17324d!important}
  .bpl-real-finals-page .bpl-bracket-card{height:108mm!important;min-height:108mm!important;max-height:108mm!important}
- .bpl-gsb-flow{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;height:calc(100% - 10mm)!important;min-height:0!important;padding-right:0!important;box-sizing:border-box!important}
- .bpl-gsb-flow:before{content:""!important;position:absolute!important;right:25%!important;top:7mm!important;bottom:10mm!important;border-right:1.2px solid #64748b!important}
- .bpl-gsb-matches{display:flex!important;flex-direction:column!important;gap:3mm!important;position:relative!important;z-index:1!important;width:70%!important}
- .bpl-gsb-match{position:relative!important;border:1.2px solid #64748b!important;border-radius:1.5mm!important;background:#fff!important;padding:1.5mm!important;break-inside:avoid!important}
- .bpl-gsb-match:after{content:""!important;position:absolute!important;right:-5%!important;top:50%!important;width:5%!important;border-top:1.2px solid #64748b!important}
- .bpl-gsb-team{display:grid!important;grid-template-columns:minmax(0,1fr) 7mm!important;align-items:center!important;gap:1mm!important;min-height:7mm!important;border-bottom:1px solid #cbd5e1!important;font-size:7.3pt!important;font-weight:700!important;line-height:1.15!important}
- .bpl-gsb-team:last-of-type{border-bottom:0!important}
- .bpl-gsb-team span{overflow-wrap:anywhere!important}
- .bpl-gsb-team b{display:block!important;text-align:center!important;border:1px solid #94a3b8!important;border-radius:1mm!important;min-height:5mm!important;padding:.5mm!important;font-size:8pt!important}
- .bpl-gsb-meta{font-size:5.8pt!important;color:#64748b!important;text-align:right!important;margin-top:.7mm!important}
- .bpl-gsb-match-label{position:absolute!important;top:-1.5mm!important;left:1.5mm!important;transform:translateY(-100%)!important;font-size:5.5pt!important;font-weight:800!important;color:#64748b!important;letter-spacing:.04em!important}
- .bpl-gsb-winner{position:relative!important;z-index:2!important;margin:5mm 0 0 auto!important;width:25%!important;min-height:17mm!important;padding:2mm!important;border:2px solid #b88718!important;border-radius:2mm!important;background:#fff8df!important;text-align:center!important;box-sizing:border-box!important}
+ .bpl-gsb-flow{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;gap:4mm!important;height:calc(100% - 10mm)!important;min-height:0!important;padding:0!important;box-sizing:border-box!important}
+ .bpl-gsb-flow:before{content:""!important;position:absolute!important;right:1.5%!important;top:6mm!important;bottom:23mm!important;border-right:1.4px solid #94a3b8!important}
+ .bpl-gsb-matches{display:flex!important;flex-direction:column!important;gap:3mm!important;position:relative!important;z-index:1!important;width:90%!important}
+ .bpl-gsb-match{position:relative!important;border:1.3px solid #9aaabd!important;border-radius:2mm!important;background:#f8fafc!important;padding:2.2mm!important;break-inside:avoid!important;box-shadow:0 .5mm 1mm rgba(15,23,42,.06)!important}
+ .bpl-gsb-match:after{content:""!important;position:absolute!important;left:100%!important;top:50%!important;width:11.2%!important;border-top:1.4px solid #94a3b8!important}
+ .bpl-gsb-team{display:grid!important;grid-template-columns:minmax(0,1fr) 13mm!important;align-items:stretch!important;gap:2mm!important;min-height:8mm!important;margin:0 0 1.4mm!important;border:0!important;font-size:8pt!important;font-weight:700!important;line-height:1.2!important}
+ .bpl-gsb-team:last-of-type{margin-bottom:0!important}
+ .bpl-gsb-team-name{display:flex!important;align-items:center!important;min-width:0!important;padding:1.5mm 2mm!important;border:1px solid #cbd5e1!important;border-radius:1.3mm!important;background:#fff!important;color:#172033!important;overflow-wrap:anywhere!important}
+ .bpl-gsb-score-box{display:flex!important;align-items:center!important;justify-content:center!important;min-height:8mm!important;padding:1mm!important;border:1.5px solid #64748b!important;border-radius:1.3mm!important;background:#eaf0f7!important;color:#102a43!important;font-size:10pt!important;font-weight:900!important;text-align:center!important}
+ .bpl-gsb-meta{font-size:6pt!important;color:#64748b!important;text-align:right!important;margin-top:1.2mm!important}
+ .bpl-gsb-match-label{position:absolute!important;top:-1.7mm!important;left:2mm!important;transform:translateY(-100%)!important;padding:.5mm 1.5mm!important;border-radius:1mm!important;background:#e8eef5!important;font-size:5.8pt!important;font-weight:900!important;color:#334e68!important;letter-spacing:.05em!important}
+ .bpl-gsb-winner{position:relative!important;z-index:2!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1mm!important;margin:1mm 0 0!important;width:100%!important;min-height:21mm!important;padding:3mm 4mm!important;border:2px solid #b88718!important;border-radius:2.5mm!important;background:#fff4cf!important;text-align:center!important;box-sizing:border-box!important;box-shadow:inset 0 0 0 1px rgba(184,135,24,.12)!important}
  .bpl-gsb-winner:before{display:none!important}
- .bpl-gsb-winner-title{font-size:6pt!important;font-weight:900!important;letter-spacing:.08em!important;color:#64748b!important}
- .bpl-gsb-winner-name{font-size:9pt!important;font-weight:900!important;line-height:1.15!important;color:#172033!important;overflow-wrap:anywhere!important;margin-top:1mm!important}
- .bpl-gsb-winner-status{font-size:5.5pt!important;color:#64748b!important;margin-top:.7mm!important}
+ .bpl-gsb-winner-title{font-size:7pt!important;font-weight:900!important;letter-spacing:.1em!important;color:#77520c!important}
+ .bpl-gsb-winner-name{width:100%!important;font-size:11pt!important;font-weight:900!important;line-height:1.2!important;color:#172033!important;overflow-wrap:anywhere!important}
+ .bpl-gsb-winner-status{font-size:6pt!important;color:#6b5a32!important;margin-top:.5mm!important}
  .bpl-sheet-table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:8pt!important;margin:1.5mm 0 3mm!important;color:#172033!important}
  .bpl-sheet-table th,.bpl-sheet-table td{padding:1.5mm 1mm!important;border:1px solid #cbd5e1!important;color:#172033!important;line-height:1.25!important;white-space:pre-line!important;overflow-wrap:anywhere!important;vertical-align:middle!important}
  .bpl-sheet-table th{background:#e2e8f0!important;font-weight:900!important;text-align:center!important}
