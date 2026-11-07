@@ -13580,9 +13580,15 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
         scores=[...row.querySelectorAll(".db-cell input")].map(el=>String(el.value||"").trim());
       }else{
         const nameCell=row.querySelector(".gsb-match-name");
-        const parts=String(nameCell?.textContent||"").split(/\s+vs\s+/i);
-        names=parts.length>1?parts:[String(nameCell?.textContent||"").trim(),"Da determinare"];
-        scores=[...row.querySelectorAll(".gsb-score input")].map(el=>String(el.value||"").trim());
+        const rawName=String(nameCell?.innerText||nameCell?.textContent||"").replace(/\s+/g," ").trim();
+        const parts=rawName.split(/\s+vs\s+/i);
+        names=parts.length>1?parts:[rawName,"Da determinare"];
+        // Legge i due punteggi usando gli attributi dati realmente presenti
+        // sugli input della formula Gold/Silver/Bronze; fallback per markup legacy.
+        const scoreInputs=[...row.querySelectorAll('input[data-gsb-side]')]
+          .sort((a,b)=>Number(a.getAttribute("data-gsb-side"))-Number(b.getAttribute("data-gsb-side")));
+        scores=(scoreInputs.length===2?scoreInputs:[...row.querySelectorAll(".gsb-score input")])
+          .map(el=>String(el.value??"").trim());
       }
       const cells=[...row.cells];
       const cellValue=cell=>{const input=cell?.querySelector("input");return String(input?input.value:textOf(cell)||"").trim();};
