@@ -13547,18 +13547,32 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
     alert("Stampa non avviata: il tabellone reale non ha caricato tutti e tre i gironi e le tre finali. Aggiorna il tabellone e riprova.");
     return false;
   }
-  const groupHtml=groupCards.map((card,index)=>{
-    const clone=printableClone(card);
-    clone.classList.add("bpl-real-group-card");
-    clone.querySelectorAll("table").forEach(table=>table.classList.add("bpl-real-table"));
-    return clone.outerHTML;
-  }).join("");
-  const finalsHtml=finalCards.map((card,index)=>{
-    const clone=printableClone(card);
-    clone.classList.add("bpl-real-final-card");
-    clone.querySelectorAll("table").forEach(table=>table.classList.add("bpl-real-table"));
-    return clone.outerHTML;
-  }).join("");
+  /* Schede autonome per la stampa: dati tabellari, non cloni della grafica amministrativa. */
+  const printCellValue=cell=>{
+    const fields=[...cell.querySelectorAll("input,select,textarea")];
+    if(fields.length){
+      const values=fields.map(el=>el.tagName==="SELECT"?(el.selectedOptions?.[0]?.textContent||el.value||""):String(el.value??"").trim()).filter(Boolean);
+      if(values.length)return values.join(" – ");
+    }
+    return String(cell.innerText||cell.textContent||"").replace(/\\s*\\n\\s*/g," / ").replace(/\\s+/g," ").trim();
+  };
+  const printTable=(table,kind)=>{
+    const rows=[...table.querySelectorAll("tr")].filter(row=>getComputedStyle(row).display!=="none");
+    if(!rows.length)return "";
+    const head=rows.find(row=>row.querySelector("th"));
+    const body=rows.filter(row=>row!==head&&row.querySelector("td"));
+    const cells=row=>[...row.cells].map(cell=>'<td>'+esc(printCellValue(cell))+'</td>').join("");
+    const headers=head?[...head.cells].map(cell=>'<th>'+esc(printCellValue(cell))+'</th>').join(""):"";
+    return '<table class="bpl-sheet-table bpl-sheet-'+kind+'">'+(headers?'<thead><tr>'+headers+'</tr></thead>':"")+'<tbody>'+body.map(row=>'<tr>'+cells(row)+'</tr>').join("")+'</tbody></table>';
+  };
+  const printCard=(card,index,kind)=>{
+    const heading=card.querySelector("h3")?.innerText?.trim()||((kind==="group"?"GIRONE ":"")+String.fromCharCode(65+index));
+    const tables=[...card.querySelectorAll("table")].filter(table=>getComputedStyle(table).display!=="none");
+    const content=tables.map(table=>printTable(table,kind)).filter(Boolean).join("");
+    return '<article class="bpl-print-card bpl-print-'+kind+'"><h2>'+esc(heading)+'</h2>'+content+'</article>';
+  };
+  const groupHtml=groupCards.map((card,index)=>printCard(card,index,"group")).join("");
+  const finalsHtml=finalCards.map((card,index)=>printCard(card,index,"final")).join("");
   const title=esc(state?.nomeTorneo||"TABELLONE TORNEO");
   gsbFlowPage=
     '<section class="bpl-page bpl-real-groups-page">'+
@@ -13602,30 +13616,34 @@ const realPrintCss=`
 @media print{
  html,body{margin:0!important;padding:0!important;background:#fff!important;color:#172033!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
  #bovePrintLayout{display:block!important;width:100%!important;background:#fff!important;color:#172033!important}
- .bpl-real-groups-page,.bpl-real-finals-page{width:100%;height:180mm;min-height:180mm;box-sizing:border-box;page-break-after:always;overflow:hidden;padding:3mm;background:#fff;color:#172033;font-family:Arial,Helvetica,sans-serif}
- .bpl-real-heading{text-align:center;margin:0 0 4mm}
- .bpl-real-heading h1{font-size:19pt;font-weight:900;margin:0 0 1.5mm;color:#172033}
- .bpl-real-heading>div{font-size:11pt;font-weight:900;letter-spacing:.08em;color:#334155}
- .bpl-real-heading p{font-size:9pt;font-weight:700;margin:2mm 0 0;color:#475569}
- .bpl-real-groups-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important;align-items:stretch!important;width:100%!important;height:145mm!important;min-height:145mm!important;max-height:145mm!important} .bpl-real-finals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important;align-items:start!important;width:100%!important}
- .bpl-qualification-flow{display:grid!important;grid-template-columns:1fr!important;gap:1.5mm!important;margin:0 0 2.5mm!important}
- .bpl-flow-lane{display:grid!important;grid-template-columns:minmax(0,3fr) 18mm minmax(24mm,1fr)!important;align-items:center!important;min-height:10mm!important}
+ .bpl-real-groups-page,.bpl-real-finals-page{width:100%;min-height:180mm;box-sizing:border-box;page-break-after:always;padding:3mm 2mm;background:#fff;color:#172033;font-family:Arial,Helvetica,sans-serif;overflow:visible}
+ .bpl-real-heading{text-align:center;margin:0 0 4mm;border-bottom:2px solid #1e293b;padding-bottom:2mm}
+ .bpl-real-heading h1{font-size:20pt;font-weight:900;margin:0 0 1.5mm;color:#172033}
+ .bpl-real-heading>div{font-size:10pt;font-weight:900;letter-spacing:.08em;color:#334155}
+ .bpl-real-heading p{font-size:8pt;font-weight:700;margin:2mm 0 0;color:#475569}
+ .bpl-real-groups-grid,.bpl-real-finals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3mm!important;align-items:stretch!important;width:100%!important}
+ .bpl-print-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;box-sizing:border-box!important;padding:3mm!important;margin:0!important;border:1.2px solid #64748b!important;border-top:3px solid #334155!important;border-radius:1.5mm!important;background:#fff!important;color:#172033!important;box-shadow:none!important;break-inside:avoid!important;overflow:visible!important}
+ .bpl-print-card h2{font-size:12pt!important;line-height:1.15!important;text-align:center!important;margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;color:#172033!important;font-weight:900!important}
+ .bpl-sheet-table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:8pt!important;margin:1.5mm 0 3mm!important;color:#172033!important}
+ .bpl-sheet-table th,.bpl-sheet-table td{padding:1.5mm 1mm!important;border:1px solid #cbd5e1!important;color:#172033!important;line-height:1.25!important;white-space:pre-line!important;overflow-wrap:anywhere!important;vertical-align:middle!important}
+ .bpl-sheet-table th{background:#e2e8f0!important;font-weight:900!important;text-align:center!important}
+ .bpl-sheet-table td{font-weight:600!important;text-align:center!important}
+ .bpl-sheet-group td:nth-child(3){text-align:left!important;font-weight:700!important}
+ .bpl-sheet-final td{font-size:7.5pt!important}
+ .bpl-real-finals-grid .bpl-print-final:nth-child(1){border-top-color:#b88718!important}
+ .bpl-real-finals-grid .bpl-print-final:nth-child(2){border-top-color:#8793a2!important}
+ .bpl-real-finals-grid .bpl-print-final:nth-child(3){border-top-color:#a5683d!important}
+ .bpl-qualification-flow{display:grid!important;grid-template-columns:1fr!important;gap:1mm!important;margin:0 0 2.5mm!important}
+ .bpl-flow-lane{display:grid!important;grid-template-columns:minmax(0,3fr) 12mm minmax(20mm,1fr)!important;align-items:center!important;min-height:8mm!important}
  .bpl-flow-sources{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:2mm!important}
- .bpl-flow-sources span{display:block!important;text-align:center!important;padding:1.5mm 1mm!important;border:1px solid #64748b!important;border-radius:1.5mm!important;background:#f8fafc!important;color:#172033!important;font-size:7.5pt!important;font-weight:800!important}
- .bpl-flow-connector{height:8mm!important;position:relative!important;border-top:1px solid #475569!important;border-bottom:1px solid #475569!important}
- .bpl-flow-connector:after{content:""!important;position:absolute!important;right:0!important;top:50%!important;width:0!important;height:0!important;border-top:2mm solid transparent!important;border-bottom:2mm solid transparent!important;border-left:3mm solid #475569!important;transform:translateY(-50%)!important}
+ .bpl-flow-sources span{display:block!important;text-align:center!important;padding:1mm!important;border:1px solid #64748b!important;background:#f8fafc!important;color:#172033!important;font-size:7pt!important;font-weight:800!important}
+ .bpl-flow-connector{height:6mm!important;position:relative!important;border-top:1px solid #475569!important;border-bottom:1px solid #475569!important}
+ .bpl-flow-connector:after{content:""!important;position:absolute!important;right:0!important;top:50%!important;width:0!important;height:0!important;border-top:1.5mm solid transparent!important;border-bottom:1.5mm solid transparent!important;border-left:2.5mm solid #475569!important;transform:translateY(-50%)!important}
  .bpl-flow-connector i{display:none!important}
- .bpl-flow-destination{padding:2mm!important;text-align:center!important;border:2px solid #334155!important;border-radius:2mm!important;font-size:9pt!important;font-weight:900!important;letter-spacing:.08em!important;background:#fff!important;color:#172033!important}
+ .bpl-flow-destination{padding:1.5mm!important;text-align:center!important;border:1.5px solid #334155!important;font-size:8pt!important;font-weight:900!important;background:#fff!important;color:#172033!important}
  .bpl-flow-gold .bpl-flow-destination{border-color:#b88718!important;background:#fff8df!important}
  .bpl-flow-silver .bpl-flow-destination{border-color:#8793a2!important;background:#f1f5f9!important}
  .bpl-flow-bronze .bpl-flow-destination{border-color:#a5683d!important;background:#fff1e7!important}
- .bpl-real-group-card{display:block!important;visibility:visible!important;opacity:1!important;min-width:0!important;max-width:none!important;width:100%!important;height:145mm!important;min-height:145mm!important;max-height:145mm!important;overflow:hidden!important;box-sizing:border-box!important;padding:2.2mm!important;margin:0!important;border:1px solid #64748b!important;border-radius:2mm!important;background:#fff!important;color:#172033!important;box-shadow:none!important;break-inside:avoid!important} .bpl-real-final-card{display:block!important;visibility:visible!important;opacity:1!important;min-width:0!important;max-width:none!important;width:auto!important;height:auto!important;max-height:153mm!important;overflow:hidden!important;box-sizing:border-box!important;padding:2.2mm!important;margin:0!important;border:1px solid #64748b!important;border-radius:2mm!important;background:#fff!important;color:#172033!important;box-shadow:none!important;break-inside:avoid!important}
- .bpl-real-group-card h3,.bpl-real-final-card h3{font-size:10pt!important;line-height:1.15!important;text-align:center!important;margin:0 0 2mm!important}
- .bpl-real-group-card table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;font-size:6.5pt!important;margin:1mm 0!important} .bpl-real-final-card table{width:100%!important;max-width:100%!important;border-collapse:collapse!important;table-layout:auto!important;font-size:7pt!important;margin:1mm 0!important}
- .bpl-real-group-card th,.bpl-real-group-card td,.bpl-real-final-card th,.bpl-real-final-card td{padding:1mm .7mm!important;border:1px solid #cbd5e1!important;color:#172033!important;line-height:1.2!important;white-space:normal!important}
- .bpl-real-group-card th,.bpl-real-final-card th{background:#e2e8f0!important;font-weight:900!important}
- .bpl-real-group-card .team-line{display:block!important;overflow:visible!important;overflow-wrap:anywhere!important;word-break:break-word!important;white-space:normal!important;font-size:6.5pt!important;line-height:1.15!important;max-height:none!important;color:#172033!important} .bpl-real-final-card .gsb-match-name{font-size:7pt!important;line-height:1.2!important;color:#172033!important}
- .bpl-print-value{display:inline!important;color:#172033!important;font:inherit!important;white-space:normal!important}
  .bpl-real-footer{text-align:center;font-size:8pt;font-weight:700;color:#475569;margin-top:3mm}
  .bpl-special-print-page{page-break-after:always}
 }
