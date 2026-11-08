@@ -1,64 +1,52 @@
-# Deployment e infrastruttura
+# Deployment e infrastruttura — Eventour
 
-Riferimento: **NPPADEL-TECH-DOC-01**
+## Repository operativo
+- Repository: `torneipadel/torneipadelnew.github.io`
+- Branch pubblicato: `main`
+- Hosting: GitHub Pages
+- Pagina corrente del tabellone: `tabellone.html`
 
-## Hosting
-Il progetto è pubblicato tramite GitHub Pages dal repository:
-`torneirobertobove/torneirobertobove.github.io`
-
-Branch di pubblicazione:
-`main`
-
-## Workflow principale
-File:
-`.github/workflows/deploy-pages.yml`
+## Workflow di pubblicazione
+File: `.github/workflows/deploy-pages.yml`
 
 Trigger:
 - push su `main`;
-- `workflow_dispatch`.
+- avvio manuale (`workflow_dispatch`).
 
-Azioni principali:
-1. checkout;
-2. configurazione GitHub Pages;
-3. generazione favicon con ImageMagick;
-4. upload dell'intero repository come Pages artifact;
-5. deploy con `actions/deploy-pages@v4`.
+Passaggi principali:
+1. checkout del repository;
+2. installazione delle dipendenze di compilazione;
+3. esecuzione di `npm run build:legacy-tabellone` per la compatibilità Safari 10.3;
+4. preparazione dell'artefatto Pages nella cartella `_site`;
+5. esclusione di `TEMP_AUDIT/`, `backup/`, `.github/`, `.git/` e `node_modules/` dall'artefatto;
+6. upload e deploy su GitHub Pages.
 
-## Workflow sponsor
-File:
-`.github/workflows/patch-bove-sponsor.yml`
+L'esclusione dall'artefatto non cancella né modifica le directory archivio nel repository.
 
-Il workflow interviene sulle pagine:
-- `2Page.html`
-- `Bove.html`
-- `visitatore.html`
+## Backup e ripristino
+- `.github/workflows/backup-completo-zip.yml` genera un archivio ZIP e un bundle della cronologia Git come artifact con retention di 90 giorni.
+- `.github/workflows/superadmin-code-backup.yml` gestisce il backup giornaliero e il bridge di ripristino.
+- L'aggiornamento del ramo giornaliero ora è consentito solo se fast-forward; in caso di divergenza il workflow si ferma senza sovrascrivere la cronologia.
 
-e mantiene l'integrazione sponsor globale. Effettua anche il commit/push automatico delle modifiche risultanti.
+Il workflow di backup usa ancora l'endpoint Supabase configurato nel file. Questa modifica non cambia progetto, credenziali, funzione Edge o database.
+
+## Workflow sponsor storico
+Il workflow attivo `patch-bove-sponsor.yml` è stato rimosso da `.github/workflows/` perché imponeva lo script sponsor v10 e poteva sovrascrivere una versione più recente. Il contenuto originale è conservato in:
+`docs/archived-workflows/patch-bove-sponsor.yml`
+
+Non riattivarlo senza una nuova verifica delle versioni effettivamente usate dalle pagine.
 
 ## PWA
 File:
 - `manifest.json`
 - `sw.js`
 
-Manifest:
-- nome: NEXT POINT PADEL;
-- short name: NEXT POINT PADEL;
-- start URL: `/`;
-- scope: `/`;
-- display: standalone;
-- orientamento: portrait-primary.
-
-Il service worker corrente usa un modello semplice: install/activate e proxy delle richieste GET tramite rete; non implementa una cache applicativa offline completa.
-
-## Cache busting
-Il progetto utilizza versioni nei riferimenti script, ad esempio `?v=...`. Quando un modulo viene modificato, il riferimento HTML deve essere controllato per evitare di caricare una versione vecchia.
+Il Service Worker attuale esegue installazione/attivazione e lascia le richieste applicative alla rete/browser; non implementa una cache offline completa.
 
 ## Regola di rilascio
-Ogni correzione deve essere:
-1. verificata nel file Git corrente;
-2. committata;
-3. controllata nel workflow Pages;
-4. verificata sul comportamento reale dopo il deploy.
+1. controllare il diff sul branch di manutenzione;
+2. verificare che il workflow Pages completi build, upload e deploy;
+3. controllare le pagine principali e la console browser dopo il deploy;
+4. verificare il comportamento reale di login, amministrazione e tabellone prima di considerare concluso il rilascio.
 
-## Da verificare
-Stato/risultato dell'ultima esecuzione GitHub Actions non viene dichiarato qui senza una lettura diretta del run corrente.
+Lo stato di un deploy non va dichiarato riuscito senza controllare l'esecuzione GitHub Actions corrispondente.
