@@ -137,7 +137,7 @@ const types=['Comunicazione','Torneo','Promozione','Evento','Ricordo','Prodotto'
 const tournamentDate=selectedTournament?.data_torneo||selectedTournament?.data||selectedCfg?.dataTorneo||'';
 const tournamentTime=selectedTournament?.ora_inizio||selectedCfg?.oraDefault||selectedCfg?.rules?.start||'';
 const tournamentDescription=selectedTournament?.descrizione||selectedCfg?.descrizione||'';
-const tournamentLink=selectedTournament?(()=>{try{return new URL('Bove.html?idTorneo='+encodeURIComponent(selectedTournament.id),location.href).href}catch(e){return 'Bove.html?idTorneo='+encodeURIComponent(selectedTournament.id)}})():'';
+const tournamentLink=selectedTournament?(()=>{const target='tabellone.html?idTorneo='+encodeURIComponent(selectedTournament.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):'');try{return new URL(target,location.href).href}catch(e){return target}})():'';
 const autoTitle=selectedTournament?.nome||'';
 const autoText=selectedTournament?[
 '🏆 '+(selectedTournament.nome||''),
