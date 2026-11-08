@@ -85,7 +85,7 @@ document.querySelectorAll('[data-sponsor-del]').forEach(b=>b.onclick=async()=>{i
 
 function whatsapp(){
 const t=selected();if(!t){alert('Seleziona prima un torneo');return}
-const link=location.origin+'/Bove.html?idTorneo='+encodeURIComponent(t.id);
+const link=new URL('tabellone.html',location.href).href+'?idTorneo='+encodeURIComponent(t.id)+(window.aziendaId?'&azienda_id='+encodeURIComponent(window.aziendaId):'');
 shell('WhatsApp',`${esc(t.nome)} · ID ${esc(t.id)}`,`<div class="card feature-card"><div class="card-head"><div><h2>Comunicazioni WhatsApp</h2><span class="notice">Messaggio pronto con il link del torneo selezionato</span></div></div><div class="card-body"><label>Messaggio</label><textarea id="waText" class="input" rows="6">Ciao! Ti invitiamo al torneo ${esc(t.nome)} del ${esc(t.data||t.data_torneo||'')}.
 
 ${esc(link)}</textarea><div class="admin-feature-actions"><button class="btn primary" id="waOpen">📱 Apri WhatsApp</button><button class="btn" id="waCopy">📋 Copia link torneo</button></div><div class="notice" style="margin-top:14px">Il link è sempre riferito al torneo attualmente selezionato.</div></div></div>`);
