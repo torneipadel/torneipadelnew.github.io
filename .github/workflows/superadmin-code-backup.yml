@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/5 * * * *" # polling ripristino
+    - cron: "0 2 * * *" # backup completo giornaliero
   workflow_dispatch:
 
 permissions:
@@ -54,7 +55,7 @@ jobs:
           BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
 
       - name: Create and register complete repository backup after main updates
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event.schedule == '0 2 * * *'
         shell: bash
         run: |
           set -euo pipefail
