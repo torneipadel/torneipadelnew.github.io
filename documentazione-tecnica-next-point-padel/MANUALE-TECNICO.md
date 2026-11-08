@@ -6,7 +6,7 @@
 Versionato direttamente in Git. Fotografia tecnica aggiornata al 20 settembre 2026. Le parti non certificate sono marcate **DA VERIFICARE**.
 
 ## 1. Identità
-NEXT POINT PADEL è una web application per gestione di tornei e attività di padel. Repository ufficiale: `torneirobertobove/torneirobertobove.github.io`.
+NEXT POINT PADEL è una web application per gestione di tornei e attività di padel. Repository ufficiale: `torneipadel/torneipadelnew.github.io`.
 
 Comprende area pubblica, amministrazione, autenticazione, iscrizioni, partecipanti, coppie, calendario, risultati, classifiche, fasi finali, comunicazioni, news, sponsor, mercatino e King individuale a coppie variabili.
 
@@ -15,7 +15,7 @@ HTML5, CSS3, JavaScript browser/ES6+, Supabase JS v2, Supabase Auth, PostgreSQL/
 
 ## 3. Architettura
 - `admin.html` + moduli `admin-*.js`: console amministrativa.
-- `Bove.html`: motore torneo/stato.
+- `tabellone.html`: pagina corrente del motore torneo/stato. I riferimenti interni BOVE sono nomi storici ancora presenti in alcuni moduli.
 - `visitatore.html` + moduli pubblici: area pubblica.
 - `admin-torneo-rotazione-v1.js`: King individuale.
 - Supabase: autenticazione e persistenza.

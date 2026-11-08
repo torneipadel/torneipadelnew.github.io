@@ -1,12 +1,14 @@
 # BOVE — Motore tornei
 
 Riferimento: **NPPADEL-TECH-DOC-01**  
-File principale: `Bove.html`  
-SHA rilevato: `112b9c8ef1b4b08b991464425a68c8e4d94437f1`  
-Aggiornamento inventario: 20 settembre 2026.
+File principale corrente: `tabellone.html` (il nome BOVE resta in alcuni identificatori e moduli storici)  
+SHA rilevato nel branch main al momento dell'audit: `90864178b2a7462c2a7225ea811bfe69788437a5`  
+Aggiornamento: 8 novembre 2026.
+
+> **Nota sul nome storico:** il file `Bove.html` non è presente nel branch `main`. La pagina operativa corrente è `tabellone.html`. I nomi interni `bove*` e i riferimenti BOVE nel codice sono mantenuti perché alcuni moduli ancora caricati li utilizzano; non rinominarli o rimuoverli senza una verifica delle dipendenze.
 
 ## Ruolo
-`Bove.html` è il motore/stato operativo del torneo. La pagina contiene HTML, CSS e JavaScript del tabellone e integra Supabase JS v2.
+`tabellone.html` è il motore/stato operativo del torneo. La pagina contiene HTML, CSS e JavaScript del tabellone e integra Supabase JS v2.
 
 ## Flusso logico di riferimento
 Il flusso applicativo documentato per Bove è:
