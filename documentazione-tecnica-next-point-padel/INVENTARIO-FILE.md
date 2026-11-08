@@ -44,7 +44,7 @@ La modifica proposta al workflow Pages esclude `TEMP_AUDIT/` e `backup/` dall'ar
 - `.github/workflows/deploy-pages.yml`: workflow di pubblicazione Pages; la versione aggiornata prepara una cartella `_site` senza gli archivi di audit/backup.
 - `.github/workflows/backup-completo-zip.yml`: crea un archivio ZIP e un bundle Git scaricabili come artifact.
 - `.github/workflows/superadmin-code-backup.yml`: gestisce il bridge di backup/ripristino; il ramo giornaliero viene aggiornato solo se l'avanzamento è fast-forward, senza force-push.
-- Il vecchio workflow `patch-bove-sponsor.yml` è stato disattivato e conservato in `docs/archived-workflows/`: forzava il riferimento sponsor alla versione v10 e poteva sovrascrivere versioni più recenti.
+- Il vecchio workflow `patch-bove-sponsor.yml` è stato disattivato e conservato in `\.github/workflow-archive/`: forzava il riferimento sponsor alla versione v10 e poteva sovrascrivere versioni più recenti.
 
 ## Elementi che NON vanno eliminati sulla sola base del nome
 
