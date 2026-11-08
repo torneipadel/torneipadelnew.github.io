@@ -32,7 +32,7 @@ Il workflow di backup usa ancora l'endpoint Supabase configurato nel file. Quest
 
 ## Workflow sponsor storico
 Il workflow attivo `patch-bove-sponsor.yml` è stato rimosso da `.github/workflows/` perché imponeva lo script sponsor v10 e poteva sovrascrivere una versione più recente. Il contenuto originale è conservato in:
-`docs/archived-workflows/patch-bove-sponsor.yml`
+`.github/workflow-archive/patch-bove-sponsor.yml`
 
 Non riattivarlo senza una nuova verifica delle versioni effettivamente usate dalle pagine.
 
