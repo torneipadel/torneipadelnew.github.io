@@ -13597,7 +13597,13 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
         const nameCell=row.querySelector(".gsb-match-name");
         const rawName=String(nameCell?.innerText||nameCell?.textContent||"").replace(/\s+/g," ").trim();
         const parts=rawName.split(/\s+vs\s+/i);
-        names=parts.length>1?parts:[rawName,"Da determinare"];
+        const cleanFinalName=value=>{
+          const name=String(value||"").replace(/\s+/g," ").trim();
+          // In stampa mostrare solo il nome reale della coppia, mai qualifiche provvisorie.
+          if(!name||/da\s+definire|da\s+determinare|da\s+assegnare|\bclassificat[oaie]\b|\b[123][ª°]?\s+girone\b/i.test(name)) return "";
+          return name;
+        };
+        names=(parts.length>1?parts:[rawName,""]).map(cleanFinalName);
         // Legge i due punteggi usando gli attributi dati realmente presenti
         // sugli input della formula Gold/Silver/Bronze; fallback per markup legacy.
         const scoreInputs=[...row.querySelectorAll('input[data-gsb-side]')]
@@ -13610,11 +13616,13 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
       const meta=kind==="group"
         ? [cellValue(cells[0]),cellValue(cells[1])].filter(Boolean).join(" · ")
         : [String(cells[0]?.querySelector("input")?.value||"").trim(),String(cells[1]?.querySelector("input")?.value||"").trim()].filter(Boolean).join(" · ");
+      const scoreMarkup=kind==="final"?"":'<span class="bpl-gsb-score-box">'+esc(scores[0]||"—")+'</span>';
+      const scoreMarkup2=kind==="final"?"":'<span class="bpl-gsb-score-box">'+esc(scores[1]||"—")+'</span>';
       return '<div class="bpl-gsb-match">'+
-        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[0]||"Da determinare")+'pt">'+esc(names[0]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[0]||"—")+'</span></div>'+
-        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[1]||"Da determinare")+'pt">'+esc(names[1]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[1]||"—")+'</span></div>'+
-        (meta?'<div class="bpl-gsb-meta">'+esc(meta)+'</div>':"")+
-        '<div class="bpl-gsb-match-label">INCONTRO '+(i+1)+'</div></div>';
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[0]||"")+'pt">'+esc(names[0]||"")+'</span>'+scoreMarkup+'</div>'+
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[1]||"")+'pt">'+esc(names[1]||"")+'</span>'+scoreMarkup2+'</div>'+
+        (kind==="final"?"":(meta?'<div class="bpl-gsb-meta">'+esc(meta)+'</div>':""))+
+        (kind==="final"?"":'<div class="bpl-gsb-match-label">INCONTRO '+(i+1)+'</div>')+'</div>';
     }).join("");
     let winner="Da determinare",complete=false;
     if(kind==="group"){
