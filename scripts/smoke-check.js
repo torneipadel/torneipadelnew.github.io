@@ -21,14 +21,14 @@ for (const page of pages) {
     continue;
   }
   const html = fs.readFileSync(pagePath, "utf8");
-  const tags = html.matchAll(/<script\\b([^>]*)>/gi);
+  const tags = html.matchAll(/<script\b([^>]*)>/gi);
   for (const match of tags) {
     const attrs = match[1];
-    const srcMatch = attrs.match(/\\bsrc\\s*=\\s*["']([^"']+)["']/i);
-    if (!srcMatch || /\\btype\\s*=\\s*["']module["']/i.test(attrs)) continue;
+    const srcMatch = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+    if (!srcMatch || /\btype\s*=\s*["']module["']/i.test(attrs)) continue;
     const raw = srcMatch[1].split("?")[0];
-    if (/^(?:https?:)?\\/\\//i.test(raw) || raw.startsWith("data:")) continue;
-    const relative = decodeURIComponent(raw).replace(/^\\.\\//, "").replace(/^\\//, "");
+    if (/^(?:https?:)?\/\//i.test(raw) || raw.startsWith("data:")) continue;
+    const relative = decodeURIComponent(raw).replace(/^\.\//, "").replace(/^\//, "");
     const target = path.resolve(root, relative);
     if (!target.startsWith(root + path.sep)) {
       failures.push(`Percorso script fuori repository in ${page}: ${raw}`);
@@ -49,12 +49,12 @@ for (const page of pages) {
 }
 
 const communications = path.join(root, "admin-comunicazioni-v1.js");
-if (fs.existsSync(communications) && /Bove\\.html/i.test(fs.readFileSync(communications, "utf8"))) {
+if (fs.existsSync(communications) && /Bove\.html/i.test(fs.readFileSync(communications, "utf8"))) {
   failures.push("Riferimento obsoleto a Bove.html in admin-comunicazioni-v1.js");
 }
 
 if (failures.length) {
-  console.error(failures.join("\\n"));
+  console.error(failures.join("\n"));
   process.exit(1);
 }
 console.log(`Smoke check superato: ${pages.length} pagine principali e ${checked.size} script locali verificati.`);
