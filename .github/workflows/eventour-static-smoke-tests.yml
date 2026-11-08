@@ -1,0 +1,36 @@
+name: Eventour static smoke tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eventour-static-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install build dependencies
+        run: npm install --ignore-scripts
+
+      - name: Build Safari 10.3 compatibility files
+        run: npm run build:legacy-tabellone
+
+      - name: Check core pages and local JavaScript
+        run: node scripts/smoke-check.js
