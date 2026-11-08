@@ -506,16 +506,16 @@
     "terms": "Bedingungen"
   }
 };
-  function current(){return localStorage.getItem(STORAGE_KEY)||"it";}
+  function current(){try{const saved=window.localStorage.getItem(STORAGE_KEY);return LANGS[saved]?saved:"it";}catch(e){return "it";}}
   function getText(key){const lang=current();const dict=Object.assign({},TEXT[lang]||{},LANDING_TEXT[lang]||{});return dict[key]!==undefined?dict[key]:(TEXT.it[key]!==undefined?TEXT.it[key]:(LANDING_TEXT.it[key]!==undefined?LANDING_TEXT.it[key]:key));}
   function flagHtml(lang){const item=LANGS[lang]||LANGS.it;return '<img class="language-flag" src="https://flagcdn.com/w20/'+item.flagCode+'.png" alt="" width="20" height="15" style="width:20px;height:15px;object-fit:cover;border-radius:2px;display:inline-block;vertical-align:-3px;flex:none">';}
   function setLanguage(lang){
     if(!LANGS[lang]) lang="it";
-    localStorage.setItem(STORAGE_KEY,lang);
+    try{window.localStorage.setItem(STORAGE_KEY,lang);}catch(e){/* La lingua resta attiva anche se il browser blocca lo storage. */}
     document.documentElement.lang=lang;
     document.documentElement.dir=LANGS[lang].dir;
     const dict=Object.assign({},TEXT[lang]||{},LANDING_TEXT[lang]||{});document.querySelectorAll("[data-i18n]").forEach(el=>{const key=el.dataset.i18n;if(dict[key]!==undefined)el.innerHTML=dict[key];});
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{const key=el.dataset.i18nPlaceholder;if(TEXT[lang][key]!==undefined)el.placeholder=TEXT[lang][key];});
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{const key=el.dataset.i18nPlaceholder;if((TEXT[lang]||{})[key]!==undefined)el.placeholder=TEXT[lang][key];});
     const selector=document.getElementById("languageSelector");
     if(selector){
       const active=LANGS[lang];
@@ -535,7 +535,7 @@
     const selector=document.getElementById("languageSelector");
     if(selector){
       const button=selector.querySelector(".language-button");
-      button.addEventListener("click",function(e){e.stopPropagation();selector.classList.toggle("open");});
+      if(button)button.addEventListener("click",function(e){e.stopPropagation();selector.classList.toggle("open");});
       selector.querySelectorAll("[data-lang]").forEach(item=>item.addEventListener("click",function(){setLanguage(item.dataset.lang);selector.classList.remove("open");}));
       document.addEventListener("click",function(){selector.classList.remove("open");});
     }
