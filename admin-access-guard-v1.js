@@ -17,7 +17,6 @@
       try{
         const email=String(session.user?.email||"").trim().toLowerCase();
         const superadminEmail=email==="giose.rizzi@gmail.com";
-        const adminEmail=email==="boverob@libero.it"||email==="cfalba@libero.it";
 
         let profileRole="";
         if(!superadminEmail&&!adminEmail){
@@ -29,8 +28,8 @@
           }
         }
 
-        if(superadminEmail||adminEmail||profileRole==="superadmin"||profileRole==="admin"){
-          const ruolo=superadminEmail||profileRole==="superadmin"?"superadmin":"admin";
+        if(superadminEmail){
+          const ruolo="superadmin";
           window.adminRuolo=ruolo;
           window.isSuperadmin=superadminEmail;
           window.isAdmin=true;
