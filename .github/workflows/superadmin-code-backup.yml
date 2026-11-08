@@ -53,8 +53,8 @@ jobs:
         env:
           BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
 
-      - name: Create and register daily complete repository backup
-        if: github.event_name == 'schedule' || github.event_name == 'push'
+      - name: Create and register complete repository backup after main updates
+        if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
