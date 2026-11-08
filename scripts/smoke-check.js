@@ -21,29 +21,41 @@ for (const page of pages) {
     continue;
   }
   const html = fs.readFileSync(pagePath, "utf8");
-  const tags = html.matchAll(/<script\b([^>]*)>/gi);
+  const tags = html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi);
+  let inlineIndex = 0;
   for (const match of tags) {
     const attrs = match[1];
+    const body = match[2] || "";
     const srcMatch = attrs.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
-    if (!srcMatch || /\btype\s*=\s*["']module["']/i.test(attrs)) continue;
-    const raw = srcMatch[1].split("?")[0];
-    if (/^(?:https?:)?\/\//i.test(raw) || raw.startsWith("data:")) continue;
-    const relative = decodeURIComponent(raw).replace(/^\.\//, "").replace(/^\//, "");
-    const target = path.resolve(root, relative);
-    if (!target.startsWith(root + path.sep)) {
-      failures.push(`Percorso script fuori repository in ${page}: ${raw}`);
-      continue;
-    }
-    if (!fs.existsSync(target)) {
-      failures.push(`Script locale mancante in ${page}: ${raw}`);
-      continue;
-    }
-    if (checked.has(target)) continue;
-    checked.add(target);
-    try {
-      new vm.Script(fs.readFileSync(target, "utf8"), { filename: relative });
-    } catch (error) {
-      failures.push(`Errore sintassi in ${relative}: ${error.message}`);
+    const isModule = /\btype\s*=\s*["']module["']/i.test(attrs);
+    if (srcMatch) {
+      if (isModule) continue;
+      const raw = srcMatch[1].split("?")[0];
+      if (/^(?:https?:)?\/\//i.test(raw) || raw.startsWith("data:")) continue;
+      const relative = decodeURIComponent(raw).replace(/^\.\//, "").replace(/^\//, "");
+      const target = path.resolve(root, relative);
+      if (!target.startsWith(root + path.sep)) {
+        failures.push(`Percorso script fuori repository in ${page}: ${raw}`);
+        continue;
+      }
+      if (!fs.existsSync(target)) {
+        failures.push(`Script locale mancante in ${page}: ${raw}`);
+        continue;
+      }
+      if (checked.has(target)) continue;
+      checked.add(target);
+      try {
+        new vm.Script(fs.readFileSync(target, "utf8"), { filename: relative });
+      } catch (error) {
+        failures.push(`Errore sintassi in ${relative}: ${error.message}`);
+      }
+    } else if (!isModule && body.trim()) {
+      try {
+        new vm.Script(body, { filename: `${page}#inline-${inlineIndex}` });
+      } catch (error) {
+        failures.push(`Errore sintassi in script inline ${page}#${inlineIndex}: ${error.message}`);
+      }
+      inlineIndex++;
     }
   }
 }
@@ -57,4 +69,4 @@ if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log(`Smoke check superato: ${pages.length} pagine principali e ${checked.size} script locali verificati.`);
+console.log(`Smoke check superato: ${pages.length} pagine principali, ${checked.size} script locali e script inline verificati.`);
