@@ -65,13 +65,12 @@ async function wireDashboard(){
 
     const email=String(session.user?.email||"").trim().toLowerCase();
     const isGlobalSuperadmin=email==="giose.rizzi@gmail.com";
-    const isGlobalAdmin=email==="boverob@libero.it"||email==="cfalba@libero.it";
     window.isGlobalSuperadmin=isGlobalSuperadmin;
-    window.isGlobalPlatformAdmin=isGlobalSuperadmin||isGlobalAdmin;
+    window.isGlobalPlatformAdmin=isGlobalSuperadmin;
     const explicitTenantContext=sessionStorage.getItem("nextpoint_login_tenant_explicit")==="1";
     const explicitTenantId=explicitTenantContext?String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim():"";
     if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
-    let role=isGlobalSuperadmin?"superadmin":(isGlobalAdmin?"admin":"");
+    let role=isGlobalSuperadmin?"superadmin":"";
     let aziendaAccess=null;
     let selectedTenantId=explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
     const requestedSlug=String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
