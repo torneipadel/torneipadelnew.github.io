@@ -1,0 +1,61 @@
+# ARCHIVED — DO NOT RUN
+
+This historical workflow was removed from the active GitHub Actions workflows because it unconditionally rewrote the public sponsor script reference to v10. That could downgrade pages already using a newer version.
+
+The original workflow is preserved below for reference only. Do not restore it as an active workflow without reviewing current sponsor references first.
+
+---
+
+name: Patch sponsor globali
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installa il gestore sponsor globale senza modificare la logica del tabellone
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          PAGES = ['tabellone.html', 'visitatore.html']
+          MARKER = '<script src="sponsor-public-v2.js?v=10"></script>'
+
+          def patch_page(filename):
+              p = Path(filename)
+              if not p.exists():
+                  print(f'Pagina assente, ignorata: {filename}')
+                  return False
+              s = p.read_text(encoding='utf-8')
+              original = s
+              s = re.sub(r'\s*<script[^>]+sponsor-public-v2\.js[^>]*></script>', '', s, flags=re.I)
+              if '</body>' in s:
+                  s = s.replace('</body>', '  ' + MARKER + '\n</body>', 1)
+              p.write_text(s, encoding='utf-8')
+              return s != original
+
+          changed = [page for page in PAGES if patch_page(page)]
+          print('Pagine sponsor aggiornate:', changed)
+          PY
+
+      - name: Commit sponsor
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- tabellone.html visitatore.html
+          if git diff --cached --quiet; then
+            echo "Nessuna modifica necessaria."
+            exit 0
+          fi
+          git commit -m 'Allinea il caricamento degli sponsor pubblici'
+          git pull --rebase origin main
+          git push
