@@ -13631,7 +13631,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
       if(savedWinner){winner=textOf(savedWinner);complete=true;}
     }
     return '<article class="bpl-print-card bpl-print-'+kind+' bpl-bracket-card">'+
-      '<h2>'+esc(heading)+'</h2>'+
+      '<h2><span>'+esc(heading)+'</span>'+(kind==="final"&&index===0?'<span class="bpl-print-title-spacer" aria-hidden="true">&nbsp;</span>':"")+'</h2>'+
       '<div class="bpl-gsb-flow"><div class="bpl-gsb-matches">'+matches+'</div>'+
       '<div class="bpl-gsb-winner"><div class="bpl-gsb-winner-title">'+(kind==="group"?"VINCITORE DEL GIRONE":"VINCITORE FASCIA")+'</div>'+
       '<div class="bpl-gsb-winner-name">'+esc(winner)+'</div>'+
@@ -13688,6 +13688,8 @@ const realPrintCss=`
  .bpl-bracket-card h2{margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;text-align:center!important;font-size:12pt!important;font-weight:900!important;letter-spacing:.04em!important;color:#17324d!important}
  .bpl-real-finals-page .bpl-bracket-card{height:125mm!important;min-height:125mm!important;max-height:125mm!important;flex:initial!important;align-self:stretch!important}
  .bpl-real-finals-page .bpl-bracket-card h2{display:flex!important;align-items:center!important;justify-content:center!important;min-height:15mm!important;height:15mm!important;max-height:15mm!important;box-sizing:border-box!important;line-height:1.25!important;padding:1mm 2mm!important;margin:0 0 3mm!important;white-space:normal!important;text-align:center!important;}
+ .bpl-real-finals-page .bpl-bracket-card h2{flex-direction:column!important}
+ .bpl-real-finals-page .bpl-print-title-spacer{display:block!important;flex:none!important;height:1.25em!important;min-height:1.25em!important;line-height:1.25!important}
  .bpl-real-finals-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:125mm!important;align-items:stretch!important;justify-items:stretch!important;gap:3mm!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important}
  .bpl-real-finals-grid>.bpl-bracket-card{display:flex!important;position:relative!important;inset:auto!important;transform:none!important;float:none!important;clear:none!important;flex:none!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;height:125mm!important;min-height:125mm!important;max-height:125mm!important;margin:0!important;padding:3mm!important;align-self:stretch!important;justify-self:stretch!important;overflow:hidden!important}
  .bpl-real-finals-grid>.bpl-bracket-card:nth-child(1){grid-column:1!important;grid-row:1!important}
