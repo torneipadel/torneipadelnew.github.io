@@ -13632,13 +13632,7 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
       '<div class="bpl-real-footer">Calendario, risultati e classifiche dei tre gironi — dati effettivi del torneo</div>'+
     '</section>'+
     '<section class="bpl-page bpl-real-finals-page">'+
-      '<div class="bpl-real-heading"><h1>'+title+'</h1><div>FASE FINALE — GOLD · SILVER · BRONZE</div>'+
-      '<p>1ª classificata di ciascun girone → GOLD &nbsp; · &nbsp; 2ª → SILVER &nbsp; · &nbsp; 3ª → BRONZE</p></div>'+
-      '<div class="bpl-qualification-flow" aria-label="Passaggio dai gironi alle finali">'+
-        '<div class="bpl-flow-lane bpl-flow-gold"><div class="bpl-flow-sources"><span>1° GIRONE A</span><span>1° GIRONE B</span><span>1° GIRONE C</span></div><div class="bpl-flow-connector"><i></i><i></i><i></i></div><div class="bpl-flow-destination">GOLD</div></div>'+
-        '<div class="bpl-flow-lane bpl-flow-silver"><div class="bpl-flow-sources"><span>2° GIRONE A</span><span>2° GIRONE B</span><span>2° GIRONE C</span></div><div class="bpl-flow-connector"><i></i><i></i><i></i></div><div class="bpl-flow-destination">SILVER</div></div>'+
-        '<div class="bpl-flow-lane bpl-flow-bronze"><div class="bpl-flow-sources"><span>3° GIRONE A</span><span>3° GIRONE B</span><span>3° GIRONE C</span></div><div class="bpl-flow-connector"><i></i><i></i><i></i></div><div class="bpl-flow-destination">BRONZE</div></div>'+
-      '</div>'+
+      '<div class="bpl-real-heading"><h1>'+title+'</h1><div>FASE FINALE — GOLD · SILVER · BRONZE</div></div>'+
       '<div class="bpl-real-finals-grid">'+finalsHtml+'</div>'+
       '<div class="bpl-real-footer">Incontri, orari, campi, risultati e classifiche finali — dati effettivi del torneo</div>'+
     '</section>';
@@ -13677,7 +13671,12 @@ const realPrintCss=`
  .bpl-print-card h2{font-size:12pt!important;line-height:1.15!important;text-align:center!important;margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;color:#172033!important;font-weight:900!important}
  .bpl-bracket-card{height:145mm!important;min-height:145mm!important;max-height:145mm!important;overflow:hidden!important;padding:3mm!important;background:#fff!important;border:1.5px solid #94a3b8!important;border-top:3px solid #1e3a5f!important;border-radius:3mm!important;box-shadow:0 1mm 2mm rgba(15,23,42,.08)!important}
  .bpl-bracket-card h2{margin:0 0 3mm!important;padding:0 0 2mm!important;border-bottom:1px solid #cbd5e1!important;text-align:center!important;font-size:12pt!important;font-weight:900!important;letter-spacing:.04em!important;color:#17324d!important}
- .bpl-real-finals-page .bpl-bracket-card{height:108mm!important;min-height:108mm!important;max-height:108mm!important}
+ .bpl-real-finals-page .bpl-bracket-card{height:108mm!important;min-height:108mm!important;max-height:108mm!important;flex:0 0 108mm!important;align-self:stretch!important}
+ .bpl-real-finals-grid{align-items:stretch!important;grid-auto-rows:108mm!important}
+ .bpl-real-finals-page .bpl-gsb-match{height:25mm!important;min-height:25mm!important;max-height:25mm!important;box-sizing:border-box!important;overflow:hidden!important;padding:2mm!important}
+ .bpl-real-finals-page .bpl-gsb-team{height:8mm!important;min-height:8mm!important;max-height:8mm!important;grid-template-columns:minmax(0,1fr) 13mm!important;align-items:center!important;overflow:hidden!important}
+ .bpl-real-finals-page .bpl-gsb-team-name{height:8mm!important;min-height:8mm!important;max-height:8mm!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;overflow-wrap:normal!important;font-size:6.2pt!important;line-height:1!important;padding:1mm!important}
+ .bpl-real-finals-page .bpl-gsb-score-box{height:8mm!important;min-height:8mm!important;max-height:8mm!important;box-sizing:border-box!important}
  .bpl-gsb-flow{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;gap:4mm!important;height:calc(100% - 10mm)!important;min-height:0!important;padding:0!important;box-sizing:border-box!important}
  .bpl-gsb-flow:before{content:""!important;position:absolute!important;right:1.5%!important;top:6mm!important;bottom:23mm!important;border-right:1.4px solid #94a3b8!important}
  .bpl-gsb-matches{display:flex!important;flex-direction:column!important;gap:3mm!important;position:relative!important;z-index:1!important;width:90%!important}
