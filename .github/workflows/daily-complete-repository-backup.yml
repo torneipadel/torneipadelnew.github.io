@@ -1,0 +1,61 @@
+name: Daily complete repository backup
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: daily-complete-repository-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get short-lived GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('torneipadel-code-backup-bridge');
+            core.setSecret(token);
+            core.setOutput('token', token);
+
+      - name: Create and register daily complete repository backup
+        shell: bash
+        run: |
+          set -euo pipefail
+          DAY="$(date -u +%Y%m%d)"
+          BRANCH="backup-completo-$DAY"
+          EXISTING_SHA="$(git ls-remote origin "refs/heads/$BRANCH" | awk 'NR==1 {print $1}')"
+          if [ -z "$EXISTING_SHA" ]; then
+            git push origin "$GITHUB_SHA:refs/heads/$BRANCH"
+            BACKUP_SHA="$GITHUB_SHA"
+          elif git merge-base --is-ancestor "$EXISTING_SHA" "$GITHUB_SHA"; then
+            git push origin "$GITHUB_SHA:refs/heads/$BRANCH"
+            BACKUP_SHA="$GITHUB_SHA"
+          elif git merge-base --is-ancestor "$GITHUB_SHA" "$EXISTING_SHA"; then
+            BACKUP_SHA="$EXISTING_SHA"
+          else
+            echo "Backup branch diverged from main; refusing to overwrite it."
+            exit 1
+          fi
+          export BACKUP_BRANCH="$BRANCH"
+          export BACKUP_SHA
+          python -c 'import json,os; print(json.dumps({"operation":"register_backup","branch_name":os.environ["BACKUP_BRANCH"],"commit_sha":os.environ["BACKUP_SHA"]}))' > /tmp/backup.json
+          curl -fsS -X POST "https://dkeqicstprvvfebiaooc.supabase.co/functions/v1/code-backup-bridge" \
+            -H "Authorization: Bearer $BRIDGE_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/backup.json
+        env:
+          BRIDGE_TOKEN: ${{ steps.oidc.outputs.token }}
