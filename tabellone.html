@@ -13565,6 +13565,21 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
     const headers=head?[...head.cells].map(cell=>'<th>'+esc(printCellValue(cell))+'</th>').join(""):"";
     return '<table class="bpl-sheet-table bpl-sheet-'+kind+'">'+(headers?'<thead><tr>'+headers+'</tr></thead>':"")+'<tbody>'+body.map(row=>'<tr>'+cells(row)+'</tr>').join("")+'</tbody></table>';
   };
+  // Riduce automaticamente il carattere dei nomi lunghi senza mandarli a capo.
+  const fitPrintTeamName=(value)=>{
+    const textValue=String(value||"Da determinare");
+    const canvas=document.createElement("canvas");
+    const ctx=canvas.getContext("2d");
+    if(!ctx) return 5;
+    const maxWidth=64*96/25.4; // spazio utile del nome nella scheda A4 orizzontale
+    let size=8;
+    while(size>4.2){
+      ctx.font="700 "+size+"pt Arial";
+      if(ctx.measureText(textValue).width<=maxWidth) break;
+      size-=0.2;
+    }
+    return Number(size.toFixed(1));
+  };
   const printRoundRobinCard=(card,index,kind)=>{
     const heading=card.querySelector("h3")?.innerText?.trim()||
       (kind==="group"?"GIRONE "+String.fromCharCode(65+index):"FASE FINALE");
@@ -13596,8 +13611,8 @@ if(state?.rules?.formulaFinale==="gironeFinale"){
         ? [cellValue(cells[0]),cellValue(cells[1])].filter(Boolean).join(" · ")
         : [String(cells[0]?.querySelector("input")?.value||"").trim(),String(cells[1]?.querySelector("input")?.value||"").trim()].filter(Boolean).join(" · ");
       return '<div class="bpl-gsb-match">'+
-        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name">'+esc(names[0]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[0]||"—")+'</span></div>'+
-        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name">'+esc(names[1]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[1]||"—")+'</span></div>'+
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[0]||"Da determinare")+'pt">'+esc(names[0]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[0]||"—")+'</span></div>'+
+        '<div class="bpl-gsb-team"><span class="bpl-gsb-team-name" style="font-size:'+fitPrintTeamName(names[1]||"Da determinare")+'pt">'+esc(names[1]||"Da determinare")+'</span><span class="bpl-gsb-score-box">'+esc(scores[1]||"—")+'</span></div>'+
         (meta?'<div class="bpl-gsb-meta">'+esc(meta)+'</div>':"")+
         '<div class="bpl-gsb-match-label">INCONTRO '+(i+1)+'</div></div>';
     }).join("");
@@ -13675,7 +13690,7 @@ const realPrintCss=`
  .bpl-real-finals-grid{align-items:stretch!important;grid-auto-rows:108mm!important}
  .bpl-real-finals-page .bpl-gsb-match{height:25mm!important;min-height:25mm!important;max-height:25mm!important;box-sizing:border-box!important;overflow:hidden!important;padding:2mm!important}
  .bpl-real-finals-page .bpl-gsb-team{height:8mm!important;min-height:8mm!important;max-height:8mm!important;grid-template-columns:minmax(0,1fr) 13mm!important;align-items:center!important;overflow:hidden!important}
- .bpl-real-finals-page .bpl-gsb-team-name{height:8mm!important;min-height:8mm!important;max-height:8mm!important;box-sizing:border-box!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;overflow-wrap:normal!important;font-size:6.2pt!important;line-height:1!important;padding:1mm!important}
+ .bpl-real-finals-page .bpl-gsb-team-name{height:8mm!important;min-height:8mm!important;max-height:8mm!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:normal!important;word-break:normal!important;line-height:1!important;padding:1mm!important;min-width:0!important}
  .bpl-real-finals-page .bpl-gsb-score-box{height:8mm!important;min-height:8mm!important;max-height:8mm!important;box-sizing:border-box!important}
  .bpl-gsb-flow{position:relative!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;gap:4mm!important;height:calc(100% - 10mm)!important;min-height:0!important;padding:0!important;box-sizing:border-box!important}
  .bpl-gsb-flow:before{content:""!important;position:absolute!important;right:1.5%!important;top:6mm!important;bottom:23mm!important;border-right:1.4px solid #94a3b8!important}
@@ -13689,6 +13704,7 @@ const realPrintCss=`
  .bpl-gsb-meta{font-size:6pt!important;color:#64748b!important;text-align:right!important;margin-top:1.2mm!important}
  .bpl-gsb-match-label{position:absolute!important;top:-1.7mm!important;left:2mm!important;transform:translateY(-100%)!important;padding:.5mm 1.5mm!important;border-radius:1mm!important;background:#e8eef5!important;font-size:5.8pt!important;font-weight:900!important;color:#334e68!important;letter-spacing:.05em!important}
  .bpl-gsb-winner{position:relative!important;z-index:2!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1mm!important;margin:1mm 0 0!important;width:100%!important;min-height:21mm!important;padding:3mm 4mm!important;border:2px solid #b88718!important;border-radius:2.5mm!important;background:#fff4cf!important;text-align:center!important;box-sizing:border-box!important;box-shadow:inset 0 0 0 1px rgba(184,135,24,.12)!important}
+ .bpl-real-finals-page .bpl-gsb-winner{width:100%!important;align-self:stretch!important;flex:0 0 auto!important;margin-top:2mm!important}
  .bpl-gsb-winner:before{display:none!important}
  .bpl-gsb-winner-title{font-size:7pt!important;font-weight:900!important;letter-spacing:.1em!important;color:#77520c!important}
  .bpl-gsb-winner-name{width:100%!important;font-size:11pt!important;font-weight:900!important;line-height:1.2!important;color:#172033!important;overflow-wrap:anywhere!important}
@@ -13701,17 +13717,6 @@ const realPrintCss=`
  .bpl-real-finals-grid .bpl-print-final:nth-child(1){border-top-color:#b88718!important}
  .bpl-real-finals-grid .bpl-print-final:nth-child(2){border-top-color:#8793a2!important}
  .bpl-real-finals-grid .bpl-print-final:nth-child(3){border-top-color:#a5683d!important}
- .bpl-qualification-flow{display:grid!important;grid-template-columns:1fr!important;gap:1mm!important;margin:0 0 2.5mm!important}
- .bpl-flow-lane{display:grid!important;grid-template-columns:minmax(0,3fr) 12mm minmax(20mm,1fr)!important;align-items:center!important;min-height:8mm!important}
- .bpl-flow-sources{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:2mm!important}
- .bpl-flow-sources span{display:block!important;text-align:center!important;padding:1mm!important;border:1px solid #64748b!important;background:#f8fafc!important;color:#172033!important;font-size:7pt!important;font-weight:800!important}
- .bpl-flow-connector{height:6mm!important;position:relative!important;border-top:1px solid #475569!important;border-bottom:1px solid #475569!important}
- .bpl-flow-connector:after{content:""!important;position:absolute!important;right:0!important;top:50%!important;width:0!important;height:0!important;border-top:1.5mm solid transparent!important;border-bottom:1.5mm solid transparent!important;border-left:2.5mm solid #475569!important;transform:translateY(-50%)!important}
- .bpl-flow-connector i{display:none!important}
- .bpl-flow-destination{padding:1.5mm!important;text-align:center!important;border:1.5px solid #334155!important;font-size:8pt!important;font-weight:900!important;background:#fff!important;color:#172033!important}
- .bpl-flow-gold .bpl-flow-destination{border-color:#b88718!important;background:#fff8df!important}
- .bpl-flow-silver .bpl-flow-destination{border-color:#8793a2!important;background:#f1f5f9!important}
- .bpl-flow-bronze .bpl-flow-destination{border-color:#a5683d!important;background:#fff1e7!important}
  .bpl-real-footer{text-align:center;font-size:8pt;font-weight:700;color:#475569;margin-top:3mm}
  .bpl-special-print-page{page-break-after:always}
 }
