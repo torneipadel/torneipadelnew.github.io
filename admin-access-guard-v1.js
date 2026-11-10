@@ -19,7 +19,7 @@
         const superadminEmail=email==="giose.rizzi@gmail.com";
 
         let profileRole="";
-        if(!superadminEmail&&!adminEmail){
+        if(!superadminEmail){
           try{
             const profileResult=await client.from("profili").select("ruolo").eq("user_id",session.user.id).maybeSingle();
             profileRole=String(profileResult.data?.ruolo||"").trim().toLowerCase();
@@ -29,6 +29,7 @@
         }
 
         if(superadminEmail){
+          try{if(!window.EventourAdminMFA||!await window.EventourAdminMFA.complete(client))throw new Error("MFA non completata");}catch(mfaError){console.error("Admin MFA:",mfaError);await client.auth.signOut();window.location.replace("index.html?mfa_error=1");return false;}
           const ruolo="superadmin";
           window.adminRuolo=ruolo;
           window.isSuperadmin=superadminEmail;
