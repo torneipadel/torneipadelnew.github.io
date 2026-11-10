@@ -23,9 +23,10 @@ function showCodePrompt(client,factorId,enrollData){
    if(totp.secret){const p=node('p',{},'Se non puoi scansionare il QR, inserisci manualmente questa chiave:');Object.assign(p.style,{fontSize:'13px',lineHeight:'1.4'});const secret=node('code',{},totp.secret);Object.assign(secret.style,{display:'block',padding:'10px',background:'#eef2f7',borderRadius:'7px',overflowWrap:'anywhere',userSelect:'all',fontSize:'13px'});ui.box.append(p,secret);}
   }
   const code=addCode(ui.box),submit=addButton(ui.box,enrollment?'Conferma attivazione MFA':'Verifica e continua');ui.box.append(ui.status);
-  submit.addEventListener('click',async()=>{submit.disabled=true;ui.status.textContent='Verifica in corso…';try{await verify(client,factorId,code.value);ui.close();resolve(true);}catch(e){ui.status.textContent=e.message||'Codice non valido. Riprova.';submit.disabled=false;}});
+  let timer=null;const finishPrompt=value=>{if(timer!==null)clearInterval(timer);ui.close();resolve(value);};
+  submit.addEventListener('click',async()=>{submit.disabled=true;ui.status.textContent='Verifica in corso…';try{await verify(client,factorId,code.value);finishPrompt(true);}catch(e){ui.status.textContent=e.message||'Codice non valido. Riprova.';submit.disabled=false;}});
   code.focus();
-  const timer=setInterval(async()=>{try{const s=await client.auth.getSession();if(!s.data?.session){clearInterval(timer);ui.close();resolve(false);}}catch(e){}},2000);
+  timer=setInterval(async()=>{try{const s=await client.auth.getSession();if(!s.data?.session)finishPrompt(false);}catch(e){}},2000);
  });
 }
 async function complete(client){
