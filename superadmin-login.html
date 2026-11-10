@@ -104,9 +104,11 @@ e.preventDefault();error.textContent="";submit.disabled=true;submit.textContent=
 try{
 const result=await sb.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});
 if(result.error)throw result.error;
-const check=await sb.rpc("is_superadmin");
-if(check.error||check.data!==true){await sb.auth.signOut();throw new Error("Account autenticato ma non autorizzato come Superadmin.");}
+const profile=await sb.rpc("admin_role");
+if(profile.error||String(profile.data||"").toLowerCase()!=="superadmin"){await sb.auth.signOut();throw new Error("Account autenticato ma non autorizzato come Superadmin.");}
 const mfaOk=await window.EventourAdminMFA.complete(sb);if(!mfaOk){await sb.auth.signOut();throw new Error("Autenticazione MFA non completata. Accedi nuovamente.");}
+const check=await sb.rpc("is_superadmin");
+if(check.error||check.data!==true){await sb.auth.signOut();throw new Error("Verifica MFA o autorizzazione Superadmin non valida.");}
 window.location.href="eventour-control-center.html";
 }catch(err){error.textContent=err&&err.message?err.message:"Accesso non riuscito.";submit.disabled=false;submit.textContent="Accedi al Control Center";}
 });
