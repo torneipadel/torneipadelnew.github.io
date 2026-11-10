@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="eventour_logo.jpg?v=20261018"><link rel="apple-touch-icon" href="eventour_logo.jpg?v=20261018">
 <title>Eventour — Accesso</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="admin-mfa-auth-v1.js?v=1"></script>
 <script src="lingue.js?v=3"></script>
 <style>
 *{box-sizing:border-box}
@@ -145,6 +145,7 @@ async function loginUser(){
   }
  }
  if(adminRole){
+  try{const mfaOk=await window.EventourAdminMFA.complete(sb);if(!mfaOk){await sb.auth.signOut();setStatus("Autenticazione MFA non completata. Accedi nuovamente.");return;}}catch(mfaError){await sb.auth.signOut();setStatus("Verifica MFA non riuscita: "+(mfaError.message||"riprova."));return;}
   sessionStorage.removeItem("nextpoint_login_azienda_nome");
   sessionStorage.setItem("nextpoint_login_role",adminRole);
   if(aziendaAccess?.azienda_id){

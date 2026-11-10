@@ -17,6 +17,9 @@ async function load(){
  try{
   const {data:{user},error:authError}=await sb.auth.getUser();
   if(authError)throw authError;if(!user)throw new Error('Sessione Superadmin non autenticata. Accedi nuovamente.');
+  const {data:baseRole,error:baseRoleError}=await sb.rpc('admin_role');
+  if(baseRoleError)throw baseRoleError;if(String(baseRole||'').toLowerCase()!=='superadmin')throw new Error('Accesso riservato al Superadmin globale.');
+  const mfaOk=await window.EventourAdminMFA.complete(sb);if(!mfaOk)throw new Error('Verifica MFA non completata. Accedi nuovamente.');
   const {data:role,error:roleError}=await sb.rpc('is_superadmin');
   if(roleError)throw roleError;if(role!==true)throw new Error('Accesso riservato al Superadmin globale.');
   const result=await rpc('eventour_superadmin_overview',{});
