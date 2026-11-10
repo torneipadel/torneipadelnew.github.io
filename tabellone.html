@@ -5,6 +5,7 @@
 <title>Torneo 8 Squadre</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-mfa-auth-v1.js?v=1"></script>
 <style>
 :root{--bg:#0f172a;--card:#111827;--line:#243041;--text:#e5e7eb;}
 *{box-sizing:border-box}
@@ -874,6 +875,19 @@ async function verifyAccess(){
 
     }
 
+
+    try{
+        const mfaOk = await window.EventourAdminMFA.complete(sb);
+        if(!mfaOk) throw new Error("Autenticazione MFA non completata.");
+    }catch(mfaError){
+        console.error("Tabellone: verifica MFA amministratore non riuscita:",mfaError);
+        await sb.auth.signOut();
+        bloccaGestionale();
+        document.body.classList.remove("access-pending");
+        alert("Per gestire il tabellone è necessaria la verifica in due passaggi. Accedi nuovamente.");
+        window.location.replace("index.html");
+        return;
+    }
 
     /*
     ============================
