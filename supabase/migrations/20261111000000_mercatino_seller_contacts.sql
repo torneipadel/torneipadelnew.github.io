@@ -74,7 +74,7 @@ set search_path = ''
 as $function$
   select m.id, m.titolo, m.categoria, m.categoria_label, m.anteprima,
          m.descrizione, m.prezzo, m.condizioni, m.immagine, m.locandina,
-         m.contatto, m.telefono, m.nome_cognome, m.created_at
+         m.contatto, m.telefono, null::text, m.created_at
   from public.mercatino m
   join public.aziende a on a.id = m.azienda_id
   where a.stato = 'attiva'
@@ -98,7 +98,7 @@ set search_path = ''
 as $function$
   select m.id, m.titolo, m.categoria, m.categoria_label, m.anteprima,
          m.descrizione, m.prezzo, m.condizioni, m.immagine,
-         m.contatto, m.telefono, m.nome_cognome, m.created_at
+         m.contatto, m.telefono, null::text, m.created_at
   from public.mercatino m
   join public.aziende a on a.id = m.azienda_id
   where a.stato = 'attiva'
