@@ -64,7 +64,7 @@
       const a=document.createElement('a'); a.textContent=label; a.href=href;
       if(adminOnly){a.dataset.adminOnly='true';a.hidden=true;}
       const q=new URLSearchParams(location.search);
-      const companySlug=q.get('azienda') || sessionStorage.getItem('nextpoint_login_azienda_slug') || localStorage.getItem('nextpoint_public_azienda_slug') || '';
+      const companySlug=q.get('azienda') || (page==='societa.html'?q.get('slug'):'') || sessionStorage.getItem('nextpoint_login_azienda_slug') || localStorage.getItem('nextpoint_public_azienda_slug') || '';
       if(companySlug && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(companySlug);
       panel.appendChild(a);
     };
