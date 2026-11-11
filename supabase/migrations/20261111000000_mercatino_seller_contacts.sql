@@ -81,6 +81,7 @@ as $function$
     and lower(a.slug) = lower(trim(p_slug))
     and m.pubblicato is true
     and lower(coalesce(m.stato,'')) = 'disponibile'
+    and (nullif(btrim(m.contatto),'') is not null or nullif(btrim(m.telefono),'') is not null)
   order by m.created_at desc;
 $function$;
 
@@ -104,5 +105,6 @@ as $function$
     and lower(a.slug) = lower(trim(p_slug))
     and m.pubblicato is true
     and lower(coalesce(m.stato,'')) = 'disponibile'
+    and (nullif(btrim(m.contatto),'') is not null or nullif(btrim(m.telefono),'') is not null)
   order by m.created_at desc;
 $function$;
