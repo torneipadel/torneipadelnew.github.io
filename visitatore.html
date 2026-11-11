@@ -129,6 +129,8 @@ np-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);t
   'use strict';
   const params=new URLSearchParams(window.location.search);
   const slug=(params.get('azienda')||'').trim();
+  const marketLink=document.querySelector('.np-quick-action[href="mercatino.html"]');
+  if(slug&&marketLink)marketLink.href='mercatino.html?azienda='+encodeURIComponent(slug);
 
   // La modalità senza società è una vera area pubblica autonoma.
   // La modalità con ?azienda= resta integralmente gestita dalla pagina tenant.
