@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attiva account · Eventour</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;font-family:Arial,sans-serif;color:#fff;background:linear-gradient(135deg,#071a2c,#123c5c)}
+main{width:min(520px,100%);padding:28px;border:1px solid #ffffff35;border-radius:20px;background:#ffffff12;box-shadow:0 18px 50px #0005}
+h1{margin-top:0}p{line-height:1.5;color:#dbe7f2}label{display:block;margin:16px 0 6px;font-weight:700}input{width:100%;padding:13px;border:1px solid #ffffff55;border-radius:9px;background:#ffffff12;color:#fff;font-size:16px}button{margin-top:20px;padding:13px 18px;border:0;border-radius:9px;background:#fff;color:#123c5c;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:wait}#status{min-height:24px;margin-top:16px;color:#ffe58a;overflow-wrap:anywhere}.hidden{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>Attiva il tuo account Eventour</h1>
+<p>Conferma l'invito impostando una password personale. Il collegamento ricevuto via email è temporaneo e utilizzabile una sola volta.</p>
+<section id="form" class="hidden">
+<label for="password">Nuova password</label>
+<input id="password" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Almeno 12 caratteri">
+<label for="confirm">Conferma password</label>
+<input id="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Ripeti la password">
+<button id="save" type="button">Attiva account</button>
+</section>
+<div id="status" role="status" aria-live="polite">Verifica del collegamento in corso…</div>
+</main>
+<script>
+const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
+const SUPABASE_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
+const statusEl=document.getElementById("status"),form=document.getElementById("form"),save=document.getElementById("save");
+let validSession=false;
+(async()=>{
+ try{
+  const {data:{session},error}=await sb.auth.getSession();
+  if(error)throw error;
+  if(!session||!session.user){statusEl.textContent="Il collegamento non è valido, è scaduto o è già stato utilizzato. Chiedi al proprietario della società un nuovo invito.";return}
+  validSession=true;form.classList.remove("hidden");statusEl.textContent="Invito verificato. Scegli una password personale di almeno 12 caratteri.";
+ }catch(e){statusEl.textContent="Non è stato possibile verificare l'invito. Richiedi un nuovo collegamento."}
+})();
+save.addEventListener("click",async()=>{
+ if(!validSession)return;
+ const p=document.getElementById("password").value,c=document.getElementById("confirm").value;
+ if(p.length<12||p.length>72){statusEl.textContent="La password deve contenere almeno 12 caratteri e non superare 72 caratteri.";return}
+ if(p!==c){statusEl.textContent="Le due password non coincidono.";return}
+ save.disabled=true;statusEl.textContent="Attivazione account in corso…";
+ try{
+  const {error}=await sb.auth.updateUser({password:p});
+  if(error)throw error;
+  await sb.auth.signOut({scope:"local"});
+  validSession=false;form.classList.add("hidden");
+  statusEl.textContent="Account attivato correttamente. Ora puoi accedere dalla pagina Accesso società.";
+ }catch(e){statusEl.textContent="Attivazione non riuscita: "+(e.message||"verifica il collegamento e riprova");save.disabled=false}
+});
+</script>
+</body>
+</html>
