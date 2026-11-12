@@ -11,6 +11,7 @@
 <link rel="icon" href="eventour_logo.jpg?v=20261018"><link rel="apple-touch-icon" href="eventour_logo.jpg?v=20261018">
 <title>Eventour — Accesso</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-storage-v1.js?v=1"></script>
 <script src="lingue.js?v=3"></script>
 <style>
 *{box-sizing:border-box}
@@ -96,6 +97,7 @@ async function registerUser(){
  setStatus("Registrazione effettuata. Controlla la tua email per confermare l'account.");
 }
 async function loginUser(){
+ window.EventourAuthPersistence?.setRemember(document.getElementById("ricordami").checked);
  const email=emailInput.value.trim().toLowerCase(),password=passwordInput.value;
  if(!email||!password){setStatus("Inserisci email e password.");return}
  setStatus("Accesso in corso…");
