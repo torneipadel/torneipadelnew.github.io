@@ -1,7 +1,7 @@
 (function(){'use strict';
 const URL_SUPABASE='https://dkeqicstprvvfebiaooc.supabase.co';
 const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
-const client=window.supabase.createClient(URL_SUPABASE,KEY);
+const client=window.__NP_SUPABASE_CLIENT__?.auth?.storageKey==='eventour-visitor-auth'?window.__NP_SUPABASE_CLIENT__:(window.__NP_VISITOR_NAV_CLIENT__=window.__NP_VISITOR_NAV_CLIENT__||window.supabase.createClient(URL_SUPABASE,KEY,{auth:{storageKey:'eventour-visitor-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));
 const BUCKET='mercatino-images';
 const list=document.getElementById('list'),detail=document.getElementById('detail'),detailContent=document.getElementById('detailContent');
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
