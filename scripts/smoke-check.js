@@ -169,6 +169,17 @@ const recoveryPage = fs.readFileSync(path.join(root, "reset-password.html"), "ut
 if (!recoveryPage.includes('password.length < 12') || !recoveryPage.includes('scope: "global"')) {
   failures.push("Recupero password non impone la lunghezza minima e la revoca delle sessioni.");
 }
+const mainLoginPage = fs.readFileSync(path.join(root, "login.html"), "utf8");
+const visitorRegistration = fs.readFileSync(path.join(root, "registrazione-utente.html"), "utf8");
+const companyRegistration = fs.readFileSync(path.join(root, "registrazione-societa.html"), "utf8");
+if (!mainLoginPage.includes("password.length<12") || !visitorRegistration.includes("password.length<12") || !companyRegistration.includes("password.length<12")) {
+  failures.push("I moduli di creazione account non applicano la lunghezza minima password aggiornata.");
+}
+const visitorLoginPage = fs.readFileSync(path.join(root, "login-utente.html"), "utf8");
+if (!visitorLoginPage.includes("flow=visitor&azienda=")) {
+  failures.push("Il recupero password visitatore non conserva la società di provenienza.");
+}
+
 const superadminLoginPage = fs.readFileSync(path.join(root, "superadmin-login.html"), "utf8");
 if (!superadminLoginPage.includes("p.length<12") || !superadminLoginPage.includes("await sb.auth.signOut()")) {
   failures.push("Recupero password Superadmin non conforme alla policy aggiornata.");
