@@ -61,6 +61,31 @@ for (const page of pages) {
   }
 }
 
+const activationPage = path.join(root, "attiva-account.html");
+if (fs.existsSync(activationPage)) {
+  const activation = fs.readFileSync(activationPage, "utf8");
+  for (const required of [
+    'callbackParams.get("type")==="invite"',
+    "session.user.email_confirmed_at",
+    "sb.auth.updateUser({password:p})",
+    'sb.auth.signOut({scope:"local"})'
+  ]) {
+    if (!activation.includes(required)) {
+      failures.push(`Controllo invito/attivazione mancante in attiva-account.html: ${required}`);
+    }
+  }
+} else {
+  failures.push("Pagina di attivazione account mancante: attiva-account.html");
+}
+
+const inviteFunction = path.join(root, "supabase", "functions", "tenant-user-management", "index.ts");
+if (fs.existsSync(inviteFunction)) {
+  const source = fs.readFileSync(inviteFunction, "utf8");
+  if (!source.includes('redirectTo:"https://torneipadel.github.io/torneipadelnew.github.io/attiva-account.html"')) {
+    failures.push("Redirect della funzione tenant-user-management non punta alla pagina di attivazione Eventour.");
+  }
+}
+
 const communications = path.join(root, "admin-comunicazioni-v1.js");
 if (fs.existsSync(communications) && /Bove\.html/i.test(fs.readFileSync(communications, "utf8"))) {
   failures.push("Riferimento obsoleto a Bove.html in admin-comunicazioni-v1.js");
