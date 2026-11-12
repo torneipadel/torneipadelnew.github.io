@@ -247,7 +247,7 @@ if(tenantAccess){
 }
 const {data:azienda}=await sb.from("aziende").select("id,nome_app,ragione_sociale,cf_piva,logo_url,slug").eq("owner_user_id",user.id).maybeSingle();
 if(azienda){const assurance=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error||assurance.data?.currentLevel!=="aal2"){window.location.replace("sicurezza-mfa.html?return=dashboard.html");return}}
-if(!azienda){
+if(!azienda){const assurance=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(assurance.error||assurance.data?.currentLevel!=="aal2"){window.location.replace("sicurezza-mfa.html?flow=onboarding&return=dashboard.html");return}
  document.querySelector("main.page").style.display="none";
  document.getElementById("companySetup").style.display="block";
  document.getElementById("welcomeName").textContent="";
