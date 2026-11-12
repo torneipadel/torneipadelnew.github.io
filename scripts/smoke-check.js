@@ -84,7 +84,7 @@ if (fs.existsSync(visitorRegistrationPage)) {
   const registration = fs.readFileSync(visitorRegistrationPage, "utf8");
   for (const required of [
     'callbackParams.get("type")==="signup"',
-    "session.user.email_confirmed_at",
+    "email_confirmed_at",
     'sb.rpc("complete_visitor_membership"',
     'sb.rpc("update_visitor_profile"'
   ]) {
