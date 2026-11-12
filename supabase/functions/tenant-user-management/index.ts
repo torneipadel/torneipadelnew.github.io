@@ -97,11 +97,18 @@ Deno.serve(async req => {
       if (!created?.id) return json({error:"Invito creato senza identificativo utente."},500);
       const {error:insertError} = await admin.from("azienda_utenti").insert({azienda_id:aziendaId,user_id:created.id,ruolo,attivo:true});
       if (insertError) {
-        if (insertError.code === "23505") return json({error:"L'invito email è stato creato, ma l'associazione risulta già presente o in conflitto. Aggiorna l'elenco utenti e, se necessario, contatta l'assistenza.",user_id:created.id},409);
-        return json({error:"L'invito è stato creato, ma l'associazione alla società non è riuscita: "+insertError.message,user_id:created.id},500);
+        const {error:cleanupError} = await admin.auth.admin.deleteUser(created.id);
+        const detail = cleanupError ? " Inoltre non è stato possibile annullare l'account invitato: "+cleanupError.message : " L'account invitato è stato annullato.";
+        if (insertError.code === "23505") return json({error:"L'associazione alla società è già presente o in conflitto. "+detail},409);
+        return json({error:"L'associazione alla società non è riuscita: "+insertError.message+"."+detail},500);
       }
-      const {error:profileError} = await admin.from("profili").update({nome,cognome,email}).eq("user_id",created.id);
-      if (profileError) return json({error:"L'invito e l'associazione sono stati creati, ma l'aggiornamento del profilo non è riuscito: "+profileError.message,user_id:created.id},500);
+      const {data:profile,error:profileError} = await admin.from("profili").update({nome,cognome,email}).eq("user_id",created.id).select("user_id").maybeSingle();
+      if (profileError || !profile) {
+        const {error:membershipCleanupError} = await admin.from("azienda_utenti").delete().eq("azienda_id",aziendaId).eq("user_id",created.id);
+        const {error:authCleanupError} = await admin.auth.admin.deleteUser(created.id);
+        const cleanup = [membershipCleanupError?.message,authCleanupError?.message].filter(Boolean);
+        return json({error:"L'aggiornamento del profilo non è riuscito"+(profileError?": "+profileError.message:": profilo non trovato")+". "+(cleanup.length?"Pulizia incompleta: "+cleanup.join("; "):"Invito e associazione annullati correttamente.")},500);
+      }
       return json({ok:true,user_id:created.id,email,ruolo,already_exists:false});
     }
 
