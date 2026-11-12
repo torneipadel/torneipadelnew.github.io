@@ -13,7 +13,7 @@ let factorId='',busy=false;
 function status(v){$('status').textContent=v}
 async function init(){
  const {data:{session},error}=await sb.auth.getSession();if(error||!session){location.replace('login.html');return}
- const email=String(session.user?.email||'').trim().toLowerCase();let privileged=email==='giose.rizzi@gmail.com';
+ const onboarding=params.get('flow')==='onboarding';const email=String(session.user?.email||'').trim().toLowerCase();let privileged=onboarding||email==='giose.rizzi@gmail.com';
  if(!privileged){const p=await sb.from('profili').select('ruolo').eq('user_id',session.user.id).maybeSingle();privileged=['admin','superadmin'].includes(String(p.data?.ruolo||'').toLowerCase())}
  if(!privileged){const a=await sb.rpc('get_my_azienda_access');const row=Array.isArray(a.data)?a.data[0]:a.data;privileged=!a.error&&row?.accesso_consentito&&['owner','admin','superadmin'].includes(String(row.ruolo||'').toLowerCase())}
  if(!privileged){location.replace('dashboard.html');return}
