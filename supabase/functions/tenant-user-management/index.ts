@@ -91,7 +91,7 @@ Deno.serve(async req => {
         }
         return json({ok:true,user_id:existing.id,email,ruolo,already_exists:true});
       }
-      const {data:invited,error:inviteError} = await admin.auth.admin.inviteUserByEmail(email,{data:{nome,cognome,tenant_invite:true,tenant_role:ruolo}});
+      const {data:invited,error:inviteError} = await admin.auth.admin.inviteUserByEmail(email,{data:{nome,cognome,tenant_invite:true,tenant_role:ruolo},redirectTo:"https://torneipadel.github.io/torneipadelnew.github.io/attiva-account.html"});
       if (inviteError) throw inviteError;
       const created = invited?.user;
       if (!created?.id) return json({error:"Invito creato senza identificativo utente."},500);
