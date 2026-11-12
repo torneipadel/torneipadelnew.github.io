@@ -37,7 +37,6 @@ const isInviteCallback=callbackParams.get("type")==="invite";
   const {data:{session},error}=await sb.auth.getSession();
   if(error)throw error;
   if(!isInviteCallback||!session||!session.user||!session.user.email_confirmed_at){
-   await sb.auth.signOut({scope:"local"});
    statusEl.textContent="Questo collegamento di invito non è valido, è scaduto o è già stato utilizzato. Chiedi al proprietario della società un nuovo invito.";
    return;
   }
