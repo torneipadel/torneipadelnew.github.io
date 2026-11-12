@@ -22,10 +22,18 @@ async function init(){
  const verified=(listed.data?.totp||[]).find(f=>f.status==='verified');
  if(verified){factorId=verified.id;$('intro').textContent='Inserisci il codice generato dalla tua app Authenticator.';$('instructions').textContent='Conferma il tuo accesso con il codice temporaneo.';$('setup').style.display='none';status('Verifica in due passaggi richiesta.');return}
  const pending=(listed.data?.totp||[]).find(f=>f.status!=='verified');
- if(pending){$('verify').disabled=true;status('È presente una configurazione MFA non completata. Contatta il supporto per completarla o ripristinarla.');return}
+ if(pending){
+  let saved=null;try{saved=JSON.parse(sessionStorage.getItem('eventour_mfa_pending')||'null')}catch(_){}
+  if(!saved||saved.userId!==session.user.id||saved.factorId!==pending.id||!saved.qrCode||!saved.secret){
+   $('verify').disabled=true;status('È presente una configurazione MFA non completata su un’altra sessione. Contatta il supporto per ripristinarla in sicurezza.');return
+  }
+  factorId=pending.id;$('qr').src=saved.qrCode;$('qr').style.display='block';$('secret').textContent='Chiave manuale: '+saved.secret;$('secret').style.display='block';status('Configurazione MFA ripresa. Scansiona il QR code e inserisci il codice a 6 cifre.');return
+ }
  const enrolled=await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'Eventour Authenticator'});
  if(enrolled.error){$('verify').disabled=true;status('Configurazione MFA non disponibile: '+enrolled.error.message);return}
- factorId=enrolled.data.id;$('qr').src=enrolled.data.totp.qr_code;$('qr').style.display='block';$('secret').textContent='Chiave manuale: '+enrolled.data.totp.secret;$('secret').style.display='block';status('Scansiona il QR code, poi inserisci il codice a 6 cifre.');
+ factorId=enrolled.data.id;
+ try{sessionStorage.setItem('eventour_mfa_pending',JSON.stringify({userId:session.user.id,factorId:factorId,qrCode:enrolled.data.totp.qr_code,secret:enrolled.data.totp.secret}))}catch(_){}
+ $('qr').src=enrolled.data.totp.qr_code;$('qr').style.display='block';$('secret').textContent='Chiave manuale: '+enrolled.data.totp.secret;$('secret').style.display='block';status('Scansiona il QR code, poi inserisci il codice a 6 cifre.');
 }
 $('verify').addEventListener('click',async()=>{if(busy)return;busy=true;$('verify').disabled=true;try{
  const code=$('code').value.replace(/\s/g,'');if(!/^\d{6}$/.test(code))throw new Error('Inserisci un codice valido di 6 cifre.');
@@ -33,7 +41,7 @@ $('verify').addEventListener('click',async()=>{if(busy)return;busy=true;$('verif
  const v=await sb.auth.mfa.verify({factorId,challengeId:ch.data.id,code});if(v.error)throw v.error;
  const refreshed=await sb.auth.refreshSession();if(refreshed.error)throw refreshed.error;
  const aal=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(aal.error||aal.data?.currentLevel!=='aal2')throw new Error('La verifica non ha raggiunto il livello di sicurezza richiesto. Riprova.');
- status('Verifica completata. Apertura della gestione…');location.replace(safeReturn);
+ try{sessionStorage.removeItem('eventour_mfa_pending')}catch(_){}status('Verifica completata. Apertura della gestione…');location.replace(safeReturn);
  }catch(e){status(e.message||'Verifica non riuscita. Riprova.');$('verify').disabled=false;busy=false}});
  init().catch(e=>{status(e.message||'Errore durante la verifica MFA.');$('verify').disabled=true});
 })();
