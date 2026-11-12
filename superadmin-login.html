@@ -34,9 +34,9 @@ button{width:100%;height:48px;margin-top:18px;border:0;border-radius:9px;backgro
 <div id="recoveryBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5eaf0">
 <p style="margin:0 0 8px"><b>Imposta nuova password</b></p>
 <label for="newPassword">Nuova password</label>
-<input id="newPassword" type="password" autocomplete="new-password" minlength="8">
+<input id="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="72">
 <label for="confirmPassword">Conferma password</label>
-<input id="confirmPassword" type="password" autocomplete="new-password" minlength="8">
+<input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="72">
 <button id="savePassword" type="button">Salva nuova password</button>
 </div>
 <div id="resetBox" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid #e5eaf0">
@@ -74,7 +74,7 @@ savePassword.addEventListener("click",async()=>{
  error.style.color="#b42318";error.textContent="";
  const p=document.getElementById("newPassword").value;
  const cp=document.getElementById("confirmPassword").value;
- if(p.length<8){error.textContent="La nuova password deve contenere almeno 8 caratteri.";return}
+ if(p.length<12||p.length>72){error.textContent="La nuova password deve contenere almeno 12 caratteri e non superare 72 caratteri.";return}
  if(p!==cp){error.textContent="Le password non coincidono.";return}
  savePassword.disabled=true;savePassword.textContent="Salvataggio...";
  const {error:err}=await sb.auth.updateUser({password:p});
