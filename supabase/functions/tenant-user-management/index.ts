@@ -29,6 +29,8 @@ Deno.serve(async req => {
     const callerClient = createClient(url,Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || service,{auth:{persistSession:false,autoRefreshToken:false}});
     const {data:{user:caller},error:authError} = await callerClient.auth.getUser(token);
     if (authError || !caller) return json({error:"Sessione non valida"},401);
+    const {data:assurance,error:assuranceError} = await callerClient.auth.mfa.getAuthenticatorAssuranceLevel(token);
+    if (assuranceError || assurance?.currentLevel !== "aal2") return json({error:"Verifica MFA richiesta per la gestione della società."},403);
 
     const body = await req.json();
     const action = String(body.action || "");
