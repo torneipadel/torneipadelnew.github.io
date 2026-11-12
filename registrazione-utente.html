@@ -71,6 +71,8 @@ const sb=supabase.createClient(
 const params=new URLSearchParams(location.search);
 const azienda=params.get("azienda")||"";
 const q=encodeURIComponent(azienda);
+const callbackParams=new URLSearchParams(location.hash.replace(/^#/,""));
+const isSignupCallback=callbackParams.get("type")==="signup";
 const statusBox=document.getElementById("status");
 let companyRecord=null,busy=false;
 
@@ -94,6 +96,45 @@ async function init(){
    return;
  }
  document.getElementById("company").textContent="Stai creando un account per "+(c.nome_app||c.ragione_sociale)+".";
+ if(isSignupCallback){
+   const {data:{session},error:sessionError}=await sb.auth.getSession();
+   if(sessionError||!session?.user?.email_confirmed_at){
+     statusBox.textContent="Conferma email non completata o collegamento scaduto. Se hai appena confermato, accedi dalla pagina Accesso visitatore.";
+     history.replaceState(null,"",location.pathname+location.search);
+     return;
+   }
+   history.replaceState(null,"",location.pathname+location.search);
+   const meta=session.user.user_metadata||{};
+   const membership=await sb.rpc("complete_visitor_membership",{
+     p_azienda_slug:companyRecord.slug,
+     p_nome:meta.nome||null,
+     p_cognome:meta.cognome||null,
+     p_telefono:meta.telefono||null
+   });
+   const member=Array.isArray(membership.data)?membership.data[0]:membership.data;
+   if(membership.error||!member?.ok||String(member.azienda_id)!==String(companyRecord.id)||String(member.ruolo||"").toLowerCase()!=="user"){
+     await sb.auth.signOut();
+     statusBox.textContent="Email confermata, ma non è stato possibile completare l'associazione alla società. Contatta il proprietario della società.";
+     return;
+   }
+   const extra=await sb.rpc("update_visitor_profile",{
+     p_livello:meta.livello||null,
+     p_alias:meta.alias||null,
+     p_note:meta.note||null
+   });
+   if(extra.error){
+     await sb.auth.signOut();
+     statusBox.textContent="Email confermata, ma il profilo visitatore non è stato completato. Contatta il proprietario della società.";
+     return;
+   }
+   sessionStorage.setItem("nextpoint_login_azienda_id",companyRecord.id);
+   sessionStorage.setItem("nextpoint_login_azienda_slug",companyRecord.slug);
+   sessionStorage.setItem("nextpoint_login_role","user");
+   sessionStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
+   localStorage.setItem("nextpoint_public_azienda_slug",companyRecord.slug);
+   statusBox.textContent="Email confermata. Accesso alla tua area visitatore…";
+   window.location.replace("visitatore.html?azienda="+encodeURIComponent(companyRecord.slug));
+ }
 }
 
 async function go(){
