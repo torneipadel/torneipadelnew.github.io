@@ -91,6 +91,7 @@ function setStatus(v){status.textContent=v||""}
 async function registerUser(){
  const email=emailInput.value.trim().toLowerCase(),password=passwordInput.value;
  if(!email||!password){setStatus("Inserisci email e password.");return}
+ if(password.length<12||password.length>72){setStatus("Per un nuovo account la password deve contenere almeno 12 caratteri e non superare 72.");return}
  setStatus("Registrazione in corso…");
  const {error}=await sb.auth.signUp({email,password});
  if(error){setStatus("Errore: "+error.message);return}
