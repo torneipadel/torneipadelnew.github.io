@@ -15,6 +15,11 @@
       }
 
       try{
+        const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if(assurance.error || assurance.data?.currentLevel!=="aal2"){
+          window.location.replace("sicurezza-mfa.html?return=admin.html");
+          return false;
+        }
         const email=String(session.user?.email||"").trim().toLowerCase();
         const superadminEmail=email==="giose.rizzi@gmail.com";
 
