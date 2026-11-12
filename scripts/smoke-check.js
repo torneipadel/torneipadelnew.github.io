@@ -10,7 +10,8 @@ const pages = [
   "visitatore.html",
   "login-societa-admin.html",
   "sponsor-pubblico.html",
-  "attiva-account.html"
+  "attiva-account.html",
+  "registrazione-utente.html"
 ];
 const checked = new Set();
 const failures = [];
@@ -76,6 +77,23 @@ if (fs.existsSync(activationPage)) {
   }
 } else {
   failures.push("Pagina di attivazione account mancante: attiva-account.html");
+}
+
+const visitorRegistrationPage = path.join(root, "registrazione-utente.html");
+if (fs.existsSync(visitorRegistrationPage)) {
+  const registration = fs.readFileSync(visitorRegistrationPage, "utf8");
+  for (const required of [
+    'callbackParams.get("type")==="signup"',
+    "session.user.email_confirmed_at",
+    'sb.rpc("complete_visitor_membership"',
+    'sb.rpc("update_visitor_profile"'
+  ]) {
+    if (!registration.includes(required)) {
+      failures.push(`Conferma email/attivazione visitatore mancante in registrazione-utente.html: ${required}`);
+    }
+  }
+} else {
+  failures.push("Pagina di registrazione visitatore mancante: registrazione-utente.html");
 }
 
 const inviteFunction = path.join(root, "supabase", "functions", "tenant-user-management", "index.ts");
