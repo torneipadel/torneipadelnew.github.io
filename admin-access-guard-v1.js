@@ -19,7 +19,7 @@
         const superadminEmail=email==="giose.rizzi@gmail.com";
 
         let profileRole="";
-        if(!superadminEmail&&!adminEmail){
+        if(!superadminEmail){
           try{
             const profileResult=await client.from("profili").select("ruolo").eq("user_id",session.user.id).maybeSingle();
             profileRole=String(profileResult.data?.ruolo||"").trim().toLowerCase();
