@@ -14,7 +14,7 @@ const msg=document.getElementById("msg"),goBtn=document.getElementById("go");
 let companyRecord=null,busy=false,loginSessionCreated=false;
 document.getElementById("back").href="societa.html?slug="+q;
 document.getElementById("reg").href="registrazione-utente.html?azienda="+q;
-document.getElementById("forgotPassword").addEventListener("click",async e=>{e.preventDefault();const email=document.getElementById("email").value.trim().toLowerCase();if(!email){msg.textContent="Inserisci prima la tua email.";document.getElementById("email").focus();return}msg.textContent="Invio della richiesta di recupero in corso…";const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:new URL("reset-password.html?flow=visitor",window.location.href).href});msg.textContent=error?"Errore nell\u2019invio: "+error.message:"Se l\u2019indirizzo è associato a un account, riceverai un link per reimpostare la password.";});
+document.getElementById("forgotPassword").addEventListener("click",async e=>{e.preventDefault();const email=document.getElementById("email").value.trim().toLowerCase();if(!email){msg.textContent="Inserisci prima la tua email.";document.getElementById("email").focus();return}msg.textContent="Invio della richiesta di recupero in corso…";const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:new URL("reset-password.html?flow=visitor&azienda="+encodeURIComponent(azienda),window.location.href).href});msg.textContent=error?"Errore nell\u2019invio: "+error.message:"Se l\u2019indirizzo è associato a un account, riceverai un link per reimpostare la password.";});
 async function init(){
   if(!azienda){msg.textContent="Società non specificata.";goBtn.disabled=true;return}
   try{
