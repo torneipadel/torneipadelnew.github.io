@@ -131,7 +131,8 @@ if (!adminGuard.includes("getAuthenticatorAssuranceLevel") || !adminGuard.includ
 }
 const mfaMigration = path.join(root, "supabase", "migrations", "20261112015401_eventour_admin_mfa_aal2_enforcement.sql");
 const rpcMigration = path.join(root, "supabase", "migrations", "20261112015801_eventour_mfa_guard_security_definer_rpcs.sql");
-for (const file of [mfaMigration, rpcMigration]) {
+const onboardingMigration = path.join(root, "supabase", "migrations", "20261112020016_eventour_mfa_guard_company_onboarding_rpc.sql");
+for (const file of [mfaMigration, rpcMigration, onboardingMigration]) {
   if (!fs.existsSync(file)) failures.push(`Migrazione MFA mancante: ${path.relative(root, file)}`);
 }
 const guardedFunctions = [
