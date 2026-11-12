@@ -12,6 +12,7 @@ const pages = [
   "login-utente.html",
   "registrazione-societa.html",
   "admin.html",
+  "dashboard.html",
   "tabellone.html",
   "visitatore.html",
   "login-societa-admin.html",
@@ -160,6 +161,10 @@ for (const name of guardedFunctions) {
 const superadminPage = fs.readFileSync(path.join(root, "superadmin-login.html"), "utf8");
 if (!superadminPage.includes("sicurezza-mfa.html?return=eventour-control-center.html")) {
   failures.push("Il login Superadmin non passa dalla verifica MFA.");
+}
+const dashboardPage = fs.readFileSync(path.join(root, "dashboard.html"), "utf8");
+if (!dashboardPage.includes("getAuthenticatorAssuranceLevel") || !dashboardPage.includes("sicurezza-mfa.html?return=dashboard.html")) {
+  failures.push("La dashboard società non protegge gli accessi amministrativi con MFA.");
 }
 const controlCenterScript = fs.readFileSync(path.join(root, "eventour-control-center-v1.js"), "utf8");
 if (!controlCenterScript.includes("getAuthenticatorAssuranceLevel") || !controlCenterScript.includes("sicurezza-mfa.html?return=eventour-control-center.html")) {
