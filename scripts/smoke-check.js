@@ -129,8 +129,8 @@ const adminGuard = fs.readFileSync(path.join(root, "admin-access-guard-v1.js"), 
 if (!adminGuard.includes("getAuthenticatorAssuranceLevel") || !adminGuard.includes('currentLevel!=="aal2"')) {
   failures.push("Il guard dell'area amministrativa non impone AAL2.");
 }
-const mfaMigration = path.join(root, "supabase", "migrations", "20261112000000_eventour_admin_mfa_aal2_enforcement.sql");
-const rpcMigration = path.join(root, "supabase", "migrations", "20261112000100_eventour_mfa_guard_security_definer_rpcs.sql");
+const mfaMigration = path.join(root, "supabase", "migrations", "20261112015401_eventour_admin_mfa_aal2_enforcement.sql");
+const rpcMigration = path.join(root, "supabase", "migrations", "20261112015801_eventour_mfa_guard_security_definer_rpcs.sql");
 for (const file of [mfaMigration, rpcMigration]) {
   if (!fs.existsSync(file)) failures.push(`Migrazione MFA mancante: ${path.relative(root, file)}`);
 }
