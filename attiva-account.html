@@ -27,7 +27,7 @@ h1{margin-top:0}p{line-height:1.5;color:#dbe7f2}label{display:block;margin:16px 
 <script>
 const SUPABASE_URL="https://dkeqicstprvvfebiaooc.supabase.co";
 const SUPABASE_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const statusEl=document.getElementById("status"),form=document.getElementById("form"),save=document.getElementById("save");
 let validSession=false;
 (async()=>{
