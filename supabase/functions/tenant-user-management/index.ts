@@ -71,7 +71,7 @@ Deno.serve(async req => {
       const nome = String(body.nome || "").trim();
       const cognome = String(body.cognome || "").trim();
       const ruolo = String(body.ruolo || "user").trim().toLowerCase();
-      if (!email || email.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({error:"Inserisci un indirizzo email valido."},400);
+      if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({error:"Inserisci un indirizzo email valido."},400);
       if (!nome || nome.length > 80 || !cognome || cognome.length > 80) return json({error:"Inserisci nome e cognome (massimo 80 caratteri ciascuno)."},400);
       if (!["user","admin","superadmin"].includes(ruolo)) return json({error:"Il ruolo selezionato non è consentito."},400);
       const existing = await findAuthUserByEmail(email);
