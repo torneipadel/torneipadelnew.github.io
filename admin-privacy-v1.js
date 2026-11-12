@@ -26,7 +26,7 @@ async function loadPrivacyAdmin(){
      const payload={titolare:document.getElementById('privacyTitolare').value.trim(),sede:document.getElementById('privacySede').value.trim(),cf_piva:document.getElementById('privacyCfPiva').value.trim(),email:document.getElementById('privacyEmail').value.trim(),pec:document.getElementById('privacyPec').value.trim(),dpo:document.getElementById('privacyDpo').value.trim(),privacy_text:document.getElementById('privacyText').value, cookie_text:document.getElementById('cookieText').value, termini_text:document.getElementById('termsText').value,updated_at:new Date().toISOString()};
      if(!payload.titolare||!payload.sede||!payload.cf_piva||!payload.email){alert('Compila almeno Titolare, sede, CF/P.IVA ed e-mail Privacy.');return}
      const id=select?select.value:a.id;
-     const result=await sb.from('aziende').update(payload).eq('id',id);
+     const result=await sb.rpc('update_my_azienda_config',{p_azienda_id:id,p_payload:payload});
      if(result.error){console.error(result.error);alert('Salvataggio non riuscito: '+result.error.message);return}
      alert('✅ Dati Privacy e documenti legali salvati per la società selezionata.');
      await loadPrivacyAdmin();
