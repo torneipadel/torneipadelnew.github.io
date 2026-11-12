@@ -52,7 +52,7 @@ a{color:#fff;font-weight:700}
 <textarea id="note" placeholder="Note"></textarea>
 
 <input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password (minimo 6 caratteri)">
+<input id="password" type="password" minlength="12" maxlength="72" placeholder="Password (minimo 12 caratteri)">
 
 <p class="privacy-note">I dati inseriti servono per creare il tuo account e gestire la tua partecipazione alle attività della società. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Leggi l’informativa privacy</a>.</p>
 
@@ -153,8 +153,8 @@ async function go(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
 
- if(!azienda||!companyRecord?.id||!nome||!cognome||!email||password.length<6){
-   statusBox.textContent="Verifica la società e compila Nome, Cognome, Email e Password (minimo 6 caratteri).";
+ if(!azienda||!companyRecord?.id||!nome||!cognome||!email||password.length<12||password.length>72){
+   statusBox.textContent="Verifica la società e compila Nome, Cognome, Email e Password (minimo 12 caratteri, massimo 72).";
    busy=false;submitButton.disabled=false;
    return;
  }
