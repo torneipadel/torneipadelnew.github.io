@@ -138,6 +138,17 @@ const adminGuard = fs.readFileSync(path.join(root, "admin-access-guard-v1.js"), 
 if (!adminGuard.includes("getAuthenticatorAssuranceLevel") || !adminGuard.includes('currentLevel!=="aal2"')) {
   failures.push("Il guard dell'area amministrativa non impone AAL2.");
 }
+const companyDashboard = fs.readFileSync(path.join(root, "dashboard.html"), "utf8");
+if (!companyDashboard.includes('rpc("create_company_for_current_user"') || companyDashboard.includes('.from("azienda_utenti").insert') || companyDashboard.includes('.from("aziende").insert')) {
+  failures.push("La creazione società non usa esclusivamente il flusso server-side protetto.");
+}
+const privacyAdmin = fs.readFileSync(path.join(root, "admin-privacy-v1.js"), "utf8");
+if (!privacyAdmin.includes("rpc('update_my_azienda_config'") || privacyAdmin.includes(".from('aziende').update")) {
+  failures.push("La gestione Privacy usa ancora aggiornamenti diretti non protetti.");
+}
+const companyWriteMigration = path.join(root, "supabase", "migrations", "20261112021011_lock_company_and_membership_writes_to_guarded_functions.sql");
+if (!fs.existsSync(companyWriteMigration)) failures.push("Migrazione di protezione scritture società/membri mancante.");
+
 const mfaMigration = path.join(root, "supabase", "migrations", "20261112015401_eventour_admin_mfa_aal2_enforcement.sql");
 const rpcMigration = path.join(root, "supabase", "migrations", "20261112015801_eventour_mfa_guard_security_definer_rpcs.sql");
 const onboardingMigration = path.join(root, "supabase", "migrations", "20261112020016_eventour_mfa_guard_company_onboarding_rpc.sql");
