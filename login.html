@@ -120,7 +120,7 @@ async function loginUser(){
   sessionStorage.setItem("nextpoint_login_role",role);
   sessionStorage.setItem("nextpoint_login_azienda_slug",reservedSlug);
   setStatus("Accesso effettuato. Apertura della gestione tornei…");
-  setTimeout(()=>window.location.replace("admin.html?v=20260927"),200);
+  setTimeout(()=>window.location.replace("sicurezza-mfa.html?return=admin.html"),200);
   return;
  }
 
@@ -157,7 +157,7 @@ async function loginUser(){
    sessionStorage.removeItem("nextpoint_login_azienda_slug");
   }
   setStatus("Accesso effettuato. Apertura della gestione tornei…");
-  setTimeout(()=>window.location.replace("admin.html?v=20260927"),200);
+  setTimeout(()=>window.location.replace("sicurezza-mfa.html?return=admin.html"),200);
   return;
  }
  sessionStorage.removeItem("nextpoint_login_azienda_id");
