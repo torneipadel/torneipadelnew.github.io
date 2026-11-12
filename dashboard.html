@@ -65,7 +65,7 @@ h1{position:relative;z-index:1;font-size:29px;line-height:1.12;margin:0;font-wei
 <div><label>Telefono</label><input id="azTelefono" type="tel"></div>
 <div><label>PEC</label><input id="azPec" type="email"></div>
 <div><label>Titolare</label><input id="azTitolare"></div>
-<div style="grid-column:1/-1"><label>Logo</label><input id="azLogo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><small style="display:block;margin-top:5px;color:rgba(255,255,255,.58)">PNG/JPG/WebP/SVG. Massimo 6 MB.</small></div>
+<div style="grid-column:1/-1"><label>Logo</label><input id="azLogo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><small style="display:block;margin-top:5px;color:rgba(255,255,255,.58)">PNG/JPG/WebP/SVG. Massimo 5 MB.</small></div>
 <div style="grid-column:1/-1"><label>Privacy</label><textarea id="azPrivacy" rows="5" placeholder="Testo privacy della società"></textarea></div>
 <div style="grid-column:1/-1"><label>Cookie</label><textarea id="azCookie" rows="4" placeholder="Testo cookie della società"></textarea></div>
 <div style="grid-column:1/-1"><label>Termini del servizio</label><textarea id="azTermini" rows="4" placeholder="Termini e condizioni della società"></textarea></div>
@@ -274,7 +274,7 @@ async function saveCompany(e){
  let logoUrl=null;
  const file=document.getElementById("azLogo").files[0];
  if(file){
-  if(file.size>6291456){st.textContent="Il logo supera 6 MB.";return}
+  if(file.size>5242880){st.textContent="Il logo supera 5 MB.";return}
   const ext=(file.name.split(".").pop()||"png").toLowerCase();
   const storagePath=user.id+"/"+crypto.randomUUID()+"."+ext;
   const up=await sb.storage.from("azienda-assets").upload(storagePath,file,{contentType:file.type||"image/png",upsert:false});
