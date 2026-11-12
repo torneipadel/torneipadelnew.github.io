@@ -106,7 +106,7 @@ const result=await sb.auth.signInWithPassword({email:document.getElementById("em
 if(result.error)throw result.error;
 const check=await sb.rpc("is_superadmin");
 if(check.error||check.data!==true){await sb.auth.signOut();throw new Error("Account autenticato ma non autorizzato come Superadmin.");}
-window.location.href="eventour-control-center.html";
+window.location.href="sicurezza-mfa.html?return=eventour-control-center.html";
 }catch(err){error.textContent=err&&err.message?err.message:"Accesso non riuscito.";submit.disabled=false;submit.textContent="Accedi al Control Center";}
 });
 </script>
