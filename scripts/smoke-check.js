@@ -9,7 +9,8 @@ const pages = [
   "tabellone.html",
   "visitatore.html",
   "login-societa-admin.html",
-  "sponsor-pubblico.html"
+  "sponsor-pubblico.html",
+  "attiva-account.html"
 ];
 const checked = new Set();
 const failures = [];
