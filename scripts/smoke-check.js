@@ -113,7 +113,7 @@ if (fs.existsSync(mfaPage)) {
     "auth.mfa.challenge",
     "auth.mfa.verify",
     "getAuthenticatorAssuranceLevel",
-    '"aal2"'
+    "aal2"
   ]) {
     if (!mfa.includes(required)) failures.push(`Flusso MFA mancante in sicurezza-mfa.html: ${required}`);
   }
