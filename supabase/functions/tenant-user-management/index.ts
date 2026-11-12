@@ -70,16 +70,25 @@ Deno.serve(async req => {
       const email = String(body.email || "").trim().toLowerCase();
       const nome = String(body.nome || "").trim();
       const cognome = String(body.cognome || "").trim();
-      const ruolo = ["admin","superadmin"].includes(String(body.ruolo || "")) ? String(body.ruolo) : "user";
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({error:"Inserisci un indirizzo email valido."},400);
+      const ruolo = String(body.ruolo || "user").trim().toLowerCase();
+      if (!email || email.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({error:"Inserisci un indirizzo email valido."},400);
+      if (!nome || nome.length > 80 || !cognome || cognome.length > 80) return json({error:"Inserisci nome e cognome (massimo 80 caratteri ciascuno)."},400);
+      if (!["user","admin","superadmin"].includes(ruolo)) return json({error:"Il ruolo selezionato non è consentito."},400);
       const existing = await findAuthUserByEmail(email);
       if (existing) {
+        if (!existing.email_confirmed_at) return json({error:"L'indirizzo email di questo account non è ancora verificato. L'utente deve completare prima la verifica email.",code:"EMAIL_NOT_VERIFIED"},409);
         const {data:existingMembership,error:existingError} = await admin.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",aziendaId).eq("user_id",existing.id).maybeSingle();
         if (existingError) throw existingError;
         if (existingMembership?.attivo) return json({error:"Questo utente appartiene già alla società selezionata."},409);
         if (existingMembership && existingMembership.attivo === false) return json({error:"L'utente ha già un'appartenenza disattivata. Riattivala dalla lista utenti."},409);
+        const {data:otherActive,error:otherActiveError} = await admin.from("azienda_utenti").select("azienda_id").eq("user_id",existing.id).eq("attivo",true).neq("azienda_id",aziendaId).limit(1).maybeSingle();
+        if (otherActiveError) throw otherActiveError;
+        if (otherActive) return json({error:"Questo account è già attivo presso un'altra società. Non è possibile assegnarlo a una seconda società attiva.",code:"USER_ALREADY_ACTIVE_IN_OTHER_COMPANY"},409);
         const {error:linkError} = await admin.from("azienda_utenti").insert({azienda_id:aziendaId,user_id:existing.id,ruolo,attivo:true});
-        if (linkError) throw linkError;
+        if (linkError) {
+          if (linkError.code === "23505") return json({error:"L'account risulta già associato o è stato assegnato contemporaneamente. Aggiorna l'elenco utenti."},409);
+          throw linkError;
+        }
         return json({ok:true,user_id:existing.id,email,ruolo,already_exists:true});
       }
       const {data:invited,error:inviteError} = await admin.auth.admin.inviteUserByEmail(email,{data:{nome,cognome,tenant_invite:true,tenant_role:ruolo}});
@@ -87,8 +96,12 @@ Deno.serve(async req => {
       const created = invited?.user;
       if (!created?.id) return json({error:"Invito creato senza identificativo utente."},500);
       const {error:insertError} = await admin.from("azienda_utenti").insert({azienda_id:aziendaId,user_id:created.id,ruolo,attivo:true});
-      if (insertError) return json({error:"L'invito è stato creato, ma l'associazione alla società non è riuscita: "+insertError.message, user_id:created.id},500);
-      await admin.from("profili").update({nome:nome || null,cognome:cognome || null,email}).eq("user_id",created.id);
+      if (insertError) {
+        if (insertError.code === "23505") return json({error:"L'invito email è stato creato, ma l'associazione risulta già presente o in conflitto. Aggiorna l'elenco utenti e, se necessario, contatta l'assistenza.",user_id:created.id},409);
+        return json({error:"L'invito è stato creato, ma l'associazione alla società non è riuscita: "+insertError.message,user_id:created.id},500);
+      }
+      const {error:profileError} = await admin.from("profili").update({nome,cognome,email}).eq("user_id",created.id);
+      if (profileError) return json({error:"L'invito e l'associazione sono stati creati, ma l'aggiornamento del profilo non è riuscito: "+profileError.message,user_id:created.id},500);
       return json({ok:true,user_id:created.id,email,ruolo,already_exists:false});
     }
 
