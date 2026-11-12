@@ -51,7 +51,7 @@ label{display:block;margin:0 0 7px;font-size:12px;font-weight:700}input{width:10
 <div class="field"><label for="cf">Partita IVA / Codice Fiscale *</label><input id="cf" required autocomplete="off" placeholder="Inserisci Partita IVA o Codice Fiscale"></div>
 <div class="field"><label for="nome">Nome amministratore *</label><input id="nome" required autocomplete="given-name"></div>
 <div class="field"><label for="cognome">Cognome amministratore *</label><input id="cognome" required autocomplete="family-name"></div>
-<div class="field"><label for="password">Password *</label><input id="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimo 8 caratteri"></div>
+<div class="field"><label for="password">Password *</label><input id="password" type="password" required minlength="8" autocomplete="new-password" placeholder="Minimo 12 caratteri"></div>
 <div class="field"><label for="password2">Conferma password *</label><input id="password2" type="password" required minlength="8" autocomplete="new-password"></div>
 </div>
 <div class="checks">
@@ -175,7 +175,7 @@ async function startRegistration(){
    }
  }
  const password=$("password").value,password2=$("password2").value;
- if(!password||password.length<8){submit.disabled=false;status.textContent="La password deve contenere almeno 8 caratteri.";return}
+ if(!password){submit.disabled=false;status.textContent="Inserisci la password.";return}
  if(password!==password2){submit.disabled=false;status.textContent="Le password non coincidono.";return}
 
  status.textContent="Accesso all'account amministratore…";
@@ -191,6 +191,7 @@ async function startRegistration(){
    await createCompany(existingUser);return;
  }
 
+ if(password.length<12||password.length>72){submit.disabled=false;status.textContent="Per un nuovo account la password deve contenere almeno 12 caratteri e non superare 72. Se hai già un account, verifica la password esistente.";return}
  status.textContent="Account non ancora presente: creazione dell'account…";
  const signUp=await sb.auth.signUp({email:d.email,password,options:{emailRedirectTo:location.origin+location.pathname,data:{
    account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
