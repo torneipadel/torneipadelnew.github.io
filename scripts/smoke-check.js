@@ -5,6 +5,11 @@ const vm = require("node:vm");
 const root = process.cwd();
 const pages = [
   "index.html",
+  "login.html",
+  "reset-password.html",
+  "superadmin-login.html",
+  "login-utente.html",
+  "registrazione-societa.html",
   "admin.html",
   "tabellone.html",
   "visitatore.html",
@@ -148,6 +153,15 @@ for (const name of guardedFunctions) {
   if (!fs.existsSync(file) || !fs.readFileSync(file, "utf8").includes("getAuthenticatorAssuranceLevel")) {
     failures.push(`Protezione MFA mancante nella Edge Function: ${name}`);
   }
+}
+
+const recoveryPage = fs.readFileSync(path.join(root, "reset-password.html"), "utf8");
+if (!recoveryPage.includes('password.length < 12') || !recoveryPage.includes('scope: "global"')) {
+  failures.push("Recupero password non impone la lunghezza minima e la revoca delle sessioni.");
+}
+const superadminLoginPage = fs.readFileSync(path.join(root, "superadmin-login.html"), "utf8");
+if (!superadminLoginPage.includes("p.length<12") || !superadminLoginPage.includes("await sb.auth.signOut()")) {
+  failures.push("Recupero password Superadmin non conforme alla policy aggiornata.");
 }
 
 const communications = path.join(root, "admin-comunicazioni-v1.js");
