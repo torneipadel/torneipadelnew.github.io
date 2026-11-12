@@ -8,6 +8,7 @@ const pages = [
   "login.html",
   "reset-password.html",
   "superadmin-login.html",
+  "eventour-control-center.html",
   "login-utente.html",
   "registrazione-societa.html",
   "admin.html",
@@ -153,6 +154,15 @@ for (const name of guardedFunctions) {
   if (!fs.existsSync(file) || !fs.readFileSync(file, "utf8").includes("getAuthenticatorAssuranceLevel")) {
     failures.push(`Protezione MFA mancante nella Edge Function: ${name}`);
   }
+}
+
+const superadminPage = fs.readFileSync(path.join(root, "superadmin-login.html"), "utf8");
+if (!superadminPage.includes("sicurezza-mfa.html?return=eventour-control-center.html")) {
+  failures.push("Il login Superadmin non passa dalla verifica MFA.");
+}
+const controlCenterScript = fs.readFileSync(path.join(root, "eventour-control-center-v1.js"), "utf8");
+if (!controlCenterScript.includes("getAuthenticatorAssuranceLevel") || !controlCenterScript.includes("sicurezza-mfa.html?return=eventour-control-center.html")) {
+  failures.push("Il Control Center non protegge l'accesso diretto con MFA.");
 }
 
 const recoveryPage = fs.readFileSync(path.join(root, "reset-password.html"), "utf8");
