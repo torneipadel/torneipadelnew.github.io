@@ -8,7 +8,7 @@
 'use strict';
 const URL='https://dkeqicstprvvfebiaooc.supabase.co',KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 const sb=window.supabase.createClient(URL,KEY),$=id=>document.getElementById(id),params=new URLSearchParams(location.search);
-const target=params.get('return')||'admin.html',safeReturn=/^admin\.html(?:[?#].*)?$/.test(target)?target:'admin.html';
+const target=params.get('return')||'admin.html',safeReturn=/^(?:admin|eventour-control-center)\.html(?:[?#].*)?$/.test(target)?target:'admin.html';
 let factorId='',busy=false;
 function status(v){$('status').textContent=v}
 async function init(){
