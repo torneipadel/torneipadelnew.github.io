@@ -30,12 +30,20 @@ const SUPABASE_KEY="sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const statusEl=document.getElementById("status"),form=document.getElementById("form"),save=document.getElementById("save");
 let validSession=false;
+const callbackParams=new URLSearchParams(location.hash.replace(/^#/,""));
+const isInviteCallback=callbackParams.get("type")==="invite";
 (async()=>{
  try{
   const {data:{session},error}=await sb.auth.getSession();
   if(error)throw error;
-  if(!session||!session.user){statusEl.textContent="Il collegamento non è valido, è scaduto o è già stato utilizzato. Chiedi al proprietario della società un nuovo invito.";return}
-  validSession=true;form.classList.remove("hidden");statusEl.textContent="Invito verificato. Scegli una password personale di almeno 12 caratteri.";
+  if(!isInviteCallback||!session||!session.user||!session.user.email_confirmed_at){
+   await sb.auth.signOut({scope:"local"});
+   statusEl.textContent="Questo collegamento di invito non è valido, è scaduto o è già stato utilizzato. Chiedi al proprietario della società un nuovo invito.";
+   return;
+  }
+  validSession=true;form.classList.remove("hidden");
+  history.replaceState(null,"",location.pathname+location.search);
+  statusEl.textContent="Invito verificato. Scegli una password personale di almeno 12 caratteri.";
  }catch(e){statusEl.textContent="Non è stato possibile verificare l'invito. Richiedi un nuovo collegamento."}
 })();
 save.addEventListener("click",async()=>{
@@ -47,9 +55,11 @@ save.addEventListener("click",async()=>{
  try{
   const {error}=await sb.auth.updateUser({password:p});
   if(error)throw error;
-  await sb.auth.signOut({scope:"local"});
   validSession=false;form.classList.add("hidden");
-  statusEl.textContent="Account attivato correttamente. Ora puoi accedere dalla pagina Accesso società.";
+  const {error:logoutError}=await sb.auth.signOut({scope:"local"});
+  statusEl.textContent=logoutError
+   ?"Password impostata. Non è stato possibile chiudere automaticamente la sessione: chiudi il browser e accedi nuovamente da Accesso società."
+   :"Account attivato correttamente. Ora puoi accedere dalla pagina Accesso società.";
  }catch(e){statusEl.textContent="Attivazione non riuscita: "+(e.message||"verifica il collegamento e riprova");save.disabled=false}
 });
 </script>
