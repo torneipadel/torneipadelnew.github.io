@@ -164,5 +164,5 @@ render();
 window.openAdminNews=()=>newsEditor();
 const oldOpenAdminComPage=window.openAdminComPage;
 window.openAdminComPage=p=>{if(p==='sponsor'){window.openAdminSponsor?.();return}if(p==='news'||p==='news-ai'){window.openAdminNews?.();return}return oldOpenAdminComPage?.(p)};
-document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="news"],[data-com-page="sponsor"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');window.openAdminComPage?.(b.dataset.comPage==='sponsor'?'sponsor':'news-ai')},true);
+document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="news"],[data-com-page="sponsor"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');if(b.dataset.comPage==='sponsor'){window.openAdminSponsor?.();return;}if(typeof window.openAdminNews==='function'){window.openAdminNews();return;}console.error('Editor amministrativo News non disponibile: verificare admin-comunicazioni-v1.js');alert('Editor amministrativo News non disponibile. Ricarica la pagina e riprova.')},true);
 })();
