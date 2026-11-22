@@ -90,7 +90,9 @@
       const a=document.createElement('a'); a.textContent=label; a.href=href;
       if(adminOnly){a.dataset.adminOnly='true';a.hidden=true;}
       const q=new URLSearchParams(location.search);
-      const companySlug=q.get('azienda') || (page==='societa.html'?q.get('slug'):'') || sessionStorage.getItem('nextpoint_login_azienda_slug') || localStorage.getItem('nextpoint_public_azienda_slug') || '';
+      let storedSlug='';
+      try{storedSlug=sessionStorage.getItem('nextpoint_login_azienda_slug') || localStorage.getItem('nextpoint_public_azienda_slug') || '';}catch(_){}
+      const companySlug=q.get('azienda') || (page==='societa.html'?q.get('slug'):'') || storedSlug;
       if(companySlug && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(companySlug);
       panel.appendChild(a);
     };
@@ -185,13 +187,13 @@
       const client = await ensureVisitorAuthClient();
       const { data, error } = await client.auth.getSession();
       if (error) {
-        console.warn('Sessione non verificata: menu non attivato per sicurezza.', error);
+        console.warn('Sessione non verificata: mostro soltanto la navigazione pubblica.', error);
+        createMenu(null);
         return;
       }
-      // Il menu hamburger compare esclusivamente con una sessione autenticata verificata.
-      // La navigazione anonima resta affidata ai collegamenti pubblici della singola pagina.
-      if (!data?.session?.user) return;
-      createMenu(data.session);
+      // Il menu pubblico deve essere disponibile anche senza account; le voci admin
+      // restano nascoste e vengono mostrate solo dopo la verifica dei privilegi.
+      createMenu(data?.session?.user ? data.session : null);
     } catch (e) {
       console.warn('Sessione non verificata: attivo il menu pubblico Eventour.', e);
       createMenu(null);
