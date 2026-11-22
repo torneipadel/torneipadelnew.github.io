@@ -542,5 +542,5 @@ const bindStudioButtons=()=>{
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindStudioButtons,{once:true});
 else bindStudioButtons();
-window.openAdminComPage=(function(previous){return function(page,...args){if(page==='news'||page==='news-ai'||page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
+window.openAdminComPage=(function(previous){return function(page,...args){if(page==='news'||page==='news-ai'){if(typeof window.openAdminNews==='function')return window.openAdminNews();console.error('Editor News indipendente non disponibile.');window.alert('Editor News non caricato: aggiorna la pagina e riprova.');return;}if(page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
 })();
