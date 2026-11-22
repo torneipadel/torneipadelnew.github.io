@@ -96,7 +96,8 @@
     };
     // In admin.html la voce Home è ridondante: Esci riporta già alla pagina iniziale.
     if(page!=='admin.html') addLink('Home','index.html');
-    addLink('Tornei e visitatori','visitatore.html');
+    // La voce Tornei e visitatori non serve nel menu della pagina amministrativa.
+    if(page!=='admin.html') addLink('Tornei e visitatori','visitatore.html');
     const newsNavLink=addLink('News','news.html');
     addLink('Mercatino','mercatino.html');
     addLink('Sponsor','sponsor-pubblico.html');
