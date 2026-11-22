@@ -38,7 +38,7 @@
     return !!el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"],#teamModal,#rulesModal');
   }
   function removeNavigationArrows(){
-    document.querySelectorAll('.site-global-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
+    document.querySelectorAll('.site-global-back,.np-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
       if(!isInsideModal(el)) el.remove();
     });
     if(!isTabellone){
@@ -182,6 +182,10 @@
   // La verifica della sessione resta separata e non ritarda la pulizia della navigazione.
   removeNavigationArrows();
   createGlobalBackButton();
+  // Le schermate admin caricano alcuni contenuti in modo dinamico: elimina anche
+  // eventuali frecce di ritorno aggiunte dopo il caricamento iniziale.
+  const navigationArrowObserver=new MutationObserver(()=>removeNavigationArrows());
+  if(document.body) navigationArrowObserver.observe(document.body,{childList:true,subtree:true});
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
