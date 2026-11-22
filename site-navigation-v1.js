@@ -94,7 +94,8 @@
       if(companySlug && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(companySlug);
       panel.appendChild(a);
     };
-    addLink('Home','index.html');
+    // In admin.html la voce Home è ridondante: Esci riporta già alla pagina iniziale.
+    if(page!=='admin.html') addLink('Home','index.html');
     addLink('Tornei e visitatori','visitatore.html');
     const newsNavLink=addLink('News','news.html');
     addLink('Mercatino','mercatino.html');
