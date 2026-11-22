@@ -40,6 +40,17 @@ function getCompanyContext(){
   const params=new URLSearchParams(location.search);
   let slug=(params.get('azienda')||'').trim();
   let companyId=(params.get('azienda_id')||'').trim();
+  // Se la pagina viene aperta da un collegamento privo di query, recupera
+  // il contesto della società dalla pagina pubblica di provenienza (stesso dominio).
+  if(!slug&&!companyId&&document.referrer){
+    try{
+      const ref=new URL(document.referrer);
+      if(ref.origin===location.origin){
+        slug=(ref.searchParams.get('azienda')||'').trim();
+        companyId=(ref.searchParams.get('azienda_id')||'').trim();
+      }
+    }catch(e){}
+  }
   try{
     if(!slug)slug=(sessionStorage.getItem('nextpoint_login_azienda_slug')||localStorage.getItem('nextpoint_public_azienda_slug')||'').trim();
     if(!companyId)companyId=(sessionStorage.getItem('nextpoint_login_azienda_id')||'').trim();
@@ -64,7 +75,7 @@ function renderSponsors(list){
 async function resolveCompany(context){
   if(context.slug){
     const {data,error}=await sb.rpc('get_public_company',{p_slug:context.slug});
-    if(error)throw error;
+    if(error)console.warn('Ricerca società tramite slug non riuscita:',error);
     const company=Array.isArray(data)?data[0]:data;
     if(company&&company.id)return company;
   }
@@ -85,9 +96,15 @@ async function loadSponsors(){
     }
     const companyName=String(company.nome_app||company.ragione_sociale||company.nome||'').trim();
     if(companyName)document.getElementById('sponsorCompanyName').textContent=companyName;
-    const result=company.slug
+    let result=company.slug
       ? await sb.rpc('get_public_company_sponsors',{p_slug:company.slug})
       : await sb.rpc('get_public_company_sponsors',{p_azienda_id:company.id});
+    // Fallback sullo stesso ID tenant se la ricerca pubblica per slug non restituisce dati.
+    if((result.error||!Array.isArray(result.data)||result.data.length===0)&&company.id){
+      const byId=await sb.rpc('get_public_company_sponsors',{p_azienda_id:company.id});
+      if(!byId.error&&Array.isArray(byId.data)&&byId.data.length)result=byId;
+      else if(result.error)console.error('Errore caricamento sponsor tramite slug:',result.error);
+    }
     if(result.error)throw result.error;
     const rows=Array.isArray(result.data)?result.data:[];
     renderSponsors(rows.filter(s=>s&&String(s.nome||'').trim()));
