@@ -22,6 +22,60 @@ button.cta,a.cta,.cta,.cta:hover,.cta:focus,.cta:focus-visible,.cta:active{backg
 button.cta:hover,a.cta:hover,.cta:focus-visible{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.9)!important}
 .brand-back{width:40px;height:40px;margin:0 0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;font:400 20px 'Open Sans',Arial,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .brand-back:hover{background:rgba(255,255,255,.15)}
+
+/* Restyling editoriale News Eventour */
+.page{width:min(1040px,calc(100% - 40px));padding:24px 0 64px}
+.news-brand-banner{height:148px;border-radius:24px;margin-bottom:30px;box-shadow:0 20px 55px rgba(0,0,0,.34)}
+.heroTitle{margin:0 0 25px;padding:26px 30px 27px;border:1px solid rgba(255,255,255,.16);border-radius:22px;background:linear-gradient(110deg,rgba(7,27,48,.86),rgba(9,43,72,.48));box-shadow:0 16px 42px rgba(0,0,0,.16);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:2.3px}
+.eyebrow:before{content:"";display:block;width:24px;height:2px;background:var(--gold);border-radius:2px}
+.heroTitle h1{font-size:clamp(42px,6vw,62px);margin:12px 0 9px;letter-spacing:-.055em}
+.heroTitle p{max-width:560px;font-size:13px;color:rgba(255,255,255,.75)}
+.featured{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);min-height:310px;border-radius:24px;margin-bottom:25px;background:linear-gradient(125deg,rgba(15,49,77,.92),rgba(8,25,43,.86));border-color:rgba(255,255,255,.2);box-shadow:0 22px 58px rgba(0,0,0,.27)}
+.featuredMedia{height:100%;min-height:310px;border-bottom:0;border-right:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.015))}
+.featuredMedia img{height:100%;max-height:460px;object-fit:cover}
+.featuredNoImage{height:100%;min-height:310px;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.featuredBody{display:flex;flex-direction:column;justify-content:center;padding:clamp(22px,4vw,38px)}
+.featuredBody h2{font-size:clamp(25px,3vw,36px);line-height:1.13;margin:14px 0 9px}
+.featuredBody .text{font-size:13px;line-height:1.75;color:rgba(255,255,255,.78);display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.featuredBody .cta{margin-top:22px}
+.badge{background:rgba(255,231,107,.1);border-color:rgba(255,231,107,.28);color:var(--gold)}
+.filters{gap:9px;margin:0 0 18px}
+.filter{padding:9px 15px;border-color:rgba(255,255,255,.2);background:rgba(5,20,36,.48);font-size:10px;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.filter.active,.filter:hover{background:var(--gold);border-color:var(--gold);color:#15263a}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.card{border-radius:20px;background:linear-gradient(145deg,rgba(16,48,73,.88),rgba(6,20,35,.86));border-color:rgba(255,255,255,.17);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.card:hover{transform:translateY(-3px);border-color:rgba(255,231,107,.38);box-shadow:0 20px 42px rgba(0,0,0,.27)}
+.cardMedia{aspect-ratio:16/9;background:rgba(255,255,255,.045)}
+.cardMedia img{transition:transform .35s ease}
+.card:hover .cardMedia img{transform:scale(1.025)}
+.cardBody{padding:20px 21px 22px}
+.cardBody h3{font-size:19px;line-height:1.25;margin:9px 0}
+.cardBody p{font-size:12px;line-height:1.65;color:rgba(255,255,255,.72);-webkit-line-clamp:4}
+.cardBody .cta{margin-top:20px}
+.cta{font-size:10px;padding:11px 15px;border-color:rgba(255,255,255,.55);letter-spacing:.2px}
+.empty{padding:48px 24px;border-radius:22px;background:linear-gradient(135deg,rgba(16,48,73,.72),rgba(6,20,35,.72));font-size:13px;line-height:1.7}
+.loading{padding:70px 20px;font-size:13px}
+.news-detail-panel{background:#0a1d30;border-color:rgba(255,255,255,.2)}
+.news-detail-body{padding:clamp(22px,4vw,38px)}
+.news-detail-body .text{font-size:15px;line-height:1.85}
+@media(max-width:700px){
+ .page{width:calc(100% - 22px);padding:12px 0 40px}
+ .news-brand-banner{height:125px;margin-bottom:17px;border-radius:19px}
+ .heroTitle{margin:0 0 17px;padding:21px 19px;border-radius:18px}
+ .heroTitle h1{font-size:42px}
+ .featured{grid-template-columns:1fr;border-radius:19px}
+ .featuredMedia{height:auto;min-height:190px;border-right:0;border-bottom:1px solid rgba(255,255,255,.14)}
+ .featuredMedia img{height:auto;max-height:340px;object-fit:cover}
+ .featuredNoImage{min-height:150px}
+ .featuredBody{padding:21px}
+ .featuredBody h2{font-size:27px}
+ .featuredBody .text{font-size:12px;-webkit-line-clamp:6}
+ .grid{grid-template-columns:1fr;gap:13px}
+ .cardBody{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){.card,.cardMedia img{transition:none}}
+
 </style>
 <script src="tenant-theme-v1.js?v=3"></script>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
