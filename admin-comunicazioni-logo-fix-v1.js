@@ -70,38 +70,3 @@ document.addEventListener('click',e=>{if(window.__waCanonicalActive)return;const
 window.creaGruppoWhatsApp=creaGruppoWhatsApp;
 })();
 
-(()=>{'use strict';
-const $=id=>document.getElementById(id);
-const selected=()=>window.getTorneoAdminCorrente?.()||((window.adminState?.tornei||[]).find(t=>String(t.id)===String(window.adminState?.torneoSelezionato))||null);
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const cfgOf=t=>t?.configurazione&&typeof t.configurazione==='object'?{...t.configurazione}:{};
-const saveCfg=async(t,cfg)=>{const sb=window.supabaseClient||window.sb;if(!sb||!t){alert('Torneo o connessione Supabase non disponibile.');return false}const {data,error}=await sb.from('tornei').update({configurazione:{...(cfg||{})}}).eq('id',t.id).select('id,configurazione').maybeSingle();if(error){console.error(error);alert('Errore salvataggio: '+error.message);return false}if(!data){alert('Configurazione non salvata.');return false}t.configurazione=data.configurazione||cfg;try{localStorage.setItem('padel_admin_state',JSON.stringify(window.adminState||{}))}catch(e){}return true};
-const fileToDataUrl=file=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(new Error('Impossibile leggere l’immagine.'));r.readAsDataURL(file)});
-const dateText=v=>{if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleString('it-IT',{dateStyle:'short',timeStyle:'short'})};
-const typeIcon=t=>{const x=String(t||'').toLowerCase();if(x.includes('torneo'))return '🏆';if(x.includes('promo'))return '🔥';if(x.includes('evento'))return '📅';if(x.includes('ricordo'))return '📸';if(x.includes('prodott'))return '🎾';if(x.includes('articol'))return '📰';return '📢'};
-async function newsEditor(){
- const t=selected();if(!t){alert('Seleziona prima un torneo');return}
- const c=cfgOf(t),items=Array.isArray(c.news)?c.news:[];
- const root=$('appContent');if(!root)return;
- const typeOptions=['Comunicazione','Torneo','Promozione','Evento','Ricordo','Prodotto','Articolo'];
- root.innerHTML=`<div class="page-head"><div><h1>News & Comunicazioni</h1><p>${esc(t.nome)} · ID ${esc(t.id)}</p></div><button class="btn" id="newsBack">← Torna al torneo</button></div>
- <div class="card feature-card"><div class="card-head"><div><h2>Nuovo contenuto</h2><span class="notice">Crea una comunicazione, una promozione, una locandina o un articolo.</span></div></div><div class="card-body"><div class="section-grid">
- <div class="feature-form"><label>Tipo contenuto</label><select id="newsType" class="input">${typeOptions.map(x=>`<option value="${x}">${x}</option>`).join('')}</select>
- <label>Immagine / Locandina</label><input id="newsImage" class="input" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><small class="notice">PNG, JPG, WEBP o GIF. Facoltativa.</small><div id="newsImagePreview" style="margin-top:10px;display:none"></div>
- <label>Titolo</label><input id="newsTitle" class="input" placeholder="Titolo del contenuto">
- <label>Testo</label><textarea id="newsText" class="input" rows="7" placeholder="Testo della comunicazione o dell'articolo"></textarea>
- <label>Link facoltativo</label><input id="newsLink" class="input" placeholder="https://...">
- <label style="display:flex;align-items:center;gap:9px;margin-top:12px"><input id="newsFeatured" type="checkbox"> Metti in evidenza</label>
- <button class="btn primary" id="newsSave">＋ Pubblica contenuto</button></div>
- <div><h3>Contenuti pubblicati</h3><div id="newsList" class="feature-list">${items.length?items.slice().reverse().map((n,i)=>`<div class="list-item" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap"><div style="width:86px;height:62px;border-radius:9px;overflow:hidden;background:rgba(15,23,42,.12);display:flex;align-items:center;justify-content:center;flex:none">${n.immagine?`<img src="${esc(n.immagine)}" style="width:100%;height:100%;object-fit:cover" alt="">`:`<span style="font-size:25px">${typeIcon(n.tipo)}</span>`}</div><div style="flex:1;min-width:200px"><strong>${esc(n.titolo||'News')}</strong><small style="display:block;margin-top:4px">${esc(n.tipo||'Comunicazione')} ${n.data?'· '+esc(dateText(n.data)):''}</small><small style="display:block;margin-top:4px">${esc(n.testo||'')}</small>${n.inEvidenza?'<small style="display:block;margin-top:4px">⭐ In evidenza</small>':''}</div><button class="btn small danger" data-news-del="${esc(n.id||i)}">Elimina</button></div>`).join(''):'<div class="empty">Nessun contenuto pubblicato.</div>'}</div></div>
- </div></div></div>`;
- $('newsBack')?.addEventListener('click',()=>window.openAdminPage?.('torneo'));
- const imageInput=$('newsImage'),preview=$('newsImagePreview');
- imageInput?.addEventListener('change',()=>{const f=imageInput.files?.[0];if(!f){preview.style.display='none';preview.innerHTML='';return}const ok=['image/png','image/jpeg','image/webp','image/gif'];if(!ok.includes(f.type)){alert('L’immagine deve essere PNG, JPG, WEBP o GIF.');imageInput.value='';return}if(f.size>4*1024*1024){alert('L’immagine è troppo grande. Usa un file massimo di 4 MB.');imageInput.value='';return}const r=new FileReader();r.onload=()=>{preview.innerHTML=`<img src="${esc(r.result)}" style="max-width:100%;max-height:180px;border-radius:10px;object-fit:contain">`;preview.style.display='block'};r.readAsDataURL(f)});
- $('newsSave')?.addEventListener('click',async()=>{const tipo=$('newsType')?.value||'Comunicazione',titolo=$('newsTitle')?.value.trim(),testo=$('newsText')?.value.trim(),link=$('newsLink')?.value.trim(),inEvidenza=!!$('newsFeatured')?.checked,file=imageInput?.files?.[0];if(!titolo||!testo){alert('Inserisci titolo e testo.');return}if(link&&!/^https?:\/\//i.test(link)){alert('Il link deve iniziare con http:// o https://');return}let immagine='';if(file){if(file.size>4*1024*1024){alert('L’immagine è troppo grande. Usa un file massimo di 4 MB.');return}try{immagine=await fileToDataUrl(file)}catch(e){alert(e.message);return}}const next=[...items,{id:'news-'+Date.now(),tipo,titolo,testo,immagine,link,data:new Date().toISOString(),inEvidenza}];if(inEvidenza){next.forEach((n,i)=>{if(i!==next.length-1)n.inEvidenza=false})}const ok=await saveCfg(t,{...c,news:next});if(ok)newsEditor()});
- document.querySelectorAll('[data-news-del]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Eliminare questo contenuto?'))return;const id=b.dataset.newsDel;const next=items.filter((n,i)=>String(n.id||i)!==String(id));if(await saveCfg(t,{...c,news:next}))newsEditor()}));
-}
-const oldOpenNews=window.openAdminComPage;
-window.openAdminComPage=p=>p==='news'?newsEditor():(p==='whatsapp'?oldOpenNews?.(p):oldOpenNews?.(p));
-document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="news"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');newsEditor().catch(err=>{console.error(err);alert('Errore caricamento News: '+(err?.message||err));});},true);
-})();
