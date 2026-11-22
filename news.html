@@ -16,6 +16,10 @@
 
 
 .news-detail{position:fixed;inset:0;z-index:2147483005;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(1,8,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.news-detail.open{display:flex}.news-detail-panel{position:relative;width:min(820px,100%);max-height:calc(100vh - 36px);overflow:auto;border:1px solid rgba(255,255,255,.2);border-radius:22px;background:#0b1b2c;box-shadow:0 24px 70px rgba(0,0,0,.48)}.news-detail-close{position:sticky;top:10px;float:right;margin:10px 10px 0 0;width:38px;height:38px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(4,14,27,.88);color:#fff;font-size:24px;cursor:pointer;z-index:2}.news-detail-media{width:100%;max-height:460px;overflow:hidden;background:rgba(255,255,255,.05)}.news-detail-media img{display:block;width:100%;max-height:460px;object-fit:contain}.news-detail-body{padding:26px}.news-detail-body h2{margin:10px 0;font-size:clamp(25px,5vw,38px);line-height:1.12}.news-detail-body .text{font-size:15px;line-height:1.8;color:rgba(255,255,255,.86);white-space:pre-wrap;overflow-wrap:anywhere}.news-detail-body .date{font-size:12px}@media(max-width:600px){.news-detail{padding:8px}.news-detail-panel{max-height:calc(100vh - 16px);border-radius:17px}.news-detail-body{padding:20px}.news-detail-body .text{font-size:14px}}
+
+/* Forza i pulsanti di lettura trasparenti anche contro gli stili globali */
+button.cta,a.cta,.cta,.cta:hover,.cta:focus,.cta:focus-visible,.cta:active{background:transparent!important;background-color:transparent!important;color:#fff!important;box-shadow:none!important}
+button.cta:hover,a.cta:hover,.cta:focus-visible{background:rgba(255,255,255,.10)!important;border-color:rgba(255,255,255,.9)!important}
 .brand-back{width:40px;height:40px;margin:0 0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;font:400 20px 'Open Sans',Arial,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .brand-back:hover{background:rgba(255,255,255,.15)}
 </style>
