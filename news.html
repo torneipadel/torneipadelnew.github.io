@@ -2,138 +2,58 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#07182b">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>News | Eventour</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--line:rgba(255,255,255,.22);--blue:#073b72;--gold:#ffe76b;--green:#54d68b;--red:#ff9b9b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;font-family:'Open Sans',Arial,sans-serif;color:#fff;background:#06111f url('sfondo2.jpg') center/cover fixed no-repeat;overflow-x:hidden}body:before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(3,12,24,.30),rgba(3,12,24,.68));pointer-events:none;z-index:-1}.page{width:min(760px,calc(100% - 28px));margin:auto;padding:18px 0 45px}.news-brand-banner{position:relative;isolation:isolate;width:100%;height:125px;margin:0 0 16px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;border:1px solid rgba(255,255,255,.24);border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;box-shadow:0 16px 42px rgba(0,0,0,.30)}.news-brand-banner:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(115deg,rgba(3,17,31,.62),rgba(3,17,31,.28),rgba(3,17,31,.58));pointer-events:none}.news-eventour-logo{position:relative;z-index:1;display:block;width:310px;height:88px;max-width:100%;margin:0 auto;object-fit:contain;object-position:center;border:0;border-radius:0;box-shadow:none;filter:none;opacity:1}.news-brand-subtitle{position:relative;z-index:1;display:block;width:100%;margin:-7px 0 0;color:#fff;font-family:Jost,Inter,'Open Sans',Arial,sans-serif;font-size:11px;font-style:italic;font-weight:600;letter-spacing:1.35px;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.35);text-align:center;white-space:nowrap}.heroTitle{margin:30px 3px 18px;padding:0;border:0;background:none;box-shadow:none}.eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--gold);text-transform:uppercase}.heroTitle h1{font-size:clamp(32px,7vw,48px);line-height:1;letter-spacing:-.04em;margin:8px 0 10px}.heroTitle p{margin:0;color:rgba(255,255,255,.66);font-size:13px;line-height:1.6}.featured{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));border:1px solid rgba(255,255,255,.18);border-radius:20px;overflow:hidden;box-shadow:0 14px 38px rgba(0,0,0,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:14px}.featuredMedia{width:100%;min-height:220px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.14)}.featuredMedia img{width:100%;height:auto;max-height:650px;object-fit:contain;display:block}.featuredNoImage{min-height:220px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.52);font-weight:700;font-size:12px}.featuredBody{padding:24px}.badge{display:inline-flex;width:max-content;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);color:var(--gold);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px}.featuredBody h2{font-size:28px;line-height:1.12;letter-spacing:-.02em;margin:10px 0 7px}.date{color:rgba(255,255,255,.52);font-size:10px;margin-bottom:14px}.text{white-space:pre-line;color:rgba(255,255,255,.68);line-height:1.65;max-width:900px;font-size:12px}.cta{display:inline-flex;align-items:center;width:max-content;margin-top:14px;background:#fff;color:var(--blue);text-decoration:none;padding:10px 13px;border-radius:10px;font:800 9px 'Open Sans',Arial,sans-serif;box-shadow:none}.filters{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}.filter{border:1px solid rgba(255,255,255,.17);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:8px 11px;font:700 10px 'Open Sans',Arial,sans-serif;cursor:pointer}.filter.active,.filter:hover{background:#fff;color:var(--blue)}.grid{display:grid;grid-template-columns:1fr;gap:14px}.card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));border:1px solid rgba(255,255,255,.18);border-radius:20px;overflow:hidden;box-shadow:0 14px 38px rgba(0,0,0,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;flex-direction:column}.cardMedia{aspect-ratio:16/10;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.14)}.cardMedia img{width:100%;height:100%;object-fit:cover;display:block}.cardBody{padding:17px 17px 19px;display:flex;flex-direction:column;flex:1}.cardBody h3{margin:7px 0 7px;font-size:17px;line-height:1.2;letter-spacing:0}.cardBody p{margin:0;color:rgba(255,255,255,.62);line-height:1.45;font-size:11px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.cardBody .cta{margin-top:auto;align-self:flex-start}.smallDate{font-size:9px;color:rgba(255,255,255,.52);font-weight:700;letter-spacing:.01em}.adminDelete{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:max-content;margin-top:12px;padding:8px 11px;border:1px solid rgba(255,155,155,.18);border-radius:9px;background:rgba(255,155,155,.08);color:var(--red);font:700 9px 'Open Sans',Arial,sans-serif;cursor:pointer}.featuredBody .adminDelete{margin-top:12px}.empty{padding:30px 18px;border:1px dashed rgba(255,255,255,.22);border-radius:20px;background:rgba(255,255,255,.06);text-align:center;color:rgba(255,255,255,.62);font-size:12px}.loading{text-align:center;padding:54px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.25);font-weight:700;font-size:12px}.np-menu,.np-menu a,.np-menu strong{font-family:'Open Sans',Arial,sans-serif;-webkit-font-smoothing:antialiased}
+@media(max-width:600px){body{background-attachment:scroll}.page{width:calc(100% - 20px);padding-top:10px}.news-brand-banner{height:125px;margin-bottom:13px;border-radius:19px}.news-eventour-logo{height:88px;width:310px;max-width:100%}.news-brand-subtitle{font-size:11px;letter-spacing:1.35px}.heroTitle{margin-top:25px}.heroTitle h1{font-size:40px}.featured{border-radius:19px}.featuredMedia{min-height:190px}.featuredBody{padding:20px}.featuredBody h2{font-size:26px}.card{border-radius:19px}.filters{gap:7px}.filter{padding:8px 11px}}
+@media(max-width:390px){.news-brand-banner{height:125px}.news-eventour-logo{height:88px;width:310px;max-width:100%}.news-brand-subtitle{font-size:11px;letter-spacing:1.35px}}@media(prefers-reduced-motion:reduce){.cta,.filter{transition:none}}
+
+
+.brand-back{width:40px;height:40px;margin:0 0 12px;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.09);color:#fff;font:400 20px 'Open Sans',Arial,sans-serif;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.brand-back:hover{background:rgba(255,255,255,.15)}
+</style>
 <script src="tenant-theme-v1.js?v=3"></script>
 <link rel="stylesheet" href="mobile-layout-fixes.css?v=1">
-<style>
-:root{--navy:#07182b;--navy2:#0b2540;--gold:#f5d66e;--gold2:#ffe9a0;--ink:#102238;--muted:#6d7b8c;--paper:#f5f7fa;--line:#e6ebf1}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;min-height:100vh;font-family:'DM Sans',Arial,sans-serif;color:#fff;background:#07182b url('sfondo2.jpg') center/cover fixed no-repeat;overflow-x:hidden}
-body:before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(4,15,28,.72),rgba(4,15,28,.91));z-index:-1;pointer-events:none}
-.page{width:min(1180px,calc(100% - 40px));margin:auto;padding:18px 0 70px}
-.brand-back{width:42px;height:42px;margin:0 0 12px;border:1px solid rgba(255,255,255,.2);border-radius:13px;background:rgba(255,255,255,.09);color:#fff;font-size:21px;cursor:pointer}
-.news-brand-banner{position:relative;isolation:isolate;height:126px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;overflow:hidden;border:1px solid rgba(255,255,255,.2);border-radius:22px;background:url("FOTO_PADEL1.jpg") center/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.28)}
-.news-brand-banner:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,rgba(3,17,31,.72),rgba(3,17,31,.28),rgba(3,17,31,.68))}
-.news-eventour-logo{display:block;width:310px;height:88px;max-width:90%;object-fit:contain}
-.news-brand-subtitle{margin-top:-8px;font-family:Manrope,sans-serif;font-size:11px;font-weight:700;font-style:italic;letter-spacing:1.5px;text-shadow:0 2px 8px #000}
-.hero{padding:52px 4px 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
-.hero-copy{max-width:760px}
-.eyebrow{display:flex;align-items:center;gap:10px;color:var(--gold);font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase}
-.eyebrow:before{content:"";width:28px;height:1px;background:var(--gold)}
-.hero h1{font:800 clamp(42px,7vw,72px)/.98 Manrope,sans-serif;letter-spacing:-3px;margin:13px 0 13px}
-.hero p{margin:0;max-width:650px;color:rgba(255,255,255,.68);font-size:15px;line-height:1.7}
-.hero-mark{flex:none;width:112px;height:112px;border:1px solid rgba(245,214,110,.35);border-radius:50%;display:grid;place-items:center;color:var(--gold);font:800 30px Manrope,sans-serif;box-shadow:inset 0 0 0 9px rgba(245,214,110,.05)}
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:10px 0 20px}
-.search{position:relative;flex:1;max-width:390px}
-.search input{width:100%;height:46px;border:1px solid rgba(255,255,255,.17);border-radius:14px;background:rgba(255,255,255,.09);color:#fff;padding:0 16px 0 43px;font:500 13px 'DM Sans',sans-serif;outline:none}
-.search input::placeholder{color:rgba(255,255,255,.5)}
-.search:before{content:"⌕";position:absolute;left:15px;top:7px;font-size:25px;color:var(--gold)}
-.news-count{color:rgba(255,255,255,.55);font-size:12px}
-.featured{display:grid;grid-template-columns:1.08fr .92fr;min-height:360px;overflow:hidden;border:1px solid rgba(255,255,255,.17);border-radius:24px;background:linear-gradient(120deg,rgba(255,255,255,.13),rgba(255,255,255,.055));box-shadow:0 24px 65px rgba(0,0,0,.24);backdrop-filter:blur(14px);margin-bottom:26px}
-.featured-media{position:relative;min-height:360px;background:linear-gradient(135deg,#173a5a,#0b1e32);overflow:hidden}
-.featured-media img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
-.featured-media:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(3,14,26,.3),transparent 55%)}
-.featured-placeholder{height:100%;min-height:360px;display:grid;place-items:center;color:rgba(255,255,255,.45);font-size:64px}
-.featured-copy{padding:clamp(26px,4vw,48px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
-.tag{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid rgba(245,214,110,.35);border-radius:99px;color:var(--gold2);font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
-.featured-copy h2{font:800 clamp(25px,3.4vw,39px)/1.13 Manrope,sans-serif;letter-spacing:-1.1px;margin:17px 0 10px}
-.date{font-size:11px;color:rgba(255,255,255,.52);margin-bottom:17px}
-.featured-copy p{margin:0;color:rgba(255,255,255,.72);font-size:14px;line-height:1.75;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-.read-more{display:inline-flex;align-items:center;gap:12px;margin-top:24px;padding:12px 17px;border:0;border-radius:12px;background:var(--gold);color:#15263a;font:800 12px 'DM Sans',sans-serif;cursor:pointer;transition:transform .2s,background .2s}
-.read-more:hover{transform:translateY(-2px);background:var(--gold2)}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:38px 0 16px}
-.section-head h2{margin:0;font:800 23px Manrope,sans-serif;letter-spacing:-.5px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.filter{padding:9px 14px;border:1px solid rgba(255,255,255,.17);border-radius:99px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.8);font:700 11px 'DM Sans',sans-serif;cursor:pointer;transition:all .18s}
-.filter:hover,.filter.active{background:var(--gold);border-color:var(--gold);color:#14263a}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.card{min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.15);border-radius:19px;background:rgba(255,255,255,.095);box-shadow:0 13px 35px rgba(0,0,0,.16);transition:transform .22s,border-color .22s}
-.card:hover{transform:translateY(-4px);border-color:rgba(245,214,110,.42)}
-.card-media{aspect-ratio:16/10;background:linear-gradient(135deg,#173a5a,#0b1e32);overflow:hidden}
-.card-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
-.card:hover .card-media img{transform:scale(1.035)}
-.card-placeholder{height:100%;display:grid;place-items:center;color:rgba(255,255,255,.4);font-size:38px}
-.card-body{padding:19px;display:flex;flex-direction:column;min-height:190px}
-.card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--gold2);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
-.card-meta time{color:rgba(255,255,255,.45);font-weight:600;letter-spacing:0;text-transform:none;white-space:nowrap}
-.card h3{font:800 19px/1.25 Manrope,sans-serif;letter-spacing:-.35px;margin:13px 0 9px}
-.card p{margin:0;color:rgba(255,255,255,.66);font-size:12px;line-height:1.65;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.card .read-link{margin-top:auto;padding-top:17px;border:0;background:none;color:var(--gold);font:800 11px 'DM Sans',sans-serif;text-align:left;cursor:pointer}
-.empty,.loading{padding:42px 22px;border:1px dashed rgba(255,255,255,.22);border-radius:20px;background:rgba(255,255,255,.055);text-align:center;color:rgba(255,255,255,.68);font-size:13px;line-height:1.7}
-.loading{border:0;background:none}
-.modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(1,8,16,.82);backdrop-filter:blur(8px)}
-.modal.open{display:flex}
-.modal-panel{position:relative;width:min(760px,100%);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.17);border-radius:22px;background:#0b2036;box-shadow:0 25px 90px rgba(0,0,0,.5)}
-.modal-image{width:100%;max-height:390px;object-fit:cover;display:block}
-.modal-content{padding:28px}
-.modal-content h2{font:800 clamp(25px,4vw,38px)/1.12 Manrope,sans-serif;margin:14px 0 10px}
-.modal-content p{color:rgba(255,255,255,.78);font-size:14px;line-height:1.85;white-space:pre-line}
-.modal-close{position:sticky;float:right;top:12px;margin:12px 12px -50px 0;z-index:2;width:38px;height:38px;border:1px solid rgba(255,255,255,.2);border-radius:50%;background:rgba(3,14,26,.8);color:#fff;font-size:22px;cursor:pointer}
-.modal-content .read-more{margin-top:8px;text-decoration:none}
-.footer-note{margin-top:52px;padding-top:20px;border-top:1px solid rgba(255,255,255,.12);text-align:center;color:rgba(255,255,255,.38);font-size:10px;letter-spacing:1px}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.featured{grid-template-columns:1fr 1fr}.hero-mark{width:88px;height:88px}}
-@media(max-width:620px){body{background-attachment:scroll}.page{width:calc(100% - 22px);padding:10px 0 44px}.news-brand-banner{height:116px;border-radius:18px}.news-eventour-logo{height:82px;width:290px}.news-brand-subtitle{font-size:10px}.hero{padding:36px 3px 22px}.hero h1{font-size:47px;letter-spacing:-2px}.hero p{font-size:13px}.hero-mark{display:none}.toolbar{align-items:flex-start;flex-direction:column}.search{max-width:none;width:100%}.featured{grid-template-columns:1fr;border-radius:20px}.featured-media{min-height:220px}.featured-placeholder{min-height:220px}.featured-copy{padding:23px}.featured-copy h2{font-size:28px}.section-head{margin-top:30px}.grid{grid-template-columns:1fr;gap:13px}.card{display:grid;grid-template-columns:112px minmax(0,1fr);border-radius:16px}.card-media{aspect-ratio:auto;min-height:100%;height:100%}.card-body{min-height:0;padding:13px}.card h3{font-size:15px;margin:9px 0 6px}.card p{font-size:11px;-webkit-line-clamp:2}.card-meta{font-size:9px}.card-meta time{font-size:9px}.card .read-link{padding-top:10px}.modal{padding:10px}.modal-panel{max-height:94vh;border-radius:17px}.modal-content{padding:20px}.modal-image{max-height:250px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
 </head>
 <body>
 <div class="page">
+
 <button type="button" class="brand-back" onclick="history.back()" aria-label="Torna indietro">←</button>
-<section class="news-brand-banner" aria-label="EVENTOUR gestione eventi e tornei">
+<section class="news-brand-banner" aria-label="EVENTOUR gestione & eventi">
 <img src="loghi/eventour_trasp.png?v=20261025" class="news-eventour-logo" alt="EVENTOUR">
 <span class="news-brand-subtitle">gestione eventi &amp; tornei</span>
 </section>
-<header class="hero">
-<div class="hero-copy">
-<div class="eyebrow">Il club si racconta</div>
-<h1>News &amp; storie</h1>
-<p id="heroDescription">Le novità, gli appuntamenti e le comunicazioni della nostra community. Tutto quello che vale la pena sapere, in un unico posto.</p>
-</div>
-<div class="hero-mark" aria-hidden="true">E.</div>
-</header>
-<div class="toolbar">
-<label class="search"><input id="newsSearch" type="search" placeholder="Cerca una notizia..." aria-label="Cerca una notizia"></label>
-<span class="news-count" id="newsCount"></span>
-</div>
-<main id="app"><div class="loading">Stiamo preparando le ultime notizie…</div></main>
-<div class="footer-note">EVENTOUR · GESTIONE EVENTI &amp; TORNEI</div>
-</div>
-<div class="modal" id="newsModal" aria-hidden="true">
-<div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-<button class="modal-close" id="modalClose" type="button" aria-label="Chiudi">×</button>
-<div id="modalContent"></div>
-</div>
+<section class="heroTitle"><div class="eyebrow">Comunicazioni & contenuti</div><h1>News</h1><p>Tornei, promozioni, eventi, ricordi e novità del club.</p></section>
+<main id="app"><div class="loading">Caricamento delle News…</div></main>
 </div>
 <script>
 const SUPABASE_URL='https://dkeqicstprvvfebiaooc.supabase.co';
-const SUPABASE_KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let allNews=[],activeCategory='Tutte',searchTerm='';
-const $=id=>document.getElementById(id);
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrZXFpY3N0cHJ2dmZiaWFvY29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExNjQ2NjksImV4cCI6MjA3Njc0MDY2OX0.MPlE8CZ2B8pEhSJzTWBJ-FfFLQpwRAxlAlno-SCylWg';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let allNews=[];let isAdmin=false;
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function formatDate(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})}
-function normalizeNews(row){return {...row,titolo:row.titolo||'Senza titolo',testo:row.testo||'',tipo:row.tipo||'Comunicazione',immagine:row.locandina||row.immagine||'',link:row.link||'',in_evidenza:row.in_evidenza===true,data:row.created_at||''}}
-function imageMarkup(src,alt,cls){return src?'<img class="'+cls+'" src="'+esc(src)+'" alt="'+esc(alt)+'" loading="lazy">':''}
-function newsSummary(v,max){const s=String(v||'').trim();return s.length>max?s.slice(0,max).trimEnd()+'…':s}
-function filteredNews(){return allNews.filter(n=>(activeCategory==='Tutte'||n.tipo===activeCategory)&&(!searchTerm||(String(n.titolo+' '+n.testo+' '+n.tipo).toLowerCase().includes(searchTerm))))}
-function openArticle(id){const n=allNews.find(x=>String(x.id)===String(id));if(!n)return;let html=(n.immagine?imageMarkup(n.immagine,n.titolo,'modal-image'):'')+'<div class="modal-content"><span class="tag">'+esc(n.tipo)+'</span><h2 id="modalTitle">'+esc(n.titolo)+'</h2><div class="date">'+esc(formatDate(n.data))+'</div><p>'+esc(n.testo)+'</p>'+(n.link?'<a class="read-more" href="'+esc(n.link)+'" target="_blank" rel="noopener">Vai al collegamento ↗</a>':'')+'</div>';$('modalContent').innerHTML=html;$('newsModal').classList.add('open');$('newsModal').setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}
-function closeArticle(){$('newsModal').classList.remove('open');$('newsModal').setAttribute('aria-hidden','true');$('modalContent').innerHTML='';document.body.style.overflow=''}
-function cardHtml(n){return '<article class="card"><div class="card-media">'+(n.immagine?imageMarkup(n.immagine,n.titolo,''):'<div class="card-placeholder">✦</div>')+'</div><div class="card-body"><div class="card-meta"><span>'+esc(n.tipo)+'</span><time>'+esc(formatDate(n.data))+'</time></div><h3>'+esc(n.titolo)+'</h3><p>'+esc(newsSummary(n.testo,145))+'</p><button class="read-link" type="button" data-open="'+esc(n.id)+'">Leggi la notizia →</button></div></article>'}
-function render(){const list=filteredNews();$('newsCount').textContent=list.length+' '+(list.length===1?'notizia':'notizie');if(!allNews.length){$('app').innerHTML='<div class="empty"><strong>Le News stanno per arrivare.</strong><br>Le comunicazioni ufficiali e le novità della società saranno pubblicate qui.</div>';return}const featured=list.find(n=>n.in_evidenza)||list[0];const rest=list.filter(n=>n!==featured);const cats=['Tutte'].concat(Array.from(new Set(allNews.map(n=>n.tipo||'Comunicazione'))));let html='';if(featured&&!searchTerm&&activeCategory==='Tutte'){html+='<section class="featured"><div class="featured-media">'+(featured.immagine?imageMarkup(featured.immagine,featured.titolo,''):'<div class="featured-placeholder">✦</div>')+'</div><div class="featured-copy"><span class="tag">'+esc(featured.tipo)+'</span><h2>'+esc(featured.titolo)+'</h2><div class="date">'+esc(formatDate(featured.data))+'</div><p>'+esc(newsSummary(featured.testo,430))+'</p><button class="read-more" type="button" data-open="'+esc(featured.id)+'">Leggi la notizia <span>→</span></button></div></section>'}html+='<div class="section-head"><h2>'+(searchTerm?'Risultati della ricerca':activeCategory==='Tutte'?'Tutte le notizie':esc(activeCategory))+'</h2></div><div class="filters">'+cats.map(c=>'<button class="filter '+(activeCategory===c?'active':'')+'" type="button" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')+'</div>';const cards=(featured&&!searchTerm&&activeCategory==='Tutte'?rest:list);html+='<section class="grid">'+cards.map(cardHtml).join('')+'</section>';if(!list.length)html='<div class="filters">'+cats.map(c=>'<button class="filter '+(activeCategory===c?'active':'')+'" type="button" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')+'</div><div class="empty">Nessuna notizia corrisponde alla ricerca. Prova con un altro termine.</div>';$('app').innerHTML=html;$('app').querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.cat;render()}));$('app').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openArticle(b.dataset.open)))}
-async function load(){const slug=(new URLSearchParams(location.search).get('azienda')||'').trim();if(!slug){$('app').innerHTML='<div class="empty">Non è stata selezionata una società. Torna alla pagina Eventour e scegli il club da consultare.</div>';return}try{const companyRes=await sb.rpc('get_public_company',{p_slug:slug});const company=Array.isArray(companyRes.data)?companyRes.data[0]:companyRes.data;if(companyRes.error||!company?.id){$('app').innerHTML='<div class="empty">Società non trovata o non disponibile.</div>';console.error('News company lookup:',companyRes.error);return}const title=company.nome_app||company.ragione_sociale||'la nostra società';$('heroDescription').textContent='Le novità, gli appuntamenti e le comunicazioni di '+title+'. Tutto quello che vale la pena sapere, in un unico posto.';const newsRes=await sb.rpc('get_public_company_news_v2',{p_slug:slug});if(newsRes.error){console.error('News load:',newsRes.error);$('app').innerHTML='<div class="empty">In questo momento non è possibile caricare le News. Riprova più tardi.</div>';return}allNews=(newsRes.data||[]).filter(n=>n.pubblicata===true).map(normalizeNews);render()}catch(e){console.error('News load failed:',e);$('app').innerHTML='<div class="empty">Si è verificato un problema durante il caricamento delle News.</div>'}}
-$('newsSearch').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();render()});
-$('modalClose').addEventListener('click',closeArticle);
-$('newsModal').addEventListener('click',e=>{if(e.target===$('newsModal'))closeArticle()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArticle()});
-load();
+function normalizeNews(row){const cfg=row?.configurazione||{};const arr=Array.isArray(cfg.news)?cfg.news:[];return arr.map((n,i)=>({...n,__torneo:row.nome||'',__torneoId:row.id,__index:i,__global:false,__ordine:Number(n.ordine)||999999,__data:n.data||row.updated_at||row.data_torneo||row.data||''}))}
+function normalizeGlobalNews(row){return {...row,tipo:row.tipo||'Comunicazione',titolo:row.titolo||'Senza titolo',testo:row.testo||'',immagine:row.locandina||row.immagine||'',inEvidenza:false,link:row.link||'',__torneo:'',__torneoId:null,__index:-1,__global:true,__ordine:999999,__data:row.created_at||''}}
+function normalizeTournamentNews(row){const cfg=row?.configurazione||{};const poster=Array.isArray(cfg.news)?cfg.news.find(n=>n?.immagine)?.immagine||'':'';const d=row?.data_torneo||row?.data||'';const slug=(new URLSearchParams(location.search).get('azienda')||'').trim();return {tipo:'Torneo',titolo:row?.nome||'Torneo',testo:row?.descrizione||'Scopri il torneo, i dettagli e le iscrizioni.',immagine:poster,inEvidenza:false,link:'tabellone.html?idTorneo='+encodeURIComponent(row.id)+(slug?'&azienda='+encodeURIComponent(slug):''),__torneo:row?.nome||'',__torneoId:row?.id,__index:-1,__global:true,__ordine:500000,__data:d||row?.updated_at||''}}
+function normalizeMarketNews(row){const slug=(new URLSearchParams(location.search).get('azienda')||'').trim();const params=new URLSearchParams();if(slug)params.set('azienda',slug);if(row?.id)params.set('id',String(row.id));return {tipo:'Offerta',titolo:row?.titolo||'Articolo del Mercatino',testo:row?.anteprima||row?.descrizione||'Articolo disponibile nel Mercatino.',immagine:row?.locandina||row?.immagine||'',inEvidenza:false,link:'mercatino.html?'+params.toString(),__torneo:'Mercatino',__torneoId:null,__index:-1,__global:true,__ordine:750000,__data:row?.created_at||''}}
+function formatDate(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})}
+function sortNews(a,b){if(Boolean(b.inEvidenza)!==Boolean(a.inEvidenza))return b.inEvidenza?1:-1;if(a.__ordine!==b.__ordine)return a.__ordine-b.__ordine;return String(b.__data).localeCompare(String(a.__data))}
+function imageTag(src,alt,cls){return src?`<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:''}
+function deleteButton(n){return isAdmin&&!n.__global?`<button class="adminDelete" type="button" onclick="deleteNews('${esc(String(n.__torneoId))}',${Number(n.__index)})">🗑 Elimina</button>`:''}
+function render(list=allNews){const app=document.getElementById('app');if(!list.length){app.innerHTML='<div class="empty">Non ci sono News pubblicate al momento.</div>';return}const featured=list.find(n=>n.inEvidenza)||list[0];const cats=['Tutte',...new Set(list.map(n=>n.tipo||'Comunicazione'))];const cards=list.filter(n=>n!==featured);app.innerHTML=`<section class="featured"><div class="featuredMedia">${featured.immagine?imageTag(featured.immagine,featured.titolo||'Locandina',''): '<div class="featuredNoImage">News in evidenza</div>'}</div><div class="featuredBody"><span class="badge">${esc(featured.tipo||'Comunicazione')}</span><h2>${esc(featured.titolo||'Senza titolo')}</h2><div class="date">${esc(formatDate(featured.__data))}${featured.__torneo?' · '+esc(featured.__torneo):''}</div><div class="text">${esc(featured.testo||'')}</div>${featured.link?`<a class="cta" href="${esc(featured.link)}" target="_blank" rel="noopener">Scopri di più →</a>`:''}${deleteButton(featured)}</div></section><div class="filters">${cats.map((c,i)=>`<button class="filter ${i===0?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div><section class="grid" id="newsGrid">${cards.map(cardHtml).join('')}</section>`;document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));btn.classList.add('active');const cat=btn.dataset.cat;document.getElementById('newsGrid').innerHTML=list.filter(n=>n!==featured&&(cat==='Tutte'||(n.tipo||'Comunicazione')===cat)).map(cardHtml).join('')}))}
+function cardHtml(n){return `<article class="card">${n.immagine?`<div class="cardMedia">${imageTag(n.immagine,n.titolo||'News','')}</div>`:''}<div class="cardBody"><span class="smallDate">${esc(n.tipo||'Comunicazione')} · ${esc(formatDate(n.__data))}</span><h3>${esc(n.titolo||'Senza titolo')}</h3><p>${esc(n.testo||'')}</p>${n.link?`<a class="cta" href="${esc(n.link)}" target="_blank" rel="noopener">Apri →</a>`:''}${deleteButton(n)}</div></article>`}
+async function checkAdmin(){try{const {data:{session}}=await sb.auth.getSession();if(!session?.user?.email)return false;const {data,error}=await sb.from('profili').select('ruolo').eq('email',session.user.email).maybeSingle();if(error){console.warn('Verifica ruolo admin:',error);return false}return String(data?.ruolo||'').toLowerCase()==='admin'}catch(e){console.warn('Verifica admin non disponibile:',e);return false}}
+async function deleteNews(torneoId,index){if(!isAdmin)return;if(!Number.isInteger(index)||index<0)return;const news=allNews.find(n=>String(n.__torneoId)===String(torneoId)&&Number(n.__index)===index);const titolo=news?.titolo||'questa News';if(!confirm(`Eliminare definitivamente "${titolo}"?`))return;const {data,error}=await sb.from('tornei').select('configurazione').eq('id',torneoId).maybeSingle();if(error||!data){alert('Impossibile recuperare la News da eliminare.');console.error(error);return}const cfg=data.configurazione&&typeof data.configurazione==='object'?{...data.configurazione}:{};const arr=Array.isArray(cfg.news)?cfg.news:[];if(index>=arr.length){alert('La News non è più disponibile.');await load();return}cfg.news=arr.filter((_,i)=>i!==index);const {error:updateError}=await sb.from('tornei').update({configurazione:cfg}).eq('id',torneoId);if(updateError){alert('Eliminazione non riuscita.');console.error(updateError);return}await load()}
+async function load(){const slug=(new URLSearchParams(location.search).get('azienda')||'').trim();if(!slug){document.getElementById('app').innerHTML='<div class="empty">Seleziona una società per visualizzare le News.</div>';return}const companyRes=await sb.rpc('get_public_company',{p_slug:slug});const company=Array.isArray(companyRes.data)?companyRes.data[0]:companyRes.data;if(companyRes.error||!company?.id){document.getElementById('app').innerHTML='<div class="empty">Società non trovata o non disponibile.</div>';return}const [torneiRes,globalRes,marketRes]=await Promise.all([sb.rpc('get_public_tornei',{p_torneo_id:null,p_azienda_id:company.id}),sb.rpc('get_public_company_news_v2',{p_slug:slug}),sb.rpc('get_public_company_mercatino_v2',{p_slug:slug})]);const torneiError=torneiRes.error,globalError=globalRes.error,marketError=marketRes.error;if(torneiError&&globalError&&marketError){document.getElementById('app').innerHTML='<div class="empty">Le News non sono momentaneamente disponibili.</div>';console.error(torneiError,globalError,marketError);return}const scopedTournaments=(torneiRes.data||[]).filter(t=>String(t.azienda_id||'')===String(company.id));const manualNews=globalError?[]:(globalRes.data||[]).map(normalizeGlobalNews);const torneoNews=torneiError?[]:scopedTournaments.filter(t=>t.pubblicato===true||String(t.stato||'').toLowerCase()==='attivo').map(normalizeTournamentNews);const marketNews=marketError?[]:(marketRes.data||[]).map(normalizeMarketNews);const torneoConfigNews=torneiError?[]:scopedTournaments.flatMap(normalizeNews);allNews=[...torneoConfigNews,...manualNews,...torneoNews,...marketNews].sort(sortNews);render()}
+(async()=>{isAdmin=await checkAdmin();await load()})();
 </script>
+
+
 <script src="site-navigation-v1.js?v=22"></script>
 </body>
 </html>
