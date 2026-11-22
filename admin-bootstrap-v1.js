@@ -2,6 +2,11 @@
 window.logoutAdmin=async function(){try{if(window.sb?.auth?.signOut){await Promise.race([window.sb.auth.signOut(),new Promise(resolve=>setTimeout(resolve,1500))])}}catch(e){}try{localStorage.removeItem('padel_admin_state');if(window.__adminStorageKey)localStorage.removeItem(window.__adminStorageKey)}catch(e){}window.adminState=window.adminState||{};window.adminState.adminLoggato=false;window.adminState.adminEmail='';window.adminRuolo='';window.isAdmin=false;window.isSuperadmin=false;document.documentElement.dataset.adminRole='';try{history.replaceState(null,'','admin.html')}catch(e){}window.location.replace('index.html')};(function(){
 'use strict';
 const go=p=>{if(typeof window.openAdminPage==='function')return window.openAdminPage(p);console.error('Navigazione Admin non disponibile:',p);return false};
+const requestedAdminPage=new URLSearchParams(window.location.search).get('open');
+if(requestedAdminPage==='news'){
+ const openRequestedNews=()=>setTimeout(()=>{if(new URLSearchParams(window.location.search).get('open')==='news')go('news')},900);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',openRequestedNews,{once:true});else openRequestedNews();
+}
 const bindStatic=(id,fn)=>document.getElementById(id)?.addEventListener('click',e=>{e.preventDefault();fn()});
 bindStatic('topNew',()=>window.apriWizardTorneo?.());
 bindStatic('sideRefresh',()=>window.refreshCleanAdmin?.());
