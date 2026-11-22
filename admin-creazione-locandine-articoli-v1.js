@@ -542,5 +542,5 @@ const bindStudioButtons=()=>{
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindStudioButtons,{once:true});
 else bindStudioButtons();
-window.openAdminComPage=(function(previous){return function(page,...args){if(page==='news'||page==='news-ai'||page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
+window.openAdminComPage=(function(previous){return function(page,...args){if(page==='locandine'||page==='poster-studio'){openStudio();return;}return previous?.call(this,page,...args);};})(window.openAdminComPage);
 })();
