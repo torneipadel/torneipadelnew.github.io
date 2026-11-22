@@ -55,6 +55,8 @@
   }
 
   function createGlobalBackButton(){
+    // Nella pagina admin è già presente l'hamburger: non aggiungere una freccia duplicata.
+    if(page==='admin.html') return;
     if(document.querySelector('.site-global-back')) return;
     // Sostituisce l'eventuale freccia locale con un controllo uniforme su tutte le pagine del menu.
     document.querySelectorAll('.news-back-control').forEach(el=>el.remove());
