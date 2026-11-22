@@ -99,7 +99,8 @@
       const globalAdmin=hasAuthenticatedSession && window.isGlobalPlatformAdmin===true && !window.aziendaId && ['admin','superadmin'].includes(role);
       const canManageTenant=tenantAdmin;
       const canOpenControlCenter=globalSuperadmin || globalAdmin;
-      if(newsNavLink) newsNavLink.href=canManageTenant?'admin.html?open=news':'news.html';
+      // News nell'hamburger è sempre la consultazione pubblica; l'inserimento resta nella sidebar admin.
+      // Il link conserva il parametro azienda applicato da addLink().
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
         const href=el.getAttribute('href')||'';
         const isControlCenter=href==='eventour-control-center.html';
