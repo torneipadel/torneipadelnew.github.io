@@ -115,7 +115,7 @@ window.openAdminComPage=p=>p==='news'?news():p==='locandine'?openPosterAdmin():p
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
-const esc=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'<','>':'>','\"':'\"'}[m]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const selected=()=>window.getTorneoAdminCorrente?.()||((window.adminState?.tornei||[]).find(t=>String(t.id)===String(window.adminState?.torneoSelezionato))||null);
 const cfgOf=t=>t?.configurazione&&typeof t.configurazione==='object'?{...t.configurazione}:{};
 async function saveNewsCfg(t,cfg){const sb=window.supabaseClient||window.sb;if(!sb||!t){alert('Torneo o connessione Supabase non disponibile.');return false}const {data,error}=await sb.from('tornei').update({configurazione:{...(cfg||{})}}).eq('id',t.id).select('id,configurazione').maybeSingle();if(error){console.error(error);alert('Errore salvataggio News: '+error.message);return false}if(!data){alert('La configurazione News non è stata salvata.');return false}t.configurazione=data.configurazione||cfg;try{localStorage.setItem(window.__adminStorageKey||'padel_admin_state',JSON.stringify(window.adminState||{}))}catch(e){}return true}
