@@ -38,7 +38,7 @@
     return !!el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"],#teamModal,#rulesModal');
   }
   function removeNavigationArrows(){
-    document.querySelectorAll('.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
+    document.querySelectorAll('.site-global-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
       if(!isInsideModal(el)) el.remove();
     });
     if(!isTabellone){
@@ -55,30 +55,8 @@
   }
 
   function createGlobalBackButton(){
-    // La freccia indietro non deve comparire nelle pagine pubbliche: la navigazione è già nel menu.
-    // Nella pagina admin principale è presente l'hamburger e non serve una freccia duplicata.
-    if(!isAdminPage || page==='admin.html') return;
-    if(document.querySelector('.site-global-back')) return;
-    // Sostituisce l'eventuale freccia locale con un controllo uniforme su tutte le pagine del menu.
-    document.querySelectorAll('.news-back-control').forEach(el=>el.remove());
-    const style=document.createElement('style');
-    style.textContent=`
-      .site-global-back{position:fixed!important;top:16px!important;left:16px!important;z-index:2147483001!important;width:44px!important;height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:12px!important;background:rgba(7,25,45,.88)!important;color:#fff!important;box-shadow:0 5px 18px rgba(0,0,0,.25)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font:400 25px/1 Arial,sans-serif!important;text-decoration:none!important;cursor:pointer!important;padding:0!important}
-      .site-global-back:hover{background:rgba(7,25,45,.98)!important}
-      @media(max-width:600px){.site-global-back{top:12px!important;left:12px!important;width:42px!important;height:42px!important}}
-    `;
-    document.head.appendChild(style);
-    const back=document.createElement('button');
-    back.type='button';
-    back.className='site-global-back';
-    back.textContent='←';
-    back.setAttribute('aria-label','Indietro');
-    back.title='Indietro';
-    back.addEventListener('click',()=>{
-      if(window.history.length>1) window.history.back();
-      else window.location.href='index.html';
-    });
-    document.body.appendChild(back);
+    // L'hamburger è l'unico controllo di navigazione: non generare frecce indietro.
+    return;
   }
 
   function createMenu(activeSession){
