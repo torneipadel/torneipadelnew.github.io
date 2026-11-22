@@ -36,7 +36,7 @@ root.innerHTML=`<div class="page-head"><div><h1>${title}</h1><p>${sub}</p></div>
 $('comBack')?.addEventListener('click',()=>window.openAdminPage?.('torneo'))
 }
 
-async function news(){return newsEditor()}
+async function news(){return window.openAdminNews?.()}
 
 async function sponsor(){
 const aziendaId=String(window.aziendaId||'').trim();
@@ -179,7 +179,8 @@ list.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!confirm('
 };
 render();
 }
+window.openAdminNews=()=>newsEditor();
 const oldOpenAdminComPage=window.openAdminComPage;
-window.openAdminComPage=p=>{if(p==='sponsor'){window.openAdminSponsor?.();return}if(p==='news'||p==='news-ai'){newsEditor();return}return oldOpenAdminComPage?.(p)};
+window.openAdminComPage=p=>{if(p==='sponsor'){window.openAdminSponsor?.();return}if(p==='news'||p==='news-ai'){window.openAdminNews?.();return}return oldOpenAdminComPage?.(p)};
 document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-com-page="news"],[data-com-page="sponsor"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();document.getElementById('mobileOverlay')?.classList.remove('open');window.openAdminComPage?.(b.dataset.comPage==='sponsor'?'sponsor':'news-ai')},true);
 })();
