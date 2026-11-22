@@ -88,7 +88,7 @@ button.cta:hover,a.cta:hover,.cta:focus-visible{background:rgba(255,255,255,.10)
 <img src="loghi/eventour_trasp.png?v=20261025" class="news-eventour-logo" alt="EVENTOUR">
 <span class="news-brand-subtitle">gestione eventi &amp; tornei</span>
 </section>
-<div class="np-sponsor-slot" aria-label="Sponsor della società"></div>
+<div class="np-sponsor-slot" id="news-sponsor-slot" aria-label="Sponsor della società"></div>
 <section class="heroTitle"><div class="eyebrow">Comunicazioni & contenuti</div><h1>News</h1><p>Comunicazioni, promozioni, eventi, ricordi e novità della società.</p></section>
 <main id="app"><div class="loading">Caricamento delle News…</div></main>
 </div>
@@ -96,6 +96,8 @@ button.cta:hover,a.cta:hover,.cta:focus-visible{background:rgba(255,255,255,.10)
 const SUPABASE_URL='https://dkeqicstprvvfebiaooc.supabase.co';
 const SUPABASE_KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+// Condivide il client già inizializzato con lo stesso carosello sponsor usato dal tabellone.
+window.sb=sb;
 const app=document.getElementById('app');
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const formatDate=v=>{if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})};
@@ -129,6 +131,6 @@ loadNews().catch(error=>{console.error('Errore pagina News:',error);app.innerHTM
 
 
 <script src="site-navigation-v1.js?v=24"></script>
-<script src="sponsor-public-v2.js?v=10"></script>
+<script src="sponsor-public-v2.js?v=11"></script>
 </body>
 </html>
