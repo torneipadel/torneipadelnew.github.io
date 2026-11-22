@@ -57,7 +57,7 @@ async function loadNews(){
  if(companyRes.error||!company?.id){console.error('Verifica società News:',companyRes.error);app.innerHTML='<div class="empty">Società non trovata o non disponibile.</div>';return}
  const newsRes=await sb.rpc('get_public_company_news_v2',{p_slug:slug});
  if(newsRes.error){console.error('Caricamento News:',newsRes.error);app.innerHTML='<div class="empty">Le News di questa società non sono momentaneamente disponibili.</div>';return}
- const list=(newsRes.data||[]).filter(n=>n.pubblicata===true).sort((a,b)=>Number(!!b.in_evidenza)-Number(!!a.in_evidenza)||(Number(a.ordine)||0)-(Number(b.ordine)||0)||String(b.created_at||'').localeCompare(String(a.created_at||'')));
+ const list=(newsRes.data||[]).filter(n=>{const t=String(n?.tipo||'').trim().toLowerCase();return n.pubblicata===true&&!t.includes('torneo')&&!t.includes('mercatin')&&!t.includes('prodotto')&&!t.includes('articol')}).sort((a,b)=>Number(!!b.in_evidenza)-Number(!!a.in_evidenza)||(Number(a.ordine)||0)-(Number(b.ordine)||0)||String(b.created_at||'').localeCompare(String(a.created_at||'')));
  renderNews(list);
 }
 loadNews().catch(error=>{console.error('Errore pagina News:',error);app.innerHTML='<div class="empty">Errore durante il caricamento delle News. Riprova più tardi.</div>'});</script>
