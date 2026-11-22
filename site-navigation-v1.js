@@ -70,7 +70,7 @@
     };
     addLink('Home','index.html');
     addLink('Tornei e visitatori','visitatore.html');
-    addLink('News','news.html');
+    const newsNavLink=addLink('News','news.html');
     addLink('Mercatino','mercatino.html');
     addLink('Sponsor','sponsor-pubblico.html');
     addLink('Contatti','contatti.html');
@@ -99,6 +99,7 @@
       const globalAdmin=hasAuthenticatedSession && window.isGlobalPlatformAdmin===true && !window.aziendaId && ['admin','superadmin'].includes(role);
       const canManageTenant=tenantAdmin;
       const canOpenControlCenter=globalSuperadmin || globalAdmin;
+      if(newsNavLink) newsNavLink.href=canManageTenant?'admin.html?open=news':'news.html';
       panel.querySelectorAll('[data-admin-only="true"]').forEach(el=>{
         const href=el.getAttribute('href')||'';
         const isControlCenter=href==='eventour-control-center.html';
