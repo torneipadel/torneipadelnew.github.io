@@ -46,10 +46,10 @@
     if(!isTabellone){
       document.querySelectorAll('a,button,[role="button"]').forEach(el=>{
         if(isInsideModal(el) || el.closest('.np-cal-nav,.carousel,.swiper,.slick-slider')) return;
-        const t=(el.innerText||el.textContent||'').replace(/\\s+/g,' ').trim();
+        const t=(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
         const meta=[el.getAttribute('aria-label'),el.getAttribute('title'),el.id,el.className].filter(Boolean).join(' ').toLowerCase();
         const arrowOnly=/^[←⬅⟵⟸❮‹⮜]+$/.test(t);
-        const returnText=/^(?:[←⬅⟵⟸❮‹⮜]\\s*)?(?:torna(?:\\s+(?:indietro|alla?\\s+home|ai?\\s+tornei|alla?\\s+società|al\\s+pannello))?|indietro|back)(?:\\b|\\s|$)/i.test(t);
+        const returnText=/^(?:[←⬅⟵⟸❮‹⮜]\s*)?(?:torna(?:\s+(?:indietro|alla?\s+home|ai?\s+tornei|alla?\s+società|al\s+pannello))?|indietro|back)(?:\b|\s|$)/i.test(t);
         const returnMeta=/(?:back|indietro|torna-indietro|btn-back|site-global-back|np-back|brand-back)/i.test(meta);
         if(arrowOnly || returnText || returnMeta) el.remove();
       });
