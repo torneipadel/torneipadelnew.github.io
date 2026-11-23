@@ -71,23 +71,19 @@ async function wireDashboard(){
     window.isGlobalPlatformAdmin=isGlobalSuperadmin;
     const explicitTenantContext=sessionStorage.getItem("nextpoint_login_tenant_explicit")==="1";
     const explicitTenantId=explicitTenantContext?String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim():"";
-    if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
     let role=isGlobalSuperadmin?"superadmin":"";
     let aziendaAccess=null;
-    let selectedTenantId=explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
-    const requestedSlug=String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
+    let selectedTenantId=isGlobalSuperadmin?"":(explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim());
+    const requestedSlug=isGlobalSuperadmin?"":String(new URLSearchParams(window.location.search).get("azienda")||"").trim();
 
-    // Il superadmin globale può operare come admin soltanto nei tenant in cui
-    // possiede una membership esplicita; non riceve accesso implicito alle altre società.
-    if(isGlobalSuperadmin && !selectedTenantId && !requestedSlug){
-      const ownMemberships=await sb.from("azienda_utenti").select("azienda_id,ruolo,attivo").eq("user_id",session.user.id).eq("attivo",true);
-      if(ownMemberships.error) throw ownMemberships.error;
-      if(Array.isArray(ownMemberships.data) && ownMemberships.data.length===1){
-        selectedTenantId=String(ownMemberships.data[0].azienda_id||"").trim();
-        if(selectedTenantId) sessionStorage.setItem("nextpoint_login_azienda_id",selectedTenantId);
-      }
+    // Il Superadmin globale resta sempre fuori dal contesto tenant e non carica dati di società.
+    if(isGlobalSuperadmin){
+      window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";
+      sessionStorage.removeItem("nextpoint_login_azienda_id");
+      sessionStorage.removeItem("nextpoint_login_azienda_nome");
+      sessionStorage.removeItem("nextpoint_login_tenant_explicit");
     }
-    if(role && (selectedTenantId || requestedSlug)){
+    if(!isGlobalSuperadmin && role && (selectedTenantId || requestedSlug)){
       let companyQuery=sb.from("aziende").select("id,nome_app,ragione_sociale,slug,tipo_account,stato,demo_inizio,demo_scadenza");
       companyQuery=selectedTenantId?companyQuery.eq("id",selectedTenantId):companyQuery.eq("slug",requestedSlug);
       const companyResult=await companyQuery.maybeSingle();
