@@ -122,6 +122,17 @@
     }
     refreshRole();
     window.addEventListener('admin:role-ready',refreshRole);
+    // Il pannello admin può completare il caricamento del ruolo prima o dopo la creazione dell'hamburger.
+    // Ripeti il controllo per coprire entrambi gli ordini asincroni, poi interrompi il controllo.
+    let roleRefreshAttempts=0;
+    const roleRefreshTimer=window.setInterval(()=>{
+      refreshRole();
+      roleRefreshAttempts++;
+      const currentRole=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
+      if((window.isAdmin===true && !!window.aziendaId && ['admin','owner'].includes(currentRole)) || roleRefreshAttempts>=40){
+        window.clearInterval(roleRefreshTimer);
+      }
+    },250);
     button.addEventListener('click',()=>{
       const open=panel.classList.toggle('open'); button.setAttribute('aria-expanded',String(open));
     });
