@@ -38,7 +38,7 @@
     return !!el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"],#teamModal,#rulesModal');
   }
   function removeNavigationArrows(){
-    document.querySelectorAll('.site-global-back,.np-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
+    document.querySelectorAll('.site-global-back,.np-back,.brand-back,.btn-back,.news-back-control,.back-link,a.back,button.back,#backBtn,[aria-label*="torna indietro" i],[aria-label*="torna alla" i],[aria-label*="pagina precedente" i]').forEach(el=>{
       if(!isInsideModal(el)) el.remove();
     });
     if(!isTabellone){
