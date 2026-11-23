@@ -46,7 +46,7 @@
         if(isInsideModal(el)) return;
         const t=(el.innerText||el.textContent||'').trim();
         if(!t || t.length>100) return;
-        if(/^(←|⬅|❮|‹)\s*(società|indietro|torna|back|area|pagina|admin|visitatore)/i.test(t) ||
+        if(/^(←|⬅️?|❮|‹)\s*(società|indietro|torna|back|area|pagina|admin|visitatore)/i.test(t) ||
            /^(torna indietro|indietro|←\s*torna alla società|←\s*società)$/i.test(t)){
           el.remove();
         }
