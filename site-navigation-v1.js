@@ -38,18 +38,20 @@
     return !!el.closest('[role="dialog"],dialog,.modal,[id*="Modal"],[id*="modal"],#teamModal,#rulesModal');
   }
   function removeNavigationArrows(){
-    document.querySelectorAll('.site-global-back,.np-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i]').forEach(el=>{
-      if(!isInsideModal(el)) el.remove();
+    // Rimuove soltanto controlli di ritorno/navigazione; lascia intatti
+    // frecce di calendario, caroselli e pulsanti interni alle modali.
+    document.querySelectorAll('.site-global-back,.np-back,.brand-back,.btn-back,[aria-label*="torna indietro" i],[aria-label*="torna alla" i],[aria-label*="back" i],[title*="torna indietro" i]').forEach(el=>{
+      if(!isInsideModal(el) && !el.closest('.np-cal-nav,.carousel,.swiper,.slick-slider')) el.remove();
     });
     if(!isTabellone){
-      document.querySelectorAll('a,button').forEach(el=>{
-        if(isInsideModal(el)) return;
-        const t=(el.innerText||el.textContent||'').trim();
-        if(!t || t.length>100) return;
-        if(/^(←|⬅|❮|‹)\s*(società|indietro|torna|back)/i.test(t) ||
-           /^(torna indietro|indietro|←\s*torna alla società|←\s*società)$/i.test(t)){
-          el.remove();
-        }
+      document.querySelectorAll('a,button,[role="button"]').forEach(el=>{
+        if(isInsideModal(el) || el.closest('.np-cal-nav,.carousel,.swiper,.slick-slider')) return;
+        const t=(el.innerText||el.textContent||'').replace(/\\s+/g,' ').trim();
+        const meta=[el.getAttribute('aria-label'),el.getAttribute('title'),el.id,el.className].filter(Boolean).join(' ').toLowerCase();
+        const arrowOnly=/^[←⬅⟵⟸❮‹⮜]+$/.test(t);
+        const returnText=/^(?:[←⬅⟵⟸❮‹⮜]\\s*)?(?:torna(?:\\s+(?:indietro|alla?\\s+home|ai?\\s+tornei|alla?\\s+società|al\\s+pannello))?|indietro|back)(?:\\b|\\s|$)/i.test(t);
+        const returnMeta=/(?:back|indietro|torna-indietro|btn-back|site-global-back|np-back|brand-back)/i.test(meta);
+        if(arrowOnly || returnText || returnMeta) el.remove();
       });
     }
   }
