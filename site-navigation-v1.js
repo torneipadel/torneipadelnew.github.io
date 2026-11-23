@@ -113,7 +113,7 @@
         const isExit=el.tagName==='BUTTON';
         if(isControlCenter) el.hidden=!canOpenControlCenter;
         else if(href==='dashboard.html') el.hidden=!canManageTenant;
-        else if(href==='admin.html') el.hidden=!isAdminPage;
+        else if(href==='admin.html') el.hidden=!canManageTenant;
         else if(isExit) el.hidden=!(tenantAdmin||globalSuperadmin||globalAdmin);
         else el.hidden=true;
       });
