@@ -4,7 +4,7 @@
 
   const $=id=>document.getElementById(id);
   const client=()=>window.sb||window.supabaseClient;
-  const isSuper=()=>window.isSuperadmin===true||String(document.documentElement.dataset.adminRole||'')==='superadmin';
+  const isSuper=()=>window.isGlobalSuperadmin===true&&window.isSuperadmin===true&&String(document.documentElement.dataset.adminRole||'')==='superadmin';
 
   function addRoleBadge(){
     const footer=document.querySelector('.sidebar-footer');
