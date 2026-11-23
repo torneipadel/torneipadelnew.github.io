@@ -75,10 +75,7 @@
       if(companySlug && !href.includes('?')) a.href=href+'?azienda='+encodeURIComponent(companySlug);
       panel.appendChild(a);
     };
-    // In admin.html la voce Home è ridondante: Esci riporta già alla pagina iniziale.
-    if(page!=='admin.html') addLink('Home','index.html');
-    // La voce Tornei e visitatori non serve nel menu della pagina amministrativa.
-    if(page!=='admin.html') addLink('Tornei e visitatori','visitatore.html');
+    // Home e Tornei e visitatori sono stati rimossi dal menu hamburger su tutte le pagine.
     const newsNavLink=addLink('News','news.html');
     addLink('Mercatino','mercatino.html');
     addLink('Sponsor','sponsor-pubblico.html');
