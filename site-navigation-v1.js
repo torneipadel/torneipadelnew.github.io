@@ -83,7 +83,7 @@
     addLink('Profilo','profilo.html');
     const sep=document.createElement('div'); sep.className='site-global-menu-separator'; sep.setAttribute('aria-hidden','true'); sep.hidden=true; panel.appendChild(sep);
     addLink('Area amministrativa','dashboard.html',true);
-    addLink('Torna admin','admin.html',true);
+    addLink('Torna al pannello admin','admin.html',true);
     addLink('Centro di controllo','eventour-control-center.html',true);
     const exit=document.createElement('button'); exit.type='button'; exit.textContent='Esci dall’account'; exit.dataset.logout='true'; exit.hidden=!activeSession?.user;
     exit.addEventListener('click',async()=>{
@@ -113,7 +113,7 @@
         const isExit=el.tagName==='BUTTON';
         if(isControlCenter) el.hidden=!canOpenControlCenter;
         else if(href==='dashboard.html') el.hidden=!canManageTenant;
-        else if(href==='admin.html') el.hidden=!canManageTenant;
+        else if(href==='admin.html') el.hidden=!isAdminPage;
         else if(isExit) el.hidden=!(tenantAdmin||globalSuperadmin||globalAdmin);
         else el.hidden=true;
       });
