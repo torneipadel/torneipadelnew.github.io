@@ -21,25 +21,18 @@
           return false;
         }
         const email=String(session.user?.email||"").trim().toLowerCase();
-        const superadminEmail=email==="giose.rizzi@gmail.com";
-
-        let profileRole="";
-        if(!superadminEmail){
-          try{
-            const profileResult=await client.from("profili").select("ruolo").eq("user_id",session.user.id).maybeSingle();
-            profileRole=String(profileResult.data?.ruolo||"").trim().toLowerCase();
-          }catch(e){
-            console.warn("Admin guard: profilo non leggibile",e);
-          }
-        }
-
-        if(superadminEmail){
+        // Il ruolo globale è deciso esclusivamente da Supabase, mai dall'indirizzo email.
+        const globalCheck=await client.rpc("is_superadmin");
+        if(!globalCheck.error && globalCheck.data===true){
           const ruolo="superadmin";
           window.adminRuolo=ruolo;
-          window.isSuperadmin=superadminEmail;
+          window.isSuperadmin=true;
+          window.isGlobalSuperadmin=true;
+          window.isGlobalPlatformAdmin=true;
           window.isAdmin=true;
+          window.aziendaId=null;
           document.documentElement.dataset.adminRole=ruolo;
-          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo,isSuperadmin:superadminEmail,isAdmin:true}}));
+          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo,isSuperadmin:true,isAdmin:true,isGlobalSuperadmin:true}}));
           return true;
         }
 
@@ -61,12 +54,14 @@
         const row=Array.isArray(access)?access[0]:access;
         if(row?.azienda_id&&(!selectedTenantId||String(row.azienda_id)===selectedTenantId)){
           const ruolo=String(row.ruolo||"owner").toLowerCase();
-          if(!["owner","admin","superadmin"].includes(ruolo)){
+          if(!["owner","admin"].includes(ruolo)){
             window.location.href="dashboard.html?v=member";
             return false;
           }
           window.adminRuolo=ruolo;
           window.isSuperadmin=false;
+          window.isGlobalSuperadmin=false;
+          window.isGlobalPlatformAdmin=false;
           window.isAdmin=["owner","admin","superadmin"].includes(ruolo);
           window.isTenantOwner=ruolo==="owner";
           window.isTenantSuperadmin=ruolo==="superadmin";
@@ -78,7 +73,9 @@
             isTenantOwner:window.isTenantOwner,aziendaId:row.azienda_id
           }}));
         }else{
-          console.warn("Admin guard: accesso tenant non determinato; il controllo definitivo resta in admin-functions.js",rpcError||"nessun accesso");
+          console.warn("Admin guard: accesso tenant non autorizzato o non determinato",rpcError||"nessun accesso");
+          window.location.replace("dashboard.html?access=denied");
+          return false;
         }
         return true;
       }catch(e){
