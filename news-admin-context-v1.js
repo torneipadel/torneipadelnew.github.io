@@ -3,7 +3,9 @@
 (()=>{
 'use strict';
 async function init(){
-  const client=window.sb||window.supabaseClient;
+  const URL='https://dkeqicstprvvfebiaooc.supabase.co';
+  const KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
+  const client=window.sb||window.supabaseClient||(window.supabase?.createClient?window.supabase.createClient(URL,KEY):null);
   if(!client?.auth?.getSession||typeof client.rpc!=='function')return;
   try{
     const {data,error}=await client.auth.getSession();
