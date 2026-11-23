@@ -98,7 +98,7 @@
     function refreshRole(){
       const role=String(document.documentElement.dataset.adminRole||window.adminRuolo||'').toLowerCase();
       // Nessuna voce amministrativa viene mostrata senza una sessione autenticata verificata.
-      const hasAuthenticatedSession=!!activeSession?.user;
+      const hasAuthenticatedSession=!!activeSession?.user || (window.isAdmin===true && (!!window.aziendaId || window.isGlobalSuperadmin===true || window.isGlobalPlatformAdmin===true));
       const tenantAdmin=hasAuthenticatedSession && !!window.aziendaId && ['admin','owner'].includes(role) && window.isAdmin===true;
       // I privilegi globali richiedono sessione, ruolo esplicito e assenza di azienda associata.
       const globalSuperadmin=hasAuthenticatedSession && window.isSuperadmin===true && role==='superadmin' && !window.aziendaId;
