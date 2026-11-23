@@ -10,9 +10,6 @@ async function init(){
   try{
     const {data,error}=await client.auth.getSession();
     if(error||!data?.session?.user)return;
-    const assurance=await client.auth.mfa.getAuthenticatorAssuranceLevel();
-    if(assurance.error||assurance.data?.currentLevel!=='aal2')return;
-
     let accessResult=null;
     let lastError=null;
     let selectedTenantId='';
@@ -24,10 +21,29 @@ async function init(){
       if(candidate?.azienda_id||!lastError)break;
       await new Promise(resolve=>setTimeout(resolve,500));
     }
-    if(lastError)return;
-    const row=Array.isArray(accessResult?.data)?accessResult.data[0]:accessResult?.data;
+    let row=Array.isArray(accessResult?.data)?accessResult.data[0]:accessResult?.data;
+
+    // Stesso fallback membership usato dal login admin, se l'RPC non restituisce il contesto.
+    if(!row?.azienda_id){
+      let membershipQuery=client.from('azienda_utenti')
+        .select('azienda_id,ruolo,attivo')
+        .eq('user_id',data.session.user.id)
+        .eq('attivo',true);
+      if(selectedTenantId)membershipQuery=membershipQuery.eq('azienda_id',selectedTenantId);
+      const membership=await membershipQuery.maybeSingle();
+      if(!membership.error&&membership.data?.azienda_id){
+        const company=await client.from('aziende')
+          .select('id,nome_app,slug,stato')
+          .eq('id',membership.data.azienda_id)
+          .maybeSingle();
+        if(!company.error&&company.data&&['attiva','configurazione'].includes(String(company.data.stato||'').toLowerCase())){
+          row={azienda_id:company.data.id,nome_app:company.data.nome_app,ruolo:membership.data.ruolo};
+        }
+      }
+    }
     if(!row?.azienda_id)return;
     if(selectedTenantId&&String(row.azienda_id)!==selectedTenantId)return;
+    if(row.accesso_consentito===false)return;
     const role=String(row.ruolo||'').toLowerCase();
     if(!['owner','admin'].includes(role))return;
 
