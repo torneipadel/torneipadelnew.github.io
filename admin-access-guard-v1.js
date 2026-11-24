@@ -20,26 +20,20 @@
           window.location.replace("sicurezza-mfa.html?return=admin.html");
           return false;
         }
-        const email=String(session.user?.email||"").trim().toLowerCase();
-        const superadminEmail=email==="giose.rizzi@gmail.com";
+        const globalRoleResult=await client.rpc("is_superadmin");
+        const globalSuperadmin=!globalRoleResult.error&&globalRoleResult.data===true;
+        if(globalRoleResult.error)console.warn("Admin guard: ruolo globale non verificabile",globalRoleResult.error);
+        window.isGlobalSuperadmin=globalSuperadmin;
+        window.isGlobalPlatformAdmin=globalSuperadmin;
+        window.isSuperadmin=globalSuperadmin;
+        window.isTenantSuperadmin=false;
 
-        let profileRole="";
-        if(!superadminEmail){
-          try{
-            const profileResult=await client.from("profili").select("ruolo").eq("user_id",session.user.id).maybeSingle();
-            profileRole=String(profileResult.data?.ruolo||"").trim().toLowerCase();
-          }catch(e){
-            console.warn("Admin guard: profilo non leggibile",e);
-          }
-        }
-
-        if(superadminEmail){
+        if(globalSuperadmin){
           const ruolo="superadmin";
           window.adminRuolo=ruolo;
-          window.isSuperadmin=superadminEmail;
           window.isAdmin=true;
           document.documentElement.dataset.adminRole=ruolo;
-          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo,isSuperadmin:superadminEmail,isAdmin:true}}));
+          window.dispatchEvent(new CustomEvent("admin:role-ready",{detail:{ruolo,isSuperadmin:true,isGlobalSuperadmin:true,isAdmin:true}}));
           return true;
         }
 
@@ -66,6 +60,8 @@
             return false;
           }
           window.adminRuolo=ruolo;
+          window.isGlobalSuperadmin=false;
+          window.isGlobalPlatformAdmin=false;
           window.isSuperadmin=false;
           window.isAdmin=["owner","admin","superadmin"].includes(ruolo);
           window.isTenantOwner=ruolo==="owner";
