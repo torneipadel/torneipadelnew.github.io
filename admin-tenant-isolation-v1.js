@@ -1,13 +1,8 @@
 (function(){
   'use strict';
   const getClient=()=>window.sb||window.supabaseClient||window.supabase;
-  const isGlobalSuperadmin=()=>window.isGlobalSuperadmin===true||String(window.adminState?.adminEmail||'').trim().toLowerCase()==='giose.rizzi@gmail.com';
+  const isGlobalSuperadmin=()=>window.isGlobalSuperadmin===true;
   const tenantId=()=>String(window.aziendaId||'').trim();
-  const isGlobal=()=>{
-    if(window.isPlatformAdmin===true) return true;
-    const email=String(window.adminState?.adminEmail||'').trim().toLowerCase();
-    return email==='giose.rizzi@gmail.com'||email==='boverob@libero.it'||email==='cfalba@libero.it';
-  };
   function companyLabel(){
     const name=String(window.nomeAppAzienda||'').trim();
     const email=String(window.adminState?.adminEmail||'').trim();
