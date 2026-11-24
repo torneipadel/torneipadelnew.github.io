@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-function isSuper(){return window.isSuperadmin===true||document.documentElement.dataset.adminRole==='superadmin'}
+function isSuper(){return window.isGlobalSuperadmin===true||window.isGlobalPlatformAdmin===true}
 function add(){
  if(!isSuper())return;
  const groups=[...document.querySelectorAll('#areaAdmin .sidebar .nav-group')];
