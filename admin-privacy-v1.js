@@ -2,7 +2,7 @@
 const S=()=>window.sb||window.supabaseClient;
 const esc=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const tenantId=()=>String(window.aziendaId||'').trim();
-const isGlobal=()=>window.isSuperadmin===true || window.adminRuolo==='admin' && !tenantId();
+const isGlobal=()=>false; // Privacy e documenti legali sono sempre limitati alla società esplicitamente selezionata.
 async function loadPrivacyAdmin(){
  const root=document.getElementById('appContent');const sb=S();if(!root||!sb)return;
  let aziende=[];
