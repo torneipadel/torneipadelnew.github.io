@@ -171,7 +171,7 @@ export default {
       if (authError || !user) return json({ error: "Sessione non valida" }, 401);
       const { data: assurance, error: assuranceError } = await ctx.supabaseAdmin.auth.mfa.getAuthenticatorAssuranceLevel(token);
       if (assuranceError || assurance?.currentLevel !== "aal2") return json({ error: "Verifica MFA richiesta per la gestione sponsor." }, 403);
-      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
       const callerClient = createClient(Deno.env.get("SUPABASE_URL")!, anonKey, {
         global: { headers: { Authorization: `Bearer ${token}` } },
         auth: { persistSession: false, autoRefreshToken: false },
