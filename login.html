@@ -89,13 +89,9 @@ function registrationReturnPath(){const raw=new URLSearchParams(location.search)
 const returnPath=registrationReturnPath();
 function setStatus(v){status.textContent=v||""}
 async function registerUser(){
- const email=emailInput.value.trim().toLowerCase(),password=passwordInput.value;
- if(!email||!password){setStatus("Inserisci email e password.");return}
- if(password.length<12||password.length>72){setStatus("Per un nuovo account la password deve contenere almeno 12 caratteri e non superare 72.");return}
- setStatus("Registrazione in corso…");
- const {error}=await sb.auth.signUp({email,password});
- if(error){setStatus("Errore: "+error.message);return}
- setStatus("Registrazione effettuata. Controlla la tua email per confermare l'account.");
+ const target=returnPath||"index.html#societa";
+ setStatus("Per registrarti, scegli prima la società e completa il modulo dedicato con i consensi Privacy e Termini.");
+ window.location.href=target;
 }
 async function loginUser(){
  window.EventourAuthPersistence?.setRemember(document.getElementById("ricordami").checked);
