@@ -97,7 +97,7 @@ function fields(){
  return {
    ragione:$("ragione").value.trim(),nomeApp:$("nomeApp").value.trim(),titolare:$("titolare").value.trim(),
    email:$("email").value.trim().toLowerCase(),telefono:$("telefono").value.trim(),pec:$("pec").value.trim(),
-   sede:$("sede").value.trim(),cf:$("cf").value.trim(),nome:$("nome").value.trim(),cognome:$("cognome").value.trim()
+   sede:$("sede").value.trim(),cf:$("cf").value.trim(),nome:$("nome").value.trim(),cognome:$("cognome").value.trim(),privacy:$("privacy").checked,terms:$("terms").checked
  };
 }
 function savePending(){
@@ -109,7 +109,7 @@ function restorePending(){
  try{
    const raw=PENDING_STORAGE.getItem(PENDING_KEY);if(!raw)return;
    const d=JSON.parse(raw);
-   Object.keys(d).forEach(k=>{if($(k)&&d[k]!=null)$(k).value=d[k]});
+   Object.keys(d).forEach(k=>{if($(k)&&d[k]!=null){if(k==="privacy"||k==="terms")$(k).checked=!!d[k];else $(k).value=d[k]}});
  }catch(e){console.warn("Ripristino registrazione:",e)}
 }
 function setAuthenticatedMode(user){
@@ -137,6 +137,26 @@ async function isCurrentUserSuperadmin(){
 async function createCompany(user){
  hydrateFromUser(user);
  const d=fields();
+ const consent=await sb.rpc("record_eventour_account_consents",{p_privacy:$("privacy").checked,p_terms:$("terms").checked,p_source:"registrazione-societa"});
+ if(consent.error)throw consent.error;
+ const existingAccess=await sb.rpc("get_my_azienda_access");
+ if(existingAccess.error)throw existingAccess.error;
+ const existing=Array.isArray(existingAccess.data)?existingAccess.data[0]:existingAccess.data;
+ if(existing?.azienda_id&&String(existing.ruolo||"").toLowerCase()==="owner"){
+   PENDING_STORAGE.removeItem(PENDING_KEY);sessionStorage.removeItem(REG_PIVA_KEY);
+   sessionStorage.setItem("nextpoint_login_azienda_id",existing.azienda_id);
+   if(existing.slug)sessionStorage.setItem("nextpoint_login_azienda_slug",existing.slug);
+   form.style.display="none";$("success").style.display="block";
+   status.textContent="✓ Società creata in configurazione. Per accedere alla gestione completa completa la verifica MFA e i dati legali.";
+   submit.disabled=true;
+   return {ok:true,azienda_id:existing.azienda_id,slug:existing.slug,already_exists:true};
+ }
+ const assurance=await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+ if(assurance.error||assurance.data?.currentLevel!=="aal2"){
+   status.textContent="Per creare una nuova società devi prima completare la verifica MFA. Ti reindirizzo alla sicurezza…";
+   location.href="sicurezza-mfa.html?return="+encodeURIComponent("registrazione-societa.html");
+   return;
+ }
  const {data,error}=await sb.rpc("create_company_for_current_user",{
    p_ragione_sociale:d.ragione,p_nome_app:d.nomeApp,p_titolare:d.titolare,p_sede:d.sede,
    p_cf_piva:d.cf,p_telefono:d.telefono,p_pec:d.pec,p_email_aziendale:d.email,p_tipo_account:"societa"
@@ -197,7 +217,7 @@ async function startRegistration(){
  const signUp=await sb.auth.signUp({email:d.email,password,options:{emailRedirectTo:location.origin+location.pathname,data:{
    account_type:"societa",nome:d.nome,cognome:d.cognome,ragione_sociale:d.ragione,nome_app:d.nomeApp,
    titolare:d.titolare,telefono:d.telefono,pec:d.pec,sede:d.sede,cf_piva:d.cf,email_aziendale:d.email,
-   privacy_accettata:"true",termini_accettati:"true",richiesta_at:new Date().toISOString()
+   privacy_accettata:"true",termini_accettati:"true",privacy_version:"eventour-privacy-2026-11-25",terms_version:"eventour-terms-2026-11-25",consent_source:"registrazione-societa",richiesta_at:new Date().toISOString()
  }}}); 
  if(signUp.error){
    submit.disabled=false;
