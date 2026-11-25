@@ -31,21 +31,20 @@ Deno.serve(async (req: Request) => {
     const { data: assurance, error: assuranceError } = await admin.auth.mfa.getAuthenticatorAssuranceLevel(token);
     if (assuranceError || assurance?.currentLevel !== "aal2") return json({ error: "Verifica MFA richiesta per le funzioni amministrative." }, 403);
 
-    const [{ data: profile, error: profileError }, { data: memberships, error: membershipError }] = await Promise.all([
-      admin.from("profili").select("ruolo").eq("user_id", user.id).maybeSingle(),
-      admin.from("azienda_utenti").select("ruolo,attivo").eq("user_id", user.id).eq("attivo", true)
-    ]);
-    if (profileError || membershipError) {
-      console.error("NEWS AI role lookup failed");
-      return json({ error: "Impossibile verificare i permessi." }, 500);
+    const { data: memberships, error: membershipError } = await admin
+      .from("azienda_utenti")
+      .select("ruolo,attivo")
+      .eq("user_id", user.id)
+      .eq("attivo", true);
+    if (membershipError) {
+      console.error("NEWS AI tenant role lookup failed");
+      return json({ error: "Impossibile verificare i permessi aziendali." }, 500);
     }
 
-    const globalRole = String(profile?.ruolo || "").toLowerCase();
-    const hasGlobalAdmin = ["admin", "superadmin"].includes(globalRole);
     const hasTenantAdmin = (memberships || []).some((m: any) =>
       ["owner", "admin", "superadmin"].includes(String(m.ruolo || "").toLowerCase())
     );
-    if (!hasGlobalAdmin && !hasTenantAdmin) return json({ error: "Operazione riservata agli amministratori." }, 403);
+    if (!hasTenantAdmin) return json({ error: "Operazione riservata agli amministratori della società." }, 403);
 
     const body = await req.json().catch(() => ({}));
     const type = String(body?.type || "Comunicazione").slice(0, 80);
