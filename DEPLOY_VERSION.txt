@@ -3,3 +3,7 @@ Commit: 0942082fc98356d8a4b94c3f26343a69d2e7eaea
 Forced deployment: 2026-08-22T16:59:01Z
 
 The current main/admin.html already contains the corrected direct Supabase player selection and approval flow.
+
+SECURITY ROADMAP DEPLOY MARKER
+Commit: c718398991cfe98663c8ed6890084252adb1a678
+Forced deployment: 2026-11-25T00:25:00Z
