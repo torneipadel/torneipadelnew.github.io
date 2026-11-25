@@ -8,7 +8,7 @@
 'use strict';
 const URL='https://dkeqicstprvvfebiaooc.supabase.co',KEY='sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu';
 const sb=window.supabase.createClient(URL,KEY),$=id=>document.getElementById(id),params=new URLSearchParams(location.search);
-const target=params.get('return')||'admin.html',safeReturn=/^(?:admin|eventour-control-center)\.html(?:[?#].*)?$/.test(target)?target:'admin.html';
+const target=params.get('return')||'admin.html',safeReturn=/^(?:admin|dashboard|registrazione-societa|eventour-control-center)\.html(?:[?#].*)?$/.test(target)?target:'admin.html',isRegistrationFlow=safeReturn==='registrazione-societa.html';
 let factorId='',busy=false;
 function status(v){$('status').textContent=v}
 async function init(){
@@ -16,7 +16,7 @@ async function init(){
  const onboarding=params.get('flow')==='onboarding';const email=String(session.user?.email||'').trim().toLowerCase();let privileged=onboarding||email==='giose.rizzi@gmail.com';
  if(!privileged){const p=await sb.from('profili').select('ruolo').eq('user_id',session.user.id).maybeSingle();privileged=['admin','superadmin'].includes(String(p.data?.ruolo||'').toLowerCase())}
  if(!privileged){const a=await sb.rpc('get_my_azienda_access');const row=Array.isArray(a.data)?a.data[0]:a.data;privileged=!a.error&&row?.accesso_consentito&&['owner','admin','superadmin'].includes(String(row.ruolo||'').toLowerCase())}
- if(!privileged){location.replace('dashboard.html');return}
+ if(!privileged&&!isRegistrationFlow){location.replace('dashboard.html');return}
  const aal=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(!aal.error&&aal.data?.currentLevel==='aal2'){location.replace(safeReturn);return}
  const listed=await sb.auth.mfa.listFactors();if(listed.error){$('verify').disabled=true;status('Impossibile verificare i dispositivi MFA: '+listed.error.message);return}
  const verified=(listed.data?.totp||[]).find(f=>f.status==='verified');
