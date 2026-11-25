@@ -78,7 +78,7 @@ Deno.serve(async req => {
       const map = new Map((userData?.users || []).map((u:any) => [u.id,u]));
       return json({azienda_id:aziendaId,caller_role:callerRole,users:(rows || []).map((r:any) => {
         const u:any = map.get(r.user_id);
-        return {user_id:r.user_id,ruolo:r.ruolo,attivo:r.attivo,created_at:r.created_at,email:u?.email || "",nome:u?.user_metadata?.nome || "",cognome:u?.user_metadata?.cognome || "",invite_pending:!!u?.invited_at&&!u?.email_confirmed_at};
+        return {user_id:r.user_id,ruolo:r.ruolo,attivo:r.attivo,created_at:r.created_at,email:u?.email || "",nome:u?.user_metadata?.nome || "",cognome:u?.user_metadata?.cognome || "",invite_pending:!!u?.invited_at&&!u?.email_confirmed_at&&r.attivo===true&&!u?.user_metadata?.tenant_invite_revoked_at};
       })});
     }
 
@@ -158,6 +158,16 @@ Deno.serve(async req => {
       if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"Il proprietario non può essere disattivato da questa schermata."},400);
       const {error} = await admin.from("azienda_utenti").update({attivo}).eq("azienda_id",aziendaId).eq("user_id",target);
       if (error) throw error;
+      if (attivo) {
+        const {data:userResult,error:userError} = await admin.auth.admin.getUserById(target);
+        if (!userError && userResult?.user?.user_metadata?.tenant_invite_revoked_at) {
+          const metadata = {...(userResult.user.user_metadata || {})};
+          delete metadata.tenant_invite_revoked_at;
+          delete metadata.tenant_invite_revoked_for;
+          const {error:metadataError} = await admin.auth.admin.updateUserById(target,{user_metadata:metadata});
+          if (metadataError) console.error("Invite metadata reset failed:",metadataError.message);
+        }
+      }
       await writeAudit(caller,callerRole,attivo?"TENANT_USER_ACTIVATE":"TENANT_USER_DEACTIVATE",aziendaId,target,attivo?"Accesso aziendale riattivato.":"Accesso aziendale disattivato.",{ruolo:targetRow.ruolo,attivo:targetRow.attivo},{ruolo:targetRow.ruolo,attivo});
       return json({ok:true,access_revoked:!attivo});
     }
