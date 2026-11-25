@@ -24,7 +24,7 @@ input:focus,textarea:focus{border-color:rgba(255,255,255,.65);box-shadow:0 0 0 2
 .btn-back{background:rgba(0,0,0,.32);color:#fff}
 #status{margin-top:12px;min-height:20px;color:#ffeb3b;font-size:13px;line-height:1.4}
 a{color:#fff;font-weight:700}
-.privacy-note{font-size:11px;line-height:1.55;color:rgba(255,255,255,.68);margin:12px 0 4px}
+.privacy-note{font-size:11px;line-height:1.55;color:rgba(255,255,255,.68);margin:12px 0 4px}.consent-checks{margin:12px 0 8px}.consent-check{display:flex;align-items:flex-start;gap:9px;margin:9px 0;color:rgba(255,255,255,.82);font-size:11px;line-height:1.5}.consent-check input{width:auto;min-width:16px;margin:2px 0 0;flex:0 0 auto}.consent-check a{color:#ffe76b;font-weight:700}
 @media(max-width:767px){body{align-items:flex-start;padding:18px 12px 28px;background-attachment:scroll}.box{width:min(620px,100%);padding:20px 16px;border-radius:16px}.logo{width:92%;height:70px;margin-bottom:4px}.brand-subtitle{font-size:13px;margin-bottom:14px}h2{font-size:20px}.info{font-size:13px}input,textarea{font-size:14px}.btn,.btn-back{font-size:13px}}
 @media(max-width:380px){.box{padding:18px 13px}.logo{width:92%;height:64px}.brand-subtitle{font-size:12px;letter-spacing:1px}h2{font-size:19px}input,textarea{height:44px}.btn,.btn-back{min-height:44px}}
 
@@ -55,6 +55,7 @@ a{color:#fff;font-weight:700}
 <input id="password" type="password" minlength="12" maxlength="72" placeholder="Password (minimo 12 caratteri)">
 
 <p class="privacy-note">I dati inseriti servono per creare il tuo account e gestire la tua partecipazione alle attività della società. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Leggi l’informativa privacy</a>.</p>
+<div class="consent-checks"><label class="consent-check"><input id="privacyConsent" type="checkbox"><span>Ho letto l’<a id="privacyConsentLink" href="privacy.html" target="_blank" rel="noopener noreferrer">informativa Privacy</a> della società.</span></label><label class="consent-check"><input id="termsConsent" type="checkbox"><span>Accetto i <a id="termsConsentLink" href="termini.html" target="_blank" rel="noopener noreferrer">Termini del servizio</a> della società.</span></label></div>
 
 <button class="btn" id="go">CREA ACCOUNT</button>
 <button class="btn-back" id="back">⬅ Torna alla società</button>
@@ -96,6 +97,8 @@ async function init(){
    return;
  }
  document.getElementById("company").textContent="Stai creando un account per "+(c.nome_app||c.ragione_sociale)+".";
+ document.getElementById("privacyConsentLink").href="privacy.html?azienda="+q;
+ document.getElementById("termsConsentLink").href="termini.html?azienda="+q;
  if(isSignupCallback){
    const {data:{session},error:sessionError}=await sb.auth.getSession();
    if(sessionError||!session?.user?.email_confirmed_at){
@@ -105,6 +108,9 @@ async function init(){
    }
    history.replaceState(null,"",location.pathname+location.search);
    const meta=session.user.user_metadata||{};
+   if(meta.privacy_accettata!=="true"||meta.termini_accettati!=="true"||meta.privacy_version!=="eventour-privacy-2026-11-25"||meta.terms_version!=="eventour-terms-2026-11-25"){await sb.auth.signOut();statusBox.textContent="Consenso Privacy e Termini non registrato. Ripeti la registrazione accettando entrambi i documenti.";return;}
+   const consent=await sb.rpc("record_eventour_account_consents",{p_privacy:true,p_terms:true,p_source:"registrazione-visitatore"});
+   if(consent.error){await sb.auth.signOut();statusBox.textContent="Impossibile registrare il consenso Privacy e Termini. "+consent.error.message;return;}
    const membership=await sb.rpc("complete_visitor_membership",{
      p_azienda_slug:companyRecord.slug,
      p_nome:meta.nome||null,
@@ -153,8 +159,10 @@ async function go(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
 
- if(!azienda||!companyRecord?.id||!nome||!cognome||!email||password.length<12||password.length>72){
-   statusBox.textContent="Verifica la società e compila Nome, Cognome, Email e Password (minimo 12 caratteri, massimo 72).";
+ const privacyAccepted=document.getElementById("privacyConsent").checked;
+ const termsAccepted=document.getElementById("termsConsent").checked;
+ if(!azienda||!companyRecord?.id||!nome||!cognome||!email||password.length<12||password.length>72||!privacyAccepted||!termsAccepted){
+   statusBox.textContent="Verifica la società, compila i dati richiesti, usa una password di almeno 12 caratteri e accetta Privacy e Termini.";
    busy=false;submitButton.disabled=false;
    return;
  }
@@ -167,7 +175,7 @@ async function go(){
    email,
    password,
    options:{
-     data:{nome,cognome,telefono,livello,alias,note},
+     data:{account_type:"visitatore",nome,cognome,telefono,livello,alias,note,privacy_accettata:"true",termini_accettati:"true",privacy_version:"eventour-privacy-2026-11-25",terms_version:"eventour-terms-2026-11-25",consent_source:"registrazione-visitatore"},
      emailRedirectTo:location.origin+location.pathname+"?azienda="+q
    }
  });
@@ -179,6 +187,8 @@ async function go(){
 
  if(r.data.session){
    registrationSessionCreated=true;
+   const consent=await sb.rpc("record_eventour_account_consents",{p_privacy:privacyAccepted,p_terms:termsAccepted,p_source:"registrazione-visitatore"});
+   if(consent.error){await sb.auth.signOut();registrationSessionCreated=false;statusBox.textContent="Impossibile registrare il consenso Privacy e Termini. "+consent.error.message;busy=false;submitButton.disabled=false;return;}
    const m=await sb.rpc("complete_visitor_membership",{
      p_azienda_slug:azienda,
      p_nome:nome,
