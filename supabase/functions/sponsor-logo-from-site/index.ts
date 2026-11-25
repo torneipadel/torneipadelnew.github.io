@@ -31,8 +31,13 @@ function cleanUrl(value: string, base?: string) {
 function isPublicAddress(ip: string): boolean {
   const value = ip.toLowerCase().split("%")[0];
   if (value.includes(":")) {
-    const first = Number.parseInt(value.split(":")[0] || "0", 16);
-    return Number.isFinite(first) && first >= 0x2000 && first <= 0x3fff;
+    const parts = value.split(":");
+    const first = Number.parseInt(parts[0] || "0", 16);
+    const second = Number.parseInt(parts[1] || "0", 16);
+    if (!Number.isFinite(first) || first < 0x2000 || first > 0x3fff) return false;
+    if (first === 0x2002) return false;
+    if (first === 0x2001 && (second === 0x0000 || second === 0x0db8 || (second >= 0x0010 && second <= 0x001f))) return false;
+    return true;
   }
   const parts = value.split(".").map(Number);
   if (parts.length !== 4 || parts.some(n => !Number.isInteger(n) || n < 0 || n > 255)) return false;
