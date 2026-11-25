@@ -20,6 +20,21 @@ async function findAuthUserByEmail(email: string) {
   throw new Error("Ricerca utenti troppo ampia: contatta il supporto.");
 }
 
+async function writeAudit(caller: any, callerRole: string, action: string, aziendaId: string, targetId: string, summary: string, beforeData: any, afterData: any) {
+  const {error} = await admin.from("admin_audit_log").insert({
+    actor_user_id: caller.id,
+    actor_email: caller.email || null,
+    ruolo: callerRole,
+    action,
+    entity_type: "tenant_user",
+    entity_id: aziendaId + ":" + targetId,
+    summary,
+    before_data: beforeData ?? null,
+    after_data: afterData ?? null
+  });
+  if (error) console.error("Tenant user audit log failed:", error.message);
+}
+
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok",{headers:cors});
   if (req.method !== "POST") return json({error:"Metodo non supportato"},405);
@@ -63,7 +78,7 @@ Deno.serve(async req => {
       const map = new Map((userData?.users || []).map((u:any) => [u.id,u]));
       return json({azienda_id:aziendaId,caller_role:callerRole,users:(rows || []).map((r:any) => {
         const u:any = map.get(r.user_id);
-        return {user_id:r.user_id,ruolo:r.ruolo,attivo:r.attivo,created_at:r.created_at,email:u?.email || "",nome:u?.user_metadata?.nome || "",cognome:u?.user_metadata?.cognome || ""};
+        return {user_id:r.user_id,ruolo:r.ruolo,attivo:r.attivo,created_at:r.created_at,email:u?.email || "",nome:u?.user_metadata?.nome || "",cognome:u?.user_metadata?.cognome || "",invite_pending:!!u?.invited_at&&!u?.email_confirmed_at};
       })});
     }
 
@@ -91,6 +106,7 @@ Deno.serve(async req => {
           if (linkError.code === "23505") return json({error:"L'account risulta già associato o è stato assegnato contemporaneamente. Aggiorna l'elenco utenti."},409);
           throw linkError;
         }
+        await writeAudit(caller,callerRole,"TENANT_USER_LINK",aziendaId,existing.id,"Account associato alla società.",null,{ruolo,attivo:true});
         return json({ok:true,user_id:existing.id,email,ruolo,already_exists:true});
       }
       const {data:invited,error:inviteError} = await admin.auth.admin.inviteUserByEmail(email,{data:{nome,cognome,tenant_invite:true,tenant_role:ruolo},redirectTo:"https://torneipadel.github.io/torneipadelnew.github.io/attiva-account.html"});
@@ -111,6 +127,7 @@ Deno.serve(async req => {
         const cleanup = [membershipCleanupError?.message,authCleanupError?.message].filter(Boolean);
         return json({error:"L'aggiornamento del profilo non è riuscito"+(profileError?": "+profileError.message:": profilo non trovato")+". "+(cleanup.length?"Pulizia incompleta: "+cleanup.join("; "):"Invito e associazione annullati correttamente.")},500);
       }
+      await writeAudit(caller,callerRole,"TENANT_USER_INVITE",aziendaId,created.id,"Invito alla società creato.",null,{ruolo,attivo:true,invite_pending:true});
       return json({ok:true,user_id:created.id,email,ruolo,already_exists:false});
     }
 
@@ -119,18 +136,20 @@ Deno.serve(async req => {
       const ruolo = ["admin","superadmin","user"].includes(String(body.ruolo || "")) ? String(body.ruolo) : "user";
       if (callerRole !== "owner") return json({error:"Solo il proprietario può modificare i ruoli."},403);
       if (target === caller.id) return json({error:"Il proprietario non può modificare il proprio ruolo."},400);
-      const {data:targetRow,error:targetError} = await admin.from("azienda_utenti").select("ruolo").eq("azienda_id",aziendaId).eq("user_id",target).maybeSingle();
+      const {data:targetRow,error:targetError} = await admin.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",aziendaId).eq("user_id",target).maybeSingle();
       if (targetError) throw targetError;
       if (!targetRow) return json({error:"Utente non appartenente alla società."},404);
       if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"Il ruolo del proprietario non può essere modificato da questa schermata."},400);
       const {error} = await admin.from("azienda_utenti").update({ruolo}).eq("azienda_id",aziendaId).eq("user_id",target);
       if (error) throw error;
+      await writeAudit(caller,callerRole,"TENANT_USER_ROLE_CHANGE",aziendaId,target,"Ruolo aziendale aggiornato.",{ruolo:targetRow.ruolo,attivo:targetRow.attivo},{ruolo,attivo:targetRow.attivo});
       return json({ok:true});
     }
 
     if (action === "active") {
       const target = String(body.user_id || "");
-      const attivo = Boolean(body.attivo);
+      if (typeof body.attivo !== "boolean") return json({error:"Stato utente non valido."},400);
+      const attivo = body.attivo;
       if (callerRole !== "owner") return json({error:"Solo il proprietario può attivare o disattivare utenti."},403);
       if (target === caller.id) return json({error:"Il proprietario non può disattivare se stesso."},400);
       const {data:targetRow,error:targetError} = await admin.from("azienda_utenti").select("ruolo").eq("azienda_id",aziendaId).eq("user_id",target).maybeSingle();
@@ -139,7 +158,31 @@ Deno.serve(async req => {
       if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"Il proprietario non può essere disattivato da questa schermata."},400);
       const {error} = await admin.from("azienda_utenti").update({attivo}).eq("azienda_id",aziendaId).eq("user_id",target);
       if (error) throw error;
-      return json({ok:true});
+      await writeAudit(caller,callerRole,attivo?"TENANT_USER_ACTIVATE":"TENANT_USER_DEACTIVATE",aziendaId,target,attivo?"Accesso aziendale riattivato.":"Accesso aziendale disattivato.",{ruolo:targetRow.ruolo,attivo:targetRow.attivo},{ruolo:targetRow.ruolo,attivo});
+      return json({ok:true,access_revoked:!attivo});
+    }
+
+    if (action === "revoke_invite") {
+      const target = String(body.user_id || "");
+      if (callerRole !== "owner") return json({error:"Solo il proprietario può revocare gli inviti."},403);
+      if (!target || target === caller.id) return json({error:"Utente non valido."},400);
+      const {data:targetRow,error:targetError} = await admin.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",aziendaId).eq("user_id",target).maybeSingle();
+      if (targetError) throw targetError;
+      if (!targetRow) return json({error:"Utente non appartenente alla società."},404);
+      if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"L'invito del proprietario non può essere revocato."},400);
+      const {data:userResult,error:userError} = await admin.auth.admin.getUserById(target);
+      if (userError) throw userError;
+      const invitedUser = userResult?.user;
+      if (!invitedUser) return json({error:"Account non trovato."},404);
+      if (invitedUser.email_confirmed_at) return json({error:"L'utente ha già accettato l'invito. Usa Disattiva accesso."},409);
+      if (!invitedUser.invited_at) return json({error:"Non risulta un invito in attesa per questo account."},409);
+      const {error:updateError} = await admin.from("azienda_utenti").update({attivo:false}).eq("azienda_id",aziendaId).eq("user_id",target);
+      if (updateError) throw updateError;
+      const metadata = {...(invitedUser.user_metadata || {}),tenant_invite_revoked_at:new Date().toISOString(),tenant_invite_revoked_for:aziendaId};
+      const {error:metadataError} = await admin.auth.admin.updateUserById(target,{user_metadata:metadata});
+      if (metadataError) console.error("Invite metadata update failed:",metadataError.message);
+      await writeAudit(caller,callerRole,"TENANT_USER_INVITE_REVOKE",aziendaId,target,"Invito pendente revocato; appartenenza disattivata.",{ruolo:targetRow.ruolo,attivo:targetRow.attivo},{ruolo:targetRow.ruolo,attivo:false,invite_pending:false});
+      return json({ok:true,access_revoked:true,metadata_warning:metadataError?.message || null});
     }
 
     return json({error:"Azione non supportata."},400);
