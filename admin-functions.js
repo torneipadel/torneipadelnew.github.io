@@ -107,33 +107,30 @@ async function wireDashboard(){
 
     // Il Superadmin globale resta nell'area tecnica: il tenant va selezionato esplicitamente.
     if(role && (selectedTenantId || requestedSlug)){
-      let companyQuery=sb.from("aziende").select("id,nome_app,ragione_sociale,slug,tipo_account,stato,demo_inizio,demo_scadenza");
-      companyQuery=selectedTenantId?companyQuery.eq("id",selectedTenantId):companyQuery.eq("slug",requestedSlug);
-      const companyResult=await companyQuery.maybeSingle();
-      if(companyResult.error || !companyResult.data){
-        throw new Error("Società selezionata non trovata: caricamento tornei bloccato.");
+      let tenantId=selectedTenantId;
+      if(!tenantId && requestedSlug){
+        const lookup=await sb.rpc("get_public_company",{p_slug:requestedSlug});
+        const publicCompany=Array.isArray(lookup.data)?lookup.data[0]:lookup.data;
+        if(lookup.error || !publicCompany?.id) throw new Error("Società selezionata non trovata.");
+        tenantId=String(publicCompany.id);
       }
-      const company=companyResult.data;
-      let tenantRole=role;
+      const accessResult=await sb.rpc("get_my_azienda_access",{p_azienda_id:tenantId});
+      const accessRow=Array.isArray(accessResult.data)?accessResult.data[0]:accessResult.data;
+      if(accessResult.error || !accessRow?.azienda_id || accessRow.accesso_consentito!==true){
+        throw new Error("Questo account non è autorizzato ad accedere alla società selezionata.");
+      }
+      const tenantRole=String(accessRow.ruolo||"").toLowerCase();
+      if(!["owner","admin","superadmin"].includes(tenantRole)){
+        throw new Error("Il ruolo assegnato non consente l'amministrazione della società selezionata.");
+      }
       if(isGlobalSuperadmin){
-        const member=await sb.from("azienda_utenti").select("ruolo,attivo").eq("azienda_id",company.id).eq("user_id",session.user.id).eq("attivo",true).maybeSingle();
-        if(member.error || !member.data) throw new Error("Questo account non è autorizzato ad amministrare la società selezionata.");
-        tenantRole=String(member.data.ruolo||"").toLowerCase();
-        if(!["owner","admin","superadmin"].includes(tenantRole)) throw new Error("Il ruolo assegnato non consente l'amministrazione della società selezionata.");
+        const {data:tenantContextSet,error:tenantContextSetError}=await sb.rpc("set_my_tenant_context",{p_azienda_id:accessRow.azienda_id});
+        if(tenantContextSetError||tenantContextSet!==true) throw tenantContextSetError||new Error("Impossibile attivare il contesto aziendale esplicito.");
       }
-      aziendaAccess={
-        azienda_id:company.id,
-        nome_app:company.nome_app,
-        ragione_sociale:company.ragione_sociale,
-        slug:company.slug,
-        tipo_account:company.tipo_account,
-        stato:company.stato,
-        demo_inizio:company.demo_inizio,
-        demo_scadenza:company.demo_scadenza,
-        accesso_consentito:["attiva","configurazione"].includes(String(company.stato||"").toLowerCase()),
-        ruolo:tenantRole
-      };
-      if(aziendaAccess.accesso_consentito===false) throw new Error("La società selezionata non è attiva.");
+      const companyResult=await sb.from("aziende").select("id,nome_app,ragione_sociale,slug,tipo_account,stato,demo_inizio,demo_scadenza").eq("id",accessRow.azienda_id).maybeSingle();
+      if(companyResult.error || !companyResult.data) throw new Error("Società selezionata non trovata: caricamento tornei bloccato.");
+      const company=companyResult.data;
+      aziendaAccess={...accessRow,...company,ruolo:tenantRole};
       role=tenantRole;
       sessionStorage.setItem("nextpoint_login_azienda_id",company.id);
       sessionStorage.setItem("nextpoint_login_azienda_nome",company.nome_app||company.ragione_sociale||"");
