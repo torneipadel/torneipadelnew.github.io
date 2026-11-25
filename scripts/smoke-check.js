@@ -190,8 +190,12 @@ if (!recoveryPage.includes('password.length < 12') || !recoveryPage.includes('sc
 const mainLoginPage = fs.readFileSync(path.join(root, "login.html"), "utf8");
 const visitorRegistration = fs.readFileSync(path.join(root, "registrazione-utente.html"), "utf8");
 const companyRegistration = fs.readFileSync(path.join(root, "registrazione-societa.html"), "utf8");
-if (!mainLoginPage.includes("password.length<12") || !visitorRegistration.includes("password.length<12") || !companyRegistration.includes("password.length<12")) {
-  failures.push("I moduli di creazione account non applicano la lunghezza minima password aggiornata.");
+const demoRegistration = fs.readFileSync(path.join(root, "registrazione-demo.html"), "utf8");
+if (mainLoginPage.includes("auth.signUp") || !mainLoginPage.includes('index.html#societa')) {
+  failures.push("La registrazione generica deve passare dall'esplorazione delle società e dai moduli con consenso.");
+}
+if (!visitorRegistration.includes("password.length<12") || !companyRegistration.includes("password.length<12") || !demoRegistration.includes("password.length<12")) {
+  failures.push("I moduli dedicati di creazione account non applicano la lunghezza minima password aggiornata.");
 }
 const visitorLoginPage = fs.readFileSync(path.join(root, "login-utente.html"), "utf8");
 if (!visitorLoginPage.includes("flow=visitor&azienda=")) {
