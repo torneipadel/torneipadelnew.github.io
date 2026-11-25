@@ -12,7 +12,6 @@ const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const GITHUB_TOKEN=Deno.env.get("GITHUB_TOKEN")!;
 const REPO="torneipadel/torneipadelnew.github.io";
-const SUPERADMIN_EMAIL="giose.rizzi@gmail.com";
 
 const admin=createClient(SUPABASE_URL,SERVICE_KEY);
 
@@ -26,7 +25,8 @@ async function requireSuperadmin(req:Request){
   const token=auth.slice(7);
   const {data,error}=await admin.auth.getUser(token);
   if(error||!data.user) throw new Error("Unauthorized");
-  if(String(data.user.email||"").toLowerCase()!==SUPERADMIN_EMAIL) throw new Error("Operazione riservata al Superadmin");
+  const {data:profile,error:profileError}=await admin.from("profili").select("ruolo").eq("user_id",data.user.id).maybeSingle();
+  if(profileError||String(profile?.ruolo||"").toLowerCase()!=="superadmin") throw new Error("Operazione riservata al Superadmin globale");
   const {data:assurance,error:assuranceError}=await admin.auth.mfa.getAuthenticatorAssuranceLevel(token);
   if(assuranceError||assurance?.currentLevel!=="aal2") throw new Error("Verifica MFA richiesta per le operazioni Superadmin");
   return data.user;
