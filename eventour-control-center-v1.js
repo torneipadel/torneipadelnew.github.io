@@ -9,6 +9,7 @@
       sessionStorage.removeItem("nextpoint_login_tenant_explicit");
       sessionStorage.removeItem("nextpoint_login_azienda_id");
       sessionStorage.removeItem("nextpoint_login_azienda_nome");
+      sessionStorage.removeItem("nextpoint_login_azienda_slug");
     } catch (_) {}
   }
   async function enterTechnicalArea() {
