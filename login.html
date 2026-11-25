@@ -118,6 +118,7 @@ async function loginUser(){
    return;
   }
   sessionStorage.setItem("nextpoint_login_azienda_id",a.azienda_id||selectedAziendaId);
+  sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
   sessionStorage.setItem("nextpoint_login_role",role);
   sessionStorage.setItem("nextpoint_login_azienda_slug",reservedSlug);
   setStatus("Accesso effettuato. Apertura della gestione tornei…");
@@ -149,6 +150,7 @@ async function loginUser(){
   }else{
    sessionStorage.removeItem("nextpoint_login_azienda_id");
    sessionStorage.removeItem("nextpoint_login_azienda_slug");
+   sessionStorage.removeItem("nextpoint_login_tenant_explicit");
   }
   setStatus("Accesso effettuato. Apertura della gestione tornei…");
   setTimeout(()=>window.location.replace("sicurezza-mfa.html?return=admin.html"),200);
@@ -156,6 +158,7 @@ async function loginUser(){
  }
  sessionStorage.removeItem("nextpoint_login_azienda_id");
  sessionStorage.removeItem("nextpoint_login_azienda_nome");
+ sessionStorage.removeItem("nextpoint_login_tenant_explicit");
  sessionStorage.removeItem("nextpoint_login_role");
  sessionStorage.removeItem("nextpoint_login_azienda_slug");
  setStatus("Accesso effettuato. Apertura della tua area…");
