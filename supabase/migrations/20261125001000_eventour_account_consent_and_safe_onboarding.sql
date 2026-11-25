@@ -245,7 +245,7 @@ begin
   v_slug := left(v_slug_base,80)||'-'||substr(replace(v_uid::text,'-',''),1,8);
 
   insert into public.aziende(owner_user_id,ragione_sociale,nome_app,slug,sede,cf_piva,email,telefono,pec,titolare,colori,stato,tipo_account,demo_inizio,demo_scadenza)
-  values(v_uid,trim(p_ragione_sociale),trim(p_nome_app),v_slug,nullif(trim(p_sede),''),nullif(trim(p_cf_piva),''),coalesce(nullif(trim(p_email_aziendale,''),''),v_email),nullif(trim(p_telefono),''),nullif(trim(p_pec),''),nullif(trim(p_titolare),''),jsonb_build_object('primary','#073b72','accent','#ffe76b'),'configurazione',v_tipo,case when v_tipo='societa_demo' then now() else null end,case when v_tipo='societa_demo' then now()+interval '14 days' else null end)
+  values(v_uid,trim(p_ragione_sociale),trim(p_nome_app),v_slug,nullif(trim(p_sede),''),nullif(trim(p_cf_piva),''),coalesce(nullif(trim(p_email_aziendale),''),v_email),nullif(trim(p_telefono),''),nullif(trim(p_pec),''),nullif(trim(p_titolare),''),jsonb_build_object('primary','#073b72','accent','#ffe76b'),'configurazione',v_tipo,case when v_tipo='societa_demo' then now() else null end,case when v_tipo='societa_demo' then now()+interval '14 days' else null end)
   returning id into v_azienda_id;
 
   insert into public.azienda_utenti(azienda_id,user_id,ruolo) values(v_azienda_id,v_uid,'owner') on conflict do nothing;
