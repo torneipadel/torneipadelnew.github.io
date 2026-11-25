@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@^1";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -170,6 +171,11 @@ export default {
       if (authError || !user) return json({ error: "Sessione non valida" }, 401);
       const { data: assurance, error: assuranceError } = await ctx.supabaseAdmin.auth.mfa.getAuthenticatorAssuranceLevel(token);
       if (assuranceError || assurance?.currentLevel !== "aal2") return json({ error: "Verifica MFA richiesta per la gestione sponsor." }, 403);
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || "";
+      const callerClient = createClient(Deno.env.get("SUPABASE_URL")!, anonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
 
       const body = await req.json();
       const sponsorId = Number(body?.sponsorId);
@@ -182,6 +188,8 @@ export default {
       if (sponsorError) throw sponsorError;
       if (!sponsor) return json({ error: "Sponsor non trovato" }, 404);
       if (!sponsor.azienda_id) return json({ error: "Sponsor senza società associata." }, 409);
+      const { data: sessionCurrent, error: sessionError } = await callerClient.rpc("tenant_session_is_current", { p_azienda_id: sponsor.azienda_id });
+      if (sessionError || sessionCurrent !== true) return json({ error: "Sessione aziendale revocata. Effettua nuovamente l'accesso." }, 401);
 
       const { data: company, error: companyError } = await ctx.supabaseAdmin
         .from("aziende").select("owner_user_id").eq("id", sponsor.azienda_id).maybeSingle();
