@@ -138,6 +138,21 @@ const adminGuard = fs.readFileSync(path.join(root, "admin-access-guard-v1.js"), 
 if (!adminGuard.includes("getAuthenticatorAssuranceLevel") || !adminGuard.includes('currentLevel!=="aal2"')) {
   failures.push("Il guard dell'area amministrativa non impone AAL2.");
 }
+const adminFunctions = fs.readFileSync(path.join(root, "admin-functions.js"), "utf8");
+if (!adminFunctions.includes('rpc("set_my_tenant_context"') || !adminFunctions.includes('rpc("clear_my_tenant_context"')) {
+  failures.push("Il caricamento amministrativo non imposta/chiude il contesto tenant globale esplicito.");
+}
+const controlCenterContext = fs.readFileSync(path.join(root, "eventour-control-center-v1.js"), "utf8");
+if (!controlCenterContext.includes('rpc("clear_my_tenant_context"')) {
+  failures.push("Il Control Center non revoca il contesto tenant prima dell'area tecnica.");
+}
+for (const migration of [
+  "20261125016000_require_explicit_tenant_context_for_global_superadmin.sql",
+  "20261125017000_require_explicit_global_tenant_session_context.sql",
+  "20261125018000_require_mfa_for_global_tenant_context.sql"
+]) {
+  if (!fs.existsSync(path.join(root, "supabase", "migrations", migration))) failures.push(`Migrazione contesto Superadmin mancante: ${migration}`);
+}
 const companyDashboard = fs.readFileSync(path.join(root, "dashboard.html"), "utf8");
 if (!companyDashboard.includes('rpc("create_company_for_current_user"') || companyDashboard.includes('.from("azienda_utenti").insert') || companyDashboard.includes('.from("aziende").insert')) {
   failures.push("La creazione società non usa esclusivamente il flusso server-side protetto.");
