@@ -68,19 +68,18 @@
   }
 
   function guardCriticalButtons(){
-    const destructive=['adminDeleteTournament','adminArchiveTournament'];
-    destructive.forEach(id=>{
+    const role=String(window.adminRuolo||"").toLowerCase();
+    const hasTenantAdminContext=!!window.aziendaId&&["owner","admin","superadmin"].includes(role);
+    ["adminDeleteTournament","adminArchiveTournament"].forEach(id=>{
       const b=$(id);
       if(!b)return;
-      if(isSuper()){
-        b.disabled=false;
-        b.title='';
-        b.style.display='';
+      if(hasTenantAdminContext){
+        b.disabled=false;b.title="";b.style.opacity="";b.style.cursor="";b.style.display="";
       }else{
         b.disabled=true;
-        b.title='Operazione riservata al Superadmin';
-        b.style.opacity='.45';
-        b.style.cursor='not-allowed';
+        b.title="Per modificare i dati serve un accesso amministrativo esplicito alla società.";
+        b.style.opacity=".45";
+        b.style.cursor="not-allowed";
       }
     });
   }
