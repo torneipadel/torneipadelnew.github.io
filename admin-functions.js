@@ -99,7 +99,7 @@ async function wireDashboard(){
     window.isTenantSuperadmin=false;
     const explicitTenantContext=sessionStorage.getItem("nextpoint_login_tenant_explicit")==="1";
     const explicitTenantId=explicitTenantContext?String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim():"";
-    if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");}
+    if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");const {error:clearTenantContextError}=await sb.rpc("clear_my_tenant_context");if(clearTenantContextError)throw clearTenantContextError;}
     let role=isGlobalSuperadmin?"superadmin":"";
     let aziendaAccess=null;
     let selectedTenantId=explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
@@ -210,8 +210,13 @@ async function wireDashboard(){
     window.isAdmin=true;
     window.isTenantSuperadmin=tenantSuperadmin;
     if(aziendaAccess?.azienda_id){
-      if(!isGlobalSuperadmin) sessionStorage.removeItem("nextpoint_login_tenant_explicit");
-      else if(selectedTenantId||requestedSlug) sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
+      if(isGlobalSuperadmin){
+        const {data:tenantContextSet,error:tenantContextSetError}=await sb.rpc("set_my_tenant_context",{p_azienda_id:aziendaAccess.azienda_id});
+        if(tenantContextSetError||tenantContextSet!==true) throw tenantContextSetError||new Error("Impossibile attivare il contesto aziendale esplicito.");
+        sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
+      }else{
+        sessionStorage.removeItem("nextpoint_login_tenant_explicit");
+      }
       window.aziendaId=aziendaAccess.azienda_id;
       window.nomeAppAzienda=aziendaAccess.nome_app||"";
       window.nomeAzienda=aziendaAccess.ragione_sociale||aziendaAccess.nome_app||"";
