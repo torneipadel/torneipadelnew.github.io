@@ -90,84 +90,27 @@
     root=document.createElement('div');
     root.id='superadminPanel';
     root.style.cssText='padding:0 0 30px';
-    root.innerHTML='<div class="page-head"><div><h1>👑 Area Superadmin</h1><p>Controllo accessi, registro modifiche, backup e ripristino.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="openSuperadminHelp">❓ Help</button><button type="button" class="btn" id="closeSuperadmin">← Torna al pannello</button></div></div>'+
+    root.innerHTML='<div class="page-head"><div><h1>👑 Area Superadmin</h1><p>Controllo tecnico della piattaforma, audit e backup del codice.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="openSuperadminHelp">❓ Help</button><button type="button" class="btn" id="closeSuperadmin">← Torna al pannello</button></div></div>'+
       '<details class="card" id="superadminHelp" style="margin-bottom:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">❓ Help — Manuale operativo Superadmin <span class="notice" style="font-weight:400;margin-left:8px">Come usare ogni funzione e quando usarla</span></summary><div class="card-body" style="line-height:1.55">'+
       '<div style="display:grid;gap:16px">'+
       '<div><h3 style="margin:0 0 6px">1. 🔐 Ruolo e protezioni</h3><p><b>A cosa serve:</b> mostra l’account con cui sei entrato, conferma che il ruolo attivo è SUPERADMIN e indica le operazioni protette.</p><p><b>Quando usarlo:</b> all’inizio di una sessione, se vuoi verificare di essere entrato con l’account Superadmin corretto o prima di un’operazione delicata.</p></div>'+
       '<div><h3 style="margin:0 0 6px">2. 🛡️ Cosa può fare il Superadmin</h3><p><b>A cosa serve:</b> è la mappa delle autorizzazioni. Indica quali operazioni sono riservate al Superadmin e quali dati hanno un meccanismo di backup/ripristino.</p><p><b>Quando usarlo:</b> quando devi decidere quale funzione utilizzare o vuoi controllare prima di un’operazione distruttiva. Non modifica dati da solo.</p></div>'+
       '<div><h3 style="margin:0 0 6px">3. 📋 Registro tecnico — Audit</h3><p><b>A cosa serve:</b> mostra soltanto tipo di operazione, categoria tecnica e data/ora. Non mostra email, riepiloghi, identificativi o contenuti delle società.</p><p><b>Come usarlo:</b> premi <b>↻ Aggiorna</b> per rileggere gli eventi tecnici disponibili.</p><p><b>Importante:</b> i dettagli che possono contenere dati aziendali o personali non sono esposti al Superadmin globale.</p></div>'+
-      '<div><h3 style="margin:0 0 6px">4. 💾 Ripristino tecnico tornei</h3><div style="padding:10px 12px;border-left:4px solid #dc3545;background:#fff0f0;color:#842029;margin-bottom:10px"><b>⚠️ ATTENZIONE — RIPRISTINO:</b> il ripristino può sovrascrivere dati correnti. Procedi solo su richiesta autorizzata e con un backup verificato dal responsabile della società.</div><p><b>Visibilità:</b> l’elenco mostra soltanto ID tecnico del backup e data, non nomi, contenuti, motivi o autori associati ai tornei.</p><p><b>Come usarlo:</b> il ripristino resta disponibile tramite ID backup; prima di confermare, verifica l’identificativo con il responsabile autorizzato.</p></div>'+
-      '<div><h3 style="margin:0 0 6px">5. 🗄️ Ripristino tecnico dati</h3><div style="padding:10px 12px;border-left:4px solid #dc3545;background:#fff0f0;color:#842029;margin-bottom:10px"><b>⚠️ ATTENZIONE — RIPRISTINO:</b> la funzione sostituisce il dato corrente con lo snapshot selezionato. Procedi solo dopo aver verificato l’ID con il responsabile autorizzato.</div><p><b>Visibilità:</b> sono mostrati soltanto ID backup, categoria della tabella, azione e data. Non vengono esposti contenuti, ID della riga aziendale, autori o riepiloghi.</p><p><b>Limite importante:</b> il ripristino è possibile solo se esiste lo snapshot corrispondente.</p></div>'+
-      '<div><h3 style="margin:0 0 6px">6. 🧩 Backup e ripristino codice — Commit GitHub</h3><div style="padding:10px 12px;border-left:4px solid #dc3545;background:#fff0f0;color:#842029;margin-bottom:10px"><b>⚠️ ATTENZIONE — RIPRISTINO CODICE:</b> ripristinare un file a un commit precedente può annullare modifiche successive presenti nel file. Se selezioni il commit sbagliato puoi reintrodurre bug o perdere correzioni. Prima di procedere, usa <b>Apri</b> e <b>Confronta</b> per verificare esattamente la versione.</div><p><b>A cosa serve:</b> mostra le versioni GitHub dei file controllati dal pannello e permette di contrassegnarle come <b>⭐ Stabile</b>, <b>🟡 Test</b> o <b>🔴 Problematica</b>. Permette inoltre di richiedere il ripristino completo di un file a uno specifico commit.</p><p><b>Come usare:</b> apri il menu e scegli il file. <b>Apri</b> porta al commit GitHub; <b>Confronta</b> mostra le differenze verso <code>main</code>; i tre pulsanti di stato servono a classificare la versione; <b>↩ Ripristina</b> avvia la richiesta di recupero del file.</p><p><b>Quando usare il ripristino:</b> dopo una modifica al codice che introduce un problema e quando hai identificato una versione precedente funzionante. Scegli sempre il commit preciso del file da recuperare.</p><p><b>Importante:</b> il ripristino del codice non cancella la cronologia. Genera una nuova richiesta/commit e conserva le versioni precedenti. Il processo viene eseguito automaticamente da GitHub Actions.</p></div>'+
-      '<div><h3 style="margin:0 0 6px">7. ⭐ Stabile / 🟡 Test / 🔴 Problematica</h3><p><b>Stabile:</b> usa questo stato quando hai verificato che quella versione funziona ed è una versione di riferimento. <b>Test:</b> usa questo stato mentre una versione è ancora in verifica. <b>Problematica:</b> usalo quando hai verificato che quella versione introduce un problema o non deve essere usata come riferimento.</p><p><b>Attenzione:</b> questi pulsanti classificano una versione nel registro; non modificano il codice del commit.</p></div>'+
-      '<div><h3 style="margin:0 0 6px">8. 🔄 Aggiorna</h3><p>I pulsanti <b>↻ Aggiorna</b> rileggono i dati della rispettiva sezione. Usali dopo una modifica, un ripristino o quando vuoi verificare che siano comparsi nuovi record.</p></div>'+
+      '<div><h3 style="margin:0 0 6px">4. 🧩 Backup e ripristino codice — Commit GitHub</h3><div style="padding:10px 12px;border-left:4px solid #dc3545;background:#fff0f0;color:#842029;margin-bottom:10px"><b>⚠️ ATTENZIONE — RIPRISTINO CODICE:</b> ripristinare un file a un commit precedente può annullare modifiche successive presenti nel file. Se selezioni il commit sbagliato puoi reintrodurre bug o perdere correzioni. Prima di procedere, usa <b>Apri</b> e <b>Confronta</b> per verificare esattamente la versione.</div><p><b>A cosa serve:</b> mostra le versioni GitHub dei file controllati dal pannello e permette di contrassegnarle come <b>⭐ Stabile</b>, <b>🟡 Test</b> o <b>🔴 Problematica</b>. Permette inoltre di richiedere il ripristino completo di un file a uno specifico commit.</p><p><b>Come usare:</b> apri il menu e scegli il file. <b>Apri</b> porta al commit GitHub; <b>Confronta</b> mostra le differenze verso <code>main</code>; i tre pulsanti di stato servono a classificare la versione; <b>↩ Ripristina</b> avvia la richiesta di recupero del file.</p><p><b>Quando usare il ripristino:</b> dopo una modifica al codice che introduce un problema e quando hai identificato una versione precedente funzionante. Scegli sempre il commit preciso del file da recuperare.</p><p><b>Importante:</b> il ripristino del codice non cancella la cronologia. Genera una nuova richiesta/commit e conserva le versioni precedenti. Il processo viene eseguito automaticamente da GitHub Actions.</p></div>'+
+      '<div><h3 style="margin:0 0 6px">5. ⭐ Stabile / 🟡 Test / 🔴 Problematica</h3><p><b>Stabile:</b> usa questo stato quando hai verificato che quella versione funziona ed è una versione di riferimento. <b>Test:</b> usa questo stato mentre una versione è ancora in verifica. <b>Problematica:</b> usalo quando hai verificato che quella versione introduce un problema o non deve essere usata come riferimento.</p><p><b>Attenzione:</b> questi pulsanti classificano una versione nel registro; non modificano il codice del commit.</p></div>'+
+      '<div><h3 style="margin:0 0 6px">6. 🔄 Aggiorna</h3><p>I pulsanti <b>↻ Aggiorna</b> rileggono i dati della rispettiva sezione. Usali dopo una modifica, un ripristino o quando vuoi verificare che siano comparsi nuovi record.</p></div>'+
       '<div style="padding:12px;border-left:4px solid #9a6700;background:#fff8e6"><b>Regola operativa consigliata:</b> prima di una modifica delicata controlla il ruolo, poi verifica il registro e i backup disponibili. Dopo l’operazione premi <b>Aggiorna</b> e controlla il risultato. Per il codice, identifica prima il commit corretto e usa il ripristino solo dopo aver verificato la versione da recuperare.</div>'+
       '</div></div></details>'+
-      '<details class="card" style="margin-bottom:18px" id="testPlayersCard"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🧪 Account giocatori di test <span class="notice" style="font-weight:400;margin-left:8px">18 account Eventour</span></summary><div class="card-body"><p>Crea o verifica i 18 account di test della società Eventour. Gli account già collegati ad altre società vengono saltati e non modificati.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primary" id="createEventourTestPlayers">👥 Crea i 18 giocatori</button></div><div id="eventourTestPlayersStatus" style="margin-top:12px" aria-live="polite"></div><div id="eventourTestPlayersResults" style="margin-top:12px"></div></div></details>'+
       '<details class="card" open><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🔐 Ruolo e protezioni <span class="notice" style="font-weight:400;margin-left:8px">Accesso e autorizzazioni</span></summary><div class="card-body" id="superadminSummary"></div></details>'+
       '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🛡️ Cosa può fare il Superadmin <span class="notice" style="font-weight:400;margin-left:8px">Operazioni consentite</span></summary><div class="card-body" id="superadminCapabilities"></div></details>'+
       '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">📋 Registro modifiche <span class="notice" style="font-weight:400;margin-left:8px">Audit</span><button type="button" class="btn" id="refreshAudit" style="float:right">↻ Aggiorna</button></summary><div class="card-body"><div id="auditList"></div></div></details>'+
-      '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">💾 Backup tornei <span class="notice" style="font-weight:400;margin-left:8px">Backup completi e ripristino</span><button type="button" class="btn" id="refreshBackups" style="float:right">↻ Aggiorna</button></summary><div class="card-body"><div id="backupList"></div></div></details>'+
-      '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🗄️ Backup dati amministrativi <span class="notice" style="font-weight:400;margin-left:8px">Iscrizioni, profili, News, Sponsor e Mercatino</span><button type="button" class="btn" id="refreshDataBackups" style="float:right">↻ Aggiorna</button></summary><div class="card-body"><div id="dataBackupList"></div></div></details>'+
       '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;list-style:none;padding:18px 20px;font-weight:800;font-size:16px">🧩 Backup e ripristino codice <span class="notice" style="font-weight:400;margin-left:8px">Commit GitHub e versioni</span><button type="button" class="btn" id="refreshCodeBackups" style="float:right">↻ Aggiorna</button></summary><div class="card-body"><div id="codeBackupList"></div></div></details>';
     $('appContent')?.replaceChildren(root);
     $('closeSuperadmin').onclick=()=>window.renderCleanAdmin?.();
     $('openSuperadminHelp').onclick=()=>{const h=$('superadminHelp');if(h)h.open=true;h?.scrollIntoView({behavior:'smooth',block:'start'})};
     $('refreshAudit').onclick=loadAudit;
-    $('refreshBackups').onclick=loadBackups;
-    $('refreshDataBackups')?.addEventListener('click',loadDataBackups);
     $('refreshCodeBackups')?.addEventListener('click',loadCodeBackups);
-    $('createEventourTestPlayers')?.addEventListener('click',createEventourTestPlayers);
     return root;
-  }
-
-  async function createEventourTestPlayers(){
-    if(!isSuper())return;
-    const c=client();
-    const status=$('eventourTestPlayersStatus');
-    const resultsBox=$('eventourTestPlayersResults');
-    const button=$('createEventourTestPlayers');
-    if(!c?.functions?.invoke||!c?.auth?.getSession){
-      if(status)status.innerHTML='<span style="color:#b42318">Supabase o sessione non disponibili. Nessun account elaborato.</span>';
-      return;
-    }
-    const sessionResult=await c.auth.getSession();
-    if(sessionResult.error||!sessionResult.data?.session?.access_token){
-      if(status)status.innerHTML='<span style="color:#b42318">Sessione non valida. Accedi nuovamente con il proprietario Eventour.</span>';
-      return;
-    }
-    const password=window.prompt('Conferma l’operazione inserendo la password prevista per gli account di test:');
-    if(password===null)return;
-    if(!password){
-      if(status)status.innerHTML='<span style="color:#b42318">Operazione annullata: password non inserita.</span>';
-      return;
-    }
-    if(!window.confirm('Confermi la creazione/verifica dei 18 account di test nella società Eventour? Gli account già associati ad altre società non verranno modificati.'))return;
-    if(button)button.disabled=true;
-    if(status)status.textContent='Richiesta inviata a Supabase. Attendi il risultato…';
-    if(resultsBox)resultsBox.replaceChildren();
-    try{
-      const r=await c.functions.invoke('crea-giocatori-eventour-test',{body:{password}});
-      if(r.error){
-        let detail=r.error.message||String(r.error);
-        try{const body=await r.error.context?.json?.();if(body?.error)detail=body.error;}catch(_){}
-        throw new Error(detail);
-      }
-      const data=r.data||{};
-      if(!Array.isArray(data.results))throw new Error(data.error||'Risposta inattesa della funzione.');
-      const rows=data.results;
-      const ok=rows.filter(x=>x.status==='creato e associato'||x.status==='account esistente associato').length;
-      const errors=rows.filter(x=>x.status==='errore'||x.status==='saltato').length;
-      if(status)status.innerHTML='<b>Risultato Supabase:</b> '+esc(String(ok))+' account creati o già associati su '+esc(String(data.total??18))+'. Problemi o account saltati: '+esc(String(errors))+'.';
-      if(resultsBox)resultsBox.innerHTML='<div style="display:grid;gap:6px">'+rows.map(x=>'<div style="padding:9px;border:1px solid #ddd;border-radius:8px;overflow-wrap:anywhere"><b>'+esc(x.email)+'</b> — '+esc(x.status)+(x.detail?' <small style="display:block">'+esc(x.detail)+'</small>':'')+'</div>').join('')+'</div>';
-      if(errors>0)console.warn('Risultati account test Eventour:',data);
-    }catch(e){
-      const msg=e?.message||String(e);
-      if(status)status.innerHTML='<span style="color:#b42318"><b>Operazione non completata:</b> '+esc(msg)+'</span>';
-      console.error('Creazione giocatori test Eventour:',e);
-    }finally{
-      if(button)button.disabled=false;
-    }
   }
 
   function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -177,9 +120,9 @@
     if(!isSuper())return false;
     shell();
     const email=(await client()?.auth?.getUser())?.data?.user?.email||window.adminState?.adminEmail||'-';
-    $('superadminSummary').innerHTML='<div class="info-row"><span>Ruolo</span><b>👑 SUPERADMIN</b></div><div class="info-row"><span>Account</span><b>'+esc(email)+'</b></div><div class="info-row"><span>Eliminazione tornei</span><b>Consentita solo al Superadmin</b></div><div class="info-row"><span>Ripristino backup</span><b>Consentito solo al Superadmin</b></div>';
-    $('superadminCapabilities').innerHTML='<div style="display:grid;gap:14px"><div><h3 style="margin:0 0 6px">✅ Può fare</h3><ul style="margin:0;padding-left:20px"><li>Gestire tutte le funzioni disponibili all’Admin.</li><li>Eliminare definitivamente tornei e iscrizioni.</li><li>Archiviare e riaprire tornei.</li><li>Consultare audit e backup.</li><li>Ripristinare dati da backup disponibili.</li><li>Gestire i ruoli utenti a livello database, inclusa la protezione contro l’auto-promozione degli Admin.</li></ul></div><div><h3 style="margin:0 0 6px">↩️ Copertura ripristino</h3><table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:7px;border-bottom:1px solid #ddd">Elemento</th><th style="text-align:left;padding:7px;border-bottom:1px solid #ddd">Backup</th><th style="text-align:left;padding:7px;border-bottom:1px solid #ddd">Ripristino</th></tr><tr><td style="padding:7px">Torneo + configurazione/regole</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr><tr><td style="padding:7px">Iscrizioni</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr><tr><td style="padding:7px">Profili/ruoli</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr><tr><td style="padding:7px">News</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr><tr><td style="padding:7px">Sponsor</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr><tr><td style="padding:7px">Mercatino</td><td style="padding:7px"><b>SI</b></td><td style="padding:7px"><b>SI</b></td></tr></table></div><div style="padding:10px 12px;border-left:4px solid #198754;background:#eefaf2"><b>Come funziona:</b> per i dati amministrativi il sistema conserva lo snapshot della singola riga quando viene inserita, modificata o cancellata. Il Superadmin può quindi riportare quella riga allo stato salvato. Non è un’immagine completa dell’intero database in un unico backup.</div><div style="padding:10px 12px;border-left:4px solid #9a6700;background:#fff8e6"><b>Importante:</b> il ripristino è possibile solo se esiste il relativo snapshot. Un dato creato e mai passato da un backup non può essere ricostruito.</div></div>';
-    await Promise.all([loadAudit(),loadBackups(),loadDataBackups(),loadCodeBackups()]);
+    $('superadminSummary').innerHTML='<div class="info-row"><span>Ruolo globale</span><b>👑 SUPERADMIN</b></div><div class="info-row"><span>Account</span><b>'+esc(email)+'</b></div><div class="info-row"><span>Dati aziendali</span><b>Non accessibili dal ruolo globale</b></div><div class="info-row"><span>Strumenti consentiti</span><b>Audit tecnico e backup codice</b></div>';
+    $('superadminCapabilities').innerHTML='<div style="display:grid;gap:14px"><div><h3 style="margin:0 0 6px">✅ Strumenti globali consentiti</h3><ul style="margin:0;padding-left:20px"><li>Consultare il registro tecnico senza dettagli aziendali o personali.</li><li>Verificare le versioni dei file e i commit GitHub.</li><li>Marcare una versione come stabile, in test o problematica.</li><li>Richiedere il ripristino di un file a un commit verificato.</li><li>Creare e consultare backup completi del repository.</li></ul></div><div style="padding:10px 12px;border-left:4px solid #198754;background:#eefaf2"><b>Separazione dei ruoli:</b> il Superadmin globale non gestisce aziende, membri, tornei, iscrizioni, profili, news, sponsor o mercatino. Per i dati di una società serve una membership esplicita e si opera con il relativo ruolo aziendale.</div><div style="padding:10px 12px;border-left:4px solid #9a6700;background:#fff8e6"><b>Ripristino codice:</b> controlla sempre Apri e Confronta prima di inviare la richiesta. Il ripristino crea un nuovo commit e conserva la cronologia.</div></div>';
+    await Promise.all([loadAudit(),loadCodeBackups()]);
     return true;
   }
 
@@ -190,26 +133,6 @@
     if(r.error){box.innerHTML='<div class="empty">Impossibile leggere il registro: '+esc(r.error.message)+'</div>';return}
     const rows=r.data||[];
     box.innerHTML=rows.length?'<div class="list">'+rows.map(x=>'<div class="list-item"><div class="list-item-main"><div><strong>'+esc(x.action)+'</strong><small>Categoria tecnica: '+esc(x.entity_type||'non specificata')+'</small></div><span class="pill">'+esc(dt(x.created_at))+'</span></div></div>').join('')+'</div>':'<div class="empty">Nessun evento tecnico registrato.</div>';
-  }
-
-  async function loadBackups(){
-    const box=$('backupList'); if(!box)return;
-    const c=client(); if(!c){box.textContent='Supabase non disponibile.';return}
-    const r=await c.rpc('superadmin_list_tournament_backup_metadata');
-    if(r.error){box.innerHTML='<div class="empty">Impossibile leggere i backup: '+esc(r.error.message)+'</div>';return}
-    const rows=r.data||[];
-    box.innerHTML=rows.length?'<div class="list">'+rows.map(x=>'<div class="list-item"><div class="list-item-main"><div><strong>Backup tecnico #'+esc(x.id)+'</strong><small>Data: '+esc(dt(x.created_at))+'</small></div><button type="button" class="btn small danger" data-restore-backup="'+esc(x.id)+'">↩ Ripristina</button></div></div>').join('')+'</div>':'<div class="empty">Nessun backup disponibile.</div>';
-    box.querySelectorAll('[data-restore-backup]').forEach(b=>b.onclick=()=>restore(Number(b.dataset.restoreBackup)));
-  }
-
-  async function loadDataBackups(){
-    const box=$('dataBackupList'); if(!box)return;
-    const c=client(); if(!c){box.textContent='Supabase non disponibile.';return}
-    const r=await c.rpc('superadmin_list_data_backup_metadata');
-    if(r.error){box.innerHTML='<div class="empty">Impossibile leggere i backup dati: '+esc(r.error.message)+'</div>';return}
-    const rows=r.data||[];
-    box.innerHTML=rows.length?'<div class="list">'+rows.map(x=>'<div class="list-item"><div class="list-item-main"><div><strong>Backup #'+esc(x.id)+' · '+esc(x.table_name)+' · '+esc(x.action)+'</strong><small>Data: '+esc(dt(x.created_at))+'</small></div><button type="button" class="btn small danger" data-restore-data-backup="'+esc(x.id)+'">↩ Ripristina</button></div></div>').join('')+'</div>':'<div class="empty">Nessun backup dati disponibile.</div>';
-    box.querySelectorAll('[data-restore-data-backup]').forEach(b=>b.onclick=()=>restoreData(Number(b.dataset.restoreDataBackup)));
   }
 
   const CODE_FILES=['tabellone.html','admin-tenant-isolation-v1.js','admin-approval-sync-v1.js','admin.html','admin-superadmin-v1.js','manuale.html','admin-system-monitor-v1.js','admin-torneo-rotazione-v1.js'];
@@ -257,26 +180,6 @@
     if(r.error){alert('Richiesta di ripristino non creata: '+r.error.message);return}
     alert('Richiesta registrata. GitHub Actions eseguirà automaticamente il ripristino e creerà un nuovo commit entro pochi minuti.');
     await loadCodeBackups();
-  }
-
-  async function restoreData(id){
-    if(!isSuper()||!Number.isFinite(id))return;
-    if(!confirm('⚠️ ATTENZIONE: il dato corrente verrà sostituito dallo snapshot. Se il backup è errato puoi perdere modifiche corrette e causare danni difficili o impossibili da recuperare.\n\nConfermi il ripristino del dato dal backup #'+id+'?'))return;
-    const c=client();if(!c)return;
-    const r=await c.rpc('superadmin_restore_data_backup',{p_backup_id:id});
-    if(r.error){alert('Ripristino dati non riuscito: '+r.error.message);return}
-    alert('Ripristino dati completato.');
-    await loadAudit();await loadDataBackups();
-  }
-
-  async function restore(id){
-    if(!isSuper()||!Number.isFinite(id))return;
-    if(!confirm('⚠️ ATTENZIONE: il torneo corrente verrà sostituito dai dati del backup. Un backup errato può causare perdita di modifiche e danni difficili o impossibili da recuperare.\n\nVerifica attentamente ID, nome, data e motivo del backup.\n\nConfermi il ripristino del torneo dal backup #'+id+'?'))return;
-    const c=client();if(!c)return;
-    const r=await c.rpc('superadmin_restore_torneo',{p_backup_id:id});
-    if(r.error){alert('Ripristino non riuscito: '+r.error.message);return}
-    alert('Ripristino completato.');
-    await window.caricaTorneiSupabase?.();await loadAudit();await loadBackups();
   }
 
   window.apriAreaSuperadmin=openPanel;
