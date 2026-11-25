@@ -41,7 +41,7 @@ Deno.serve(async req => {
   try {
     const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i,"");
     if (!token) return json({error:"Autenticazione richiesta"},401);
-    const callerClient = createClient(url,Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || service,{auth:{persistSession:false,autoRefreshToken:false}});
+    const callerClient = createClient(url,Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || service,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false,autoRefreshToken:false}});
     const {data:{user:caller},error:authError} = await callerClient.auth.getUser(token);
     if (authError || !caller) return json({error:"Sessione non valida"},401);
     const {data:assurance,error:assuranceError} = await callerClient.auth.mfa.getAuthenticatorAssuranceLevel(token);
@@ -65,6 +65,8 @@ Deno.serve(async req => {
     }
     if (!membership) return json({error:"Non autorizzato"},403);
     const aziendaId = String(membership.azienda_id);
+    const {data:sessionCurrent,error:sessionCurrentError} = await callerClient.rpc("tenant_session_is_current",{p_azienda_id:aziendaId});
+    if (sessionCurrentError || sessionCurrent !== true) return json({error:"Sessione aziendale revocata. Effettua nuovamente l'accesso."},401);
     const callerRole = String(membership.ruolo || "").toLowerCase();
     const {data:company,error:companyError} = await admin.from("aziende").select("id,stato").eq("id",aziendaId).maybeSingle();
     if (companyError) throw companyError;
@@ -140,7 +142,7 @@ Deno.serve(async req => {
       if (targetError) throw targetError;
       if (!targetRow) return json({error:"Utente non appartenente alla società."},404);
       if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"Il ruolo del proprietario non può essere modificato da questa schermata."},400);
-      const {error} = await admin.from("azienda_utenti").update({ruolo}).eq("azienda_id",aziendaId).eq("user_id",target);
+      const {error} = await admin.from("azienda_utenti").update({ruolo,session_revoked_at:new Date().toISOString()}).eq("azienda_id",aziendaId).eq("user_id",target);
       if (error) throw error;
       await writeAudit(caller,callerRole,"TENANT_USER_ROLE_CHANGE",aziendaId,target,"Ruolo aziendale aggiornato.",{ruolo:targetRow.ruolo,attivo:targetRow.attivo},{ruolo,attivo:targetRow.attivo});
       return json({ok:true});
@@ -156,7 +158,9 @@ Deno.serve(async req => {
       if (targetError) throw targetError;
       if (!targetRow) return json({error:"Utente non appartenente alla società."},404);
       if (String(targetRow.ruolo || "").toLowerCase() === "owner") return json({error:"Il proprietario non può essere disattivato da questa schermata."},400);
-      const {error} = await admin.from("azienda_utenti").update({attivo}).eq("azienda_id",aziendaId).eq("user_id",target);
+      const membershipUpdate:any = {attivo};
+      if (!attivo) membershipUpdate.session_revoked_at = new Date().toISOString();
+      const {error} = await admin.from("azienda_utenti").update(membershipUpdate).eq("azienda_id",aziendaId).eq("user_id",target);
       if (error) throw error;
       if (attivo) {
         const {data:userResult,error:userError} = await admin.auth.admin.getUserById(target);
@@ -186,7 +190,7 @@ Deno.serve(async req => {
       if (!invitedUser) return json({error:"Account non trovato."},404);
       if (invitedUser.email_confirmed_at) return json({error:"L'utente ha già accettato l'invito. Usa Disattiva accesso."},409);
       if (!invitedUser.invited_at) return json({error:"Non risulta un invito in attesa per questo account."},409);
-      const {error:updateError} = await admin.from("azienda_utenti").update({attivo:false}).eq("azienda_id",aziendaId).eq("user_id",target);
+      const {error:updateError} = await admin.from("azienda_utenti").update({attivo:false,session_revoked_at:new Date().toISOString()}).eq("azienda_id",aziendaId).eq("user_id",target);
       if (updateError) throw updateError;
       const metadata = {...(invitedUser.user_metadata || {}),tenant_invite_revoked_at:new Date().toISOString(),tenant_invite_revoked_for:aziendaId};
       const {error:metadataError} = await admin.auth.admin.updateUserById(target,{user_metadata:metadata});
