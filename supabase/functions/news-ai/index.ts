@@ -33,7 +33,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: memberships, error: membershipError } = await admin
       .from("azienda_utenti")
-      .select("ruolo,attivo")
+      .select("azienda_id,ruolo,attivo")
       .eq("user_id", user.id)
       .eq("attivo", true);
     if (membershipError) {
@@ -41,10 +41,22 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Impossibile verificare i permessi aziendali." }, 500);
     }
 
-    const hasTenantAdmin = (memberships || []).some((m: any) =>
+    const adminMemberships = (memberships || []).filter((m: any) =>
       ["owner", "admin", "superadmin"].includes(String(m.ruolo || "").toLowerCase())
     );
-    if (!hasTenantAdmin) return json({ error: "Operazione riservata agli amministratori della società." }, 403);
+    if (!adminMemberships.length) return json({ error: "Operazione riservata agli amministratori della società." }, 403);
+
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || serviceKey;
+    const callerClient = createClient(url, anonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    let sessionCurrent = false;
+    for (const membership of adminMemberships) {
+      const { data: current, error: currentError } = await callerClient.rpc("tenant_session_is_current", { p_azienda_id: membership.azienda_id });
+      if (!currentError && current === true) { sessionCurrent = true; break; }
+    }
+    if (!sessionCurrent) return json({ error: "Sessione aziendale revocata. Effettua nuovamente l'accesso." }, 401);
 
     const body = await req.json().catch(() => ({}));
     const type = String(body?.type || "Comunicazione").slice(0, 80);
