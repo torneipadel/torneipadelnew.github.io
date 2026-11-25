@@ -99,7 +99,7 @@ async function wireDashboard(){
     window.isTenantSuperadmin=false;
     const explicitTenantContext=sessionStorage.getItem("nextpoint_login_tenant_explicit")==="1";
     const explicitTenantId=explicitTenantContext?String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim():"";
-    if(isGlobalSuperadmin&&!explicitTenantContext){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");const {error:clearTenantContextError}=await sb.rpc("clear_my_tenant_context");if(clearTenantContextError)throw clearTenantContextError;}
+    if(isGlobalSuperadmin&&(!explicitTenantContext||!explicitTenantId)){window.aziendaId=null;window.nomeAppAzienda="";window.nomeAzienda="";sessionStorage.removeItem("nextpoint_login_azienda_id");sessionStorage.removeItem("nextpoint_login_azienda_nome");sessionStorage.removeItem("nextpoint_login_tenant_explicit");const {error:clearTenantContextError}=await sb.rpc("clear_my_tenant_context");if(clearTenantContextError)throw clearTenantContextError;}
     let role=isGlobalSuperadmin?"superadmin":"";
     let aziendaAccess=null;
     let selectedTenantId=explicitTenantId||String(sessionStorage.getItem("nextpoint_login_azienda_id")||"").trim();
