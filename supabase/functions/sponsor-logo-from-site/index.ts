@@ -21,17 +21,56 @@ function cleanUrl(value: string, base?: string) {
     if (u.port && !["80", "443"].includes(u.port)) return "";
     const h = u.hostname.toLowerCase().replace(/\.$/, "");
     if (!h || h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") || h.endsWith(".internal")
+      || h.endsWith(".test") || h.endsWith(".example") || h.endsWith(".invalid") || h.endsWith(".onion") || h.endsWith(".arpa")
       || h === "metadata.google.internal" || h === "0.0.0.0" || h === "::1" || h.startsWith("[")
       || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(h)) return "";
     return u.href;
   } catch { return ""; }
 }
 
+function isPublicAddress(ip: string): boolean {
+  const value = ip.toLowerCase().split("%")[0];
+  if (value.includes(":")) {
+    const first = Number.parseInt(value.split(":")[0] || "0", 16);
+    return Number.isFinite(first) && first >= 0x2000 && first <= 0x3fff;
+  }
+  const parts = value.split(".").map(Number);
+  if (parts.length !== 4 || parts.some(n => !Number.isInteger(n) || n < 0 || n > 255)) return false;
+  const [a,b,c] = parts;
+  if (a === 0 || a === 10 || a === 127 || a >= 224) return false;
+  if (a === 169 && b === 254) return false;
+  if (a === 172 && b >= 16 && b <= 31) return false;
+  if (a === 192 && (b === 168 || (b === 0 && (c === 0 || c === 2)) || (b === 88 && c === 99))) return false;
+  if (a === 100 && b >= 64 && b <= 127) return false;
+  if (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) return false;
+  if (a === 203 && b === 0 && c === 113) return false;
+  return true;
+}
+
+async function assertPublicDns(url: string) {
+  const hostname = new URL(url).hostname.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
+  if (!hostname || hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local")
+    || hostname.endsWith(".internal") || hostname.endsWith(".test") || hostname.endsWith(".example")
+    || hostname.endsWith(".invalid") || hostname.endsWith(".onion") || hostname.endsWith(".arpa")) {
+    throw new Error("Host non pubblico");
+  }
+  const [ipv4, ipv6] = await Promise.all([
+    Deno.resolveDns(hostname, "A").catch(() => [] as string[]),
+    Deno.resolveDns(hostname, "AAAA").catch(() => [] as string[]),
+  ]);
+  const addresses = [...ipv4, ...ipv6];
+  if (!addresses.length || addresses.some(address => !isPublicAddress(address))) {
+    throw new Error("Il dominio risolve verso un indirizzo non pubblico o non verificabile");
+  }
+}
+
 async function fetchWithSafeRedirects(startUrl: string, maxRedirects = 4): Promise<Response | null> {
   let current = startUrl;
   for (let i = 0; i <= maxRedirects; i++) {
+    await assertPublicDns(current);
     const response = await fetch(current, {
       redirect: "manual",
+      signal: AbortSignal.timeout(8000),
       headers: { "User-Agent": "Mozilla/5.0 sponsor-logo-fetcher", "Accept": "text/html,image/*;q=0.9,*/*;q=0.1" },
     });
     if (![301, 302, 303, 307, 308].includes(response.status)) return response;
