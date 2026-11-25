@@ -4,6 +4,13 @@
   const SUPABASE_KEY = "sb_publishable_EBgrU25BpXMp9x6a2n7_Pg_FTFa5JLu";
   const status = document.getElementById("app");
   const say = message => { if (status) status.textContent = message; };
+  function clearTenantContext() {
+    try {
+      sessionStorage.removeItem("nextpoint_login_tenant_explicit");
+      sessionStorage.removeItem("nextpoint_login_azienda_id");
+      sessionStorage.removeItem("nextpoint_login_azienda_nome");
+    } catch (_) {}
+  }
   async function enterTechnicalArea() {
     if (!window.supabase?.createClient) {
       say("Servizio di autenticazione non disponibile.");
@@ -27,10 +34,11 @@
       location.replace("sicurezza-mfa.html?return=eventour-control-center.html");
       return;
     }
+    clearTenantContext();
     say("Accesso tecnico verificato. Apertura del pannello Superadmin…");
     location.replace("admin.html");
   }
-  document.getElementById("backBtn")?.addEventListener("click", () => location.replace("admin.html"));
+  document.getElementById("backBtn")?.addEventListener("click", () => { clearTenantContext(); location.replace("admin.html"); });
   document.getElementById("refreshBtn")?.addEventListener("click", enterTechnicalArea);
   enterTechnicalArea().catch(() => {
     say("Verifica tecnica non riuscita. Accedi nuovamente.");
