@@ -1,15 +1,23 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
-const db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,{auth:{persistSession:false,autoRefreshToken:false}});
+const url=Deno.env.get("SUPABASE_URL")!;
+const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const anonKey=Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || serviceKey;
+const db=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
+const callerClient=(token:string)=>createClient(url,anonKey,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false,autoRefreshToken:false}});
+async function assertTenantSession(token:string,aziendaId:string){
+ const {data,error}=await callerClient(token).rpc("tenant_session_is_current",{p_azienda_id:aziendaId});
+ if(error||data!==true)throw new Error("Sessione aziendale revocata. Effettua nuovamente l'accesso.");
+}
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,content-type","Access-Control-Allow-Methods":"GET,PUT,OPTIONS"};
 const roles=["owner","superadmin","admin"];
-async function user(req:Request){const h=req.headers.get("Authorization")||"";if(!h.startsWith("Bearer "))throw new Error("Autenticazione richiesta");const token=h.slice(7);const {data,error}=await db.auth.getUser(token);if(error||!data.user)throw new Error("Sessione non valida");const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel(token);if(assuranceError||assurance?.currentLevel!=="aal2")throw new Error("Verifica MFA richiesta per la personalizzazione.");return data.user}
+async function user(req:Request){const h=req.headers.get("Authorization")||"";if(!h.startsWith("Bearer "))throw new Error("Autenticazione richiesta");const token=h.slice(7);const {data,error}=await db.auth.getUser(token);if(error||!data.user)throw new Error("Sessione non valida");const {data:assurance,error:assuranceError}=await db.auth.mfa.getAuthenticatorAssuranceLevel(token);if(assuranceError||assurance?.currentLevel!=="aal2")throw new Error("Verifica MFA richiesta per la personalizzazione.");return {user:data.user,token}}
 async function tenant(uid:string){
  const o=await db.from("aziende").select("id,owner_user_id,nome_app,ragione_sociale,slug,logo_url,sfondo_url,colori").eq("owner_user_id",uid).maybeSingle();if(o.error)throw o.error;if(o.data)return {a:o.data,role:"owner"};
  const m=await db.from("azienda_utenti").select("azienda_id,ruolo,attivo").eq("user_id",uid).eq("attivo",true).maybeSingle();if(m.error)throw m.error;if(!m.data||!roles.includes(m.data.ruolo))throw new Error("Accesso personalizzazione non autorizzato");
  const a=await db.from("aziende").select("id,owner_user_id,nome_app,ragione_sociale,slug,logo_url,sfondo_url,colori").eq("id",m.data.azienda_id).single();if(a.error)throw a.error;return {a:a.data,role:m.data.ruolo};
 }
-Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{headers:cors});try{const u=await user(req);const {a,role}=await tenant(u.id);if(req.method==="GET")return new Response(JSON.stringify({azienda:a,ruolo:role}),{headers:{...cors,"Content-Type":"application/json"}});
+Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{headers:cors});try{const auth=await user(req);const {a,role}=await tenant(auth.user.id);await assertTenantSession(auth.token,a.id);if(req.method==="GET")return new Response(JSON.stringify({azienda:a,ruolo:role}),{headers:{...cors,"Content-Type":"application/json"}});
 if(req.method!=="PUT")return new Response(JSON.stringify({error:"Metodo non consentito"}),{status:405,headers:{...cors,"Content-Type":"application/json"}});
 const b=await req.json().catch(()=>({}));const clean=(x:any)=>String(x??"").trim();let colors=b.colori&&typeof b.colori==="object"?b.colori:{};const payload={nome_app:clean(b.nome_app)||a.nome_app,logo_url:clean(b.logo_url),sfondo_url:clean(b.sfondo_url),colori:colors,updated_at:new Date().toISOString()};
 const {data,error}=await db.from("aziende").update(payload).eq("id",a.id).select("id,owner_user_id,nome_app,ragione_sociale,slug,logo_url,sfondo_url,colori").single();if(error)throw error;
