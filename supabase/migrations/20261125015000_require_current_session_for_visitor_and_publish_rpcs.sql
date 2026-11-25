@@ -28,7 +28,7 @@ BEGIN
  update public.aziende set stato='attiva',updated_at=now() where id=v_id and owner_user_id=v_uid;
  return jsonb_build_object('ok',true,'published',true,'azienda_id',v_id);
 end;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION public.update_visitor_profile(p_livello text DEFAULT NULL::text, p_alias text DEFAULT NULL::text, p_note text DEFAULT NULL::text)
  RETURNS jsonb
@@ -70,4 +70,4 @@ begin
 
   return jsonb_build_object('ok', true);
 end;
-$function$
+$function$;
