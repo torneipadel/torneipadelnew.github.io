@@ -207,13 +207,8 @@ async function wireDashboard(){
     window.isAdmin=true;
     window.isTenantSuperadmin=tenantSuperadmin;
     if(aziendaAccess?.azienda_id){
-      if(isGlobalSuperadmin){
-        const {data:tenantContextSet,error:tenantContextSetError}=await sb.rpc("set_my_tenant_context",{p_azienda_id:aziendaAccess.azienda_id});
-        if(tenantContextSetError||tenantContextSet!==true) throw tenantContextSetError||new Error("Impossibile attivare il contesto aziendale esplicito.");
-        sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
-      }else{
-        sessionStorage.removeItem("nextpoint_login_tenant_explicit");
-      }
+      if(isGlobalSuperadmin) sessionStorage.setItem("nextpoint_login_tenant_explicit","1");
+      else sessionStorage.removeItem("nextpoint_login_tenant_explicit");
       window.aziendaId=aziendaAccess.azienda_id;
       window.nomeAppAzienda=aziendaAccess.nome_app||"";
       window.nomeAzienda=aziendaAccess.ragione_sociale||aziendaAccess.nome_app||"";
