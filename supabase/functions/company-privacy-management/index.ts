@@ -3,7 +3,13 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const url = Deno.env.get("SUPABASE_URL")!;
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || serviceKey;
 const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+const callerClient = (token: string) => createClient(url, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
+async function assertTenantSession(token: string, aziendaId: string) {
+  const { data, error } = await callerClient(token).rpc("tenant_session_is_current", { p_azienda_id: aziendaId });
+  if (error || data !== true) throw new Error("Sessione aziendale revocata. Effettua nuovamente l'accesso.");
+}
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization,content-type", "Access-Control-Allow-Methods": "GET,PUT,OPTIONS" };
 const allowed = ["owner", "superadmin", "admin"];
 const fields = "id,slug,nome_app,ragione_sociale,sede,cf_piva,email,pec,titolare,dpo,privacy_text,cookie_text,termini_text";
@@ -16,7 +22,7 @@ async function authUser(req: Request) {
   if (error || !data.user) throw new Error("Sessione non valida");
   const { data: assurance, error: assuranceError } = await db.auth.mfa.getAuthenticatorAssuranceLevel(token);
   if (assuranceError || assurance?.currentLevel !== "aal2") throw new Error("Verifica MFA richiesta per la gestione Privacy.");
-  return data.user;
+  return { user: data.user, token };
 }
 async function tenantFor(userId: string, requestedId?: string) {
   if (requestedId) {
@@ -53,9 +59,10 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json; charset=utf-8" } });
   try {
-    const user = await authUser(req);
+    const auth = await authUser(req);
     const requestedId = String(new URL(req.url).searchParams.get("azienda_id") || "").trim();
-    const { azienda, ruolo } = await tenantFor(user.id, requestedId || undefined);
+    const { azienda, ruolo } = await tenantFor(auth.user.id, requestedId || undefined);
+    await assertTenantSession(auth.token, String(azienda.id));
     if (req.method === "GET") return reply({ azienda, ruolo });
     if (req.method !== "PUT") return reply({ error: "Metodo non consentito" }, 405);
     const body = await req.json().catch(() => ({}));
