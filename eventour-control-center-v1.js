@@ -34,11 +34,16 @@
       location.replace("sicurezza-mfa.html?return=eventour-control-center.html");
       return;
     }
+    const { error: tenantContextError } = await client.rpc("clear_my_tenant_context");
+    if (tenantContextError) {
+      say("Impossibile chiudere il contesto aziendale. Riprova prima di entrare nell’area tecnica.");
+      return;
+    }
     clearTenantContext();
     say("Accesso tecnico verificato. Apertura del pannello Superadmin…");
     location.replace("admin.html");
   }
-  document.getElementById("backBtn")?.addEventListener("click", () => { clearTenantContext(); location.replace("admin.html"); });
+  document.getElementById("backBtn")?.addEventListener("click", enterTechnicalArea);
   document.getElementById("refreshBtn")?.addEventListener("click", enterTechnicalArea);
   enterTechnicalArea().catch(() => {
     say("Verifica tecnica non riuscita. Accedi nuovamente.");
